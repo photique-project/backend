@@ -1,6 +1,7 @@
 package com.benchpress200.photique.user.application;
 
 import com.benchpress200.photique.common.infrastructure.ImageUploader;
+import com.benchpress200.photique.user.domain.dto.UserInfoResponse;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.exception.UserException;
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService{
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
+    @Override
     public void join(final JoinRequest joinRequest) {
         // 1. 비밀번호 암호화
         String password = passwordEncoder.encode(joinRequest.getPassword());
@@ -47,5 +49,13 @@ public class UserServiceImpl implements UserService{
         } catch (DataIntegrityViolationException e) {
             throw new UserException("Email or nickname already exists", e.getMessage(), HttpStatus.CONFLICT);
         }
+    }
+
+    @Override
+    public UserInfoResponse getUserInfo(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        User foundUser = user.orElseThrow(() -> new UserException("User with ID {" + userId + "} is not found", HttpStatus.NOT_FOUND));
+
+        return UserInfoResponse.from(foundUser);
     }
 }
