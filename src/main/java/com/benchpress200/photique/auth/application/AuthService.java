@@ -5,4 +5,5 @@ import jakarta.servlet.http.Cookie;
 
 public interface AuthService {
     Cookie login(LoginRequest loginRequest);
+    Cookie logout(String token);
 }

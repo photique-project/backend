@@ -8,6 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,12 +23,23 @@ public class AuthController {
 
     @PostMapping("/login")
     public ApiSuccessResponse<?> login(
-            final @RequestBody LoginRequest loginRequest,
+            @RequestBody final LoginRequest loginRequest,
             final HttpServletResponse response
     ) {
         Cookie accessTokenCookie = authService.login(loginRequest);
         response.addCookie(accessTokenCookie);
 
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/logout")
+    public ApiSuccessResponse<?> logout(
+            @CookieValue(value = "Authorization", required = false) final String token,
+            final HttpServletResponse response
+    ) {
+        Cookie expiredTokenCookie = authService.logout(token);
+        response.addCookie(expiredTokenCookie);
+
+        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 }

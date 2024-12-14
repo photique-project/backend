@@ -9,8 +9,6 @@ import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.infrastructure.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +40,16 @@ public class AuthServiceImpl implements AuthService{
         return createAccessTokenCookie(tokens.getAccessToken());
     }
 
+    @Override
+    public Cookie logout(String token) {
+        if (token != null) {
+            Long userId = tokenManager.getUserId(token);
+            refreshTokenRepository.deleteByUserId(userId);
+        }
+
+        return removeAccessTokenCookie();
+    }
+
     private Cookie createAccessTokenCookie(String accessToken) {
         Cookie accessTokenCookie = new Cookie("Authorization", accessToken);
         accessTokenCookie.setHttpOnly(true);
@@ -50,4 +58,15 @@ public class AuthServiceImpl implements AuthService{
 
         return accessTokenCookie;
     }
+
+    private Cookie removeAccessTokenCookie() {
+        Cookie accessTokenCookie = new Cookie("Authorization", null);
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setMaxAge(0);
+
+        return accessTokenCookie;
+    }
+
+
 }
