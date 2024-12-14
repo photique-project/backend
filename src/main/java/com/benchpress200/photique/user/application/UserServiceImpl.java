@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserInfoResponse getUserInfo(Long userId) {
+    public UserInfoResponse getUserInfo(final Long userId) {
         Optional<User> user = userRepository.findById(userId);
         User foundUser = user.orElseThrow(() -> new UserException("User with ID {" + userId + "} is not found", HttpStatus.NOT_FOUND));
 

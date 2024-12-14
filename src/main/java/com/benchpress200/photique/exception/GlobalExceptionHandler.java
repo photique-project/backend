@@ -1,6 +1,7 @@
 package com.benchpress200.photique.exception;
 
 
+import com.benchpress200.photique.auth.exception.AuthException;
 import com.benchpress200.photique.common.exception.ImageUploaderException;
 import com.benchpress200.photique.common.response.ApiFailureResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
@@ -62,6 +63,21 @@ public class GlobalExceptionHandler {
         printLog(request, e.getMessage());
 
         return ResponseHandler.handleFailureResponse(e.getMessage(), e.getHttpStatus());
+    }
+
+    @ExceptionHandler(AuthException.class)
+    public ApiFailureResponse handleAuthException(
+            final AuthException e,
+            final HttpServletRequest request
+    ) {
+        if(e.getOriginMessage() != null) {
+            log.error(e.getOriginMessage());
+        }
+
+        printLog(request, e.getMessage());
+
+        return ResponseHandler.handleFailureResponse(e.getMessage(), e.getHttpStatus());
+
     }
 
     private void printLog(HttpServletRequest request, String message) {

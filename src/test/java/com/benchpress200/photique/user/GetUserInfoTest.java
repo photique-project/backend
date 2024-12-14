@@ -2,10 +2,14 @@ package com.benchpress200.photique.user;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.user.infrastructure.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
+import java.util.Map;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -25,6 +30,8 @@ public class GetUserInfoTest {
     private static final String EMAIL_KEY = "email";
     private static final String PASSWORD_KEY = "password";
     private static final String NICKNAME_KEY = "nickname";
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     private UserRepository userRepository;
@@ -54,9 +61,30 @@ public class GetUserInfoTest {
                 )
                 .andExpect(status().isCreated());
 
+        String loginRequestJson = objectMapper.writeValueAsString(Map.of(
+                "email", email,
+                "password", password
+        ));
+
+        ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginRequestJson)
+                )
+                .andExpect(status().isCreated());
+
+        Cookie[] cookies = resultActions.andReturn().getResponse().getCookies();
+        Cookie authCookie = null;
+
+        for (Cookie cookie : cookies) {
+            if ("Authorization".equals(cookie.getName())) {
+                authCookie = cookie;
+            }
+        }
+
         // when and then
         mockMvc.perform(get("/api/v1/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(authCookie)
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(1))
@@ -82,10 +110,54 @@ public class GetUserInfoTest {
                 )
                 .andExpect(status().isCreated());
 
+        String loginRequestJson = objectMapper.writeValueAsString(Map.of(
+                "email", email,
+                "password", password
+        ));
+
+        ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginRequestJson)
+                )
+                .andExpect(status().isCreated());
+
+        Cookie[] cookies = resultActions.andReturn().getResponse().getCookies();
+        Cookie authCookie = null;
+
+        for (Cookie cookie : cookies) {
+            if ("Authorization".equals(cookie.getName())) {
+                authCookie = cookie;
+            }
+        }
+
         // when and then
         mockMvc.perform(get("/api/v1/users/10")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(authCookie)
                 )
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("인증토큰없이 유저조회")
+    public void testGetUserInfoWithoutToken() throws Exception {
+        // given
+        String email = "example@naver.com";
+        String password = "password12!@";
+        String nickname = "test";
+
+        mockMvc.perform(multipart("/api/v1/users")
+                        .param(EMAIL_KEY, email)
+                        .param(PASSWORD_KEY, password)
+                        .param(NICKNAME_KEY, nickname)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                )
+                .andExpect(status().isCreated());
+
+        // when and then
+        mockMvc.perform(get("/api/v1/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isUnauthorized());
     }
 }

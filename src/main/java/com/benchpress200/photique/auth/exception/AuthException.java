@@ -1,25 +1,27 @@
-package com.benchpress200.photique.user.exception;
+package com.benchpress200.photique.auth.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public class UserException extends RuntimeException {
-    private String originMessage;
+public class AuthException extends RuntimeException {
     private final HttpStatus httpStatus;
+    private String originMessage;
 
-    public UserException(
-          final String message,
-          final HttpStatus httpStatus
+    public AuthException(
+            final String message,
+            final HttpStatus httpStatus
+
     ) {
         super(message);
         this.httpStatus = httpStatus;
     }
 
-    public UserException(
+    public AuthException(
             final String message,
             final String originMessage,
             final HttpStatus httpStatus
+
     ) {
         super(message);
         this.originMessage = originMessage;

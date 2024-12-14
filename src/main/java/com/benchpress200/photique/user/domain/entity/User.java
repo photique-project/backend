@@ -1,6 +1,7 @@
 package com.benchpress200.photique.user.domain.entity;
 
 import com.benchpress200.photique.user.domain.enumeration.AuthType;
+import com.benchpress200.photique.user.domain.enumeration.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.context.event.EventListener;
 
 @Entity
 @NoArgsConstructor
@@ -50,12 +52,16 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AuthType authType;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @Column(name= "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
     private void onCreate() {
         coin = 0L;
+        role = Role.USER;
         createdAt = LocalDateTime.now();
     }
 
