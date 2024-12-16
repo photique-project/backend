@@ -3,6 +3,7 @@ package com.benchpress200.photique.auth.application;
 import com.benchpress200.photique.auth.domain.dto.AuthMailRequest;
 import com.benchpress200.photique.auth.domain.dto.CodeValidationRequest;
 import com.benchpress200.photique.auth.domain.dto.LoginRequest;
+import com.benchpress200.photique.auth.domain.dto.NicknameValidationRequest;
 import com.benchpress200.photique.auth.domain.dto.Tokens;
 import com.benchpress200.photique.auth.domain.entity.AuthCode;
 import com.benchpress200.photique.auth.domain.enumeration.AuthType;
@@ -87,6 +88,14 @@ public class AuthServiceImpl implements AuthService{
         if (!codeValidationRequest.validate(authCode.getCode())) {
            throw new AuthException("Invalid code", HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @Override
+    public void validateNickname(NicknameValidationRequest nicknameValidationRequest) {
+        String nickname = nicknameValidationRequest.getNickname();
+        userRepository.findByNickname(nickname).ifPresent(
+                user -> {throw new AuthException(nickname + "is already in use", HttpStatus.CONFLICT);}
+        );
     }
 
     private Cookie createAccessTokenCookie(String accessToken) {
