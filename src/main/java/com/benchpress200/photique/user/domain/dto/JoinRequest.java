@@ -2,7 +2,7 @@ package com.benchpress200.photique.user.domain.dto;
 
 import com.benchpress200.photique.common.dtovalidator.Image;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.domain.enumeration.AuthType;
+import com.benchpress200.photique.user.domain.enumeration.Source;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -38,7 +38,7 @@ public class JoinRequest {
                 .password(encryptedPassword)
                 .nickname(nickname)
                 .profileImage(profileImageUrl)
-                .authType(AuthType.LOCAL)
+                .source(Source.LOCAL)
                 .build();
     }
 

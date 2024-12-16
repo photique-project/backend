@@ -76,6 +76,10 @@ public class GlobalExceptionHandler {
 
         printLog(request, e.getMessage());
 
+        if (e.getHttpStatus() == HttpStatus.INTERNAL_SERVER_ERROR) {
+            return ResponseHandler.handleFailureResponse(e.getHttpStatus());
+        }
+
         return ResponseHandler.handleFailureResponse(e.getMessage(), e.getHttpStatus());
 
     }

@@ -3,15 +3,15 @@ package com.benchpress200.photique.user.domain.enumeration;
 import lombok.Getter;
 
 @Getter
-public enum AuthType {
+public enum Source {
     LOCAL("LOCAL"),
     NAVER("NAVER"),
     GOOGLE("GOOGLE"),
     KAKAO("KAKAO");
 
-    private final String type;
+    private final String source;
 
-    AuthType(String type) {
-        this.type = type;
+    Source(String source) {
+        this.source = source;
     }
 }

@@ -56,6 +56,7 @@ public class TokenManagerImpl implements TokenManager {
                 .userId(userId)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .refreshTokenTimeToLive(60L * 60L * 24L * 7L)
                 .build();
     }
 

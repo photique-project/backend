@@ -1,7 +1,7 @@
 package com.benchpress200.photique.user.domain.entity;
 
-import com.benchpress200.photique.user.domain.enumeration.AuthType;
 import com.benchpress200.photique.user.domain.enumeration.Role;
+import com.benchpress200.photique.user.domain.enumeration.Source;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,8 +16,6 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
-import org.springframework.context.event.EventListener;
 
 @Entity
 @NoArgsConstructor
@@ -50,7 +48,7 @@ public class User {
     private String profileImage;
 
     @Enumerated(EnumType.STRING)
-    private AuthType authType;
+    private Source source;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -71,12 +69,12 @@ public class User {
             String password,
             String nickname,
             String profileImage,
-            AuthType authType
+            Source source
     ) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.profileImage = profileImage;
-        this.authType = authType;
+        this.source = source;
     }
 }

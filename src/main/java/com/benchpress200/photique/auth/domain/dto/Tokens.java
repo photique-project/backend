@@ -10,11 +10,13 @@ public class Tokens {
     private Long userId;
     private String accessToken;
     private String refreshToken;
+    private Long refreshTokenTimeToLive;
 
     public RefreshToken toRefreshTokenEntity() {
         return RefreshToken.builder()
                 .userId(userId)
                 .refreshToken(refreshToken)
+                .timeToLive(refreshTokenTimeToLive)
                 .build();
     }
 }

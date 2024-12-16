@@ -1,11 +1,14 @@
 package com.benchpress200.photique.auth.presentation;
 
 import com.benchpress200.photique.auth.application.AuthService;
+import com.benchpress200.photique.auth.domain.dto.AuthMailRequest;
+import com.benchpress200.photique.auth.domain.dto.CodeValidationRequest;
 import com.benchpress200.photique.auth.domain.dto.LoginRequest;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -41,5 +44,21 @@ public class AuthController {
         response.addCookie(expiredTokenCookie);
 
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/mail")
+    public ApiSuccessResponse<?> sendAuthMail(
+            @RequestBody @Valid final AuthMailRequest authMailRequest
+    ) {
+        authService.sendAuthMail(authMailRequest);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/code")
+    public ApiSuccessResponse<?> validateAuthMailCode(
+            @RequestBody @Valid final CodeValidationRequest codeValidationRequest
+    ) {
+        authService.validateAuthMailCode(codeValidationRequest);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.OK);
     }
 }
