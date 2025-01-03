@@ -40,3 +40,4 @@ out/
 .env.dev
 .env.prod
 !docker-compose.spring.dev.yml
+!deployment-dev.yml
