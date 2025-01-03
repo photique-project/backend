@@ -39,7 +39,7 @@ jobs:
           username: ubuntu
           host: ${{ secrets.HOST_DEV }}
           key: ${{ secrets.KEY }}
-          source: ./docker-compose.spring.dev.yml, ./.env
+          source: ./docker-compose.spring.dev.yml, ./.env.dev
           target: /home/ubuntu
 
       - name: EC2 연결 및 도커컴포즈 실행
@@ -49,7 +49,7 @@ jobs:
           host: ${{ secrets.HOST_DEV }}
           key: ${{ secrets.KEY }}
           script: |
-            docker-compose -f docker-compose.spring.dev.yml down --remove-orphans
-            docker-compose -f docker-compose.spring.dev.yml pull
-            docker-compose -f docker-compose.spring.dev.yml up -d
-            docker image prune -f
+            sudo docker-compose -f docker-compose.spring.dev.yml down --remove-orphans
+            sudo docker-compose -f docker-compose.spring.dev.yml pull
+            sudo docker-compose --env-file .env.dev -f docker-compose.spring.dev.yml up -d
+            sudo docker image prune -f
