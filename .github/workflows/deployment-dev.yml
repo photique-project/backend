@@ -49,7 +49,7 @@ jobs:
           host: ${{ secrets.HOST_DEV }}
           key: ${{ secrets.KEY }}
           script: |
-            sudo docker-compose -f docker-compose.spring.dev.yml down --remove-orphans
+            sudo docker-compose -f docker-compose.spring.dev.yml down
             sudo docker-compose -f docker-compose.spring.dev.yml pull
             sudo docker-compose --env-file .env.dev -f docker-compose.spring.dev.yml up -d
             sudo docker image prune -f
