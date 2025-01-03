@@ -39,7 +39,7 @@ jobs:
           username: ubuntu
           host: ${{ secrets.HOST_DEV }}
           key: ${{ secrets.KEY }}
-          source: ./docker-compose.spring.dev.yml, ./env.dev
+          source: ./docker-compose.spring.dev.yml, ./.env
           target: /home/ubuntu
 
       - name: EC2 연결 및 도커컴포즈 실행
