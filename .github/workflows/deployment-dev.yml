@@ -19,7 +19,7 @@ jobs:
           java-version: '17'
           distribution: "temurin"
 
-      - name: yml 생성
+      - name: yml, env 생성
         run: |
           echo "${{ secrets.YML_DEV }}" > ./src/main/resources/application.yml
           echo "${{ secrets.ENV_DEV }}" > ./env.dev
