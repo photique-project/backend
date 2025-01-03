@@ -30,15 +30,16 @@ public class AuthMailTest {
     @Autowired
     private MockMvc mockMvc;
 
+
     @Test
     @DisplayName("메일인증 성공")
     public void testSuccessfulMailAuthentication() throws Exception {
         // given
-        String email = "example@naver.com";
+        String email = "example1@naver.com";
         String type = "JOIN";
 
         String requestJson = objectMapper.writeValueAsString(Map.of(
-                "email", email,
+                EMAIL_KEY, email,
                 "type", type
         ));
 
@@ -48,9 +49,7 @@ public class AuthMailTest {
                 )
                 .andExpect(status().isCreated());
 
-
         AuthCode authCode = authCodeRepository.findById(email).orElseThrow();
-
 
         requestJson = objectMapper.writeValueAsString(Map.of(
                 "email", email,
@@ -62,14 +61,14 @@ public class AuthMailTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson)
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("메일인증 실패")
     public void testFailedMailAuthentication() throws Exception {
         // given
-        String email = "example@naver.com";
+        String email = "example1@naver.com";
         String type = "JOIN";
 
         String requestJson = objectMapper.writeValueAsString(Map.of(
@@ -83,9 +82,7 @@ public class AuthMailTest {
                 )
                 .andExpect(status().isCreated());
 
-
         AuthCode authCode = authCodeRepository.findById(email).orElseThrow();
-
 
         requestJson = objectMapper.writeValueAsString(Map.of(
                 "email", email,

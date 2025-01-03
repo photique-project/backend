@@ -12,7 +12,7 @@ import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
-@Setter // RequestBody 어노테이션이 아니라면 Setter가 필요함 => 이후확인 ㄱ
+@Setter
 @NoArgsConstructor
 public class JoinRequest {
     @Email(message = "Invalid email")

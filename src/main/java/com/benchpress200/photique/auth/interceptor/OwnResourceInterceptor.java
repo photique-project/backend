@@ -9,12 +9,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.HandlerMapping;
 
 @Component
 @RequiredArgsConstructor
@@ -63,6 +65,14 @@ public class OwnResourceInterceptor implements HandlerInterceptor {
     }
 
     private Long findOwnerId(HttpServletRequest request) {
+        Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(
+                HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+
+        String userId = pathVariables.get("userId");
+        if (userId != null) {
+            return Long.parseLong(userId);
+        }
+
         if ("application/json".equals(request.getContentType())) {
             StringBuilder jsonBody = new StringBuilder();
 
@@ -79,20 +89,20 @@ public class OwnResourceInterceptor implements HandlerInterceptor {
             Gson gson = new Gson();
             JsonObject jsonObject = gson.fromJson(jsonBody.toString(), JsonObject.class);
 
-            if (jsonObject.has("user_id")) {
-                return jsonObject.get("user_id").getAsLong();
-            } else if (jsonObject.has("writer_id")) {
-                return jsonObject.get("writer_id").getAsLong();
+            if (jsonObject.has("userId")) {
+                return jsonObject.get("userId").getAsLong();
+            } else if (jsonObject.has("writerId")) {
+                return jsonObject.get("writerId").getAsLong();
             }
         }
 
-        String userId = request.getParameter("user_id");
+        userId = request.getParameter("userId");
 
         if (userId != null) {
             return Long.parseLong(userId);
         }
 
-        String writerId = request.getParameter("writer_id");
+        String writerId = request.getParameter("writerId");
 
         if (writerId != null) {
             return Long.parseLong(writerId);

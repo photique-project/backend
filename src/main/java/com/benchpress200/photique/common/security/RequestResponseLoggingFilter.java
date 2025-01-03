@@ -27,7 +27,7 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
                 request.getRequestURL(),
                 request.getMethod()
         );
-
+        
         filterChain.doFilter(request, response);
 
         long endTime = System.currentTimeMillis();

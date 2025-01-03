@@ -58,7 +58,7 @@ public class NicknameTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("nickname", newNickname)
                 )
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
