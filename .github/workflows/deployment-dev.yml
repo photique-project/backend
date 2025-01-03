@@ -22,7 +22,7 @@ jobs:
       - name: yml, env 생성
         run: |
           echo "${{ secrets.YML_DEV }}" > ./src/main/resources/application.yml
-          echo "${{ secrets.ENV_DEV }}" > ./env.dev
+          echo "${{ secrets.ENV_DEV }}" > ./.env.dev
 
       - name: 앱 빌드
         run: ./gradlew clean build -x test
