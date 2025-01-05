@@ -31,7 +31,7 @@ jobs:
           docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO_DEV }}:0.1.0 .
           docker push ${{ secrets.DOCKER_REPO_DEV }}:0.1.0
 
-      - name: EC2 연결 및 도커컴포즈 실행
+      - name: EC2 연결 및 backend 컨테이너 실행
         uses: appleboy/ssh-action@master
         with:
           username: ubuntu
