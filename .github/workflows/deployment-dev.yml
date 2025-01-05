@@ -19,10 +19,8 @@ jobs:
           java-version: '17'
           distribution: "temurin"
 
-      - name: yml, env 생성
-        run: |
-          echo "${{ secrets.YML_DEV }}" > ./src/main/resources/application.yml
-          echo "${{ secrets.ENV_DEV }}" > ./.env.dev
+      - name: yml 생성
+        run: echo "${{ secrets.YML_DEV }}" > ./src/main/resources/application.yml
 
       - name: 앱 빌드
         run: ./gradlew clean build -x test
@@ -33,15 +31,6 @@ jobs:
           docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO_DEV }}:0.1.0 .
           docker push ${{ secrets.DOCKER_REPO_DEV }}:0.1.0
 
-      - name: EC2에 도커컴포즈 복사
-        uses: appleboy/scp-action@master
-        with:
-          username: ubuntu
-          host: ${{ secrets.HOST_DEV }}
-          key: ${{ secrets.KEY }}
-          source: ./docker-compose.spring.dev.yml, ./.env.dev
-          target: /home/ubuntu
-
       - name: EC2 연결 및 도커컴포즈 실행
         uses: appleboy/ssh-action@master
         with:
@@ -49,7 +38,14 @@ jobs:
           host: ${{ secrets.HOST_DEV }}
           key: ${{ secrets.KEY }}
           script: |
-            sudo docker-compose -f docker-compose.spring.dev.yml down
-            sudo docker-compose -f docker-compose.spring.dev.yml pull
-            sudo docker-compose --env-file .env.dev -f docker-compose.spring.dev.yml up -d
-            sudo docker image prune -f
+            sudo docker stop backend-dev
+            sudo docker rm backend-dev
+            sudo docker rmi photique/backend-dev:0.1.0
+            sudo docker pull photique/backend-dev:0.1.0
+            sudo docker run -d \
+              --name backend-dev \
+              -p 8080:8080 \
+              --restart no \
+              -e TZ=Asia/Seoul \
+              photique/backend-dev:0.1.0
+
