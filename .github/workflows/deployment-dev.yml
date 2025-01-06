@@ -44,6 +44,7 @@ jobs:
             sudo docker pull photique/backend-dev:0.1.0
             sudo docker run -d \
               --name backend-dev \
+              --network backend \
               -p 8080:8080 \
               --restart no \
               -e TZ=Asia/Seoul \
