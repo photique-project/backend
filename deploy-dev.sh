@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# 최초상태까지 고려해서 블루그린 배포 쉘 작성 후 배포진행
 IS_GREEN_EXIST=$(grep -q "green-dev" "/home/ubuntu/nginx/conf.d/default.conf" && echo true || echo false)
 IS_BLUE_EXIST=$(grep -q "blue-dev" "/home/ubuntu/nginx/conf.d/default.conf" && echo true || echo false)
 

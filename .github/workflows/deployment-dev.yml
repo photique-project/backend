@@ -39,7 +39,7 @@ jobs:
           username: ubuntu
           host: ${{ secrets.HOST_DEV }}
           key: ${{ secrets.KEY }}
-          source: docker-compose.backend.dev.yml, ./deploy-dev.sh
+          source: docker-compose.backend.dev.yml, ./deploy-dev.sh, ./rollback-dev.sh
           target: /home/ubuntu
 
       - name: EC2 연결 및 backend 컨테이너 실행
