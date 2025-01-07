@@ -39,5 +39,5 @@ out/
 *.yml
 .env.dev
 .env.prod
-!docker-compose.spring.dev.yml
+!docker-compose.backend.dev.yml
 !deployment-dev.yml
