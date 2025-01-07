@@ -12,9 +12,9 @@ if { [ "$IS_GREEN_EXIST" = false ] && [ "$IS_BLUE_EXIST" = false ]; } || [ "$IS_
       echo ">>> blue 컨테이너 종료 중..."
       sudo sudo docker stop "blue-dev"
       echo ">>> blue 컨테이너 삭제 중..."
-      sudo sudo docker rm "photique/backend-blue-dev"
+      sudo sudo docker rm "blue-dev"
       echo ">>> blue 이미지 삭제 중..."
-      sudo sudo docker rmi "photique/backend-blue-dev"
+      sudo sudo docker rmi "photique/backend-blue-dev:0.1.0"
   fi
 
   echo ">>> blue image를 pull합니다."
@@ -38,13 +38,13 @@ if { [ "$IS_GREEN_EXIST" = false ] && [ "$IS_BLUE_EXIST" = false ]; } || [ "$IS_
 # blue가 트래픽 받고 있을 때
 else
   echo "### GREEN ####"
-  if [ "$(docker ps -q -f name="green-dev")" ]; then
+  if [ "$(sudo docker ps -q -f name="green-dev")" ]; then
         echo ">>> green 컨테이너 종료 중..."
         sudo sudo docker stop "green-dev"
         echo ">>> green 컨테이너 삭제 중..."
-        sudo sudo docker rm "photique/backend-green-dev"
+        sudo sudo docker rm "green-dev"
         echo ">>> green 이미지 삭제 중..."
-        sudo sudo docker rmi "photique/backend-green-dev"
+        sudo sudo docker rmi "photique/backend-green-dev:0.1.0"
   fi
   echo ">>> green image를 pull합니다."
   sudo docker-compose -f docker-compose.backend.dev.yml pull green-dev
