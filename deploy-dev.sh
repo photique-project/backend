@@ -10,11 +10,11 @@ if { [ "$IS_GREEN_EXIST" = false ] && [ "$IS_BLUE_EXIST" = false ]; } || [ "$IS_
   echo "### BLUE ####"
   if [ "$(docker ps -q -f name="green-dev")" ]; then
       echo ">>> green 컨테이너 종료 중..."
-      sudo docker stop "green-dev"
+      sudo sudo docker stop "green-dev"
       echo ">>> green 컨테이너 삭제 중..."
-      sudo docker rm "green-dev"
+      sudo sudo docker rm "green-dev"
       echo ">>> green 이미지 삭제 중..."
-      sudo docker rmi "green-dev"
+      sudo sudo docker rmi "green-dev"
   fi
 
   echo ">>> blue image를 pull합니다."
@@ -40,11 +40,11 @@ else
   echo "### GREEN ####"
   if [ "$(docker ps -q -f name="blue-dev")" ]; then
         echo ">>> blue 컨테이너 종료 중..."
-        sudo docker stop "blue-dev"
+        sudo sudo docker stop "blue-dev"
         echo ">>> blue 컨테이너 삭제 중..."
-        sudo docker rm "blue-dev"
+        sudo sudo docker rm "blue-dev"
         echo ">>> blue 이미지 삭제 중..."
-        sudo docker rmi "blue-dev"
+        sudo sudo docker rmi "blue-dev"
   fi
   echo ">>> green image를 pull합니다."
   sudo docker-compose -f docker-compose.backend.dev.yml pull green-dev

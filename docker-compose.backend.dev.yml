@@ -1,7 +1,7 @@
 version: '3'
 services:
-  blue:
-    image: photique/backend-dev:0.1.0
+  blue-dev:
+    image: photique/backend-blue-dev:0.1.0
     container_name: blue-dev
     restart: always
     ports:
@@ -12,8 +12,8 @@ services:
       - TZ=Asia/Seoul
 
 
-  green:
-    image: photique/backend-dev:0.1.0
+  green-dev:
+    image: photique/backend-green-dev:0.1.0
     container_name: green-dev
     restart: always
     ports:

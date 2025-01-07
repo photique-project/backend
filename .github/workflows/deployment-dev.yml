@@ -29,7 +29,8 @@ jobs:
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO_DEV }}:0.1.0 .
-          docker push ${{ secrets.DOCKER_REPO_DEV }}:0.1.0
+          docker push ${{ secrets.DOCKER_REPO_BLUE_DEV }}:0.1.0
+          docker push ${{ secrets.DOCKER_REPO_GREEN_DEV }}:0.1.0
 
       - name: EC2에 파일 복사
         uses: appleboy/scp-action@master
