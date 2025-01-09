@@ -1,0 +1,5 @@
+2025-01-10 00:42:51.355 [35m[SpringApplicationShutdownHook][0;39m [32m[INFO][0;39m [36mo.s.b.w.e.t.GracefulShutdown[0;39m - Commencing graceful shutdown. Waiting for active requests to complete 
+2025-01-10 00:42:51.365 [35m[tomcat-shutdown][0;39m [32m[INFO][0;39m [36mo.s.b.w.e.t.GracefulShutdown[0;39m - Graceful shutdown complete 
+2025-01-10 00:42:51.490 [35m[SpringApplicationShutdownHook][0;39m [32m[INFO][0;39m [36mo.s.o.j.LocalContainerEntityManagerFactoryBean[0;39m - Closing JPA EntityManagerFactory for persistence unit 'default' 
+2025-01-10 00:42:51.493 [35m[SpringApplicationShutdownHook][0;39m [32m[INFO][0;39m [36mc.z.h.HikariDataSource[0;39m - HikariPool-1 - Shutdown initiated... 
+2025-01-10 00:42:51.498 [35m[SpringApplicationShutdownHook][0;39m [32m[INFO][0;39m [36mc.z.h.HikariDataSource[0;39m - HikariPool-1 - Shutdown completed. 
