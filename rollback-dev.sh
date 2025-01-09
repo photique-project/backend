@@ -4,7 +4,7 @@ IS_GREEN_EXIST=$(grep -q "green-dev" "/home/ubuntu/nginx/conf.d/default.conf" &&
 IS_BLUE_EXIST=$(grep -q "blue-dev" "/home/ubuntu/nginx/conf.d/default.conf" && echo true || echo false)
 
 # green이 트래픽 받고있을 때 => blue로 롤백
-if { [ "$IS_GREEN_EXIST" = ture ]; then
+if [ "$IS_GREEN_EXIST" = true ]; then
   echo "### GREEN => BLUE ####"
 
   while true; do
