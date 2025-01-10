@@ -25,7 +25,7 @@ jobs:
           echo "${{ secrets.LOGBACK_DEV }}" > ./src/main/resources/logback-spring.xml
 
       - name: 앱 빌드
-        run: ./gradlew clean build -x test
+        run: ./gradlew clean build -x test -D spring.profiles.active=dev
 
       - name: 도커 이미지 빌드 및 푸시
         run: |
@@ -51,6 +51,8 @@ jobs:
           host: ${{ secrets.HOST_DEV }}
           key: ${{ secrets.KEY }}
           script: |
+            echo ">>> 사용되지 않는 도커 시스템 리소스 정리
+            sudo docker system prune -a
             chmod +x /home/ubuntu/deploy-dev.sh
             echo ">>> 배포 스크립트 실행 시작"
             bash /home/ubuntu/deploy-dev.sh

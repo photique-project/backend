@@ -58,6 +58,17 @@ dependencies {
 
 }
 
+processResources.dependsOn('copySecret')
+tasks.register('copySecret', Copy) {
+    from('backend-submodule/application') {
+        include '*.yml'
+    }
+    from('backend-submodule/logback') {
+        include '*.xml'
+    }
+    into 'src/main/resources'
+}
+
 tasks.named('test') {
     useJUnitPlatform()
 }
