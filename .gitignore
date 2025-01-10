@@ -37,7 +37,10 @@ out/
 .vscode/
 
 *.yml
+*.xml
 .env.dev
 .env.prod
-!docker-compose.spring.dev.yml
+!docker-compose.backend.dev.yml
+!docker-compose.backend.prod.yml
 !deployment-dev.yml
+!deployment-prod.yml
