@@ -10,7 +10,7 @@ services:
     networks:
       - backend
     environment:
-      - SPRING_PROFILE_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=dev
       - TZ=Asia/Seoul
     user: root
 
@@ -25,7 +25,7 @@ services:
     networks:
       - backend
     environment:
-      - SPRING_PROFILE_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=dev
       - TZ=Asia/Seoul
     user: root
 
