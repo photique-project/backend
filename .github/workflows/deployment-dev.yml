@@ -47,7 +47,7 @@ jobs:
           key: ${{ secrets.KEY }}
           script: |
             echo ">>> 사용되지 않는 도커 시스템 리소스 정리"
-            sudo docker system prune -a
+            sudo docker system prune -a -f
             chmod +x /home/ubuntu/deploy-dev.sh
             echo ">>> 배포 스크립트 실행 시작"
             bash /home/ubuntu/deploy-dev.sh
