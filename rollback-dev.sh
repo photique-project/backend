@@ -40,6 +40,4 @@ else
   sudo docker exec -i nginx-dev nginx -s reload
 fi
 
-
-
 # bash /home/ubuntu/rollback-dev.sh
