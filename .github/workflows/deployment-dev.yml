@@ -19,11 +19,6 @@ jobs:
           java-version: '17'
           distribution: "temurin"
 
-      - name: yml 생성
-        run: |
-          echo "${{ secrets.YML_DEV }}" > ./src/main/resources/application.yml
-          echo "${{ secrets.LOGBACK_DEV }}" > ./src/main/resources/logback-spring.xml
-
       - name: 앱 빌드
         run: ./gradlew clean build -x test -D spring.profiles.active=dev
 
