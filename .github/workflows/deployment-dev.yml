@@ -25,8 +25,8 @@ jobs:
       - name: 도커 이미지 빌드 및 푸시
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -f Dockerfile.dev -t ${{ secrets.DOCKER_REPO_BLUE_DEV }}:0.1.0 .
-          docker build -f Dockerfile.dev -t ${{ secrets.DOCKER_REPO_GREEN_DEV }}:0.1.0 .
+          docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO_BLUE_DEV }}:0.1.0 .
+          docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO_GREEN_DEV }}:0.1.0 .
           docker push ${{ secrets.DOCKER_REPO_BLUE_DEV }}:0.1.0
           docker push ${{ secrets.DOCKER_REPO_GREEN_DEV }}:0.1.0
 
