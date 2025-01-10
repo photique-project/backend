@@ -20,7 +20,7 @@ jobs:
           distribution: "temurin"
 
       - name: 앱 빌드
-        run: ./gradlew clean build -x test -Pprofile=dev
+        run: ./gradlew clean build -x test -Dspring.config.activate.on-profile=dev
 
       - name: 도커 이미지 빌드 및 푸시
         run: |
