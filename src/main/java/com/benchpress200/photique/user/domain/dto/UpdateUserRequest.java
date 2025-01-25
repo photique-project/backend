@@ -1,6 +1,6 @@
 package com.benchpress200.photique.user.domain.dto;
 
-import com.benchpress200.photique.common.dtovalidator.Image;
+import com.benchpress200.photique.common.dtovalidator.annotation.Image;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;

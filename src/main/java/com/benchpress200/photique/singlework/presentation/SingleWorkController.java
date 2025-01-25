@@ -1,0 +1,34 @@
+package com.benchpress200.photique.singlework.presentation;
+
+import com.benchpress200.photique.auth.interceptor.Auth;
+import com.benchpress200.photique.auth.interceptor.OwnResource;
+import com.benchpress200.photique.common.constant.URL;
+import com.benchpress200.photique.common.response.ApiSuccessResponse;
+import com.benchpress200.photique.common.response.ResponseHandler;
+import com.benchpress200.photique.singlework.application.SingleWorkService;
+import com.benchpress200.photique.singlework.domain.dto.NewSingleWorkRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(URL.BASE_URL + URL.SINGLE_WORK_DOMAIN)
+@RequiredArgsConstructor
+public class SingleWorkController {
+
+    private final SingleWorkService singleWorkService;
+
+    @Auth
+    @OwnResource
+    @PostMapping
+    public ApiSuccessResponse<?> createNewSingleWork(
+            @ModelAttribute @Valid final NewSingleWorkRequest newSingleWorkRequest
+    ) {
+        singleWorkService.createNewSingleWork(newSingleWorkRequest);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
+    }
+}

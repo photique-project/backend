@@ -1,6 +1,7 @@
-package com.benchpress200.photique.common.dtovalidator;
+package com.benchpress200.photique.common.dtovalidator.validator;
 
 import com.benchpress200.photique.auth.domain.enumeration.AuthType;
+import com.benchpress200.photique.common.dtovalidator.annotation.ValidAuthType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

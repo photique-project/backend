@@ -2,9 +2,9 @@ package com.benchpress200.photique.user.presentation;
 
 import com.benchpress200.photique.auth.interceptor.Auth;
 import com.benchpress200.photique.auth.interceptor.OwnResource;
+import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
-import com.benchpress200.photique.constant.URL;
 import com.benchpress200.photique.user.application.UserService;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.domain.dto.UpdateUserRequest;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
- 
+
 @RestController
 @RequestMapping(URL.BASE_URL + URL.USER_DOMAIN)
 @RequiredArgsConstructor

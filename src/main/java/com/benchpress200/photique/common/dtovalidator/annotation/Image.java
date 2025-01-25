@@ -1,5 +1,6 @@
-package com.benchpress200.photique.common.dtovalidator;
+package com.benchpress200.photique.common.dtovalidator.annotation;
 
+import com.benchpress200.photique.common.dtovalidator.validator.ImageValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import java.lang.annotation.ElementType;
@@ -12,6 +13,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Image {
     String message() default "Invalid image";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

@@ -12,7 +12,6 @@ public class UserInfoResponse {
     private String email;
     private String nickname;
     private String profileImage;
-    private Long coin;
     private LocalDateTime createdAt;
 
     public static UserInfoResponse from(User user) {
@@ -21,7 +20,6 @@ public class UserInfoResponse {
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .profileImage(user.getProfileImage())
-                .coin(user.getCoin())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

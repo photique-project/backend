@@ -1,6 +1,6 @@
 package com.benchpress200.photique.user.domain.dto;
 
-import com.benchpress200.photique.common.dtovalidator.Image;
+import com.benchpress200.photique.common.dtovalidator.annotation.Image;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Source;
 import jakarta.validation.constraints.Email;

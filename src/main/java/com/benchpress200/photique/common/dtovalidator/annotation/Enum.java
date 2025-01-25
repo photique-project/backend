@@ -1,19 +1,22 @@
-package com.benchpress200.photique.common.dtovalidator;
+package com.benchpress200.photique.common.dtovalidator.annotation;
 
+import com.benchpress200.photique.common.dtovalidator.validator.EnumValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Documented
-@Constraint(validatedBy = AuthTypeValidator.class)
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Constraint(validatedBy = EnumValidator.class)
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidAuthType {
-    String message() default "Invalid AuthType value. Allowed values are: [join, reset]";
+public @interface Enum {
+    String message() default "Invalid enum value";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
+
+    Class<? extends java.lang.Enum<?>> enumClass();
 }
