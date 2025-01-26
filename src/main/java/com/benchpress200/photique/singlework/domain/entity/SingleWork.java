@@ -1,6 +1,7 @@
 package com.benchpress200.photique.singlework.domain.entity;
 
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
+import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -59,6 +60,10 @@ public class SingleWork {
     @Column(length = 50, nullable = false)
     private String location;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Category category;
+
     @Column(nullable = false)
     private LocalDate date;
 
@@ -94,6 +99,7 @@ public class SingleWork {
             final ShutterSpeed shutterSpeed,
             final ISO iso,
             final String location,
+            final Category category,
             final LocalDate date,
             final String title,
             final String description
@@ -106,6 +112,7 @@ public class SingleWork {
         this.shutterSpeed = shutterSpeed;
         this.iso = iso;
         this.location = location;
+        this.category = category;
         this.date = date;
         this.title = title;
         this.description = description;

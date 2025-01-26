@@ -23,6 +23,7 @@ public class SingleWorkDetailResponse {
     private String shutterSpeed;
     private String iso;
     private String location;
+    private String category;
     private LocalDate date;
     private List<TagResponse> tags;
     private String title;
@@ -67,6 +68,7 @@ public class SingleWorkDetailResponse {
                 .shutterSpeed(singleWork.getShutterSpeed().getValue())
                 .iso(singleWork.getIso().getValue())
                 .location(singleWork.getLocation())
+                .category(singleWork.getCategory().getValue())
                 .date(singleWork.getDate())
                 .tags(tagsResponse)
                 .title(singleWork.getTitle())

@@ -8,6 +8,7 @@ import com.benchpress200.photique.common.dtovalidator.annotation.Image;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
+import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -58,6 +59,10 @@ public class NewSingleWorkRequest {
     @Size(max = 50, message = "The location must not exceed 50 characters")
     private String location;
 
+    @NotNull(message = "The value of category must not be null")
+    @Enum(enumClass = ISO.class, message = "Invalid value of category")
+    private String category;
+
     @NotNull(message = "The date must not be blank.")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
@@ -89,6 +94,7 @@ public class NewSingleWorkRequest {
                 .shutterSpeed(ShutterSpeed.fromValue(shutterSpeed))
                 .iso(ISO.fromValue(iso))
                 .location(location)
+                .category(Category.fromValue(category))
                 .date(date)
                 .title(title)
                 .description(description)

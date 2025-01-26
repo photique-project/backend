@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
         if (updateUserRequest.isIntroductionDefault()) {
             user.updateIntroduction(null);
-        } else if (updateUserRequest.hasIntroduction()) { // 기본값 설정이 아니고 수정요청 값이 존재한다면
+        } else if (updateUserRequest.hasIntroduction()) { // 기본값 설정이 아니고 수정 요청 값이 존재한다면
             updateIntroduction(user, updateUserRequest.getIntroduction());
         }
 
