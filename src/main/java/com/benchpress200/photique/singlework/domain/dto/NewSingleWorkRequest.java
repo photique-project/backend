@@ -44,15 +44,15 @@ public class NewSingleWorkRequest {
 
     @NotNull(message = "The value of aperture must not be null")
     @Enum(enumClass = Aperture.class, message = "Invalid value of aperture")
-    private Aperture aperture;
+    private String aperture;
 
     @NotNull(message = "The value of shutterSpeed must not be null")
     @Enum(enumClass = ShutterSpeed.class, message = "Invalid value of shutterSpeed")
-    private ShutterSpeed shutterSpeed;
+    private String shutterSpeed;
 
     @NotNull(message = "The value of iso must not be null")
     @Enum(enumClass = ISO.class, message = "Invalid value of iso")
-    private ISO iso;
+    private String iso;
 
     @NotBlank(message = "The location must not be blank.")
     @Size(max = 50, message = "The location must not exceed 50 characters")
@@ -85,9 +85,9 @@ public class NewSingleWorkRequest {
                 .image(imageUrl)
                 .camera(camera)
                 .lens(lens)
-                .aperture(aperture)
-                .shutterSpeed(shutterSpeed)
-                .iso(iso)
+                .aperture(Aperture.fromValue(aperture))
+                .shutterSpeed(ShutterSpeed.fromValue(shutterSpeed))
+                .iso(ISO.fromValue(iso))
                 .location(location)
                 .date(date)
                 .title(title)

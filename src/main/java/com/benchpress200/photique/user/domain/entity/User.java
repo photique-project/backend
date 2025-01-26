@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Table(
-        name = "singleworks",
+        name = "users",
         indexes = {
                 @Index(name = "idx_email", columnList = "email"),
                 @Index(name = "idx_nickname", columnList = "nickname")

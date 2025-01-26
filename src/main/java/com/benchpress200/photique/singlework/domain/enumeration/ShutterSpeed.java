@@ -31,9 +31,16 @@ public enum ShutterSpeed {
     ShutterSpeed(String value) {
         this.value = value;
     }
-    
+
     public static boolean isValid(String input) {
         return Arrays.stream(ShutterSpeed.values())
                 .anyMatch(shutterSpeed -> shutterSpeed.value.equals(input));
+    }
+
+    public static ShutterSpeed fromValue(String input) {
+        return Arrays.stream(ShutterSpeed.values())
+                .filter(shutterSpeed -> shutterSpeed.value.equals(input))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid shutterSpeed value: " + input));
     }
 }

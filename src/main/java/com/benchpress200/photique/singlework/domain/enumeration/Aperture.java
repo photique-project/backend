@@ -42,9 +42,16 @@ public enum Aperture {
     Aperture(String value) {
         this.value = value;
     }
-    
+
     public static boolean isValid(String input) {
         return Arrays.stream(Aperture.values())
                 .anyMatch(aperture -> aperture.value.equals(input));
+    }
+
+    public static Aperture fromValue(String input) {
+        return Arrays.stream(Aperture.values())
+                .filter(aperture -> aperture.value.equals(input))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid aperture value: " + input));
     }
 }

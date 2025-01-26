@@ -30,4 +30,11 @@ public enum ISO {
         return Arrays.stream(ISO.values())
                 .anyMatch(iso -> iso.value.equals(input));
     }
+
+    public static ISO fromValue(String input) {
+        return Arrays.stream(ISO.values())
+                .filter(iso -> iso.value.equals(input))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid iso value: " + input));
+    }
 }
