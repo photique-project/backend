@@ -15,4 +15,5 @@ public class URL {
     public static final String GET_USER_ID = "/id";
 
     public static final String SINGLE_WORK_DOMAIN = "/singleworks";
+    public static final String GET_SINGLE_WORK_DETAIL = "/{singleworkId}";
 }

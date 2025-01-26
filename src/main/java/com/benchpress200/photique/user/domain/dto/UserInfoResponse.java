@@ -15,7 +15,7 @@ public class UserInfoResponse {
     private String profileImage;
     private LocalDateTime createdAt;
 
-    public static UserInfoResponse from(User user) {
+    public static UserInfoResponse from(final User user) {
         return UserInfoResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())

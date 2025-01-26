@@ -6,6 +6,7 @@ import com.benchpress200.photique.common.domain.entity.Tag;
 import com.benchpress200.photique.common.infrastructure.ImageUploader;
 import com.benchpress200.photique.common.infrastructure.TagRepository;
 import com.benchpress200.photique.singlework.domain.dto.NewSingleWorkRequest;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
 import com.benchpress200.photique.singlework.exception.SingleWorkException;
@@ -34,6 +35,7 @@ public class SingleWorkServiceImpl implements SingleWorkService {
     private final SingleWorkTagRepository singleWorkTagRepository;
     private final TagRepository tagRepository;
 
+    @Override
     public void createNewSingleWork(final NewSingleWorkRequest newSingleWorkRequest) {
 
         // 작성자 조회
@@ -82,5 +84,24 @@ public class SingleWorkServiceImpl implements SingleWorkService {
             // SingleWorkTag 엔티티 저장
             singleWorkTagRepository.saveAll(singleWorkTags);
         }
+    }
+
+    @Override
+    public SingleWorkDetailResponse getSingleWorkDetail(final Long singleWorkId) {
+        SingleWork singleWork = singleWorkRepository.findById(singleWorkId).orElseThrow(
+                () -> new SingleWorkException("SingleWork with ID " + singleWorkId + " is not found.",
+                        HttpStatus.NOT_FOUND)
+        );
+        
+        List<SingleWorkTag> singleWorkTags = singleWorkTagRepository.findBySingleWorkId(singleWorkId);
+
+        List<Tag> tags = singleWorkTags.stream()
+                .map(SingleWorkTag::getTag)
+                .toList();
+
+        return SingleWorkDetailResponse.from(
+                singleWork,
+                tags
+        );
     }
 }
