@@ -1,7 +1,6 @@
 package com.benchpress200.photique.common.infrastructure;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.benchpress200.photique.common.exception.ImageUploaderException;
 import java.io.File;
@@ -24,14 +23,14 @@ public class ImageUploaderImpl implements ImageUploader {
 
     @Override
     public String upload(MultipartFile image, String path) {
-            String uniqueImageName = createS3ImageName(image);
-            String uniqueImagePath = path + "/" + uniqueImageName;
-            File uploadImage = convert(image, uniqueImageName);
-            String uploadImageUrl = putS3(uploadImage, uniqueImagePath);
+        String uniqueImageName = createS3ImageName(image);
+        String uniqueImagePath = path + "/" + uniqueImageName;
+        File uploadImage = convert(image, uniqueImageName);
+        String uploadImageUrl = putS3(uploadImage, uniqueImagePath);
 
-            removeNewFile(uploadImage);
+        removeNewFile(uploadImage);
 
-            return uploadImageUrl;
+        return uploadImageUrl;
     }
 
 
@@ -48,8 +47,10 @@ public class ImageUploaderImpl implements ImageUploader {
 
     @Override
     public void delete(String path) {
-        String imagePath = path.substring(path.indexOf("com/") + 4);
-        amazonS3.deleteObject(bucket, imagePath);
+        if (path != null) {
+            String imagePath = path.substring(path.indexOf("com/") + 4);
+            amazonS3.deleteObject(bucket, imagePath);
+        }
     }
 
     private File convert(MultipartFile image, String uniqueImageName) {
@@ -60,21 +61,24 @@ public class ImageUploaderImpl implements ImageUploader {
                 try (FileOutputStream fos = new FileOutputStream(convertFile)) {
                     fos.write(image.getBytes());
                 } catch (IOException e) {
-                    throw new ImageUploaderException(e.getMessage(), "Image conversion failed: IOException {" + image.getOriginalFilename() + "}");
+                    throw new ImageUploaderException(e.getMessage(),
+                            "Image conversion failed: IOException {" + image.getOriginalFilename() + "}");
                 }
 
                 return convertFile;
             }
 
-            throw new ImageUploaderException("Image conversion failed: Duplicated Image {" + image.getOriginalFilename() + "}");
+            throw new ImageUploaderException(
+                    "Image conversion failed: Duplicated Image {" + image.getOriginalFilename() + "}");
 
         } catch (IOException e) {
-            throw new ImageUploaderException(e.getMessage(), "Image conversion failed: IOException {" + image.getOriginalFilename() + "}");
+            throw new ImageUploaderException(e.getMessage(),
+                    "Image conversion failed: IOException {" + image.getOriginalFilename() + "}");
         }
     }
 
     private String putS3(File uploadImage, String imageName) {
-        PutObjectRequest putObjectRequest= new PutObjectRequest(bucket, imageName, uploadImage);
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, imageName, uploadImage);
         amazonS3.putObject(putObjectRequest);
 
         return amazonS3.getUrl(bucket, imageName).toString();

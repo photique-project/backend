@@ -10,7 +10,6 @@ import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.exception.UserException;
 import com.benchpress200.photique.user.infrastructure.UserRepository;
 import jakarta.transaction.Transactional;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,10 +51,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserInfoResponse getUserInfo(final Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        User foundUser = user.orElseThrow(
-                () -> new UserException("User with ID {" + userId + "} is not found", HttpStatus.NOT_FOUND));
-
+        User foundUser = findUserById(userId);
         return UserInfoResponse.from(foundUser);
     }
 
@@ -64,28 +60,32 @@ public class UserServiceImpl implements UserService {
             final Long userId,
             final UpdateUserRequest updateUserRequest
     ) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserException("User with ID {" + userId + "} is not found", HttpStatus.NOT_FOUND));
+        User user = findUserById(userId);
 
         if (updateUserRequest.hasPassword()) {
-            user.updatePassword(passwordEncoder.encode(updateUserRequest.getPassword()));
+            updatePassword(user, updateUserRequest.getPassword());
         }
 
         if (updateUserRequest.hasNickname()) {
-            userRepository.findByNickname(updateUserRequest.getNickname())
-                    .ifPresent(foundUser -> {
-                        throw new UserException("{" + updateUserRequest.getNickname() + "} is already in use",
-                                HttpStatus.CONFLICT);
-                    });
-
-            user.updateNickname(updateUserRequest.getNickname());
+            updateNickname(user, updateUserRequest.getNickname());
         }
 
-        if (updateUserRequest.hasProfileImage()) {
+        if (updateUserRequest.isIntroductionDefault()) {
+            user.updateIntroduction(null);
+        } else if (updateUserRequest.hasIntroduction()) { // 기본값 설정이 아니고 수정요청 값이 존재한다면
+            updateIntroduction(user, updateUserRequest.getIntroduction());
+        }
+
+        if (updateUserRequest.isProfileImageDefault()) {
             String profileImage = user.getProfileImage();
+
             if (profileImage != null) {
                 imageUploader.delete(profileImage);
+                user.updateProfileImage(null);
             }
+
+        } else if (updateUserRequest.hasProfileImage()) {
+            String profileImage = user.getProfileImage();
 
             profileImage = imageUploader.update(
                     updateUserRequest.getProfileImage(),
@@ -94,36 +94,56 @@ public class UserServiceImpl implements UserService {
             );
 
             user.updateProfileImage(profileImage);
-
-            return;
-        }
-
-        if (updateUserRequest.isProfileImageDefault()) {
-            String profileImage = user.getProfileImage();
-
-            if (profileImage != null) {
-                imageUploader.delete(profileImage);
-            }
-
-            user.updateProfileImage(null);
         }
     }
 
     @Override
-    public UserIdResponse getUserId(String accessToken) {
+    public UserIdResponse getUserId(final String accessToken) {
         Long userId = tokenManager.getUserId(accessToken);
         return UserIdResponse.builder()
                 .id(userId)
                 .build();
     }
 
-    //FIXME: 이후에 해당 유저 관련 데이터 모두 삭제하는 코드 추가해야함
+    // TODO: 이후에 해당 유저 관련 데이터 모두 삭제하는 코드 추가해야함
     @Override
-    public void withdraw(Long userId) {
+    public void withdraw(final Long userId) {
         // 유저있는지확인
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserException("User with ID {" + userId + "} is not found", HttpStatus.NOT_FOUND));
 
         userRepository.deleteById(userId);
+    }
+
+    private User findUserById(final Long userId) {
+        return userRepository.findById(userId).orElseThrow(
+                () -> new UserException("User with ID {" + userId + "} is not found", HttpStatus.NOT_FOUND));
+    }
+
+    private void updatePassword(
+            final User user,
+            final String password
+    ) {
+        user.updatePassword(passwordEncoder.encode(password));
+    }
+
+    private void updateNickname(
+            final User user,
+            final String nickname
+    ) {
+        userRepository.findByNickname(nickname)
+                .ifPresent(foundUser -> {
+                    throw new UserException("{" + nickname + "} is already in use",
+                            HttpStatus.CONFLICT);
+                });
+
+        user.updateNickname(nickname);
+    }
+
+    private void updateIntroduction(
+            final User user,
+            final String introduction
+    ) {
+        user.updateIntroduction(introduction);
     }
 }

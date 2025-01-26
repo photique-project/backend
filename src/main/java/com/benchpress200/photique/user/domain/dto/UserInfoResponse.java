@@ -11,6 +11,7 @@ public class UserInfoResponse {
     private Long id;
     private String email;
     private String nickname;
+    private String introduction;
     private String profileImage;
     private LocalDateTime createdAt;
 
@@ -19,6 +20,7 @@ public class UserInfoResponse {
                 .id(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .introduction(user.getIntroduction())
                 .profileImage(user.getProfileImage())
                 .createdAt(user.getCreatedAt())
                 .build();

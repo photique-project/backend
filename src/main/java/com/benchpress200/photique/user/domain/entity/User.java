@@ -44,6 +44,9 @@ public class User {
     @Column(name = "profile_image", length = 2048)
     private String profileImage;
 
+    @Column(length = 50)
+    private String introduction;
+
     @Enumerated(EnumType.STRING)
     private Source source;
 
@@ -64,12 +67,14 @@ public class User {
             final String email,
             final String password,
             final String nickname,
+            final String introduction,
             final String profileImage,
             final Source source
     ) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.introduction = introduction;
         this.profileImage = profileImage;
         this.source = source;
     }
@@ -80,6 +85,10 @@ public class User {
 
     public void updateNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void updateIntroduction(String introduction) {
+        this.introduction = introduction;
     }
 
     public void updateProfileImage(String profileImage) {
