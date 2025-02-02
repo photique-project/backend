@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 @NoArgsConstructor
-public class NewSingleWorkRequest {
+public class SingleWorkCreateRequest {
     @NotNull(message = "Id must not be null")
     @Id
     private Long writerId;
@@ -60,13 +60,14 @@ public class NewSingleWorkRequest {
     private String location;
 
     @NotNull(message = "The value of category must not be null")
-    @Enum(enumClass = ISO.class, message = "Invalid value of category")
+    @Enum(enumClass = Category.class, message = "Invalid value of category")
     private String category;
 
     @NotNull(message = "The date must not be blank.")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
+    @Size(max = 5, message = "The list size must be between 0 and 5")
     private List<NewTagRequest> tags;
 
     @NotBlank(message = "The title must not be blank.")

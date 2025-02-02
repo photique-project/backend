@@ -39,7 +39,7 @@ public class UserController {
     }
 
     @Auth
-    @GetMapping(URL.USER_INFO)
+    @GetMapping(URL.USER_DATA)
     public ApiSuccessResponse<?> getUserInfo(
             @PathVariable("userId") final Long userId
     ) {
@@ -49,7 +49,7 @@ public class UserController {
 
     @Auth
     @OwnResource
-    @PatchMapping(URL.USER_INFO)
+    @PatchMapping(URL.USER_DATA)
     public ApiSuccessResponse<?> updateUserInfo(
             @PathVariable("userId") final Long userId,
             @ModelAttribute @Valid final UpdateUserRequest updateUserRequest
@@ -69,7 +69,7 @@ public class UserController {
 
     @Auth
     @OwnResource
-    @DeleteMapping(URL.USER_INFO)
+    @DeleteMapping(URL.USER_DATA)
     public ApiSuccessResponse<?> withdraw(
             @PathVariable("userId") final Long userId
     ) {

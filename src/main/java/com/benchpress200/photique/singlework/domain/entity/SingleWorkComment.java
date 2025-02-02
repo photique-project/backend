@@ -58,4 +58,8 @@ public class SingleWorkComment {
         this.singleWork = singleWork;
         this.content = content;
     }
+
+    public void updateContent(final String content) {
+        this.content = content;
+    }
 }

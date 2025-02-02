@@ -18,6 +18,10 @@ public class EnumValidator implements
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
+        if (value == null || value.toString().isEmpty()) {
+            return true;
+        }
+
         try {
             Method isValidMethod = enumClass.getMethod(VALID_METHOD_NAME, String.class);
             return (boolean) isValidMethod.invoke(null, value.toString());

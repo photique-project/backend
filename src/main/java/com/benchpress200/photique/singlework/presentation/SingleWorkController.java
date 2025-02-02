@@ -6,8 +6,9 @@ import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkService;
-import com.benchpress200.photique.singlework.domain.dto.NewSingleWorkRequest;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,13 +30,21 @@ public class SingleWorkController {
     @OwnResource
     @PostMapping
     public ApiSuccessResponse<?> createNewSingleWork(
-            @ModelAttribute @Valid final NewSingleWorkRequest newSingleWorkRequest
+            @ModelAttribute @Valid final SingleWorkCreateRequest singleWorkCreateRequest
     ) {
-        singleWorkService.createNewSingleWork(newSingleWorkRequest);
+        singleWorkService.createNewSingleWork(singleWorkCreateRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 
-    @GetMapping(URL.GET_SINGLE_WORK_DETAIL)
+    @GetMapping
+    public ApiSuccessResponse<?> getSingleWorks(
+            @ModelAttribute @Valid final SingleWorkSearchRequest singleWorkSearchRequest
+    ) {
+        singleWorkService.getSingleWorks(singleWorkSearchRequest);
+        return null;
+    }
+
+    @GetMapping(URL.SINGLE_WORK_DATA)
     public ApiSuccessResponse<?> getSingleWorkDetail(
             @PathVariable final Long singleworkId
     ) {
