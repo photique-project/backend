@@ -8,9 +8,12 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkCommentService;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDeleteRequest;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDetailResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,9 +46,12 @@ public class SingleWorkCommentController {
 
     @GetMapping
     public ApiSuccessResponse<?> getSingleWorkComments(
-            
+            @PathVariable("singleworkId") final Long singleWorkId,
+            final Pageable pageable
     ) {
-
+        Page<SingleWorkCommentDetailResponse> singleWorkComments = singleWorkCommentService.getSingleWorkComments(
+                singleWorkId, pageable);
+        return ResponseHandler.handleSuccessResponse(singleWorkComments, HttpStatus.OK);
     }
 
     @Auth

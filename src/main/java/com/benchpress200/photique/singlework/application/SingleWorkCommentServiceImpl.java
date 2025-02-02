@@ -2,6 +2,7 @@ package com.benchpress200.photique.singlework.application;
 
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDeleteRequest;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDetailResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentUpdateRequest;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
@@ -11,7 +12,11 @@ import com.benchpress200.photique.singlework.infrastructure.SingleWorkRepository
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.infrastructure.UserRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +48,28 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
         // 저장
         SingleWorkComment singleWorkComment = singleWorkCommentCreateRequest.toEntity(writer, singleWork);
         singleWorkCommentRepository.save(singleWorkComment);
+    }
+
+    @Override
+    public Page<SingleWorkCommentDetailResponse> getSingleWorkComments(
+            final Long singleWorkId,
+            final Pageable pageable
+    ) {
+        // 단일작품조회
+        singleWorkRepository.findById(singleWorkId).orElseThrow(
+                () -> new SingleWorkException("Single work with ID " + singleWorkId + " is not found.",
+                        HttpStatus.NOT_FOUND)
+        );
+
+        final Page<SingleWorkComment> singleWorkComments = singleWorkCommentRepository.findBySingleWorkId(
+                singleWorkId, pageable
+        );
+
+        final List<SingleWorkCommentDetailResponse> singleWorkCommentDetailResponseList = singleWorkComments.stream()
+                .map(SingleWorkCommentDetailResponse::from)
+                .toList();
+
+        return new PageImpl<>(singleWorkCommentDetailResponseList, pageable, singleWorkComments.getTotalElements());
     }
 
     @Override
