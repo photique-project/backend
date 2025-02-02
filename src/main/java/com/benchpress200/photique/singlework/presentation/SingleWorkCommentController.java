@@ -7,10 +7,12 @@ import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkCommentService;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentCreateRequest;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDeleteRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,7 +51,22 @@ public class SingleWorkCommentController {
         singleWorkCommentUpdateRequest.withSingleWorkId(singleWorkId);
         singleWorkCommentUpdateRequest.withCommentId(commentId);
         singleWorkCommentService.updateSingleWorkComment(singleWorkCommentUpdateRequest);
-        
+
+        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
+
+    @Auth
+    @OwnResource
+    @DeleteMapping(URL.SINGLE_WORK_COMMENT_DATA)
+    public ApiSuccessResponse<?> deleteSingleWorkComment(
+            @PathVariable("singleworkId") final Long singleWorkId,
+            @PathVariable("commentId") final Long commentId,
+            @RequestBody @Valid final SingleWorkCommentDeleteRequest singleWorkCommentDeleteRequest
+    ) {
+        singleWorkCommentDeleteRequest.withSingleWorkId(singleWorkId);
+        singleWorkCommentDeleteRequest.withCommentId(commentId);
+        singleWorkCommentService.deleteSingleWorkComment(singleWorkCommentDeleteRequest);
+
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 }

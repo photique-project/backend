@@ -1,6 +1,7 @@
 package com.benchpress200.photique.singlework.application;
 
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentCreateRequest;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDeleteRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentUpdateRequest;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
@@ -68,5 +69,31 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
         // 댓글 수정
         singleWorkComment.updateContent(singleWorkCommentUpdateRequest.getContent());
+    }
+
+    @Override
+    public void deleteSingleWorkComment(final SingleWorkCommentDeleteRequest singleWorkCommentDeleteRequest) {
+        // 작성자 조회
+        final Long writerId = singleWorkCommentDeleteRequest.getWriterId();
+        userRepository.findById(writerId).orElseThrow(
+                () -> new SingleWorkException("User with ID " + writerId + " is not found.", HttpStatus.NOT_FOUND)
+        );
+
+        // 작품 조회
+        final Long singleWorkId = singleWorkCommentDeleteRequest.getSingleWorkId();
+        singleWorkRepository.findById(singleWorkId).orElseThrow(
+                () -> new SingleWorkException("Single work with ID " + singleWorkId + " is not found.",
+                        HttpStatus.NOT_FOUND)
+        );
+
+        // 댓글 조회
+        final Long commentId = singleWorkCommentDeleteRequest.getCommentId();
+        singleWorkCommentRepository.findById(singleWorkId).orElseThrow(
+                () -> new SingleWorkException("Comment in single work with ID " + commentId + " is not found.",
+                        HttpStatus.NOT_FOUND)
+        );
+
+        // 댓글 삭제
+        singleWorkCommentRepository.deleteById(commentId);
     }
 }
