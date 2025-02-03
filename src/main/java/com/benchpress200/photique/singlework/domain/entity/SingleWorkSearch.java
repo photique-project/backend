@@ -21,32 +21,35 @@ public class SingleWorkSearch {
     @Field(name = "id", type = FieldType.Long)
     private Long id;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Keyword, index = false)
     private String image;
+
+    @Field(type = FieldType.Long, index = false)
+    private Long writerId;
 
     @Field(type = FieldType.Keyword)
     private String writerNickname;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Keyword, index = false)
     private String writerProfileImage;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text)
     private String title;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text)
     private List<String> tags;
 
     @Field(type = FieldType.Text)
     private String category;
 
     @Field(type = FieldType.Long)
-    private long likeCount;
+    private Long likeCount;
 
     @Field(type = FieldType.Long)
-    private long viewCount;
+    private Long viewCount;
 
     @Field(type = FieldType.Long)
-    private long commentCount;
+    private Long commentCount;
 
     @Field(type = FieldType.Date)
     private LocalDateTime createdAt;

@@ -46,7 +46,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
         );
 
         // 저장
-        SingleWorkComment singleWorkComment = singleWorkCommentCreateRequest.toEntity(writer, singleWork);
+        final SingleWorkComment singleWorkComment = singleWorkCommentCreateRequest.toEntity(writer, singleWork);
         singleWorkCommentRepository.save(singleWorkComment);
     }
 

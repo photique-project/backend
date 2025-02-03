@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SingleWorkTagRepository extends JpaRepository<SingleWorkTag, Long> {
     List<SingleWorkTag> findBySingleWorkId(Long singleWorkId);
+
+    void deleteBySingleWorkId(Long singleWorkId);
 }

@@ -14,7 +14,7 @@ public enum Category {
     FOOD("food"),
     SPORTS("sports"),
     BLACK_AND_WHITE("blackAndWhite"),
-    NIGHT_VIEW("nightView"),
+    NIGHTSCAPE("nightscape"),
     STREET("street"),
     ABSTRACT("abstract"),
     EVENT("event"),

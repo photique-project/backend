@@ -3,9 +3,9 @@ package com.benchpress200.photique.user.application;
 import com.benchpress200.photique.auth.infrastructure.TokenManager;
 import com.benchpress200.photique.common.infrastructure.ImageUploader;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
-import com.benchpress200.photique.user.domain.dto.UpdateUserRequest;
+import com.benchpress200.photique.user.domain.dto.UserDetailResponse;
 import com.benchpress200.photique.user.domain.dto.UserIdResponse;
-import com.benchpress200.photique.user.domain.dto.UserInfoResponse;
+import com.benchpress200.photique.user.domain.dto.UserUpdateRequest;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.exception.UserException;
 import com.benchpress200.photique.user.infrastructure.UserRepository;
@@ -17,6 +17,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -34,12 +35,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void join(final JoinRequest joinRequest) {
         String password = passwordEncoder.encode(joinRequest.getPassword());
-        String imageUrl = null;
-
-        if (joinRequest.hasProfileImage()) {
-            imageUrl = imageUploader.upload(joinRequest.getProfileImage(), profileImagePath);
-        }
-
+        String imageUrl = uploadProfileImage(joinRequest.getProfileImage());
         User user = joinRequest.toEntity(password, imageUrl);
 
         try {
@@ -50,45 +46,50 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserInfoResponse getUserInfo(final Long userId) {
+    public UserDetailResponse getUserDetail(final Long userId) {
         User foundUser = findUserById(userId);
-        return UserInfoResponse.from(foundUser);
+        return UserDetailResponse.from(foundUser);
     }
 
     @Override
-    public void updateUserInfo(
+    public void updateUserDetail(
             final Long userId,
-            final UpdateUserRequest updateUserRequest
+            final UserUpdateRequest userUpdateRequest
     ) {
         User user = findUserById(userId);
 
-        if (updateUserRequest.hasPassword()) {
-            updatePassword(user, updateUserRequest.getPassword());
+        // 비밀번호 업데이트
+        if (userUpdateRequest.hasPassword()) {
+            updatePassword(user, userUpdateRequest.getPassword());
         }
 
-        if (updateUserRequest.hasNickname()) {
-            updateNickname(user, updateUserRequest.getNickname());
+        // 닉네임 업데이트
+        if (userUpdateRequest.hasNickname()) {
+            updateNickname(user, userUpdateRequest.getNickname());
         }
 
-        if (updateUserRequest.isIntroductionDefault()) {
-            user.updateIntroduction(null);
-        } else if (updateUserRequest.hasIntroduction()) { // 기본값 설정이 아니고 수정 요청 값이 존재한다면
-            updateIntroduction(user, updateUserRequest.getIntroduction());
+        // 한 줄 소개 업데이트
+        // 빈 값으로 업데이트 한다면 isEmpty() 호출할 수 있도록 빈 문자열 전달됨
+        if (userUpdateRequest.hasIntroduction()) {
+            updateIntroduction(user, userUpdateRequest.getIntroduction());
         }
 
-        if (updateUserRequest.isProfileImageDefault()) {
+        // 프로필 이미지 업데이트
+        // null이면 업데이트 X
+        // 기본값 설정이면 빈 객체전달
+        if (userUpdateRequest.hasProfileImage()) {
             String profileImage = user.getProfileImage();
 
-            if (profileImage != null) {
+            if (userUpdateRequest.isDefaultProfileImage()) { // 기본값 설정을 원한다면
                 imageUploader.delete(profileImage);
-                user.updateProfileImage(null);
+                user.updateDefaultProfileImage();
+                return;
+
             }
 
-        } else if (updateUserRequest.hasProfileImage()) {
-            String profileImage = user.getProfileImage();
-
+            // 기본값 설정이 아닌 업데이트라면
             profileImage = imageUploader.update(
-                    updateUserRequest.getProfileImage(),
+                    userUpdateRequest.getProfileImage(),
                     profileImage,
                     profileImagePath
             );
@@ -109,10 +110,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public void withdraw(final Long userId) {
         // 유저있는지확인
-        User user = userRepository.findById(userId).orElseThrow(
+        userRepository.findById(userId).orElseThrow(
                 () -> new UserException("User with ID {" + userId + "} is not found", HttpStatus.NOT_FOUND));
 
         userRepository.deleteById(userId);
+    }
+
+    private String uploadProfileImage(final MultipartFile profileImage) {
+        if (profileImage != null) {
+            return imageUploader.upload(profileImage, profileImagePath);
+        }
+
+        return null;
     }
 
     private User findUserById(final Long userId) {

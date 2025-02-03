@@ -1,7 +1,6 @@
 package com.benchpress200.photique.user.domain.dto;
 
 import com.benchpress200.photique.common.dtovalidator.annotation.Image;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -10,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
-public class UpdateUserRequest {
+public class UserUpdateRequest {
     @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{8,}$", message = "Invalid password: Password must be at least 8 characters long, include at least one letter, one number, and one special character")
     private String password;
 
@@ -20,14 +19,8 @@ public class UpdateUserRequest {
     @Size(max = 50, message = "The introduction must not exceed 50 characters")
     private String introduction;
 
-    @NotNull(message = "Introduction status must be specified")
-    private boolean isIntroductionDefault;
-
     @Image
     private MultipartFile profileImage;
-
-    @NotNull(message = "Profile image status must be specified")
-    private boolean isProfileImageDefault;
 
     public boolean hasPassword() {
         return password != null;
@@ -43,5 +36,9 @@ public class UpdateUserRequest {
 
     public boolean hasProfileImage() {
         return profileImage != null;
+    }
+
+    public boolean isDefaultProfileImage() {
+        return profileImage.isEmpty();
     }
 }

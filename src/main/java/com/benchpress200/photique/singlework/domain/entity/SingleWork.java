@@ -117,4 +117,48 @@ public class SingleWork {
         this.title = title;
         this.description = description;
     }
+
+    public void updateImage(final String image) {
+        this.image = image;
+    }
+
+    public void updateCamera(final String camera) {
+        this.camera = camera;
+    }
+
+    public void updateLens(final String lens) {
+        this.lens = lens;
+    }
+
+    public void updateAperture(final Aperture aperture) {
+        this.aperture = aperture;
+    }
+
+    public void updateShutterSpeed(final ShutterSpeed shutterSpeed) {
+        this.shutterSpeed = shutterSpeed;
+    }
+
+    public void updateIso(final ISO iso) {
+        this.iso = iso;
+    }
+
+    public void updateLocation(final String location) {
+        this.location = location;
+    }
+
+    public void updateCategory(final Category category) {
+        this.category = category;
+    }
+
+    public void updateDate(final LocalDate date) {
+        this.date = date;
+    }
+
+    public void updateTitle(final String title) {
+        this.title = title;
+    }
+
+    public void updateDescription(final String description) {
+        this.description = description;
+    }
 }

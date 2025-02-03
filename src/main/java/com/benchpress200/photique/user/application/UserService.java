@@ -1,16 +1,16 @@
 package com.benchpress200.photique.user.application;
 
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
-import com.benchpress200.photique.user.domain.dto.UpdateUserRequest;
+import com.benchpress200.photique.user.domain.dto.UserDetailResponse;
 import com.benchpress200.photique.user.domain.dto.UserIdResponse;
-import com.benchpress200.photique.user.domain.dto.UserInfoResponse;
+import com.benchpress200.photique.user.domain.dto.UserUpdateRequest;
 
 public interface UserService {
     void join(JoinRequest joinRequest);
 
-    UserInfoResponse getUserInfo(Long userId);
+    UserDetailResponse getUserDetail(Long userId);
 
-    void updateUserInfo(Long userId, UpdateUserRequest updateUserRequest);
+    void updateUserDetail(Long userId, UserUpdateRequest userUpdateRequest);
 
     UserIdResponse getUserId(String accessToken);
 

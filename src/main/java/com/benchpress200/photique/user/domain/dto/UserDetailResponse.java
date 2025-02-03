@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class UserInfoResponse {
+public class UserDetailResponse {
     private Long id;
     private String email;
     private String nickname;
@@ -15,8 +15,8 @@ public class UserInfoResponse {
     private String profileImage;
     private LocalDateTime createdAt;
 
-    public static UserInfoResponse from(final User user) {
-        return UserInfoResponse.builder()
+    public static UserDetailResponse from(final User user) {
+        return UserDetailResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())

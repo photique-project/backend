@@ -7,9 +7,9 @@ import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserService;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
-import com.benchpress200.photique.user.domain.dto.UpdateUserRequest;
+import com.benchpress200.photique.user.domain.dto.UserDetailResponse;
 import com.benchpress200.photique.user.domain.dto.UserIdResponse;
-import com.benchpress200.photique.user.domain.dto.UserInfoResponse;
+import com.benchpress200.photique.user.domain.dto.UserUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -40,21 +40,21 @@ public class UserController {
 
     @Auth
     @GetMapping(URL.USER_DATA)
-    public ApiSuccessResponse<?> getUserInfo(
+    public ApiSuccessResponse<?> getUserDetail(
             @PathVariable("userId") final Long userId
     ) {
-        UserInfoResponse userInfo = userService.getUserInfo(userId);
-        return ResponseHandler.handleSuccessResponse(userInfo, HttpStatus.OK);
+        UserDetailResponse userDetail = userService.getUserDetail(userId);
+        return ResponseHandler.handleSuccessResponse(userDetail, HttpStatus.OK);
     }
 
     @Auth
     @OwnResource
     @PatchMapping(URL.USER_DATA)
-    public ApiSuccessResponse<?> updateUserInfo(
+    public ApiSuccessResponse<?> updateUserDetail(
             @PathVariable("userId") final Long userId,
-            @ModelAttribute @Valid final UpdateUserRequest updateUserRequest
+            @ModelAttribute @Valid final UserUpdateRequest updateUserRequest
     ) {
-        userService.updateUserInfo(userId, updateUserRequest);
+        userService.updateUserDetail(userId, updateUserRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
