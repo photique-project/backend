@@ -72,8 +72,9 @@ public class SingleWorkController {
 
     @DeleteMapping(URL.SINGLE_WORK_DATA)
     public ApiSuccessResponse<?> deleteSingleWorkDetail(
-
+            @PathVariable final Long singleworkId
     ) {
-
+        singleWorkService.removeSingleWork(singleworkId);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 }

@@ -17,4 +17,6 @@ public interface SingleWorkService {
                                                      Pageable pageable);
 
     void updateSingleWorkDetail(SingleWorkUpdateRequest singleWorkUpdateRequest);
+
+    void removeSingleWork(Long singleworkId);
 }

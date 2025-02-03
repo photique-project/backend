@@ -20,6 +20,7 @@ import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
 import com.benchpress200.photique.singlework.exception.SingleWorkException;
+import com.benchpress200.photique.singlework.infrastructure.SingleWorkCommentRepository;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkRepository;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkSearchRepository;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkTagRepository;
@@ -44,6 +45,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Transactional
 public class SingleWorkServiceImpl implements SingleWorkService {
+    private final SingleWorkCommentRepository singleWorkCommentRepository;
     @Value("${cloud.aws.s3.path.single-work}")
     private String imagePath;
 
@@ -338,6 +340,26 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         } catch (IOException e) {
             throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public void removeSingleWork(final Long singleworkId) {
+
+        singleWorkRepository.findById(singleworkId).orElseThrow(
+                () -> new SingleWorkException("SingleWork with id " + singleworkId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        // 관련 댓글 삭제
+        singleWorkCommentRepository.deleteBySingleWorkId(singleworkId);
+
+        // 관련 태그 삭제
+        singleWorkTagRepository.deleteBySingleWorkId(singleworkId);
+
+        // 작품 삭제
+        singleWorkRepository.deleteById(singleworkId);
+
+        // 엘라스틱 서치 삭제
+        singleWorkSearchRepository.deleteById(singleworkId);
     }
 
     private String getLocation(SingleWorkUpdateRequest singleWorkUpdateRequest) {

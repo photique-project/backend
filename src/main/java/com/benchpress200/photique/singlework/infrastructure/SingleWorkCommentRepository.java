@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SingleWorkCommentRepository extends JpaRepository<SingleWorkComment, Long> {
     Page<SingleWorkComment> findBySingleWorkId(Long singleWorkId, Pageable pageable);
+
+    void deleteBySingleWorkId(Long singleWorkId);
 }
