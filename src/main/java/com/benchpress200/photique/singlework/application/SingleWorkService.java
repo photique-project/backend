@@ -2,6 +2,7 @@ package com.benchpress200.photique.singlework.application;
 
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeDecrementRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeIncrementRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchResponse;
@@ -22,4 +23,6 @@ public interface SingleWorkService {
     void removeSingleWork(Long singleworkId);
 
     void incrementLike(SingleWorkLikeIncrementRequest singleWorkLikeIncrementRequest);
+
+    void decrementLike(SingleWorkLikeDecrementRequest singleWorkLikeDecrementRequest);
 }

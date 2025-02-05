@@ -4,4 +4,8 @@ import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, Long> {
+    void deleteBySingleWorkId(Long singleWorkId);
+
+    void deleteByUserIdAndSingleWorkId(Long singleWorkId, Long userId);
+
 }

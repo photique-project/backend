@@ -165,4 +165,8 @@ public class SingleWork {
     public void incrementLike() {
         likeCount++;
     }
+
+    public void decrementLike() {
+        likeCount--;
+    }
 }

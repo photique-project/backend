@@ -8,6 +8,7 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkService;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeDecrementRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeIncrementRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchResponse;
@@ -94,5 +95,17 @@ public class SingleWorkController {
         singleWorkLikeIncrementRequest.withSingleWorkId(singleworkId);
         singleWorkService.incrementLike(singleWorkLikeIncrementRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
+    }
+
+    @Auth
+    @OwnResource
+    @DeleteMapping(URL.SINGLE_WORK_DATA + URL.INCREMENT_LIKE)
+    public ApiSuccessResponse<?> decrementLike(
+            @PathVariable final Long singleworkId,
+            @RequestBody final SingleWorkLikeDecrementRequest singleWorkLikeDecrementRequest
+    ) {
+        singleWorkLikeDecrementRequest.withSingleWorkId(singleworkId);
+        singleWorkService.decrementLike(singleWorkLikeDecrementRequest);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 }

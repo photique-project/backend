@@ -9,6 +9,7 @@ import com.benchpress200.photique.common.infrastructure.ImageUploader;
 import com.benchpress200.photique.common.infrastructure.TagRepository;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeDecrementRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeIncrementRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchResponse;
@@ -359,6 +360,9 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         // 관련 태그 삭제
         singleWorkTagRepository.deleteBySingleWorkId(singleworkId);
 
+        // 좋아요 기록 삭제
+        singleWorkLikeRepository.deleteBySingleWorkId(singleworkId);
+
         // 작품 삭제
         singleWorkRepository.deleteById(singleworkId);
 
@@ -368,6 +372,9 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     public void incrementLike(final SingleWorkLikeIncrementRequest singleWorkLikeIncrementRequest) {
+        // elastic search 데이터 업데이트를 위한 컬렉션
+        Map<String, Object> updateFields = new HashMap<>();
+
         // 유저존재확인
         Long userId = singleWorkLikeIncrementRequest.getUserId();
         User user = userRepository.findById(userId).orElseThrow(
@@ -384,6 +391,55 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         SingleWorkLike singleWorkLike = singleWorkLikeIncrementRequest.toEntity(user, singleWork);
         singleWorkLikeRepository.save(singleWorkLike);
         singleWork.incrementLike();
+
+        updateFields.put("likeCount", singleWork.getLikeCount());
+
+        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
+                .index("singleworks")
+                .id(singleWork.getId().toString())
+                .doc(updateFields)
+        );
+
+        try {
+            elasticsearchClient.update(updateRequest, Map.class);
+        } catch (IOException e) {
+            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public void decrementLike(final SingleWorkLikeDecrementRequest singleWorkLikeDecrementRequest) {
+        // elastic search 데이터 업데이트를 위한 컬렉션
+        Map<String, Object> updateFields = new HashMap<>();
+
+        // 유저존재확인
+        Long userId = singleWorkLikeDecrementRequest.getUserId();
+        userRepository.findById(userId).orElseThrow(
+                () -> new SingleWorkException("User with id " + userId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        // 작품존재확인
+        Long singleWorkId = singleWorkLikeDecrementRequest.getSingleWorkId();
+        SingleWork singleWork = singleWorkRepository.findById(singleWorkId).orElseThrow(
+                () -> new SingleWorkException("SingleWork with id " + singleWorkId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        singleWorkLikeRepository.deleteByUserIdAndSingleWorkId(userId, singleWorkId);
+        singleWork.decrementLike();
+
+        updateFields.put("likeCount", singleWork.getLikeCount());
+
+        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
+                .index("singleworks")
+                .id(singleWork.getId().toString())
+                .doc(updateFields)
+        );
+
+        try {
+            elasticsearchClient.update(updateRequest, Map.class);
+        } catch (IOException e) {
+            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     private String getLocation(SingleWorkUpdateRequest singleWorkUpdateRequest) {
