@@ -161,4 +161,8 @@ public class SingleWork {
     public void updateDescription(final String description) {
         this.description = description;
     }
+
+    public void incrementLike() {
+        likeCount++;
+    }
 }

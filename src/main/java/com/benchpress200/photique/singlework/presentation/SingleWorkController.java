@@ -8,6 +8,7 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkService;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeIncrementRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkUpdateRequest;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -60,6 +62,8 @@ public class SingleWorkController {
         return ResponseHandler.handleSuccessResponse(singleWorkDetailResponse, HttpStatus.OK);
     }
 
+    @Auth
+    @OwnResource
     @PatchMapping(URL.SINGLE_WORK_DATA)
     public ApiSuccessResponse<?> updateSingleWorkDetail(
             @PathVariable final Long singleworkId,
@@ -70,11 +74,25 @@ public class SingleWorkController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
+    @Auth
+    @OwnResource
     @DeleteMapping(URL.SINGLE_WORK_DATA)
     public ApiSuccessResponse<?> deleteSingleWorkDetail(
             @PathVariable final Long singleworkId
     ) {
         singleWorkService.removeSingleWork(singleworkId);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
+
+    @Auth
+    @OwnResource
+    @PostMapping(URL.SINGLE_WORK_DATA + URL.INCREMENT_LIKE)
+    public ApiSuccessResponse<?> incrementLike(
+            @PathVariable final Long singleworkId,
+            @RequestBody final SingleWorkLikeIncrementRequest singleWorkLikeIncrementRequest
+    ) {
+        singleWorkLikeIncrementRequest.withSingleWorkId(singleworkId);
+        singleWorkService.incrementLike(singleWorkLikeIncrementRequest);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 }

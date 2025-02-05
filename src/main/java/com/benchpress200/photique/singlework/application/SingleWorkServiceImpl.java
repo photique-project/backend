@@ -9,10 +9,12 @@ import com.benchpress200.photique.common.infrastructure.ImageUploader;
 import com.benchpress200.photique.common.infrastructure.TagRepository;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeIncrementRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkUpdateRequest;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
@@ -21,6 +23,7 @@ import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
 import com.benchpress200.photique.singlework.exception.SingleWorkException;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkCommentRepository;
+import com.benchpress200.photique.singlework.infrastructure.SingleWorkLikeRepository;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkRepository;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkSearchRepository;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkTagRepository;
@@ -56,6 +59,7 @@ public class SingleWorkServiceImpl implements SingleWorkService {
     private final SingleWorkTagRepository singleWorkTagRepository;
     private final TagRepository tagRepository;
     private final SingleWorkSearchRepository singleWorkSearchRepository;
+    private final SingleWorkLikeRepository singleWorkLikeRepository;
     private final ElasticsearchClient elasticsearchClient;
 
 
@@ -360,6 +364,26 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
         // 엘라스틱 서치 삭제
         singleWorkSearchRepository.deleteById(singleworkId);
+    }
+
+    @Override
+    public void incrementLike(final SingleWorkLikeIncrementRequest singleWorkLikeIncrementRequest) {
+        // 유저존재확인
+        Long userId = singleWorkLikeIncrementRequest.getUserId();
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new SingleWorkException("User with id " + userId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        // 작품존재확인
+        Long singleWorkId = singleWorkLikeIncrementRequest.getSingleWorkId();
+        SingleWork singleWork = singleWorkRepository.findById(singleWorkId).orElseThrow(
+                () -> new SingleWorkException("SingleWork with id " + singleWorkId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        // 작품 좋아요 추가
+        SingleWorkLike singleWorkLike = singleWorkLikeIncrementRequest.toEntity(user, singleWork);
+        singleWorkLikeRepository.save(singleWorkLike);
+        singleWork.incrementLike();
     }
 
     private String getLocation(SingleWorkUpdateRequest singleWorkUpdateRequest) {

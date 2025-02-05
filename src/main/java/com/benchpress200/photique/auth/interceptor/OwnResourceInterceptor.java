@@ -98,6 +98,10 @@ public class OwnResourceInterceptor implements HandlerInterceptor {
                 if (jsonObject.has("writerId")) {
                     return jsonObject.get("writerId").getAsLong();
                 }
+
+                if (jsonObject.has("userId")) {
+                    return jsonObject.get("userId").getAsLong();
+                }
             }
         }
 
