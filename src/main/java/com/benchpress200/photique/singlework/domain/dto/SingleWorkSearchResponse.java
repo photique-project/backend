@@ -1,6 +1,7 @@
 package com.benchpress200.photique.singlework.domain.dto;
 
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.user.domain.entity.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +28,18 @@ public class SingleWorkSearchResponse {
                     .profileImage(writer.getProfileImage())
                     .build();
         }
+
+        public static Writer of(
+                final Long id,
+                final String nickname,
+                final String profileImage
+        ) {
+            return Writer.builder()
+                    .id(id)
+                    .nickname(nickname)
+                    .profileImage(profileImage)
+                    .build();
+        }
     }
 
     public static SingleWorkSearchResponse from(final SingleWork singleWork) {
@@ -36,6 +49,17 @@ public class SingleWorkSearchResponse {
                 .image(singleWork.getImage())
                 .likeCount(singleWork.getLikeCount())
                 .viewCount(singleWork.getViewCount())
+                .build();
+    }
+
+    public static SingleWorkSearchResponse from(final SingleWorkSearch singleWorkSearch) {
+        return SingleWorkSearchResponse.builder()
+                .id(singleWorkSearch.getId())
+                .writer(Writer.of(singleWorkSearch.getWriterId(), singleWorkSearch.getWriterNickname(),
+                        singleWorkSearch.getWriterProfileImage()))
+                .image(singleWorkSearch.getImage())
+                .likeCount(singleWorkSearch.getLikeCount())
+                .viewCount(singleWorkSearch.getViewCount())
                 .build();
     }
 

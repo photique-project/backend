@@ -87,7 +87,7 @@ public class SingleWorkController {
 
     @Auth
     @OwnResource
-    @PostMapping(URL.SINGLE_WORK_DATA + URL.INCREMENT_LIKE)
+    @PostMapping(URL.SINGLE_WORK_DATA + URL.LIKE)
     public ApiSuccessResponse<?> incrementLike(
             @PathVariable final Long singleworkId,
             @RequestBody final SingleWorkLikeIncrementRequest singleWorkLikeIncrementRequest
@@ -99,7 +99,7 @@ public class SingleWorkController {
 
     @Auth
     @OwnResource
-    @DeleteMapping(URL.SINGLE_WORK_DATA + URL.INCREMENT_LIKE)
+    @DeleteMapping(URL.SINGLE_WORK_DATA + URL.LIKE)
     public ApiSuccessResponse<?> decrementLike(
             @PathVariable final Long singleworkId,
             @RequestBody final SingleWorkLikeDecrementRequest singleWorkLikeDecrementRequest

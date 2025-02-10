@@ -42,22 +42,20 @@ public class SingleWork {
     @Column(length = 50, nullable = false)
     private String camera;
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 50)
     private String lens;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Aperture aperture;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "shuter_speed", nullable = false)
+    @Column(name = "shuter_speed")
     private ShutterSpeed shutterSpeed;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ISO iso;
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 50)
     private String location;
 
     @Enumerated(EnumType.STRING)
@@ -168,5 +166,9 @@ public class SingleWork {
 
     public void decrementLike() {
         likeCount--;
+    }
+
+    public void incrementView() {
+        viewCount++;
     }
 }

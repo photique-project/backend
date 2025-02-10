@@ -141,7 +141,14 @@ public class SingleWorkServiceImpl implements SingleWorkService {
             final SingleWorkSearchRequest singleWorkSearchRequest,
             final Pageable pageable
     ) {
-        Page<SingleWork> singleWorks = singleWorkRepository.searchSingleWorks(
+//        Page<SingleWork> singleWorks = singleWorkRepository.searchSingleWorks(
+//                singleWorkSearchRequest.getTarget(),
+//                singleWorkSearchRequest.getKeywords(),
+//                singleWorkSearchRequest.getCategories(),
+//                pageable
+//        );
+
+        Page<SingleWorkSearch> singleWorks = singleWorkSearchRepository.searchSingleWorks(
                 singleWorkSearchRequest.getTarget(),
                 singleWorkSearchRequest.getKeywords(),
                 singleWorkSearchRequest.getCategories(),
@@ -158,10 +165,28 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     public SingleWorkDetailResponse getSingleWorkDetail(final Long singleWorkId) {
+        // elastic search 데이터 업데이트를 위한 컬렉션
+        Map<String, Object> updateFields = new HashMap<>();
+
         SingleWork singleWork = singleWorkRepository.findById(singleWorkId).orElseThrow(
                 () -> new SingleWorkException("SingleWork with ID " + singleWorkId + " is not found.",
                         HttpStatus.NOT_FOUND)
         );
+
+        singleWork.incrementView();
+        updateFields.put("viewCount", singleWorkCommentRepository.countBySingleWorkId(singleWorkId));
+
+        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
+                .index("singleworks")
+                .id(singleWork.getId().toString())
+                .doc(updateFields)
+        );
+
+        try {
+            elasticsearchClient.update(updateRequest, Map.class);
+        } catch (IOException e) {
+            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
         List<SingleWorkTag> singleWorkTags = singleWorkTagRepository.findBySingleWorkId(singleWorkId);
 

@@ -9,4 +9,6 @@ public interface SingleWorkCommentRepository extends JpaRepository<SingleWorkCom
     Page<SingleWorkComment> findBySingleWorkId(Long singleWorkId, Pageable pageable);
 
     void deleteBySingleWorkId(Long singleWorkId);
+
+    Long countBySingleWorkId(Long singleWorkId);
 }

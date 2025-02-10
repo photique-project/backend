@@ -1,5 +1,7 @@
 package com.benchpress200.photique.singlework.application;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDeleteRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDetailResponse;
@@ -12,7 +14,10 @@ import com.benchpress200.photique.singlework.infrastructure.SingleWorkRepository
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.infrastructure.UserRepository;
 import jakarta.transaction.Transactional;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,13 +29,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Transactional
 public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
-
+    private final ElasticsearchClient elasticsearchClient;
     private final UserRepository userRepository;
     private final SingleWorkRepository singleWorkRepository;
     private final SingleWorkCommentRepository singleWorkCommentRepository;
 
     @Override
     public void createSingleWorkComment(final SingleWorkCommentCreateRequest singleWorkCommentCreateRequest) {
+        // elastic search 데이터 업데이트를 위한 컬렉션
+        Map<String, Object> updateFields = new HashMap<>();
 
         // 작성자 조회
         final Long writerId = singleWorkCommentCreateRequest.getWriterId();
@@ -48,6 +55,21 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
         // 저장
         final SingleWorkComment singleWorkComment = singleWorkCommentCreateRequest.toEntity(writer, singleWork);
         singleWorkCommentRepository.save(singleWorkComment);
+
+        // elastic search 데이터 업데이트
+        updateFields.put("commentCount", singleWorkCommentRepository.countBySingleWorkId(singleWorkId));
+
+        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
+                .index("singleworks")
+                .id(singleWork.getId().toString())
+                .doc(updateFields)
+        );
+
+        try {
+            elasticsearchClient.update(updateRequest, Map.class);
+        } catch (IOException e) {
+            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override

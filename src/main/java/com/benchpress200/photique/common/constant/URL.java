@@ -20,7 +20,7 @@ public class URL {
     // SINGLE WORK
     public static final String SINGLE_WORK_DOMAIN = "/singleworks";
     public static final String SINGLE_WORK_DATA = "/{singleworkId}";
-    public static final String INCREMENT_LIKE = "/like";
+    public static final String LIKE = "/like";
 
     // SINGLE WORK COMMENT
     public static final String SINGLE_WORK_COMMENT_DOMAIN = "/singleworks/{singleworkId}/comments";
