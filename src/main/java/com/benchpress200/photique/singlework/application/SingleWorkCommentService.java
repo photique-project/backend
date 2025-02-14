@@ -15,4 +15,5 @@ public interface SingleWorkCommentService {
     void deleteSingleWorkComment(SingleWorkCommentDeleteRequest singleWorkCommentDeleteRequest);
 
     Page<SingleWorkCommentDetailResponse> getSingleWorkComments(Long singleWorkId, Pageable pageable);
+
 }

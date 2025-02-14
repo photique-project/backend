@@ -7,9 +7,13 @@ import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionCommentService;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentCreateRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDetailResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,7 +38,18 @@ public class ExhibitionCommentController {
         exhibitionCommentService.createExhibitionComment(exhibitionCommentCreateRequest);
 
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
+    }
 
+    @Auth
+    @GetMapping
+    public ApiSuccessResponse<?> getExhibitionComments(
+            @PathVariable("exhibitionId") final Long exhibitionId,
+            final Pageable pageable
+    ) {
+        Page<ExhibitionCommentDetailResponse> exhibitionCommentPage = exhibitionCommentService.getExhibitionComments(
+                exhibitionId, pageable);
+
+        return ResponseHandler.handleSuccessResponse(exhibitionCommentPage, HttpStatus.OK);
     }
 
 }

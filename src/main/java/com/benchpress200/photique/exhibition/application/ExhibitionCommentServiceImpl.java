@@ -3,6 +3,7 @@ package com.benchpress200.photique.exhibition.application;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentCreateRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDetailResponse;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
 import com.benchpress200.photique.exhibition.exception.ExhibitionException;
@@ -14,8 +15,12 @@ import com.benchpress200.photique.user.infrastructure.UserRepository;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +48,8 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
         // 전시회 조회
         Long exhibitionId = exhibitionCommentCreateRequest.getExhibitionId();
         Exhibition exhibition = exhibitionRepository.findById(exhibitionId).orElseThrow(
-                () -> new ExhibitionException("Exhibition with ID " + writerId + " is not found.", HttpStatus.NOT_FOUND)
+                () -> new ExhibitionException("Exhibition with ID " + exhibitionId + " is not found.",
+                        HttpStatus.NOT_FOUND)
         );
 
         // 저장
@@ -64,5 +70,26 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
         } catch (IOException e) {
             throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public Page<ExhibitionCommentDetailResponse> getExhibitionComments(
+            final Long exhibitionId,
+            final Pageable pageable
+    ) {
+        // 전시회 조회
+        exhibitionRepository.findById(exhibitionId).orElseThrow(
+                () -> new ExhibitionException("Exhibition with ID " + exhibitionId + " is not found.",
+                        HttpStatus.NOT_FOUND)
+        );
+
+        Page<ExhibitionComment> exhibitionCommentPage = exhibitionCommentRepository.findByExhibitionId(exhibitionId,
+                pageable);
+
+        List<ExhibitionCommentDetailResponse> exhibitionCommentDetailResponseList = exhibitionCommentPage.stream()
+                .map(ExhibitionCommentDetailResponse::from)
+                .toList();
+
+        return new PageImpl<>(exhibitionCommentDetailResponseList, pageable, exhibitionCommentPage.getTotalElements());
     }
 }

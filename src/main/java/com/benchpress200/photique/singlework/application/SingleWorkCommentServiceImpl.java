@@ -40,20 +40,20 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
         Map<String, Object> updateFields = new HashMap<>();
 
         // 작성자 조회
-        final Long writerId = singleWorkCommentCreateRequest.getWriterId();
-        final User writer = userRepository.findById(writerId).orElseThrow(
+        Long writerId = singleWorkCommentCreateRequest.getWriterId();
+        User writer = userRepository.findById(writerId).orElseThrow(
                 () -> new SingleWorkException("User with ID " + writerId + " is not found.", HttpStatus.NOT_FOUND)
         );
 
         // 작품 조회
-        final Long singleWorkId = singleWorkCommentCreateRequest.getSingleWorkId();
-        final SingleWork singleWork = singleWorkRepository.findById(singleWorkId).orElseThrow(
+        Long singleWorkId = singleWorkCommentCreateRequest.getSingleWorkId();
+        SingleWork singleWork = singleWorkRepository.findById(singleWorkId).orElseThrow(
                 () -> new SingleWorkException("Single work with ID " + singleWorkId + " is not found.",
                         HttpStatus.NOT_FOUND)
         );
 
         // 저장
-        final SingleWorkComment singleWorkComment = singleWorkCommentCreateRequest.toEntity(writer, singleWork);
+        SingleWorkComment singleWorkComment = singleWorkCommentCreateRequest.toEntity(writer, singleWork);
         singleWorkCommentRepository.save(singleWorkComment);
 
         // elastic search 데이터 업데이트
@@ -77,17 +77,17 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
             final Long singleWorkId,
             final Pageable pageable
     ) {
-        // 단일작품조회
+        // 단일작품 조회
         singleWorkRepository.findById(singleWorkId).orElseThrow(
                 () -> new SingleWorkException("Single work with ID " + singleWorkId + " is not found.",
                         HttpStatus.NOT_FOUND)
         );
 
-        final Page<SingleWorkComment> singleWorkComments = singleWorkCommentRepository.findBySingleWorkId(
+        Page<SingleWorkComment> singleWorkComments = singleWorkCommentRepository.findBySingleWorkId(
                 singleWorkId, pageable
         );
 
-        final List<SingleWorkCommentDetailResponse> singleWorkCommentDetailResponseList = singleWorkComments.stream()
+        List<SingleWorkCommentDetailResponse> singleWorkCommentDetailResponseList = singleWorkComments.stream()
                 .map(SingleWorkCommentDetailResponse::from)
                 .toList();
 
@@ -97,21 +97,21 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
     @Override
     public void updateSingleWorkComment(final SingleWorkCommentUpdateRequest singleWorkCommentUpdateRequest) {
         // 작성자 조회
-        final Long writerId = singleWorkCommentUpdateRequest.getWriterId();
+        Long writerId = singleWorkCommentUpdateRequest.getWriterId();
         userRepository.findById(writerId).orElseThrow(
                 () -> new SingleWorkException("User with ID " + writerId + " is not found.", HttpStatus.NOT_FOUND)
         );
 
         // 작품 조회
-        final Long singleWorkId = singleWorkCommentUpdateRequest.getSingleWorkId();
+        Long singleWorkId = singleWorkCommentUpdateRequest.getSingleWorkId();
         singleWorkRepository.findById(singleWorkId).orElseThrow(
                 () -> new SingleWorkException("Single work with ID " + singleWorkId + " is not found.",
                         HttpStatus.NOT_FOUND)
         );
 
         // 댓글 조회
-        final Long commentId = singleWorkCommentUpdateRequest.getCommentId();
-        final SingleWorkComment singleWorkComment = singleWorkCommentRepository.findById(singleWorkId).orElseThrow(
+        Long commentId = singleWorkCommentUpdateRequest.getCommentId();
+        SingleWorkComment singleWorkComment = singleWorkCommentRepository.findById(singleWorkId).orElseThrow(
                 () -> new SingleWorkException("Comment in single work with ID " + commentId + " is not found.",
                         HttpStatus.NOT_FOUND)
         );
@@ -123,20 +123,20 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
     @Override
     public void deleteSingleWorkComment(final SingleWorkCommentDeleteRequest singleWorkCommentDeleteRequest) {
         // 작성자 조회
-        final Long writerId = singleWorkCommentDeleteRequest.getWriterId();
+        Long writerId = singleWorkCommentDeleteRequest.getWriterId();
         userRepository.findById(writerId).orElseThrow(
                 () -> new SingleWorkException("User with ID " + writerId + " is not found.", HttpStatus.NOT_FOUND)
         );
 
         // 작품 조회
-        final Long singleWorkId = singleWorkCommentDeleteRequest.getSingleWorkId();
+        Long singleWorkId = singleWorkCommentDeleteRequest.getSingleWorkId();
         singleWorkRepository.findById(singleWorkId).orElseThrow(
                 () -> new SingleWorkException("Single work with ID " + singleWorkId + " is not found.",
                         HttpStatus.NOT_FOUND)
         );
 
         // 댓글 조회
-        final Long commentId = singleWorkCommentDeleteRequest.getCommentId();
+        Long commentId = singleWorkCommentDeleteRequest.getCommentId();
         singleWorkCommentRepository.findById(singleWorkId).orElseThrow(
                 () -> new SingleWorkException("Comment in single work with ID " + commentId + " is not found.",
                         HttpStatus.NOT_FOUND)
