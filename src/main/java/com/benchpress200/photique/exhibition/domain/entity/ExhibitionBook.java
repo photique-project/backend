@@ -1,4 +1,4 @@
-package com.benchpress200.photique.singlework.domain.entity;
+package com.benchpress200.photique.exhibition.domain.entity;
 
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.persistence.Column;
@@ -19,22 +19,19 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "singlework_comments")
-public class SingleWorkComment {
+@Table(name = "exhibition_bookmarks")
+public class ExhibitionBook {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_id", nullable = false)
-    private User writer;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "singlework_id", nullable = false)
-    private SingleWork singleWork;
-
-    @Column(length = 300, nullable = false)
-    private String content;
+    @JoinColumn(name = "exhibition_id", nullable = false)
+    private Exhibition exhibition;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -45,17 +42,11 @@ public class SingleWorkComment {
     }
 
     @Builder
-    public SingleWorkComment(
-            final User writer,
-            final SingleWork singleWork,
-            final String content
+    public ExhibitionBook(
+            final User user,
+            final Exhibition exhibition
     ) {
-        this.writer = writer;
-        this.singleWork = singleWork;
-        this.content = content;
-    }
-
-    public void updateContent(final String content) {
-        this.content = content;
+        this.user = user;
+        this.exhibition = exhibition;
     }
 }

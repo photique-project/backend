@@ -12,6 +12,7 @@ import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
 import com.benchpress200.photique.user.domain.entity.User;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -35,10 +36,10 @@ public class SingleWorkCreateRequest {
     @Image
     private MultipartFile image;
 
-    @Size(max = 50, message = "The camera name must not exceed 50 characters")
+    @Size(max = 50, message = "Camera name must not exceed 50 characters")
     private String camera;
 
-    @Size(max = 50, message = "The lens name must not exceed 50 characters")
+    @Size(max = 50, message = "Lens name must not exceed 50 characters")
     private String lens;
 
     @Enum(enumClass = Aperture.class, message = "Invalid value of aperture")
@@ -49,27 +50,28 @@ public class SingleWorkCreateRequest {
 
     @Enum(enumClass = ISO.class, message = "Invalid value of iso")
     private String iso;
-    
-    @Size(max = 50, message = "The location must not exceed 50 characters")
+
+    @Size(max = 50, message = "Location must not exceed 50 characters")
     private String location;
 
-    @NotNull(message = "The value of category must not be null")
+    @NotNull(message = "Category must not be null")
     @Enum(enumClass = Category.class, message = "Invalid value of category")
     private String category;
 
-    @NotNull(message = "The date must not be blank.")
+    @NotNull(message = "Date must not be blank.")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
-    @Size(max = 5, message = "The list size must be between 0 and 5")
+    @Size(max = 5, message = "Tag list size must be between 0 and 5")
+    @Valid
     private List<NewTagRequest> tags;
 
-    @NotBlank(message = "The title must not be blank.")
-    @Size(max = 30, message = "The title must not exceed 30 characters")
+    @NotBlank(message = "Title must not be blank.")
+    @Size(max = 30, message = "Title must not exceed 30 characters")
     private String title;
 
-    @NotBlank(message = "The description must not be blank.")
-    @Size(max = 500, message = "The description must not exceed 30 characters")
+    @NotBlank(message = "Description must not be blank.")
+    @Size(max = 500, message = "Description must not exceed 30 characters")
     private String description;
 
     public boolean hasTags() {

@@ -13,7 +13,6 @@ public class SingleWorkCommentDetailResponse {
     private Long id;
     private Writer writer;
     private String content;
-    private Long likeCount;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
 
@@ -37,7 +36,6 @@ public class SingleWorkCommentDetailResponse {
                 .id(singleWorkComment.getId())
                 .writer(Writer.from(singleWorkComment.getWriter()))
                 .content(singleWorkComment.getContent())
-                .likeCount(singleWorkComment.getLikeCount())
                 .createdAt(singleWorkComment.getCreatedAt())
                 .build();
     }

@@ -1,4 +1,4 @@
-package com.benchpress200.photique.singlework.domain.entity;
+package com.benchpress200.photique.exhibition.domain.entity;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -21,18 +21,11 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 @NoArgsConstructor
 @Getter
 @Builder
-@Document(indexName = "singleworks", writeTypeHint = WriteTypeHint.FALSE)
-public class SingleWorkSearch {
-    // 필드타입
-    // Text => 분석 + 텍스트 전체 검색
-    // Keyword => 분석되지 않고 정확한 일치 검색
-
+@Document(indexName = "exhibitions", writeTypeHint = WriteTypeHint.FALSE)
+public class ExhibitionSearch {
     @Id
     @Field(name = "id", type = FieldType.Long)
     private Long id;
-
-    @Field(type = FieldType.Keyword, index = false)
-    private String image;
 
     @Field(type = FieldType.Long, index = false)
     private Long writerId;
@@ -43,14 +36,20 @@ public class SingleWorkSearch {
     @Field(type = FieldType.Keyword, index = false)
     private String writerProfileImage;
 
+    @Field(type = FieldType.Keyword, index = false)
+    private String introduction;
+
+    @Field(type = FieldType.Integer, index = false)
+    private Integer participant;
+
+    @Field(type = FieldType.Keyword, index = false)
+    private String cardColor;
+
     @Field(type = FieldType.Text)
     private String title;
 
     @Field(type = FieldType.Text)
     private List<String> tags;
-
-    @Field(type = FieldType.Text)
-    private String category;
 
     @Field(type = FieldType.Long)
     private Long likeCount;
@@ -66,3 +65,4 @@ public class SingleWorkSearch {
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
     private LocalDateTime createdAt;
 }
+

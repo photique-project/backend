@@ -1,4 +1,4 @@
-package com.benchpress200.photique.singlework.domain.entity;
+package com.benchpress200.photique.exhibition.domain.entity;
 
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.persistence.Column;
@@ -19,19 +19,19 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "singlework_comments")
-public class SingleWorkComment {
+@Table(name = "Exhibition_comments")
+public class ExhibitionComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_id", nullable = false)
-    private User writer;
+    @JoinColumn(name = "exhibition_id", nullable = false)
+    private Exhibition exhibition;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "singlework_id", nullable = false)
-    private SingleWork singleWork;
+    @JoinColumn(name = "writer_id", nullable = false)
+    private User writer;
 
     @Column(length = 300, nullable = false)
     private String content;
@@ -45,13 +45,13 @@ public class SingleWorkComment {
     }
 
     @Builder
-    public SingleWorkComment(
+    public ExhibitionComment(
+            final Exhibition exhibition,
             final User writer,
-            final SingleWork singleWork,
             final String content
     ) {
+        this.exhibition = exhibition;
         this.writer = writer;
-        this.singleWork = singleWork;
         this.content = content;
     }
 

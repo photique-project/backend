@@ -5,6 +5,7 @@ import com.benchpress200.photique.auth.exception.AuthException;
 import com.benchpress200.photique.common.exception.ImageUploaderException;
 import com.benchpress200.photique.common.response.ApiFailureResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
+import com.benchpress200.photique.exhibition.exception.ExhibitionException;
 import com.benchpress200.photique.singlework.exception.SingleWorkException;
 import com.benchpress200.photique.user.exception.UserException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -79,6 +80,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SingleWorkException.class)
     public ApiFailureResponse handleSingleWorkException(
             final SingleWorkException e,
+            final HttpServletRequest request
+    ) {
+        request.setAttribute("message", e.getMessage() + ", " + e.getOriginMessage());
+
+        if (e.getHttpStatus() == HttpStatus.INTERNAL_SERVER_ERROR) {
+            return ResponseHandler.handleFailureResponse(e.getHttpStatus());
+        }
+
+        return ResponseHandler.handleFailureResponse(e.getMessage(), e.getHttpStatus());
+    }
+
+    @ExceptionHandler(ExhibitionException.class)
+    public ApiFailureResponse handleExhibitionException(
+            final ExhibitionException e,
             final HttpServletRequest request
     ) {
         request.setAttribute("message", e.getMessage() + ", " + e.getOriginMessage());

@@ -174,7 +174,7 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         );
 
         singleWork.incrementView();
-        updateFields.put("viewCount", singleWorkCommentRepository.countBySingleWorkId(singleWorkId));
+        updateFields.put("viewCount", singleWork.getViewCount());
 
         UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
                 .index("singleworks")
@@ -374,6 +374,7 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     public void removeSingleWork(final Long singleworkId) {
+        // TODO: 이미지도 삭제해야함
 
         singleWorkRepository.findById(singleworkId).orElseThrow(
                 () -> new SingleWorkException("SingleWork with id " + singleworkId + " not found", HttpStatus.NOT_FOUND)

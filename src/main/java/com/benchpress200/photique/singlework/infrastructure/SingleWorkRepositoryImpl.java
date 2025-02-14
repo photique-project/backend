@@ -90,9 +90,6 @@ public class SingleWorkRepositoryImpl implements SingleWorkRepositoryCustom {
                 .toList();
 
         // 전체 개수 조회
-        // 이것만 확인하면 나머지 디비로 조회하는 로직완성
-        // 이후 엘라스틱 조회 로직 정리하고 업데이트 삭제도 확실하게 하고
-        // 엘라스틱 서치로 조회하는 로직작성하고 테스트 후에 성능비교 진행하고 노션 작성
         long totalCount = results.size();
 
         return new PageImpl<>(results, pageable, totalCount);

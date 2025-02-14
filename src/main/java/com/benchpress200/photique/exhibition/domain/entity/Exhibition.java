@@ -1,4 +1,4 @@
-package com.benchpress200.photique.singlework.domain.entity;
+package com.benchpress200.photique.exhibition.domain.entity;
 
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.persistence.Column;
@@ -19,8 +19,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "singlework_comments")
-public class SingleWorkComment {
+@Table(name = "exhibitions")
+public class Exhibition {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,33 +29,53 @@ public class SingleWorkComment {
     @JoinColumn(name = "writer_id", nullable = false)
     private User writer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "singlework_id", nullable = false)
-    private SingleWork singleWork;
+    @Column(length = 30, nullable = false)
+    private String title;
 
-    @Column(length = 300, nullable = false)
-    private String content;
+    @Column(length = 200, nullable = false)
+    private String description;
+
+    @Column(name = "card_color", length = 30, nullable = false)
+    private String cardColor;
+
+    @Column(name = "like_count", nullable = false)
+    private Long likeCount;
+
+    @Column(name = "view_count", nullable = false)
+    private Long viewCount;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
     public void prePersist() {
+        likeCount = 0L;
+        viewCount = 0L;
         createdAt = LocalDateTime.now();
     }
 
     @Builder
-    public SingleWorkComment(
+    public Exhibition(
             final User writer,
-            final SingleWork singleWork,
-            final String content
+            final String title,
+            final String description,
+            final String cardColor
     ) {
         this.writer = writer;
-        this.singleWork = singleWork;
-        this.content = content;
+        this.title = title;
+        this.description = description;
+        this.cardColor = cardColor;
     }
 
-    public void updateContent(final String content) {
-        this.content = content;
+    public void incrementLike() {
+        likeCount++;
+    }
+
+    public void decrementLike() {
+        likeCount--;
+    }
+
+    public void incrementView() {
+        viewCount++;
     }
 }

@@ -25,4 +25,13 @@ public class URL {
     // SINGLE WORK COMMENT
     public static final String SINGLE_WORK_COMMENT_DOMAIN = "/singleworks/{singleworkId}/comments";
     public static final String SINGLE_WORK_COMMENT_DATA = "/{commentId}";
+
+    // EXHIBITION
+    public static final String EXHIBITION_DOMAIN = "/exhibitions";
+    public static final String EXHIBITION_DATA = "/{exhibitionId}";
+    public static final String BOOKMARK = "/bookmark";
+
+    // EXHIBITION COMMENT
+    public static final String EXHIBITION_COMMENT_DOMAIN = "/exhibitions/{exhibitionId}/comments";
+    public static final String EXHIBITION_COMMENT_DATA = "/{commentId}";
 }
