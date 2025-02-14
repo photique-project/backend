@@ -10,4 +10,10 @@ public record TagResponse(String name) {
                 .name(tag.getName())
                 .build();
     }
+
+    public static TagResponse from(final String tag) {
+        return TagResponse.builder()
+                .name(tag)
+                .build();
+    }
 }

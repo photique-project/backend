@@ -8,6 +8,8 @@ import com.benchpress200.photique.common.infrastructure.ImageUploader;
 import com.benchpress200.photique.common.infrastructure.TagRepository;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionWorkCreateRequest;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
@@ -29,6 +31,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -117,9 +122,10 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .writerNickname(writer.getNickname())
                 .writerProfileImage(writer.getProfileImage())
                 .introduction(writer.getIntroduction())
-                .participant(exhibitionWorks.size())
+                .participants(exhibitionWorks.size())
                 .cardColor(savedExhibition.getCardColor())
                 .title(savedExhibition.getTitle())
+                .description(savedExhibition.getDescription())
                 .tags(tagNames)
                 .likeCount(0L)
                 .viewCount(0L)
@@ -161,5 +167,22 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 exhibition,
                 exhibitionWorks
         );
+    }
+
+    @Override
+    public Page<ExhibitionSearchResponse> searchExhibitions(
+            final ExhibitionSearchRequest exhibitionSearchRequest,
+            final Pageable pageable
+    ) {
+        Page<ExhibitionSearch> exhibitionSearchPage = exhibitionSearchRepository.searchExhibitions(
+                exhibitionSearchRequest,
+                pageable
+        );
+
+        List<ExhibitionSearchResponse> exhibitionSearchResponsePage = exhibitionSearchPage.stream()
+                .map(ExhibitionSearchResponse::from)
+                .toList();
+
+        return new PageImpl<>(exhibitionSearchResponsePage, pageable, exhibitionSearchPage.getTotalElements());
     }
 }

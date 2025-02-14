@@ -50,9 +50,11 @@ public class SingleWorkController {
             @ModelAttribute @Valid final SingleWorkSearchRequest singleWorkSearchRequest,
             final Pageable pageable
     ) {
-        Page<SingleWorkSearchResponse> singleWorks = singleWorkService.searchSingleWorks(singleWorkSearchRequest,
-                pageable);
-        return ResponseHandler.handleSuccessResponse(singleWorks, HttpStatus.OK);
+        Page<SingleWorkSearchResponse> singleWorkSearchPage = singleWorkService.searchSingleWorks(
+                singleWorkSearchRequest,
+                pageable
+        );
+        return ResponseHandler.handleSuccessResponse(singleWorkSearchPage, HttpStatus.OK);
     }
 
     @GetMapping(URL.SINGLE_WORK_DATA)

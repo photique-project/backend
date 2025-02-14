@@ -8,8 +8,12 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionService;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -42,5 +46,18 @@ public class ExhibitionController {
     ) {
         ExhibitionDetailResponse exhibitionDetailResponse = exhibitionService.getExhibitionDetail(exhibitionId);
         return ResponseHandler.handleSuccessResponse(exhibitionDetailResponse, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ApiSuccessResponse<?> searchExhibitions(
+            @ModelAttribute @Valid final ExhibitionSearchRequest exhibitionSearchRequest,
+            final Pageable pageable
+    ) {
+        Page<ExhibitionSearchResponse> exhibitionSearchPage = exhibitionService.searchExhibitions(
+                exhibitionSearchRequest,
+                pageable
+        );
+
+        return ResponseHandler.handleSuccessResponse(exhibitionSearchPage, HttpStatus.OK);
     }
 }

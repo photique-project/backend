@@ -141,6 +141,8 @@ public class SingleWorkServiceImpl implements SingleWorkService {
             final SingleWorkSearchRequest singleWorkSearchRequest,
             final Pageable pageable
     ) {
+
+        // 테스트를 위해 사용했던 RDBMS 검색로직
 //        Page<SingleWork> singleWorks = singleWorkRepository.searchSingleWorks(
 //                singleWorkSearchRequest.getTarget(),
 //                singleWorkSearchRequest.getKeywords(),
@@ -148,18 +150,18 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 //                pageable
 //        );
 
-        Page<SingleWorkSearch> singleWorks = singleWorkSearchRepository.searchSingleWorks(
+        Page<SingleWorkSearch> singleWorkSearchPage = singleWorkSearchRepository.searchSingleWorks(
                 singleWorkSearchRequest.getTarget(),
                 singleWorkSearchRequest.getKeywords(),
                 singleWorkSearchRequest.getCategories(),
                 pageable
         );
 
-        List<SingleWorkSearchResponse> singleWorkSearchResponseList = singleWorks.stream()
+        List<SingleWorkSearchResponse> singleWorkSearchResponsePage = singleWorkSearchPage.stream()
                 .map(SingleWorkSearchResponse::from)
                 .toList();
 
-        return new PageImpl<>(singleWorkSearchResponseList, pageable, singleWorks.getTotalElements());
+        return new PageImpl<>(singleWorkSearchResponsePage, pageable, singleWorkSearchPage.getTotalElements());
     }
 
 

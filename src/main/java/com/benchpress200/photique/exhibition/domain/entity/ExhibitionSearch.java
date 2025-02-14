@@ -40,13 +40,16 @@ public class ExhibitionSearch {
     private String introduction;
 
     @Field(type = FieldType.Integer, index = false)
-    private Integer participant;
+    private Integer participants;
 
     @Field(type = FieldType.Keyword, index = false)
     private String cardColor;
 
     @Field(type = FieldType.Text)
     private String title;
+
+    @Field(type = FieldType.Text, index = false)
+    private String description;
 
     @Field(type = FieldType.Text)
     private List<String> tags;

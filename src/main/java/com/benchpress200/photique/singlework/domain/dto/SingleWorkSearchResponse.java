@@ -21,11 +21,11 @@ public class SingleWorkSearchResponse {
             String nickname,
             String profileImage
     ) {
-        public static Writer from(final User writer) {
+        public static Writer from(final User user) {
             return Writer.builder()
-                    .id(writer.getId())
-                    .nickname(writer.getNickname())
-                    .profileImage(writer.getProfileImage())
+                    .id(user.getId())
+                    .nickname(user.getNickname())
+                    .profileImage(user.getProfileImage())
                     .build();
         }
 
