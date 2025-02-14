@@ -29,10 +29,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Transactional
 public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
-    private final ElasticsearchClient elasticsearchClient;
     private final UserRepository userRepository;
     private final SingleWorkRepository singleWorkRepository;
     private final SingleWorkCommentRepository singleWorkCommentRepository;
+    private final ElasticsearchClient elasticsearchClient;
 
     @Override
     public void createSingleWorkComment(final SingleWorkCommentCreateRequest singleWorkCommentCreateRequest) {

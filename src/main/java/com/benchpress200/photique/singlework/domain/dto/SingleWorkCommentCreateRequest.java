@@ -21,9 +21,7 @@ public class SingleWorkCommentCreateRequest {
     @Size(max = 300, message = "Content must not exceed 300 characters")
     private String content;
 
-    public void withSingleWorkId(
-            final Long singleWorkId
-    ) {
+    public void withSingleWorkId(final Long singleWorkId) {
         this.singleWorkId = singleWorkId;
     }
 
