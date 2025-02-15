@@ -8,10 +8,12 @@ import com.benchpress200.photique.common.infrastructure.ImageUploader;
 import com.benchpress200.photique.common.infrastructure.TagRepository;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionWorkCreateRequest;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
@@ -209,10 +211,51 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 좋아요 기록 삭제
         exhibitionLikeRepository.deleteByExhibitionId(exhibitionId);
 
-        // 전시호 삭제
+        // 전시회 삭제
         exhibitionRepository.deleteById(exhibitionId);
 
         // 알라스틱 서치 삭제
         exhibitionSearchRepository.deleteById(exhibitionId);
+    }
+
+    @Override
+    public void incrementLike(final ExhibitionLikeIncrementRequest exhibitionLikeIncrementRequest) {
+        // elastic search 데이터 업데이트를 위한 컬렉션
+        Map<String, Object> updateFields = new HashMap<>();
+
+        // 유저존재확인
+        Long userId = exhibitionLikeIncrementRequest.getUserId();
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ExhibitionException("User with id " + userId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        // 전시회 존재 확인
+        Long exhibitionId = exhibitionLikeIncrementRequest.getExhibitionId();
+        Exhibition exhibition = exhibitionRepository.findById(exhibitionId).orElseThrow(
+                () -> new ExhibitionException("Exhibition with id " + exhibitionId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        if (exhibitionLikeRepository.existsByUserAndExhibition(user, exhibition)) {
+            throw new ExhibitionException("User has already liked this exhibition", HttpStatus.CONFLICT);
+        }
+
+        ExhibitionLike exhibitionLike = exhibitionLikeIncrementRequest.toEntity(user, exhibition);
+        exhibitionLikeRepository.save(exhibitionLike);
+
+        exhibition.incrementLike();
+
+        updateFields.put("likeCount", exhibition.getLikeCount());
+
+        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
+                .index("exhibitions")
+                .id(exhibition.getId().toString())
+                .doc(updateFields)
+        );
+
+        try {
+            elasticsearchClient.update(updateRequest, Map.class);
+        } catch (IOException e) {
+            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +20,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "singlework_likes")
+@Table(name = "singlework_likes",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"user_id", "singlework_id"}
+        )
+)
 public class SingleWorkLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

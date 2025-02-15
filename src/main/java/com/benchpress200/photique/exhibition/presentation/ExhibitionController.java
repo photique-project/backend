@@ -8,6 +8,7 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionService;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
 import jakarta.validation.Valid;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -70,6 +72,17 @@ public class ExhibitionController {
     ) {
         exhibitionService.removeExhibition(exhibitionId);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
 
+    @Auth
+    @OwnResource
+    @PostMapping(URL.EXHIBITION_DATA + URL.LIKE)
+    public ApiSuccessResponse<?> incrementLike(
+            @PathVariable final Long exhibitionId,
+            @RequestBody final ExhibitionLikeIncrementRequest exhibitionLikeIncrementRequest
+    ) {
+        exhibitionLikeIncrementRequest.withExhibitionId(exhibitionId);
+        exhibitionService.incrementLike(exhibitionLikeIncrementRequest);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 }
