@@ -7,6 +7,7 @@ import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionCommentService;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentCreateRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDeleteRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDetailResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentUpdateRequest;
 import jakarta.validation.Valid;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,6 +67,21 @@ public class ExhibitionCommentController {
         exhibitionCommentUpdateRequest.withExhibitionId(exhibitionId);
         exhibitionCommentUpdateRequest.withCommentId(commentId);
         exhibitionCommentService.updateExhibitionComment(exhibitionCommentUpdateRequest);
+
+        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
+
+    @Auth
+    @OwnResource
+    @DeleteMapping(URL.EXHIBITION_COMMENT_DATA)
+    public ApiSuccessResponse<?> deleteExhibitionComment(
+            @PathVariable("exhibitionId") final Long exhibitionId,
+            @PathVariable("commentId") final Long commentId,
+            @RequestBody @Valid final ExhibitionCommentDeleteRequest exhibitionCommentDeleteRequest
+    ) {
+        exhibitionCommentDeleteRequest.withExhibitionId(exhibitionId);
+        exhibitionCommentDeleteRequest.withCommentId(commentId);
+        exhibitionCommentService.deleteExhibitionComment(exhibitionCommentDeleteRequest);
 
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }

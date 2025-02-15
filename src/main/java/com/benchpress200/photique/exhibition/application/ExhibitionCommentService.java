@@ -1,6 +1,7 @@
 package com.benchpress200.photique.exhibition.application;
 
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentCreateRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDeleteRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDetailResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentUpdateRequest;
 import org.springframework.data.domain.Page;
@@ -12,4 +13,6 @@ public interface ExhibitionCommentService {
     Page<ExhibitionCommentDetailResponse> getExhibitionComments(Long exhibitionId, Pageable pageable);
 
     void updateExhibitionComment(ExhibitionCommentUpdateRequest exhibitionCommentUpdateRequest);
+
+    void deleteExhibitionComment(ExhibitionCommentDeleteRequest exhibitionCommentDeleteRequest);
 }

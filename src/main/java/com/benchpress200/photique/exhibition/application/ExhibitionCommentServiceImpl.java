@@ -3,6 +3,7 @@ package com.benchpress200.photique.exhibition.application;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentCreateRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDeleteRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDetailResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentUpdateRequest;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
@@ -118,5 +119,31 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
         // 댓글 수정
         exhibitionComment.updateContent(exhibitionCommentUpdateRequest.getContent());
+    }
+
+    @Override
+    public void deleteExhibitionComment(final ExhibitionCommentDeleteRequest exhibitionCommentDeleteRequest) {
+        // 작성자 조회
+        Long writerId = exhibitionCommentDeleteRequest.getWriterId();
+        userRepository.findById(writerId).orElseThrow(
+                () -> new ExhibitionException("User with ID " + writerId + " is not found.", HttpStatus.NOT_FOUND)
+        );
+
+        // 전시회 조회
+        Long exhibitionId = exhibitionCommentDeleteRequest.getExhibitionId();
+        exhibitionRepository.findById(exhibitionId).orElseThrow(
+                () -> new ExhibitionException("Exhibition with ID " + exhibitionId + " is not found.",
+                        HttpStatus.NOT_FOUND)
+        );
+
+        // 댓글 조회
+        Long commentId = exhibitionCommentDeleteRequest.getCommentId();
+        exhibitionCommentRepository.findById(commentId).orElseThrow(
+                () -> new ExhibitionException("Comment in single work with ID " + commentId + " is not found.",
+                        HttpStatus.NOT_FOUND)
+        );
+
+        // 댓글 삭제
+        exhibitionCommentRepository.deleteById(commentId);
     }
 }
