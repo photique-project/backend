@@ -122,6 +122,9 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
     @Override
     public void deleteSingleWorkComment(final SingleWorkCommentDeleteRequest singleWorkCommentDeleteRequest) {
+        // elastic search 데이터 업데이트를 위한 컬렉션
+        Map<String, Object> updateFields = new HashMap<>();
+
         // 작성자 조회
         Long writerId = singleWorkCommentDeleteRequest.getWriterId();
         userRepository.findById(writerId).orElseThrow(
@@ -130,7 +133,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
         // 작품 조회
         Long singleWorkId = singleWorkCommentDeleteRequest.getSingleWorkId();
-        singleWorkRepository.findById(singleWorkId).orElseThrow(
+        SingleWork singleWork = singleWorkRepository.findById(singleWorkId).orElseThrow(
                 () -> new SingleWorkException("Single work with ID " + singleWorkId + " is not found.",
                         HttpStatus.NOT_FOUND)
         );
@@ -144,5 +147,20 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
         // 댓글 삭제
         singleWorkCommentRepository.deleteById(commentId);
+
+        // elastic search 데이터 업데이트
+        updateFields.put("commentCount", singleWorkCommentRepository.countBySingleWorkId(singleWorkId));
+
+        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
+                .index("singleworks")
+                .id(singleWork.getId().toString())
+                .doc(updateFields)
+        );
+
+        try {
+            elasticsearchClient.update(updateRequest, Map.class);
+        } catch (IOException e) {
+            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

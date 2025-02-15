@@ -123,6 +123,9 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
     @Override
     public void deleteExhibitionComment(final ExhibitionCommentDeleteRequest exhibitionCommentDeleteRequest) {
+        // elastic search 데이터 업데이트를 위한 컬렉션
+        Map<String, Object> updateFields = new HashMap<>();
+
         // 작성자 조회
         Long writerId = exhibitionCommentDeleteRequest.getWriterId();
         userRepository.findById(writerId).orElseThrow(
@@ -131,7 +134,7 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
         // 전시회 조회
         Long exhibitionId = exhibitionCommentDeleteRequest.getExhibitionId();
-        exhibitionRepository.findById(exhibitionId).orElseThrow(
+        Exhibition exhibition = exhibitionRepository.findById(exhibitionId).orElseThrow(
                 () -> new ExhibitionException("Exhibition with ID " + exhibitionId + " is not found.",
                         HttpStatus.NOT_FOUND)
         );
@@ -145,5 +148,20 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
         // 댓글 삭제
         exhibitionCommentRepository.deleteById(commentId);
+
+        // elastic search 데이터 업데이트
+        updateFields.put("commentCount", exhibitionCommentRepository.countByExhibitionId(exhibitionId));
+
+        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
+                .index("exhibitions")
+                .id(exhibition.getId().toString())
+                .doc(updateFields)
+        );
+
+        try {
+            elasticsearchClient.update(updateRequest, Map.class);
+        } catch (IOException e) {
+            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
