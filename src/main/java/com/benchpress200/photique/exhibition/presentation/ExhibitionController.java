@@ -6,6 +6,7 @@ import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionService;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRemoveRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
@@ -111,5 +112,18 @@ public class ExhibitionController {
         exhibitionBookmarkRequest.withExhibitionId(exhibitionId);
         exhibitionService.addBookmark(exhibitionBookmarkRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
+    }
+
+    @Auth
+    @OwnResource
+    @DeleteMapping(URL.EXHIBITION_DATA + URL.BOOKMARK)
+    public ApiSuccessResponse<?> removeBookmark(
+            @PathVariable final Long exhibitionId,
+            @RequestBody final ExhibitionBookmarkRemoveRequest exhibitionBookmarkRemoveRequest
+    ) {
+        exhibitionBookmarkRemoveRequest.withExhibitionId(exhibitionId);
+        exhibitionService.removeBookmark(exhibitionBookmarkRemoveRequest);
+
+        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 }

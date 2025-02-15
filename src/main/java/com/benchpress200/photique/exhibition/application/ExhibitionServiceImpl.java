@@ -6,6 +6,7 @@ import com.benchpress200.photique.common.domain.dto.NewTagRequest;
 import com.benchpress200.photique.common.domain.entity.Tag;
 import com.benchpress200.photique.common.infrastructure.ImageUploader;
 import com.benchpress200.photique.common.infrastructure.TagRepository;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRemoveRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
@@ -327,7 +328,22 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 좋아요 데이터 저장
         ExhibitionBookmark exhibitionBookmark = exhibitionBookmarkRequest.toEntity(user, exhibition);
         exhibitionBookmarkRepository.save(exhibitionBookmark);
+    }
 
-        exhibition.incrementLike();
+    @Override
+    public void removeBookmark(final ExhibitionBookmarkRemoveRequest exhibitionBookmarkRemoveRequest) {
+        // 유저존재확인
+        Long userId = exhibitionBookmarkRemoveRequest.getUserId();
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ExhibitionException("User with id " + userId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        // 전시회 존재 확인
+        Long exhibitionId = exhibitionBookmarkRemoveRequest.getExhibitionId();
+        Exhibition exhibition = exhibitionRepository.findById(exhibitionId).orElseThrow(
+                () -> new ExhibitionException("Exhibition with id " + exhibitionId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        exhibitionBookmarkRepository.deleteByUserAndExhibition(user, exhibition);
     }
 }
