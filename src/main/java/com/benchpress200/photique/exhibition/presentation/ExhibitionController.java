@@ -8,6 +8,7 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionService;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
@@ -84,5 +85,17 @@ public class ExhibitionController {
         exhibitionLikeIncrementRequest.withExhibitionId(exhibitionId);
         exhibitionService.incrementLike(exhibitionLikeIncrementRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
+    }
+
+    @Auth
+    @OwnResource
+    @DeleteMapping(URL.EXHIBITION_DATA + URL.LIKE)
+    public ApiSuccessResponse<?> decrementLike(
+            @PathVariable final Long exhibitionId,
+            @RequestBody final ExhibitionLikeDecrementRequest exhibitionLikeDecrementRequest
+    ) {
+        exhibitionLikeDecrementRequest.withExhibitionId(exhibitionId);
+        exhibitionService.decrementLike(exhibitionLikeDecrementRequest);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 }

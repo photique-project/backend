@@ -9,4 +9,6 @@ public interface ExhibitionLikeRepository extends JpaRepository<ExhibitionLike, 
     void deleteByExhibitionId(Long exhibitionId);
 
     boolean existsByUserAndExhibition(User user, Exhibition exhibition);
+
+    void deleteByUserAndExhibition(User user, Exhibition exhibition);
 }

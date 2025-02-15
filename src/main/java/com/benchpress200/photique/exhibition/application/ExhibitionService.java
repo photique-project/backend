@@ -2,6 +2,7 @@ package com.benchpress200.photique.exhibition.application;
 
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
@@ -19,4 +20,6 @@ public interface ExhibitionService {
     void removeExhibition(Long exhibitionId);
 
     void incrementLike(ExhibitionLikeIncrementRequest exhibitionLikeIncrementRequest);
+
+    void decrementLike(ExhibitionLikeDecrementRequest exhibitionLikeDecrementRequest);
 }

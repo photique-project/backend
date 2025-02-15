@@ -8,6 +8,7 @@ import com.benchpress200.photique.common.infrastructure.ImageUploader;
 import com.benchpress200.photique.common.infrastructure.TagRepository;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
@@ -235,10 +236,12 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 () -> new ExhibitionException("Exhibition with id " + exhibitionId + " not found", HttpStatus.NOT_FOUND)
         );
 
+        // 이미 좋아요를 했다면 409응답
         if (exhibitionLikeRepository.existsByUserAndExhibition(user, exhibition)) {
             throw new ExhibitionException("User has already liked this exhibition", HttpStatus.CONFLICT);
         }
 
+        // 좋아요 데이터 저장
         ExhibitionLike exhibitionLike = exhibitionLikeIncrementRequest.toEntity(user, exhibition);
         exhibitionLikeRepository.save(exhibitionLike);
 
@@ -257,5 +260,41 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         } catch (IOException e) {
             throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public void decrementLike(final ExhibitionLikeDecrementRequest exhibitionLikeDecrementRequest) {
+        // elastic search 데이터 업데이트를 위한 컬렉션
+        Map<String, Object> updateFields = new HashMap<>();
+
+        // 유저존재확인
+        Long userId = exhibitionLikeDecrementRequest.getUserId();
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ExhibitionException("User with id " + userId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        // 전시회 존재 확인
+        Long exhibitionId = exhibitionLikeDecrementRequest.getExhibitionId();
+        Exhibition exhibition = exhibitionRepository.findById(exhibitionId).orElseThrow(
+                () -> new ExhibitionException("Exhibition with id " + exhibitionId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        exhibitionLikeRepository.deleteByUserAndExhibition(user, exhibition);
+        exhibition.decrementLike();
+
+        updateFields.put("likeCount", exhibition.getLikeCount());
+
+        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
+                .index("exhibitions")
+                .id(exhibition.getId().toString())
+                .doc(updateFields)
+        );
+
+        try {
+            elasticsearchClient.update(updateRequest, Map.class);
+        } catch (IOException e) {
+            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 }
