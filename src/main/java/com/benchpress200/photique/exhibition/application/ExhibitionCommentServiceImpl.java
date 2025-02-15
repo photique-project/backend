@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDetailResponse;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentUpdateRequest;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
 import com.benchpress200.photique.exhibition.exception.ExhibitionException;
@@ -91,5 +92,31 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
                 .toList();
 
         return new PageImpl<>(exhibitionCommentDetailResponseList, pageable, exhibitionCommentPage.getTotalElements());
+    }
+
+    @Override
+    public void updateExhibitionComment(final ExhibitionCommentUpdateRequest exhibitionCommentUpdateRequest) {
+        // 작성자 조회
+        Long writerId = exhibitionCommentUpdateRequest.getWriterId();
+        userRepository.findById(writerId).orElseThrow(
+                () -> new ExhibitionException("User with ID " + writerId + " is not found.", HttpStatus.NOT_FOUND)
+        );
+
+        // 전시회 조회
+        Long exhibitionId = exhibitionCommentUpdateRequest.getExhibitionId();
+        exhibitionRepository.findById(exhibitionId).orElseThrow(
+                () -> new ExhibitionException("Exhibition with ID " + exhibitionId + " is not found.",
+                        HttpStatus.NOT_FOUND)
+        );
+
+        // 댓글 조회
+        Long commentId = exhibitionCommentUpdateRequest.getCommentId();
+        ExhibitionComment exhibitionComment = exhibitionCommentRepository.findById(commentId).orElseThrow(
+                () -> new ExhibitionException("Comment in single work with ID " + commentId + " is not found.",
+                        HttpStatus.NOT_FOUND)
+        );
+
+        // 댓글 수정
+        exhibitionComment.updateContent(exhibitionCommentUpdateRequest.getContent());
     }
 }

@@ -8,12 +8,14 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionCommentService;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDetailResponse;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,4 +54,18 @@ public class ExhibitionCommentController {
         return ResponseHandler.handleSuccessResponse(exhibitionCommentPage, HttpStatus.OK);
     }
 
+    @Auth
+    @OwnResource
+    @PatchMapping(URL.EXHIBITION_COMMENT_DATA)
+    public ApiSuccessResponse<?> updateExhibitionComment(
+            @PathVariable("exhibitionId") final Long exhibitionId,
+            @PathVariable("commentId") final Long commentId,
+            @RequestBody @Valid final ExhibitionCommentUpdateRequest exhibitionCommentUpdateRequest
+    ) {
+        exhibitionCommentUpdateRequest.withExhibitionId(exhibitionId);
+        exhibitionCommentUpdateRequest.withCommentId(commentId);
+        exhibitionCommentService.updateExhibitionComment(exhibitionCommentUpdateRequest);
+
+        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
 }
