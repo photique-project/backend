@@ -6,6 +6,7 @@ import com.benchpress200.photique.common.domain.dto.NewTagRequest;
 import com.benchpress200.photique.common.domain.entity.Tag;
 import com.benchpress200.photique.common.infrastructure.ImageUploader;
 import com.benchpress200.photique.common.infrastructure.TagRepository;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementRequest;
@@ -14,11 +15,13 @@ import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionWorkCreateRequest;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 import com.benchpress200.photique.exhibition.exception.ExhibitionException;
+import com.benchpress200.photique.exhibition.infrastructure.ExhibitionBookmarkRepository;
 import com.benchpress200.photique.exhibition.infrastructure.ExhibitionCommentRepository;
 import com.benchpress200.photique.exhibition.infrastructure.ExhibitionLikeRepository;
 import com.benchpress200.photique.exhibition.infrastructure.ExhibitionRepository;
@@ -58,6 +61,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     private final ExhibitionSearchRepository exhibitionSearchRepository;
     private final ExhibitionCommentRepository exhibitionCommentRepository;
     private final ExhibitionLikeRepository exhibitionLikeRepository;
+    private final ExhibitionBookmarkRepository exhibitionBookmarkRepository;
     private final ElasticsearchClient elasticsearchClient;
 
     @Override
@@ -212,6 +216,9 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 좋아요 기록 삭제
         exhibitionLikeRepository.deleteByExhibitionId(exhibitionId);
 
+        // 북마크 기록 삭제
+        exhibitionBookmarkRepository.deleteByExhibitionId(exhibitionId);
+
         // 전시회 삭제
         exhibitionRepository.deleteById(exhibitionId);
 
@@ -296,5 +303,31 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    @Override
+    public void addBookmark(final ExhibitionBookmarkRequest exhibitionBookmarkRequest) {
+        // 유저존재확인
+        Long userId = exhibitionBookmarkRequest.getUserId();
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new ExhibitionException("User with id " + userId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        // 전시회 존재 확인
+        Long exhibitionId = exhibitionBookmarkRequest.getExhibitionId();
+        Exhibition exhibition = exhibitionRepository.findById(exhibitionId).orElseThrow(
+                () -> new ExhibitionException("Exhibition with id " + exhibitionId + " not found", HttpStatus.NOT_FOUND)
+        );
+
+        // 이미 북마크 했다면 409응답
+        if (exhibitionBookmarkRepository.existsByUserAndExhibition(user, exhibition)) {
+            throw new ExhibitionException("User has already marked this exhibition", HttpStatus.CONFLICT);
+        }
+
+        // 좋아요 데이터 저장
+        ExhibitionBookmark exhibitionBookmark = exhibitionBookmarkRequest.toEntity(user, exhibition);
+        exhibitionBookmarkRepository.save(exhibitionBookmark);
+
+        exhibition.incrementLike();
     }
 }

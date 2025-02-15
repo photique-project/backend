@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Table(name = "exhibition_bookmarks")
-public class ExhibitionBook {
+public class ExhibitionBookmark {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,7 +42,7 @@ public class ExhibitionBook {
     }
 
     @Builder
-    public ExhibitionBook(
+    public ExhibitionBookmark(
             final User user,
             final Exhibition exhibition
     ) {

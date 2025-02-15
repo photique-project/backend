@@ -6,6 +6,7 @@ import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionService;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementRequest;
@@ -97,5 +98,18 @@ public class ExhibitionController {
         exhibitionLikeDecrementRequest.withExhibitionId(exhibitionId);
         exhibitionService.decrementLike(exhibitionLikeDecrementRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
+
+    @Auth
+    @OwnResource
+    @PostMapping(URL.EXHIBITION_DATA + URL.BOOKMARK)
+    public ApiSuccessResponse<?> addBookmark(
+            @PathVariable final Long exhibitionId,
+            @RequestBody final ExhibitionBookmarkRequest exhibitionBookmarkRequest
+
+    ) {
+        exhibitionBookmarkRequest.withExhibitionId(exhibitionId);
+        exhibitionService.addBookmark(exhibitionBookmarkRequest);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 }

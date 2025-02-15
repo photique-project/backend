@@ -1,5 +1,6 @@
 package com.benchpress200.photique.exhibition.application;
 
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementRequest;
@@ -22,4 +23,6 @@ public interface ExhibitionService {
     void incrementLike(ExhibitionLikeIncrementRequest exhibitionLikeIncrementRequest);
 
     void decrementLike(ExhibitionLikeDecrementRequest exhibitionLikeDecrementRequest);
+
+    void addBookmark(ExhibitionBookmarkRequest exhibitionBookmarkRequest);
 }
