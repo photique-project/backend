@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,5 +60,16 @@ public class ExhibitionController {
         );
 
         return ResponseHandler.handleSuccessResponse(exhibitionSearchPage, HttpStatus.OK);
+    }
+
+    @Auth
+    @OwnResource
+    @DeleteMapping(URL.EXHIBITION_DATA)
+    public ApiSuccessResponse<?> removeExhibition(
+            @PathVariable final Long exhibitionId
+    ) {
+        exhibitionService.removeExhibition(exhibitionId);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+
     }
 }

@@ -14,4 +14,6 @@ public interface ExhibitionService {
 
     Page<ExhibitionSearchResponse> searchExhibitions(ExhibitionSearchRequest exhibitionSearchRequest,
                                                      Pageable pageable);
+
+    void removeExhibition(Long exhibitionId);
 }

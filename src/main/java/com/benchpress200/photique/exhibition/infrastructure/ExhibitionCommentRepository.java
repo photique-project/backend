@@ -9,4 +9,6 @@ public interface ExhibitionCommentRepository extends JpaRepository<ExhibitionCom
     Long countByExhibitionId(Long exhibitionId);
 
     Page<ExhibitionComment> findByExhibitionId(Long exhibitionId, Pageable pageable);
+
+    void deleteByExhibitionId(Long exhibitionId);
 }

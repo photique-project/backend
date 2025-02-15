@@ -376,11 +376,15 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     public void removeSingleWork(final Long singleworkId) {
-        // TODO: 이미지도 삭제해야함
-
-        singleWorkRepository.findById(singleworkId).orElseThrow(
+        SingleWork singleWork = singleWorkRepository.findById(singleworkId).orElseThrow(
                 () -> new SingleWorkException("SingleWork with id " + singleworkId + " not found", HttpStatus.NOT_FOUND)
         );
+
+        // s3 이미지 삭제
+        String imageUrl = singleWork.getImage();
+        if (imageUrl != null) {
+            imageUploader.delete(imageUrl);
+        }
 
         // 관련 댓글 삭제
         singleWorkCommentRepository.deleteBySingleWorkId(singleworkId);

@@ -16,6 +16,8 @@ import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 import com.benchpress200.photique.exhibition.exception.ExhibitionException;
+import com.benchpress200.photique.exhibition.infrastructure.ExhibitionCommentRepository;
+import com.benchpress200.photique.exhibition.infrastructure.ExhibitionLikeRepository;
 import com.benchpress200.photique.exhibition.infrastructure.ExhibitionRepository;
 import com.benchpress200.photique.exhibition.infrastructure.ExhibitionSearchRepository;
 import com.benchpress200.photique.exhibition.infrastructure.ExhibitionTagRepository;
@@ -51,6 +53,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     private final ExhibitionTagRepository exhibitionTagRepository;
     private final ExhibitionWorkRepository exhibitionWorkRepository;
     private final ExhibitionSearchRepository exhibitionSearchRepository;
+    private final ExhibitionCommentRepository exhibitionCommentRepository;
+    private final ExhibitionLikeRepository exhibitionLikeRepository;
     private final ElasticsearchClient elasticsearchClient;
 
     @Override
@@ -184,5 +188,31 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .toList();
 
         return new PageImpl<>(exhibitionSearchResponsePage, pageable, exhibitionSearchPage.getTotalElements());
+    }
+
+    @Override
+    public void removeExhibition(final Long exhibitionId) {
+        List<ExhibitionWork> exhibitionWorks = exhibitionWorkRepository.findByExhibitionId(exhibitionId);
+
+        // s3이미지 & 전시회 관련 이미지 데이터 삭제
+        exhibitionWorks.forEach(exhibitionWork -> {
+            imageUploader.delete(exhibitionWork.getImage());
+            exhibitionWorkRepository.delete(exhibitionWork);
+        });
+
+        // 관련 댓글 삭제
+        exhibitionCommentRepository.deleteByExhibitionId(exhibitionId);
+
+        // 관련 태그 삭제
+        exhibitionTagRepository.deleteByExhibitionId(exhibitionId);
+
+        // 좋아요 기록 삭제
+        exhibitionLikeRepository.deleteByExhibitionId(exhibitionId);
+
+        // 전시호 삭제
+        exhibitionRepository.deleteById(exhibitionId);
+
+        // 알라스틱 서치 삭제
+        exhibitionSearchRepository.deleteById(exhibitionId);
     }
 }

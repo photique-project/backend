@@ -80,7 +80,7 @@ public class SingleWorkController {
     @Auth
     @OwnResource
     @DeleteMapping(URL.SINGLE_WORK_DATA)
-    public ApiSuccessResponse<?> deleteSingleWorkDetail(
+    public ApiSuccessResponse<?> removeSingleWork(
             @PathVariable final Long singleworkId
     ) {
         singleWorkService.removeSingleWork(singleworkId);
