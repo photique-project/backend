@@ -34,4 +34,12 @@ public class FollowDomainServiceImpl implements FollowDomainService {
     ) {
         return followRepository.findByFollowingId(user.getId(), pageable);
     }
+
+    @Override
+    public Page<Follow> getFollowings(
+            final User user,
+            final Pageable pageable
+    ) {
+        return followRepository.findByFollowerId(user.getId(), pageable);
+    }
 }

@@ -9,6 +9,7 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.FollowService;
 import com.benchpress200.photique.user.domain.dto.FollowRequest;
 import com.benchpress200.photique.user.domain.dto.FollowerResponse;
+import com.benchpress200.photique.user.domain.dto.FollowingResponse;
 import com.benchpress200.photique.user.domain.dto.UnfollowRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -61,5 +62,15 @@ public class FollowController {
     ) {
         Page<FollowerResponse> followerResponsePage = followService.getFollowers(userId, pageable);
         return ResponseHandler.handleSuccessResponse(followerResponsePage, HttpStatus.OK);
+    }
+
+    @Auth
+    @GetMapping(URL.FOLLOWING)
+    public ApiSuccessResponse<?> getFollowings(
+            @PathVariable("userId") final Long userId,
+            final Pageable pageable
+    ) {
+        Page<FollowingResponse> followingResponsePage = followService.getFollowings(userId, pageable);
+        return ResponseHandler.handleSuccessResponse(followingResponsePage, HttpStatus.OK);
     }
 }

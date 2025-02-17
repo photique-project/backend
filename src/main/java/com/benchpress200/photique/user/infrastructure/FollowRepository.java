@@ -10,4 +10,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     void deleteByFollowerAndFollowing(User Follower, User Following);
 
     Page<Follow> findByFollowingId(Long followingId, Pageable pageable);
+
+    Page<Follow> findByFollowerId(Long followerId, Pageable pageable);
 }

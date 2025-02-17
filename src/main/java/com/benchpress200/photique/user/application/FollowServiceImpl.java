@@ -4,6 +4,7 @@ import com.benchpress200.photique.user.domain.FollowDomainService;
 import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.dto.FollowRequest;
 import com.benchpress200.photique.user.domain.dto.FollowerResponse;
+import com.benchpress200.photique.user.domain.dto.FollowingResponse;
 import com.benchpress200.photique.user.domain.dto.UnfollowRequest;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -30,7 +31,7 @@ public class FollowServiceImpl implements FollowService {
         User follower = userDomainService.findUser(followerId);
 
         // 팔로잉 유저 조회
-        Long followingId = followRequest.getFollowerId();
+        Long followingId = followRequest.getFollowingId();
         User following = userDomainService.findUser(followingId);
 
         // 팔로우 저장
@@ -40,7 +41,7 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     @Transactional
-    public void unfollowUser(UnfollowRequest unfollowRequest) {
+    public void unfollowUser(final UnfollowRequest unfollowRequest) {
         // 팔로워 유저 조회
         Long followerId = unfollowRequest.getFollowerId();
         User follower = userDomainService.findUser(followerId);
@@ -54,7 +55,10 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
-    public Page<FollowerResponse> getFollowers(Long userId, Pageable pageable) {
+    public Page<FollowerResponse> getFollowers(
+            final Long userId,
+            final Pageable pageable
+    ) {
         // 유저조회
         User user = userDomainService.findUser(userId);
 
@@ -64,5 +68,21 @@ public class FollowServiceImpl implements FollowService {
                 .toList();
 
         return new PageImpl<>(followerResponseList, pageable, followerPage.getTotalElements());
+    }
+
+    @Override
+    public Page<FollowingResponse> getFollowings(
+            final Long userId,
+            final Pageable pageable
+    ) {
+        // 유저조회
+        User user = userDomainService.findUser(userId);
+
+        // 본인이 팔로잉하고 있는 페이지 조회
+        Page<Follow> followingPage = followDomainService.getFollowings(user, pageable);
+        List<FollowingResponse> followingResponseList = followingPage.stream().map(FollowingResponse::from)
+                .toList();
+
+        return new PageImpl<>(followingResponseList, pageable, followingPage.getTotalElements());
     }
 }

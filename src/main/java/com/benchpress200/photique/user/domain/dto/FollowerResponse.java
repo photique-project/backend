@@ -13,9 +13,9 @@ public class FollowerResponse {
 
     public static FollowerResponse from(final Follow follow) {
         return FollowerResponse.builder()
-                .id(follow.getFollowing().getId())
-                .nickname(follow.getFollowing().getNickname())
-                .profileImage(follow.getFollowing().getProfileImage())
+                .id(follow.getFollower().getId())
+                .nickname(follow.getFollower().getNickname())
+                .profileImage(follow.getFollower().getProfileImage())
                 .build();
     }
 }
