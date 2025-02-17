@@ -1,4 +1,4 @@
-package com.benchpress200.photique.auth.domain.dto;
+package com.benchpress200.photique.user.domain.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

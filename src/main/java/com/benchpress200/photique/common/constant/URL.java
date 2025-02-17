@@ -17,6 +17,12 @@ public class URL {
     public static final String USER_DATA = "/{userId}";
     public static final String GET_USER_ID = "/id";
 
+    // FOLLOW
+    public static final String FOLLOW_DOMAIN = "/follows";
+    public static final String UNFOLLOW_TARGET = "/{targetUserId}";
+    public static final String FOLLOWER = "/follower";
+    public static final String FOLLOWING = "/following";
+
     // SINGLE WORK
     public static final String SINGLE_WORK_DOMAIN = "/singleworks";
     public static final String SINGLE_WORK_DATA = "/{singleworkId}";

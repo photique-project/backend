@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
@@ -105,7 +106,7 @@ public class SingleWorkSearchRepositoryImpl implements SingleWorkSearchRepositor
 
             // 결과 매핑
             List<SingleWorkSearch> results = searchResponse.hits().hits().stream()
-                    .map(hit -> hit.source())
+                    .map(Hit::source)
                     .toList();
 
             return new PageImpl<>(results, pageable, searchResponse.hits().total().value());

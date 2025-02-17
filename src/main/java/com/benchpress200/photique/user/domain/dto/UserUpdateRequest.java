@@ -10,6 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class UserUpdateRequest {
+    private Long userId;
+
     @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{8,}$", message = "Invalid password: Password must be at least 8 characters long, include at least one letter, one number, and one special character")
     private String password;
 
@@ -22,23 +24,7 @@ public class UserUpdateRequest {
     @Image
     private MultipartFile profileImage;
 
-    public boolean hasPassword() {
-        return password != null;
-    }
-
-    public boolean hasNickname() {
-        return nickname != null;
-    }
-
-    public boolean hasIntroduction() {
-        return introduction != null;
-    }
-
-    public boolean hasProfileImage() {
-        return profileImage != null;
-    }
-
-    public boolean isDefaultProfileImage() {
-        return profileImage.isEmpty();
+    public void withUserId(Long userId) {
+        this.userId = userId;
     }
 }

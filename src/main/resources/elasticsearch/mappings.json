@@ -1,0 +1,9 @@
+{
+  "properties": {
+    "nickname": {
+      "type": "text",
+      "analyzer": "korean",
+      "search_analyzer": "korean"
+    }
+  }
+}

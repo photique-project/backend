@@ -1,4 +1,4 @@
-package com.benchpress200.photique.common.infrastructure;
+package com.benchpress200.photique.image.infrastructure;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;

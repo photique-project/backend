@@ -3,7 +3,6 @@ package com.benchpress200.photique.auth.application;
 import com.benchpress200.photique.auth.domain.dto.AuthMailRequest;
 import com.benchpress200.photique.auth.domain.dto.CodeValidationRequest;
 import com.benchpress200.photique.auth.domain.dto.LoginRequest;
-import com.benchpress200.photique.auth.domain.dto.NicknameValidationRequest;
 import com.benchpress200.photique.auth.domain.dto.Tokens;
 import com.benchpress200.photique.auth.domain.entity.AuthCode;
 import com.benchpress200.photique.auth.domain.enumeration.AuthType;
@@ -12,6 +11,7 @@ import com.benchpress200.photique.auth.infrastructure.AuthCodeRepository;
 import com.benchpress200.photique.auth.infrastructure.AuthMailManager;
 import com.benchpress200.photique.auth.infrastructure.RefreshTokenRepository;
 import com.benchpress200.photique.auth.infrastructure.TokenManager;
+import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.infrastructure.UserRepository;
 import jakarta.servlet.http.Cookie;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class AuthServiceImpl implements AuthService{
+public class AuthServiceImpl implements AuthService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final AuthCodeRepository authCodeRepository;
@@ -65,10 +65,13 @@ public class AuthServiceImpl implements AuthService{
 
         if (authMailRequest.getType() == AuthType.JOIN) {
             userRepository.findByEmail(authMailRequest.getEmail())
-                    .ifPresent(user -> {throw new AuthException("This email address is already in use", HttpStatus.CONFLICT);});
+                    .ifPresent(user -> {
+                        throw new AuthException("This email address is already in use", HttpStatus.CONFLICT);
+                    });
         } else {
             userRepository.findByEmail(authMailRequest.getEmail())
-                    .orElseThrow(() -> new AuthException("User with email {" + email + "} is not found", HttpStatus.NOT_FOUND));
+                    .orElseThrow(() -> new AuthException("User with email {" + email + "} is not found",
+                            HttpStatus.NOT_FOUND));
         }
 
         String authCode = authMailManager.sendMail(email);
@@ -86,7 +89,7 @@ public class AuthServiceImpl implements AuthService{
                 .orElseThrow(() -> new AuthException("Verification code has expired", HttpStatus.GONE));
 
         if (!codeValidationRequest.validate(authCode.getCode())) {
-           throw new AuthException("Invalid code", HttpStatus.UNAUTHORIZED);
+            throw new AuthException("Invalid code", HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -94,7 +97,9 @@ public class AuthServiceImpl implements AuthService{
     public void validateNickname(NicknameValidationRequest nicknameValidationRequest) {
         String nickname = nicknameValidationRequest.getNickname();
         userRepository.findByNickname(nickname).ifPresent(
-                user -> {throw new AuthException(nickname + "is already in use", HttpStatus.CONFLICT);}
+                user -> {
+                    throw new AuthException(nickname + "is already in use", HttpStatus.CONFLICT);
+                }
         );
     }
 

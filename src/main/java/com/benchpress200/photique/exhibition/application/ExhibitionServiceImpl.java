@@ -4,7 +4,6 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.UpdateRequest;
 import com.benchpress200.photique.common.domain.dto.NewTagRequest;
 import com.benchpress200.photique.common.domain.entity.Tag;
-import com.benchpress200.photique.common.infrastructure.ImageUploader;
 import com.benchpress200.photique.common.infrastructure.TagRepository;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRemoveRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
@@ -29,6 +28,7 @@ import com.benchpress200.photique.exhibition.infrastructure.ExhibitionRepository
 import com.benchpress200.photique.exhibition.infrastructure.ExhibitionSearchRepository;
 import com.benchpress200.photique.exhibition.infrastructure.ExhibitionTagRepository;
 import com.benchpress200.photique.exhibition.infrastructure.ExhibitionWorkRepository;
+import com.benchpress200.photique.image.infrastructure.ImageUploader;
 import com.benchpress200.photique.singlework.exception.SingleWorkException;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.infrastructure.UserRepository;
