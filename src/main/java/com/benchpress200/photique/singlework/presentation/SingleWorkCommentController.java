@@ -1,8 +1,8 @@
 package com.benchpress200.photique.singlework.presentation;
 
-import com.benchpress200.photique.auth.interceptor.Auth;
-import com.benchpress200.photique.auth.interceptor.OwnResource;
 import com.benchpress200.photique.common.constant.URL;
+import com.benchpress200.photique.common.interceptor.Auth;
+import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkCommentService;
@@ -34,12 +34,12 @@ public class SingleWorkCommentController {
     @Auth
     @OwnResource
     @PostMapping
-    public ApiSuccessResponse<?> createSingleWorkComment(
+    public ApiSuccessResponse<?> addSingleWorkComment(
             @PathVariable("singleworkId") final Long singleWorkId,
             @RequestBody @Valid final SingleWorkCommentCreateRequest singleWorkCommentCreateRequest
     ) {
         singleWorkCommentCreateRequest.withSingleWorkId(singleWorkId);
-        singleWorkCommentService.createSingleWorkComment(singleWorkCommentCreateRequest);
+        singleWorkCommentService.addSingleWorkComment(singleWorkCommentCreateRequest);
 
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }

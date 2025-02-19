@@ -1,6 +1,5 @@
 package com.benchpress200.photique.singlework.domain.dto;
 
-import com.benchpress200.photique.common.dtovalidator.annotation.Id;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -14,7 +13,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SingleWorkLikeIncrementRequest {
     @NotNull(message = "User's id must not be null")
-    @Id
     private Long userId;
     private Long singleWorkId;
 

@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ExhibitionCommentService {
-    void createExhibitionComment(ExhibitionCommentCreateRequest exhibitionCommentCreateRequest);
+    void addExhibitionComment(ExhibitionCommentCreateRequest exhibitionCommentCreateRequest);
 
     Page<ExhibitionCommentDetailResponse> getExhibitionComments(Long exhibitionId, Pageable pageable);
 

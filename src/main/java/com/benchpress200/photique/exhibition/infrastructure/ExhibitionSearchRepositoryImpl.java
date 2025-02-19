@@ -9,7 +9,6 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import java.util.ArrayList;
@@ -28,13 +27,11 @@ public class ExhibitionSearchRepositoryImpl implements ExhibitionSearchRepositor
 
     @Override
     public Page<ExhibitionSearch> searchExhibitions(
-            final ExhibitionSearchRequest exhibitionSearchRequest,
+            final Target target,
+            final List<String> keywords,
             final Pageable pageable
     ) {
         try {
-            List<String> keywords = exhibitionSearchRequest.getKeywords();
-            Target target = exhibitionSearchRequest.getTarget();
-
             // Bool Query 빌드
             // query.bool내부에 must, must_not, should, filter 옵션가능
             Builder keywordBoolQuery = QueryBuilders.bool();

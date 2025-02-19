@@ -1,8 +1,8 @@
 package com.benchpress200.photique.singlework.domain.dto;
 
-import com.benchpress200.photique.common.domain.dto.TagResponse;
-import com.benchpress200.photique.common.domain.entity.Tag;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.tag.domain.dto.TagResponse;
+import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
@@ -52,7 +52,8 @@ public class SingleWorkDetailResponse {
 
     public static SingleWorkDetailResponse from(
             final SingleWork singleWork,
-            final List<Tag> tags
+            final List<Tag> tags,
+            final Long likeCount
     ) {
         List<TagResponse> tagsResponse = tags.stream()
                 .map(TagResponse::from)
@@ -73,7 +74,7 @@ public class SingleWorkDetailResponse {
                 .tags(tagsResponse)
                 .title(singleWork.getTitle())
                 .description(singleWork.getDescription())
-                .likeCount(singleWork.getLikeCount())
+                .likeCount(likeCount)
                 .viewCount(singleWork.getViewCount())
                 .createdAt(singleWork.getCreatedAt())
                 .build();

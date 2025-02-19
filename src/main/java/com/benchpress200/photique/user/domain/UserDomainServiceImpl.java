@@ -61,13 +61,20 @@ public class UserDomainServiceImpl implements UserDomainService {
                 .build();
 
         // Elasticsearch 저장 (예외발생 시 롤백을 위한 컨텍스트에 저장)
-        ElasticsearchUserRollbackContext.addDocumentsToSave(userSearch);
+        ElasticsearchUserRollbackContext.addDocumentToSave(userSearch);
     }
 
     @Override
     public User findUser(final Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> new UserException("User with id {" + userId + "} is not found", HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public User findUser(final String email) {
+        return userRepository.findByEmail(email).orElseThrow(
+                () -> new UserException("User with email {" + email + "} is not found", HttpStatus.NOT_FOUND)
+        );
     }
 
     @Override
@@ -94,17 +101,25 @@ public class UserDomainServiceImpl implements UserDomainService {
         }
 
         user.updateNickname(newNickname);
-        // 엘라스틱서치 데이터 조회
+
         Long userId = user.getId();
-        UserSearch userSearch = userSearchRepository.findById(user.getId()).orElseThrow(
-                () -> new UserException("User with id {" + userId + "} is not found", HttpStatus.NOT_FOUND)
-        );
+        UserSearch userSearch = findUserSearch(userId);
 
         // 엘라스틱서치 데이터 업데이트
         userSearch.updateNickname(newNickname);
 
         // 업데이트
-        ElasticsearchUserRollbackContext.addDocumentsToUpdate(userSearch);
+        ElasticsearchUserRollbackContext.addDocumentToUpdate(userSearch);
+    }
+
+    private UserSearch findUserSearch(final Long userId) {
+        if (ElasticsearchUserRollbackContext.hasDocumentToUpdate()) {
+            return ElasticsearchUserRollbackContext.getDocumentToUpdate();
+        }
+
+        return userSearchRepository.findById(userId).orElseThrow(
+                () -> new UserException("User with id {" + userId + "} is not found", HttpStatus.NOT_FOUND)
+        );
     }
 
     @Override
@@ -137,15 +152,13 @@ public class UserDomainServiceImpl implements UserDomainService {
 
         // 엘라스틱서치 데이터 조회
         Long userId = user.getId();
-        UserSearch userSearch = userSearchRepository.findById(user.getId()).orElseThrow(
-                () -> new UserException("User with id {" + userId + "} is not found", HttpStatus.NOT_FOUND)
-        );
+        UserSearch userSearch = findUserSearch(userId);
 
         // 엘라스틱서치 데이터 업데이트
         userSearch.updateProfileImage(newProfileImage);
 
         // 업데이트
-        ElasticsearchUserRollbackContext.addDocumentsToUpdate(userSearch);
+        ElasticsearchUserRollbackContext.addDocumentToUpdate(userSearch);
     }
 
     @Override
@@ -159,8 +172,19 @@ public class UserDomainServiceImpl implements UserDomainService {
             throw new UserException("No users found.", HttpStatus.NOT_FOUND);
         }
 
-        // 영어 한글자검색이 안됨
-        // 틸적고 하루 정리하고 다시 수정시작하자
         return userSearchPage;
+    }
+
+    @Override
+    public void deleteUser(final User user) {
+        userRepository.delete(user);
+
+        // 엘라스틱 서치 데이터 삭제
+        Long userId = user.getId();
+        UserSearch userSearch = userSearchRepository.findById(user.getId()).orElseThrow(
+                () -> new UserException("User with id {" + userId + "} is not found", HttpStatus.NOT_FOUND)
+        );
+
+        ElasticsearchUserRollbackContext.addDocumentToDelete(userSearch);
     }
 }

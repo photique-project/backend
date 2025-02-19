@@ -1,9 +1,9 @@
 package com.benchpress200.photique.user.presentation;
 
 
-import com.benchpress200.photique.auth.interceptor.Auth;
-import com.benchpress200.photique.auth.interceptor.OwnResource;
 import com.benchpress200.photique.common.constant.URL;
+import com.benchpress200.photique.common.interceptor.Auth;
+import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.FollowService;

@@ -13,4 +13,6 @@ public interface FollowDomainService {
     Page<Follow> getFollowers(User user, Pageable pageable);
 
     Page<Follow> getFollowings(User user, Pageable pageable);
+
+    void deleteFollow(User user);
 }

@@ -1,6 +1,5 @@
 package com.benchpress200.photique.exhibition.domain.dto;
 
-import com.benchpress200.photique.common.dtovalidator.annotation.Id;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -14,7 +13,6 @@ public class ExhibitionCommentCreateRequest {
     private Long exhibitionId;
 
     @NotNull(message = "Id must not be null")
-    @Id
     private Long writerId;
 
     @NotBlank(message = "Content must not be blank.")

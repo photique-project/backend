@@ -42,4 +42,9 @@ public class FollowDomainServiceImpl implements FollowDomainService {
     ) {
         return followRepository.findByFollowerId(user.getId(), pageable);
     }
+
+    @Override
+    public void deleteFollow(final User user) {
+        followRepository.deleteByFollowerOrFollowing(user, user);
+    }
 }

@@ -1,7 +1,7 @@
 package com.benchpress200.photique.exhibition.domain.dto;
 
-import com.benchpress200.photique.common.domain.dto.TagResponse;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
+import com.benchpress200.photique.tag.domain.dto.TagResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;

@@ -1,10 +1,9 @@
 package com.benchpress200.photique.exhibition.domain.dto;
 
-import com.benchpress200.photique.common.domain.dto.NewTagRequest;
-import com.benchpress200.photique.common.domain.entity.Tag;
-import com.benchpress200.photique.common.dtovalidator.annotation.Id;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
+import com.benchpress200.photique.tag.domain.dto.NewTagRequest;
+import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -24,7 +23,6 @@ public class ExhibitionCreateRequest {
     private String title;
 
     @NotNull(message = "Writer id must not be null")
-    @Id
     private Long writerId;
 
     @NotBlank(message = "Description must not be blank.")
@@ -69,5 +67,9 @@ public class ExhibitionCreateRequest {
                         .build()
                 )
                 .toList();
+    }
+
+    public List<String> getTags() {
+        return tags.stream().map(NewTagRequest::getName).toList();
     }
 }

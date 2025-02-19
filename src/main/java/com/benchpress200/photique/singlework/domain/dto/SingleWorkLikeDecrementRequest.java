@@ -1,6 +1,5 @@
 package com.benchpress200.photique.singlework.domain.dto;
 
-import com.benchpress200.photique.common.dtovalidator.annotation.Id;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SingleWorkLikeDecrementRequest {
     @NotNull(message = "User's id must not be null")
-    @Id
     private Long userId;
     private Long singleWorkId;
 

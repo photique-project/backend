@@ -1,16 +1,15 @@
 package com.benchpress200.photique.singlework.domain.dto;
 
-import com.benchpress200.photique.common.domain.dto.NewTagRequest;
-import com.benchpress200.photique.common.domain.entity.Tag;
-import com.benchpress200.photique.common.dtovalidator.annotation.Enum;
-import com.benchpress200.photique.common.dtovalidator.annotation.Id;
-import com.benchpress200.photique.common.dtovalidator.annotation.Image;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
+import com.benchpress200.photique.singlework.validation.annotation.Enum;
+import com.benchpress200.photique.singlework.validation.annotation.Image;
+import com.benchpress200.photique.tag.domain.dto.NewTagRequest;
+import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -29,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class SingleWorkCreateRequest {
     @NotNull(message = "Id must not be null")
-    @Id
     private Long writerId;
 
     @NotNull(message = "Image must not be null")
@@ -62,6 +60,7 @@ public class SingleWorkCreateRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
+    @NotNull(message = "Date must not be blank.")
     @Size(max = 5, message = "Tag list size must be between 0 and 5")
     @Valid
     private List<NewTagRequest> tags;
@@ -73,10 +72,6 @@ public class SingleWorkCreateRequest {
     @NotBlank(message = "Description must not be blank.")
     @Size(max = 500, message = "Description must not exceed 30 characters")
     private String description;
-
-    public boolean hasTags() {
-        return tags != null && !tags.isEmpty();
-    }
 
     public SingleWork toSingleWorkEntity(
             final User writer,
@@ -108,5 +103,9 @@ public class SingleWorkCreateRequest {
                         .tag(tag)
                         .build())
                 .toList();
+    }
+
+    public List<String> getTags() {
+        return tags.stream().map(NewTagRequest::getName).toList();
     }
 }

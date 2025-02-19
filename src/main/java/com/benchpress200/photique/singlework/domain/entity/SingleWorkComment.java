@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -27,10 +29,12 @@ public class SingleWorkComment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User writer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "singlework_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private SingleWork singleWork;
 
     @Column(length = 300, nullable = false)

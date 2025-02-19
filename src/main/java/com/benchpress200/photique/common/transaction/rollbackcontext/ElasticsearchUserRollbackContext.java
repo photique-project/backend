@@ -1,43 +1,69 @@
 package com.benchpress200.photique.common.transaction.rollbackcontext;
 
 import com.benchpress200.photique.user.domain.entity.UserSearch;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 public class ElasticsearchUserRollbackContext {
-    private static final ThreadLocal<List<UserSearch>> documentsToSave = ThreadLocal.withInitial(ArrayList::new);
-    private static final ThreadLocal<List<UserSearch>> documentsToUpdate = ThreadLocal.withInitial(ArrayList::new);
-    private static final ThreadLocal<List<UserSearch>> documentsToDelete = ThreadLocal.withInitial(ArrayList::new);
+    private static final ThreadLocal<Context> documentToSave = ThreadLocal.withInitial(Context::new);
+    private static final ThreadLocal<Context> documentToUpdate = ThreadLocal.withInitial(Context::new);
+    private static final ThreadLocal<Context> documentToDelete = ThreadLocal.withInitial(Context::new);
 
-    public static void addDocumentsToSave(final UserSearch userSearch) {
-        documentsToSave.get().add(userSearch);
+    public static void addDocumentToSave(final UserSearch userSearch) {
+        documentToSave.get().setContext(userSearch);
     }
 
-    public static void addDocumentsToUpdate(final UserSearch userSearch) {
-        documentsToUpdate.get().add(userSearch);
+    public static void addDocumentToUpdate(final UserSearch userSearch) {
+        documentToUpdate.get().setContext(userSearch);
     }
 
-    public static void addDocumentsToDelete(final UserSearch userSearch) {
-        documentsToDelete.get().add(userSearch);
+    public static void addDocumentToDelete(final UserSearch userSearch) {
+        documentToDelete.get().setContext(userSearch);
     }
 
-
-    public static List<UserSearch> getDocumentsToSave() {
-        return new ArrayList<>(documentsToSave.get());
+    public static boolean hasDocumentToSave() {
+        return documentToSave.get().hasContext();
     }
 
-    public static List<UserSearch> getDocumentsToUpdate() {
-        return new ArrayList<>(documentsToUpdate.get());
+    public static boolean hasDocumentToUpdate() {
+        return documentToUpdate.get().hasContext();
     }
 
-    public static List<UserSearch> getDocumentsToDelete() {
-        return new ArrayList<>(documentsToDelete.get());
+    public static boolean hasDocumentToDelete() {
+        return documentToDelete.get().hasContext();
+    }
+
+    public static UserSearch getDocumentToSave() {
+        return documentToSave.get().getContext();
+    }
+
+    public static UserSearch getDocumentToUpdate() {
+        return documentToUpdate.get().getContext();
+    }
+
+    public static UserSearch getDocumentToDelete() {
+        return documentToDelete.get().getContext();
     }
 
     // 저장된 엘라스틱서치 쿼리 초기화
     public static void clear() {
-        documentsToSave.remove();
-        documentsToUpdate.remove();
-        documentsToDelete.remove();
+        documentToSave.remove();
+        documentToUpdate.remove();
+        documentToDelete.remove();
+    }
+
+    @Setter
+    @Getter
+    static class Context {
+        private UserSearch context;
+
+        public Context() {
+            context = null;
+        }
+
+        public boolean hasContext() {
+            return context != null;
+        }
+
     }
 }

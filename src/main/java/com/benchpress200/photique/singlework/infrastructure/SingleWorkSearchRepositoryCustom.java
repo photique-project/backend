@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface SingleWorkSearchRepositoryCustom {
-    Page<SingleWorkSearch> searchSingleWorks(
+    Page<SingleWorkSearch> search(
             Target target,
             List<String> keywords,
             List<Category> categories,

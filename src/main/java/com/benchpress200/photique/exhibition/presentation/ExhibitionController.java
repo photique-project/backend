@@ -1,8 +1,8 @@
 package com.benchpress200.photique.exhibition.presentation;
 
-import com.benchpress200.photique.auth.interceptor.Auth;
-import com.benchpress200.photique.auth.interceptor.OwnResource;
 import com.benchpress200.photique.common.constant.URL;
+import com.benchpress200.photique.common.interceptor.Auth;
+import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionService;
@@ -38,10 +38,10 @@ public class ExhibitionController {
     @Auth
     @OwnResource
     @PostMapping
-    public ApiSuccessResponse<?> createNewExhibition(
+    public ApiSuccessResponse<?> holdNewExhibition(
             @ModelAttribute @Valid final ExhibitionCreateRequest exhibitionCreateRequest
     ) {
-        exhibitionService.createNewExhibition(exhibitionCreateRequest);
+        exhibitionService.holdNewExhibition(exhibitionCreateRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 

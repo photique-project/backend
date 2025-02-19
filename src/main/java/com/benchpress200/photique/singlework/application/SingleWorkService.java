@@ -11,12 +11,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface SingleWorkService {
-    void createNewSingleWork(SingleWorkCreateRequest singleWorkCreateRequest);
+    void postNewSingleWork(SingleWorkCreateRequest singleWorkCreateRequest);
 
     SingleWorkDetailResponse getSingleWorkDetail(Long singleworkId);
 
-    Page<SingleWorkSearchResponse> searchSingleWorks(SingleWorkSearchRequest singleWorkSearchRequest,
-                                                     Pageable pageable);
+    Page<SingleWorkSearchResponse> searchSingleWorks(
+            SingleWorkSearchRequest singleWorkSearchRequest,
+            Pageable pageable
+    );
 
     void updateSingleWorkDetail(SingleWorkUpdateRequest singleWorkUpdateRequest);
 

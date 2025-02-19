@@ -1,6 +1,6 @@
 package com.benchpress200.photique.common.converter;
 
-import com.benchpress200.photique.common.domain.dto.NewTagRequest;
+import com.benchpress200.photique.tag.domain.dto.NewTagRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.List;

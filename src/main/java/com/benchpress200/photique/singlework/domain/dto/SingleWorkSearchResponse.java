@@ -42,12 +42,12 @@ public class SingleWorkSearchResponse {
         }
     }
 
-    public static SingleWorkSearchResponse from(final SingleWork singleWork) {
+    public static SingleWorkSearchResponse from(final SingleWork singleWork, final Long likeCount) {
         return SingleWorkSearchResponse.builder()
                 .id(singleWork.getId())
                 .writer(Writer.from(singleWork.getWriter()))
                 .image(singleWork.getImage())
-                .likeCount(singleWork.getLikeCount())
+                .likeCount(likeCount)
                 .viewCount(singleWork.getViewCount())
                 .build();
     }

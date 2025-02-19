@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface SingleWorkCommentService {
-    void createSingleWorkComment(SingleWorkCommentCreateRequest singleWorkCommentCreateRequest);
+    void addSingleWorkComment(SingleWorkCommentCreateRequest singleWorkCommentCreateRequest);
 
     void updateSingleWorkComment(SingleWorkCommentUpdateRequest singleWorkCommentUpdateRequest);
 

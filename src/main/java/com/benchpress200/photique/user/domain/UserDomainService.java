@@ -16,6 +16,8 @@ public interface UserDomainService {
 
     User findUser(Long userId);
 
+    User findUser(String email);
+
     void updatePassword(User user, String newPassword);
 
     void updateNickname(User user, String newNickname);
@@ -25,4 +27,6 @@ public interface UserDomainService {
     void updateProfileImage(User user, String newProfileImage);
 
     Page<UserSearch> searchUsers(String keyword, Pageable pageable);
+
+    void deleteUser(User user);
 }

@@ -1,6 +1,5 @@
 package com.benchpress200.photique.singlework.domain.dto;
 
-import com.benchpress200.photique.common.dtovalidator.annotation.Id;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -12,7 +11,6 @@ public class SingleWorkCommentUpdateRequest {
     private Long commentId;
 
     @NotNull(message = "Id must not be null")
-    @Id
     private Long writerId;
 
     @NotBlank(message = "Content must not be blank.")

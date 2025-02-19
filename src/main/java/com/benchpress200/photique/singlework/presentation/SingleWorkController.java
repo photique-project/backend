@@ -1,8 +1,8 @@
 package com.benchpress200.photique.singlework.presentation;
 
-import com.benchpress200.photique.auth.interceptor.Auth;
-import com.benchpress200.photique.auth.interceptor.OwnResource;
 import com.benchpress200.photique.common.constant.URL;
+import com.benchpress200.photique.common.interceptor.Auth;
+import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkService;
@@ -35,15 +35,26 @@ public class SingleWorkController {
 
     private final SingleWorkService singleWorkService;
 
+
     @Auth
     @OwnResource
     @PostMapping
-    public ApiSuccessResponse<?> createNewSingleWork(
+    public ApiSuccessResponse<?> postNewSingleWork(
             @ModelAttribute @Valid final SingleWorkCreateRequest singleWorkCreateRequest
     ) {
-        singleWorkService.createNewSingleWork(singleWorkCreateRequest);
+        singleWorkService.postNewSingleWork(singleWorkCreateRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
+
+
+    @GetMapping(URL.SINGLE_WORK_DATA)
+    public ApiSuccessResponse<?> getSingleWorkDetail(
+            @PathVariable final Long singleworkId
+    ) {
+        SingleWorkDetailResponse singleWorkDetailResponse = singleWorkService.getSingleWorkDetail(singleworkId);
+        return ResponseHandler.handleSuccessResponse(singleWorkDetailResponse, HttpStatus.OK);
+    }
+
 
     @GetMapping
     public ApiSuccessResponse<?> searchSingleWorks(
@@ -57,13 +68,6 @@ public class SingleWorkController {
         return ResponseHandler.handleSuccessResponse(singleWorkSearchPage, HttpStatus.OK);
     }
 
-    @GetMapping(URL.SINGLE_WORK_DATA)
-    public ApiSuccessResponse<?> getSingleWorkDetail(
-            @PathVariable final Long singleworkId
-    ) {
-        SingleWorkDetailResponse singleWorkDetailResponse = singleWorkService.getSingleWorkDetail(singleworkId);
-        return ResponseHandler.handleSuccessResponse(singleWorkDetailResponse, HttpStatus.OK);
-    }
 
     @Auth
     @OwnResource

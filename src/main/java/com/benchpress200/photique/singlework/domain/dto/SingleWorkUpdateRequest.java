@@ -1,12 +1,15 @@
 package com.benchpress200.photique.singlework.domain.dto;
 
-import com.benchpress200.photique.common.domain.dto.NewTagRequest;
-import com.benchpress200.photique.common.dtovalidator.annotation.Enum;
-import com.benchpress200.photique.common.dtovalidator.annotation.Image;
+import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
+import com.benchpress200.photique.singlework.validation.annotation.Enum;
+import com.benchpress200.photique.singlework.validation.annotation.Image;
+import com.benchpress200.photique.tag.domain.dto.NewTagRequest;
+import com.benchpress200.photique.tag.domain.entity.Tag;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
@@ -26,10 +29,10 @@ public class SingleWorkUpdateRequest {
     @Image
     private MultipartFile image; // 업데이트에서 null 이면 수정하지 않는 요청
 
-    @Size(max = 50, message = "The camera name must not exceed 50 characters")
+    @Size(min = 1, max = 50, message = "Camera name must not exceed 50 characters")
     private String camera; // 필수값이지만 업데이트에서는 수정 안한다면 null로 요청
 
-    @Size(max = 50, message = "The lens name must not exceed 50 characters")
+    @Size(max = 50, message = "Lens name must not exceed 50 characters")
     private String lens; // null이면 수정 x, null이 아닌 빈 값 들어오면 기본값세팅
 
     @Enum(enumClass = Aperture.class, message = "Invalid value of aperture")
@@ -41,7 +44,7 @@ public class SingleWorkUpdateRequest {
     @Enum(enumClass = ISO.class, message = "Invalid value of iso")
     private String iso; // null이면 수정 x, null이 아닌 빈 값 들어오면 기본값세팅
 
-    @Size(max = 50, message = "The location must not exceed 50 characters")
+    @Size(max = 50, message = "Location must not exceed 50 characters")
     private String location; // null이면 수정 x, null이 아닌 빈 값 들어오면 기본값세팅
 
     @Enum(enumClass = Category.class, message = "Invalid value of category")
@@ -50,93 +53,72 @@ public class SingleWorkUpdateRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date; // null이면 수정 x
 
-    @Size(max = 5, message = "The list size must be between 0 and 5")
+    @Size(max = 5, message = "The number of tag must be between 0 and 5")
     private List<NewTagRequest> tags; // null이면 수정 x
 
-    @Size(max = 30, message = "The title must not exceed 30 characters")
+    @Size(min = 1, max = 30, message = "Title must not exceed 30 characters")
     private String title; // null이면 수정 x
 
-    @Size(max = 500, message = "The description must not exceed 30 characters")
+    @Size(min = 1, max = 500, message = "Description must not exceed 30 characters")
     private String description; // null이면 수정 x
+
+    public List<String> getTags() {
+        if (tags == null) {
+            return null;
+        }
+
+        return tags.stream().map(NewTagRequest::getName).toList();
+    }
+
+    public List<SingleWorkTag> toSingleWorkTagEntities(
+            final SingleWork singleWork,
+            final List<Tag> tags
+    ) {
+        // null 일 경우 유지를 위한 null반환
+        if (tags == null) {
+            return null;
+        }
+
+        return tags.stream()
+                .map(tag -> SingleWorkTag.builder()
+                        .singleWork(singleWork)
+                        .tag(tag)
+                        .build())
+                .toList();
+    }
+
 
     public void withSingleWorkId(Long id) {
         this.id = id;
-    }
-
-    public boolean hasImage() {
-        return image != null;
-    }
-
-    public boolean isEmptyImage() {
-        return image.isEmpty();
-    }
-
-    public boolean hasCamera() {
-        return camera != null;
-    }
-
-    public boolean isEmptyCamera() {
-        return camera.isEmpty();
-    }
-
-    public boolean hasLens() {
-        return lens != null;
     }
 
     public boolean isEmptyLens() {
         return lens.isEmpty();
     }
 
-    public boolean hasAperture() {
-        return aperture != null;
-    }
 
     public boolean isEmptyAperture() {
         return aperture.isEmpty();
     }
 
-    public boolean hasShutterSpeed() {
-        return shutterSpeed != null;
-    }
 
     public boolean isEmptyShutterSpeed() {
         return shutterSpeed.isEmpty();
     }
 
-    public boolean hasIso() {
-        return iso != null;
-    }
 
     public boolean isEmptyIso() {
         return iso.isEmpty();
     }
 
-    public boolean hasLocation() {
-        return location != null;
-    }
 
     public boolean isEmptyLocation() {
         return location.isEmpty();
     }
 
-    public boolean hasCategory() {
-        return category != null;
-    }
-
-    public boolean isEmptyCategory() {
-        return category.isEmpty();
-    }
-
-    public boolean hasDate() {
-        return date != null;
-    }
 
     public boolean hasTags() {
         return tags != null;
-    }
-
-    public boolean isEmptyTags() {
-        return tags.isEmpty();
     }
 
     public boolean hasTitle() {

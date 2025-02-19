@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @NoArgsConstructor
@@ -26,10 +28,12 @@ public class Follow {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "follower_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User follower;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "following_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User following;
 
     @Column(name = "created_at", nullable = false)

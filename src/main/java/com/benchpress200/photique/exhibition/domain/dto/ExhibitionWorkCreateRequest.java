@@ -1,10 +1,8 @@
 package com.benchpress200.photique.exhibition.domain.dto;
 
-import com.benchpress200.photique.common.dtovalidator.annotation.Id;
-import com.benchpress200.photique.common.dtovalidator.annotation.Image;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
-import com.benchpress200.photique.user.domain.entity.User;
+import com.benchpress200.photique.singlework.validation.annotation.Image;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,10 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 @NoArgsConstructor
 public class ExhibitionWorkCreateRequest {
-    @NotNull(message = "Writer id must not be null")
-    @Id
-    private Long writerId;
-
     @NotNull(message = "Image must not be null")
     @Image
     private MultipartFile image;
@@ -35,12 +29,10 @@ public class ExhibitionWorkCreateRequest {
 
     public ExhibitionWork toEntity(
             final Exhibition exhibition,
-            final User writer,
             final String imageUrl
     ) {
         return ExhibitionWork.builder()
                 .exhibition(exhibition)
-                .writer(writer)
                 .image(imageUrl)
                 .title(title)
                 .description(description)

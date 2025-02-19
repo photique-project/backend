@@ -1,15 +1,14 @@
 package com.benchpress200.photique.user.presentation;
 
-import com.benchpress200.photique.auth.interceptor.Auth;
-import com.benchpress200.photique.auth.interceptor.OwnResource;
 import com.benchpress200.photique.common.constant.URL;
+import com.benchpress200.photique.common.interceptor.Auth;
+import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserService;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailResponse;
-import com.benchpress200.photique.user.domain.dto.UserIdResponse;
 import com.benchpress200.photique.user.domain.dto.UserSearchRequest;
 import com.benchpress200.photique.user.domain.dto.UserSearchResponse;
 import com.benchpress200.photique.user.domain.dto.UserUpdateRequest;
@@ -18,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -80,15 +78,6 @@ public class UserController {
     ) {
         Page<UserSearchResponse> userSearchResponsePage = userService.searchUsers(userSearchRequest, pageable);
         return ResponseHandler.handleSuccessResponse(userSearchResponsePage, HttpStatus.OK);
-    }
-
-    @Auth
-    @GetMapping(URL.GET_USER_ID)
-    public ApiSuccessResponse<?> getUserId(
-            @CookieValue("Authorization") final String accessToken
-    ) {
-        UserIdResponse userIdResponse = userService.getUserId(accessToken);
-        return ResponseHandler.handleSuccessResponse(userIdResponse, HttpStatus.OK);
     }
 
     @Auth

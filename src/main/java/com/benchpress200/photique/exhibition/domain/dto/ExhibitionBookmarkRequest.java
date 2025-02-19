@@ -1,6 +1,5 @@
 package com.benchpress200.photique.exhibition.domain.dto;
 
-import com.benchpress200.photique.common.dtovalidator.annotation.Id;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -15,7 +14,6 @@ import lombok.Setter;
 public class ExhibitionBookmarkRequest {
 
     @NotNull(message = "User's id must not be null")
-    @Id
     private Long userId;
     private Long exhibitionId;
 

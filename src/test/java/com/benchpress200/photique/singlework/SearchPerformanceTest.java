@@ -1,7 +1,5 @@
 package com.benchpress200.photique.singlework;
 
-import com.benchpress200.photique.common.domain.entity.Tag;
-import com.benchpress200.photique.common.infrastructure.TagRepository;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkSearchRequest;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
@@ -10,6 +8,8 @@ import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkRepository;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkSearchRepository;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkTagRepository;
+import com.benchpress200.photique.tag.domain.entity.Tag;
+import com.benchpress200.photique.tag.infrastructure.TagRepository;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.infrastructure.UserRepository;
 import java.time.LocalDate;
@@ -132,7 +132,7 @@ public class SearchPerformanceTest {
         System.out.println("MySQL 검색 실행시간: " + (duration / 1_000_000.0) + " ms");
 
         startTime = System.nanoTime();
-        singleWorkSearchRepository.searchSingleWorks(
+        singleWorkSearchRepository.search(
                 singleWorkSearchRequest.getTarget(),
                 singleWorkSearchRequest.getKeywords(),
                 singleWorkSearchRequest.getCategories(),

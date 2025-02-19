@@ -2,10 +2,10 @@ package com.benchpress200.photique.exception;
 
 
 import com.benchpress200.photique.auth.exception.AuthException;
-import com.benchpress200.photique.common.exception.ImageUploaderException;
 import com.benchpress200.photique.common.response.ApiFailureResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.exception.ExhibitionException;
+import com.benchpress200.photique.image.exception.ImageUploaderException;
 import com.benchpress200.photique.singlework.exception.SingleWorkException;
 import com.benchpress200.photique.user.exception.UserException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -4,6 +4,7 @@ import com.benchpress200.photique.auth.application.AuthService;
 import com.benchpress200.photique.auth.domain.dto.AuthMailRequest;
 import com.benchpress200.photique.auth.domain.dto.CodeValidationRequest;
 import com.benchpress200.photique.auth.domain.dto.LoginRequest;
+import com.benchpress200.photique.auth.domain.dto.WhoAmIResponse;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +32,7 @@ public class AuthController {
             @RequestBody final LoginRequest loginRequest,
             final HttpServletResponse response
     ) {
+        // 응답 객체 조작은 컨트롤러 단에서 처리
         Cookie accessTokenCookie = authService.login(loginRequest);
         response.addCookie(accessTokenCookie);
 
@@ -47,11 +50,19 @@ public class AuthController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping(URL.SEND_MAIL)
-    public ApiSuccessResponse<?> sendAuthMail(
+    @PostMapping(URL.JOIN_MAIL)
+    public ApiSuccessResponse<?> sendJoinAuthMail(
             @RequestBody @Valid final AuthMailRequest authMailRequest
     ) {
-        authService.sendAuthMail(authMailRequest);
+        authService.sendJoinAuthMail(authMailRequest);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
+    }
+
+    @PostMapping(URL.PASSWORD_MAIL)
+    public ApiSuccessResponse<?> sendPasswordAuthMail(
+            @RequestBody @Valid final AuthMailRequest authMailRequest
+    ) {
+        authService.sendPasswordAuthMail(authMailRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 
@@ -61,5 +72,13 @@ public class AuthController {
     ) {
         authService.validateAuthMailCode(codeValidationRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping(URL.WHO_AM_I)
+    public ApiSuccessResponse<?> whoAmI(
+            @CookieValue("Authorization") final String accessToken
+    ) {
+        WhoAmIResponse whoAmIResponse = authService.whoAmI(accessToken);
+        return ResponseHandler.handleSuccessResponse(whoAmIResponse, HttpStatus.OK);
     }
 }

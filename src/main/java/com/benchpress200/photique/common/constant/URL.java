@@ -8,14 +8,15 @@ public class URL {
     public static final String AUTH_DOMAIN = "/auth";
     public static final String LOGIN = "/login";
     public static final String LOGOUT = "/logout";
-    public static final String SEND_MAIL = "/mail";
+    public static final String JOIN_MAIL = "/mail/join";
+    public static final String PASSWORD_MAIL = "/mail/password";
     public static final String VALIDATE_CODE = "/code";
     public static final String VALIDATE_NICKNAME = "/nickname";
 
     // USER
     public static final String USER_DOMAIN = "/users";
     public static final String USER_DATA = "/{userId}";
-    public static final String GET_USER_ID = "/id";
+    public static final String WHO_AM_I = "/me";
 
     // FOLLOW
     public static final String FOLLOW_DOMAIN = "/follows";

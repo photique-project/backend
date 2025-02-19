@@ -1,12 +1,9 @@
 package com.benchpress200.photique.singlework.application;
 
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.UpdateRequest;
-import com.benchpress200.photique.common.domain.dto.NewTagRequest;
-import com.benchpress200.photique.common.domain.entity.Tag;
-import com.benchpress200.photique.common.infrastructure.TagRepository;
-import com.benchpress200.photique.image.infrastructure.ImageUploader;
+import com.benchpress200.photique.image.domain.ImageDomainService;
+import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
+import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeDecrementRequest;
@@ -18,123 +15,89 @@ import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
-import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
-import com.benchpress200.photique.singlework.domain.enumeration.ISO;
-import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
-import com.benchpress200.photique.singlework.exception.SingleWorkException;
-import com.benchpress200.photique.singlework.infrastructure.SingleWorkCommentRepository;
-import com.benchpress200.photique.singlework.infrastructure.SingleWorkLikeRepository;
-import com.benchpress200.photique.singlework.infrastructure.SingleWorkRepository;
-import com.benchpress200.photique.singlework.infrastructure.SingleWorkSearchRepository;
-import com.benchpress200.photique.singlework.infrastructure.SingleWorkTagRepository;
+import com.benchpress200.photique.singlework.domain.enumeration.Target;
+import com.benchpress200.photique.tag.domain.TagDomainService;
+import com.benchpress200.photique.tag.domain.entity.Tag;
+import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.infrastructure.UserRepository;
 import jakarta.transaction.Transactional;
-import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class SingleWorkServiceImpl implements SingleWorkService {
-    private final SingleWorkCommentRepository singleWorkCommentRepository;
     @Value("${cloud.aws.s3.path.single-work}")
     private String imagePath;
 
+    private final ImageDomainService imageDomainService;
+    private final UserDomainService userDomainService;
+    private final SingleWorkDomainService singleWorkDomainService;
+    private final SingleWorkCommentDomainService singleWorkCommentDomainService;
+    private final TagDomainService tagDomainService;
 
-    private final ImageUploader imageUploader;
-    private final UserRepository userRepository;
-    private final SingleWorkRepository singleWorkRepository;
-    private final SingleWorkTagRepository singleWorkTagRepository;
-    private final TagRepository tagRepository;
-    private final SingleWorkSearchRepository singleWorkSearchRepository;
-    private final SingleWorkLikeRepository singleWorkLikeRepository;
-    private final ElasticsearchClient elasticsearchClient;
+    
+    @Override
+    @Transactional
+    public void postNewSingleWork(final SingleWorkCreateRequest singleWorkCreateRequest) {
+        // 작성자 조회
+        Long writerId = singleWorkCreateRequest.getWriterId();
+        User writer = userDomainService.findUser(writerId);
+
+        // 이미지 업로드 & 단일작품 저장
+        MultipartFile image = singleWorkCreateRequest.getImage();
+        String imageUrl = imageDomainService.upload(image, imagePath);
+
+        // 일단 단일작품만 저장
+        SingleWork singleWork = singleWorkCreateRequest.toSingleWorkEntity(writer, imageUrl);
+        singleWork = singleWorkDomainService.createNewSingleWork(singleWork);
+
+        // 일단 태그를 엔티티로 꺼내서 태그도메인서비스로 존재하지않던것들은 구분해서 새로저장
+        List<String> tagNames = singleWorkCreateRequest.getTags();
+        List<Tag> tags = tagDomainService.createNewTags(tagNames);
+
+        // 그 다음 단일작품 태그 엔티티로 꺼내서 저장
+        List<SingleWorkTag> singleWorkTags = singleWorkCreateRequest.toSingleWorkTagEntities(singleWork, tags);
+        singleWorkDomainService.createNewSingleWorkTags(singleWorkTags);
+
+        // 엘라스틱 서치 저장
+        SingleWorkSearch singleWorkSearch = SingleWorkSearch.of(singleWork, writer, tagNames);
+        singleWorkDomainService.createNewSingleWorkSearch(singleWorkSearch);
+    }
 
 
     @Override
-    public void createNewSingleWork(final SingleWorkCreateRequest singleWorkCreateRequest) {
+    @Transactional
+    public SingleWorkDetailResponse getSingleWorkDetail(final Long singleWorkId) {
+        // 단일작품 조회
+        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
 
-        // 작성자 조회
-        final Long writerId = singleWorkCreateRequest.getWriterId();
-        final User writer = userRepository.findById(writerId).orElseThrow(
-                () -> new SingleWorkException("User with ID " + writerId + " is not found.", HttpStatus.NOT_FOUND)
+        // 조회수 증가
+        singleWorkDomainService.incrementView(singleWork);
+
+        // 단일작품 태그 리스트 조회
+        List<SingleWorkTag> singleWorkTags = singleWorkDomainService.findSingleWorkTag(singleWork);
+
+        // 단일작품 태그와 매칭되는 태그 조회
+        List<Tag> tags = tagDomainService.findTags(singleWorkTags);
+
+        // 단일작품 좋아요 수 조회
+        Long likeCount = singleWorkDomainService.countLike(singleWork);
+
+        return SingleWorkDetailResponse.from(
+                singleWork,
+                tags,
+                likeCount
         );
-
-        // 이미지 업로드 & 단일작품 저장
-        final String imageUrl = imageUploader.upload(singleWorkCreateRequest.getImage(), imagePath);
-        final SingleWork savedSingleWork = singleWorkRepository.save(
-                singleWorkCreateRequest.toSingleWorkEntity(writer, imageUrl));
-
-        // 태그 데이터 유무 확인
-        List<String> tagNames = null;
-        if (singleWorkCreateRequest.hasTags()) {
-            List<NewTagRequest> tags = singleWorkCreateRequest.getTags();
-
-            // 태그이름 리스트 생성
-            tagNames = tags.stream()
-                    .map(NewTagRequest::getName)
-                    .collect(Collectors.toList());
-
-            // 데이터베이스에 존재하는 태그이름 리스트 생성
-            List<String> existingTagNames = tagRepository.findAllByNameIn(tagNames)
-                    .stream()
-                    .map(Tag::getName)
-                    .toList();
-
-            // 존재하지 않는 태그 리스트 생성
-            List<Tag> newTags = tags.stream()
-                    .filter(tagRequest -> !existingTagNames.contains(tagRequest.getName()))
-                    .map(NewTagRequest::toEntity)
-                    .toList();
-
-            // 새로운 태그 저장
-            if (!newTags.isEmpty()) {
-                tagRepository.saveAll(newTags);
-            }
-
-            // 요청한 모든 태그 엔티티 조회
-            List<Tag> allTags = tagRepository.findAllByNameIn(tagNames);
-
-            // SingleWorkTag 엔티티 생성
-            List<SingleWorkTag> singleWorkTags = singleWorkCreateRequest.toSingleWorkTagEntities(savedSingleWork,
-                    allTags);
-
-            // SingleWorkTag 엔티티 저장
-            singleWorkTagRepository.saveAll(singleWorkTags);
-        }
-
-        // 엘라스틱 서치 저장
-        SingleWorkSearch singleWorkSearch = SingleWorkSearch.builder()
-                .id(savedSingleWork.getId())
-                .image(savedSingleWork.getImage())
-                .writerId(writer.getId())
-                .writerNickname(writer.getNickname())
-                .writerProfileImage(writer.getProfileImage())
-                .title(savedSingleWork.getTitle())
-                .tags(tagNames)
-                .category(savedSingleWork.getCategory().getValue())
-                .likeCount(savedSingleWork.getLikeCount())
-                .viewCount(savedSingleWork.getViewCount())
-                .commentCount(0L)
-                .createdAt(savedSingleWork.getCreatedAt())
-                .build();
-
-        singleWorkSearchRepository.save(singleWorkSearch);
     }
-
 
     @Override
     public Page<SingleWorkSearchResponse> searchSingleWorks(
@@ -150,13 +113,16 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 //                pageable
 //        );
 
-        Page<SingleWorkSearch> singleWorkSearchPage = singleWorkSearchRepository.searchSingleWorks(
-                singleWorkSearchRequest.getTarget(),
-                singleWorkSearchRequest.getKeywords(),
-                singleWorkSearchRequest.getCategories(),
-                pageable
-        );
+        // 검색조건
+        Target target = singleWorkSearchRequest.getTarget();
+        List<String> keywords = singleWorkSearchRequest.getKeywords();
+        List<Category> categories = singleWorkSearchRequest.getCategories();
 
+        // 단일작품 검색
+        Page<SingleWorkSearch> singleWorkSearchPage = singleWorkDomainService.searchSingleWorks(target, keywords,
+                categories, pageable);
+
+        // 응답 dto 로 변환
         List<SingleWorkSearchResponse> singleWorkSearchResponsePage = singleWorkSearchPage.stream()
                 .map(SingleWorkSearchResponse::from)
                 .toList();
@@ -164,354 +130,118 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         return new PageImpl<>(singleWorkSearchResponsePage, pageable, singleWorkSearchPage.getTotalElements());
     }
 
-
     @Override
-    public SingleWorkDetailResponse getSingleWorkDetail(final Long singleWorkId) {
-        // elastic search 데이터 업데이트를 위한 컬렉션
-        Map<String, Object> updateFields = new HashMap<>();
-
-        SingleWork singleWork = singleWorkRepository.findById(singleWorkId).orElseThrow(
-                () -> new SingleWorkException("SingleWork with ID " + singleWorkId + " is not found.",
-                        HttpStatus.NOT_FOUND)
-        );
-
-        singleWork.incrementView();
-        updateFields.put("viewCount", singleWork.getViewCount());
-
-        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
-                .index("singleworks")
-                .id(singleWork.getId().toString())
-                .doc(updateFields)
-        );
-
-        try {
-            elasticsearchClient.update(updateRequest, Map.class);
-        } catch (IOException e) {
-            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        List<SingleWorkTag> singleWorkTags = singleWorkTagRepository.findBySingleWorkId(singleWorkId);
-
-        List<Tag> tags = singleWorkTags.stream()
-                .map(SingleWorkTag::getTag)
-                .toList();
-
-        return SingleWorkDetailResponse.from(
-                singleWork,
-                tags
-        );
-    }
-
-    @Override
+    @Transactional
     public void updateSingleWorkDetail(final SingleWorkUpdateRequest singleWorkUpdateRequest) {
+        // 단일작품 조회
         Long singleWorkId = singleWorkUpdateRequest.getId();
-        SingleWork singleWork = singleWorkRepository.findById(singleWorkId).orElseThrow(
-                () -> new SingleWorkException("SingleWork with ID " + singleWorkId + " is not found.",
-                        HttpStatus.NOT_FOUND)
-        );
+        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
 
-        // elastic search 데이터 업데이트를 위한 컬렉션
-        Map<String, Object> updateFields = new HashMap<>();
+        // 이미지 업데이트
+        String oldImageUrl = singleWork.getImage();
+        MultipartFile newImage = singleWorkUpdateRequest.getImage();
+        String updatedNewImageUrl = imageDomainService.update(newImage, oldImageUrl, imagePath); // 이미지 업데이트 로직확인
+        singleWorkDomainService.updateImage(singleWork, updatedNewImageUrl);
 
-        // 업데이트 이미지가 있다면
-        if (singleWorkUpdateRequest.hasImage()) {
-            if (singleWorkUpdateRequest.isEmptyImage()) { // 빈 이미지로 업데이트 불가능
-                throw new SingleWorkException("Invalid Image", HttpStatus.BAD_REQUEST);
-            }
+        // 카메라 업데이트
+        String newCamera = singleWorkUpdateRequest.getCamera();
+        singleWorkDomainService.updateCamera(singleWork, newCamera);
 
-            String image = singleWork.getImage();
-            image = imageUploader.update(
-                    singleWorkUpdateRequest.getImage(),
-                    image,
-                    imagePath
-            );
+        // 렌즈 업데이트
+        String newLens = singleWorkUpdateRequest.getLens();
+        singleWorkDomainService.updateLens(singleWork, newLens);
 
-            singleWork.updateImage(image);
-            updateFields.put("image", image);
-        }
+        // 조리개 값 업데이트
+        String newAperture = singleWorkUpdateRequest.getAperture();
+        singleWorkDomainService.updateAperture(singleWork, newAperture);
 
-        // 업데이트 카메라가 있다면
-        if (singleWorkUpdateRequest.hasCamera()) {
-            if (singleWorkUpdateRequest.isEmptyCamera()) { // 빈 카메라 업데이트 불가능
-                throw new SingleWorkException("Invalid Camera", HttpStatus.BAD_REQUEST);
-            }
+        // 셔터스피드 업데이트
+        String newShutterSpeed = singleWorkUpdateRequest.getShutterSpeed();
+        singleWorkDomainService.updateShutterSpeed(singleWork, newShutterSpeed);
 
-            String camera = singleWorkUpdateRequest.getCamera();
-            singleWork.updateCamera(camera);
-            updateFields.put("camera", camera);
-        }
+        // ISO 업데이트
+        String newIso = singleWorkUpdateRequest.getIso();
+        singleWorkDomainService.updateIso(singleWork, newIso);
 
-        // 업데이트 렌즈가 있다면
-        if (singleWorkUpdateRequest.hasLens()) {
-            String lens = getLens(singleWorkUpdateRequest); // null이 아닌 빈 값이라면 기본값으로 null 세팅
-            singleWork.updateLens(lens);
-            updateFields.put("lens", lens);
-        }
+        // 위치 업데이트
+        String newLocation = singleWorkUpdateRequest.getLocation();
+        singleWorkDomainService.updateLocation(singleWork, newLocation);
 
-        // 업데이트 조리개 값이 있다면
-        if (singleWorkUpdateRequest.hasAperture()) {
-            Aperture aperture = getAperture(singleWorkUpdateRequest);
-            singleWork.updateAperture(aperture);
-            updateFields.put("aperture", aperture);
-        }
+        // 카테고리 업데이트
+        String newCategory = singleWorkUpdateRequest.getCategory();
+        singleWorkDomainService.updateCategory(singleWork, newCategory);
 
-        // 업데이트 셔터스피드 값이 있다면
-        if (singleWorkUpdateRequest.hasShutterSpeed()) {
-            ShutterSpeed shutterSpeed = getShutterSpeed(singleWorkUpdateRequest);
-            singleWork.updateShutterSpeed(shutterSpeed);
-            updateFields.put("shutterSpeed", shutterSpeed);
-        }
+        // 날짜 업데이트
+        LocalDate newDate = singleWorkUpdateRequest.getDate();
+        singleWorkDomainService.updateDate(singleWork, newDate);
 
-        // 업데이트 ISO 값이 있다면
-        if (singleWorkUpdateRequest.hasIso()) {
-            ISO iso = getIso(singleWorkUpdateRequest);
-            singleWork.updateIso(iso);
-            updateFields.put("iso", iso);
-        }
+        // 태그 업데이트
+        List<String> newTagNames = singleWorkUpdateRequest.getTags();
+        List<Tag> tags = tagDomainService.createNewTags(newTagNames);
+        singleWorkDomainService.updateTags(singleWork, tags);
 
-        // 업데이트 위치가 있다면
-        if (singleWorkUpdateRequest.hasLocation()) {
-            String location = getLocation(singleWorkUpdateRequest);
-            singleWork.updateLocation(location);
-            updateFields.put("location", location);
-        }
+        // 타이틀 업데이트
+        String newTitle = singleWorkUpdateRequest.getTitle();
+        singleWorkDomainService.updateTitle(singleWork, newTitle);
 
-        // 업데이트 카테고리가 있다면
-        if (singleWorkUpdateRequest.hasCategory()) {
-            if (singleWorkUpdateRequest.isEmptyCategory()) {
-                throw new SingleWorkException("Invalid Category", HttpStatus.BAD_REQUEST);
-            }
-
-            String category = singleWorkUpdateRequest.getCategory();
-            singleWork.updateCategory(Category.fromValue(category));
-            updateFields.put("category", category);
-        }
-
-        // 업데이트 날짜가 있다면
-        if (singleWorkUpdateRequest.hasDate()) {
-            LocalDate date = singleWorkUpdateRequest.getDate();
-            singleWork.updateDate(date);
-            updateFields.put("date", date);
-        }
-
-        // 업데이트 태그가 있다면
-        if (singleWorkUpdateRequest.hasTags()) {
-            // 기존 태그 모두 삭제하고
-            singleWorkTagRepository.deleteBySingleWorkId(singleWorkId);
-
-            List<NewTagRequest> tags = singleWorkUpdateRequest.getTags();
-
-            // 태그이름 리스트 생성
-            List<String> tagNames = tags.stream()
-                    .map(NewTagRequest::getName)
-                    .collect(Collectors.toList());
-
-            // 데이터베이스에 존재하는 태그이름 리스트 생성
-            List<String> existingTagNames = tagRepository.findAllByNameIn(tagNames)
-                    .stream()
-                    .map(Tag::getName)
-                    .toList();
-
-            // 존재하지 않는 태그 리스트 생성
-            List<Tag> newTags = tags.stream()
-                    .filter(tagRequest -> !existingTagNames.contains(tagRequest.getName()))
-                    .map(NewTagRequest::toEntity)
-                    .toList();
-
-            // 새로운 태그 저장
-            if (!newTags.isEmpty()) {
-                tagRepository.saveAll(newTags);
-            }
-
-            // 요청한 모든 태그 엔티티 조회
-            List<Tag> allTags = tagRepository.findAllByNameIn(tagNames);
-
-            // SingleWorkTag 엔티티 생성
-            List<SingleWorkTag> singleWorkTags = allTags.stream()
-                    .map(tag -> SingleWorkTag.builder()
-                            .singleWork(singleWork)
-                            .tag(tag)
-                            .build())
-                    .toList();
-
-            // SingleWorkTag 엔티티 저장
-            singleWorkTagRepository.saveAll(singleWorkTags);
-            updateFields.put("tags", tagNames);
-        }
-
-        // 업데이트 타이틀이 있다면
-        if (singleWorkUpdateRequest.hasTitle()) {
-            if (singleWorkUpdateRequest.isEmptyTitle()) {
-                throw new SingleWorkException("Invalid Title", HttpStatus.BAD_REQUEST);
-            }
-
-            String title = singleWorkUpdateRequest.getTitle();
-            singleWork.updateTitle(title);
-            updateFields.put("title", title);
-        }
-
-        // 업데이트 설명이 있다면
-        if (singleWorkUpdateRequest.hasDescription()) {
-            if (singleWorkUpdateRequest.isEmptyDescription()) {
-                throw new SingleWorkException("Invalid Description", HttpStatus.BAD_REQUEST);
-            }
-
-            String description = singleWorkUpdateRequest.getDescription();
-            singleWork.updateDescription(description);
-            updateFields.put("description", description);
-        }
-
-        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
-                .index("singleworks")
-                .id(singleWork.getId().toString())
-                .doc(updateFields)
-        );
-
-        try {
-            elasticsearchClient.update(updateRequest, Map.class);
-        } catch (IOException e) {
-            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        // 설명 업데이트
+        String newDescription = singleWorkUpdateRequest.getDescription();
+        singleWorkDomainService.updateDescription(singleWork, newDescription);
     }
 
     @Override
+    @Transactional
     public void removeSingleWork(final Long singleworkId) {
-        SingleWork singleWork = singleWorkRepository.findById(singleworkId).orElseThrow(
-                () -> new SingleWorkException("SingleWork with id " + singleworkId + " not found", HttpStatus.NOT_FOUND)
-        );
+        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleworkId);
 
         // s3 이미지 삭제
         String imageUrl = singleWork.getImage();
-        if (imageUrl != null) {
-            imageUploader.delete(imageUrl);
-        }
+        imageDomainService.delete(imageUrl);
 
-        // 관련 댓글 삭제
-        singleWorkCommentRepository.deleteBySingleWorkId(singleworkId);
+        // 단일작품 좋아요 삭제
+        singleWorkDomainService.deleteSingleWorkLike(singleWork);
 
-        // 관련 태그 삭제
-        singleWorkTagRepository.deleteBySingleWorkId(singleworkId);
+        // 단일작품 태그 삭제
+        singleWorkDomainService.deleteSingleWorkTag(singleWork);
 
-        // 좋아요 기록 삭제
-        singleWorkLikeRepository.deleteBySingleWorkId(singleworkId);
+        // 단일작품 댓글 삭제
+        singleWorkCommentDomainService.deleteComment(singleWork);
 
-        // 작품 삭제
-        singleWorkRepository.deleteById(singleworkId);
-
-        // 엘라스틱 서치 삭제
-        singleWorkSearchRepository.deleteById(singleworkId);
+        // 단일작품 삭제
+        singleWorkDomainService.deleteSingleWork(singleWork);
     }
 
     @Override
+    @Transactional
     public void incrementLike(final SingleWorkLikeIncrementRequest singleWorkLikeIncrementRequest) {
-        // elastic search 데이터 업데이트를 위한 컬렉션
-        Map<String, Object> updateFields = new HashMap<>();
-
         // 유저존재확인
         Long userId = singleWorkLikeIncrementRequest.getUserId();
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new SingleWorkException("User with id " + userId + " not found", HttpStatus.NOT_FOUND)
-        );
+        User user = userDomainService.findUser(userId);
 
         // 작품존재확인
         Long singleWorkId = singleWorkLikeIncrementRequest.getSingleWorkId();
-        SingleWork singleWork = singleWorkRepository.findById(singleWorkId).orElseThrow(
-                () -> new SingleWorkException("SingleWork with id " + singleWorkId + " not found", HttpStatus.NOT_FOUND)
-        );
+        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
+
+        // 이미 좋아요 추가헀는지 확인
+        singleWorkDomainService.isLiked(user, singleWork);
 
         // 작품 좋아요 추가
         SingleWorkLike singleWorkLike = singleWorkLikeIncrementRequest.toEntity(user, singleWork);
-        singleWorkLikeRepository.save(singleWorkLike);
-        singleWork.incrementLike();
-
-        updateFields.put("likeCount", singleWork.getLikeCount());
-
-        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
-                .index("singleworks")
-                .id(singleWork.getId().toString())
-                .doc(updateFields)
-        );
-
-        try {
-            elasticsearchClient.update(updateRequest, Map.class);
-        } catch (IOException e) {
-            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        singleWorkDomainService.incrementLike(singleWorkLike);
     }
 
     @Override
+    @Transactional
     public void decrementLike(final SingleWorkLikeDecrementRequest singleWorkLikeDecrementRequest) {
-        // elastic search 데이터 업데이트를 위한 컬렉션
-        Map<String, Object> updateFields = new HashMap<>();
-
         // 유저존재확인
         Long userId = singleWorkLikeDecrementRequest.getUserId();
-        userRepository.findById(userId).orElseThrow(
-                () -> new SingleWorkException("User with id " + userId + " not found", HttpStatus.NOT_FOUND)
-        );
+        User user = userDomainService.findUser(userId);
 
         // 작품존재확인
         Long singleWorkId = singleWorkLikeDecrementRequest.getSingleWorkId();
-        SingleWork singleWork = singleWorkRepository.findById(singleWorkId).orElseThrow(
-                () -> new SingleWorkException("SingleWork with id " + singleWorkId + " not found", HttpStatus.NOT_FOUND)
-        );
+        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
 
-        singleWorkLikeRepository.deleteByUserIdAndSingleWorkId(userId, singleWorkId);
-        singleWork.decrementLike();
-
-        updateFields.put("likeCount", singleWork.getLikeCount());
-
-        UpdateRequest<Map<String, Object>, ?> updateRequest = UpdateRequest.of(u -> u
-                .index("singleworks")
-                .id(singleWork.getId().toString())
-                .doc(updateFields)
-        );
-
-        try {
-            elasticsearchClient.update(updateRequest, Map.class);
-        } catch (IOException e) {
-            throw new SingleWorkException("Elastic search network error", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        // 작품 좋아요 삭제
+        singleWorkDomainService.decrementLike(user, singleWork);
     }
-
-    private String getLocation(SingleWorkUpdateRequest singleWorkUpdateRequest) {
-        if (singleWorkUpdateRequest.isEmptyLocation()) {
-            return null;
-        }
-
-        return singleWorkUpdateRequest.getLocation();
-    }
-
-    private ISO getIso(SingleWorkUpdateRequest singleWorkUpdateRequest) {
-        if (singleWorkUpdateRequest.isEmptyIso()) {
-            return null;
-        }
-
-        return ISO.fromValue(singleWorkUpdateRequest.getShutterSpeed());
-    }
-
-    private ShutterSpeed getShutterSpeed(SingleWorkUpdateRequest singleWorkUpdateRequest) {
-        if (singleWorkUpdateRequest.isEmptyShutterSpeed()) {
-            return null;
-        }
-
-        return ShutterSpeed.fromValue(singleWorkUpdateRequest.getShutterSpeed());
-    }
-
-    private Aperture getAperture(SingleWorkUpdateRequest singleWorkUpdateRequest) {
-        if (singleWorkUpdateRequest.isEmptyAperture()) {
-            return null;
-        }
-
-        return Aperture.fromValue(singleWorkUpdateRequest.getAperture());
-    }
-
-    private String getLens(SingleWorkUpdateRequest singleWorkUpdateRequest) {
-        if (singleWorkUpdateRequest.isEmptyLens()) {
-            return null;
-        }
-
-        return singleWorkUpdateRequest.getLens();
-    }
-
 }

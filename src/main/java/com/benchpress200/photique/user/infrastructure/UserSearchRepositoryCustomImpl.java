@@ -10,39 +10,16 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
 import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.document.Document;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 
 @RequiredArgsConstructor
 public class UserSearchRepositoryCustomImpl implements UserSearchRepositoryCustom {
-    private final ElasticsearchOperations elasticsearchOperations;
     private final ElasticsearchClient elasticsearchClient;
-
-    @Override
-    public void update(Object document) {
-        Document esDocument = elasticsearchOperations.getElasticsearchConverter().mapObject(document);
-        UpdateQuery updateQuery = UpdateQuery.builder(esDocument.getId())
-                .withDocument(esDocument)
-                .withDocAsUpsert(true)
-                .build();
-
-        String indexName = Objects.requireNonNull(elasticsearchOperations.getElasticsearchConverter()
-                        .getMappingContext()
-                        .getPersistentEntity(document.getClass())) // 엔티티 정보를 가져옴
-                .getIndexCoordinates() // 인덱스 정보 추출
-                .getIndexName(); // 인덱스명 가져오기
-
-        elasticsearchOperations.update(updateQuery, IndexCoordinates.of(indexName));
-    }
 
     @Override
     public Page<UserSearch> search(

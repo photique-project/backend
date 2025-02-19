@@ -11,4 +11,8 @@ public interface ExhibitionBookmarkRepository extends JpaRepository<ExhibitionBo
     boolean existsByUserAndExhibition(User user, Exhibition exhibition);
 
     void deleteByUserAndExhibition(User user, Exhibition exhibition);
+
+    void deleteByUser(User user);
+
+    void deleteByExhibition(Exhibition exhibition);
 }

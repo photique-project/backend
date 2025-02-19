@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -34,6 +36,7 @@ public class SingleWork {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User writer;
 
     @Column(length = 2048, nullable = false)
@@ -71,9 +74,6 @@ public class SingleWork {
     @Column(length = 500, nullable = false)
     private String description;
 
-    @Column(name = "like_count", nullable = false)
-    private Long likeCount;
-
     @Column(name = "view_count", nullable = false)
     private Long viewCount;
 
@@ -82,7 +82,6 @@ public class SingleWork {
 
     @PrePersist
     public void prePersist() {
-        likeCount = 0L;
         viewCount = 0L;
         createdAt = LocalDateTime.now();
     }
@@ -158,14 +157,6 @@ public class SingleWork {
 
     public void updateDescription(final String description) {
         this.description = description;
-    }
-
-    public void incrementLike() {
-        likeCount++;
-    }
-
-    public void decrementLike() {
-        likeCount--;
     }
 
     public void incrementView() {

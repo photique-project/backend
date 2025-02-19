@@ -1,12 +1,14 @@
 package com.benchpress200.photique.singlework.infrastructure;
 
-import com.benchpress200.photique.common.domain.entity.QTag;
+
 import com.benchpress200.photique.singlework.domain.entity.QSingleWork;
 import com.benchpress200.photique.singlework.domain.entity.QSingleWorkComment;
+import com.benchpress200.photique.singlework.domain.entity.QSingleWorkLike;
 import com.benchpress200.photique.singlework.domain.entity.QSingleWorkTag;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
+import com.benchpress200.photique.tag.domain.entity.QTag;
 import com.benchpress200.photique.user.domain.entity.QUser;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
@@ -108,7 +110,9 @@ public class SingleWorkRepositoryImpl implements SingleWorkRepositoryCustom {
                         case "createdAt":
                             return new OrderSpecifier<>(direction, sw.createdAt);
                         case "likeCount":
-                            return new OrderSpecifier<>(direction, sw.likeCount);
+                            NumberExpression<Long> likeCount = Expressions.numberTemplate(Long.class,
+                                    "count({0})", QSingleWorkLike.singleWorkLike.id);
+                            return new OrderSpecifier<>(direction, likeCount);
                         case "viewCount":
                             return new OrderSpecifier<>(direction, sw.viewCount);
                         case "commentCount":

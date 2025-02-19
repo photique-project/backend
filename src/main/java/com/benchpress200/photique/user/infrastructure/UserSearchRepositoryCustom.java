@@ -5,7 +5,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface UserSearchRepositoryCustom {
-    void update(Object document);
-
     Page<UserSearch> search(String keyword, Pageable pageable);
 }

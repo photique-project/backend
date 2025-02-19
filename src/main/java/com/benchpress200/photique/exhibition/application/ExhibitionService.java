@@ -12,7 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ExhibitionService {
-    void createNewExhibition(ExhibitionCreateRequest exhibitionCreateRequest);
+    void holdNewExhibition(ExhibitionCreateRequest exhibitionCreateRequest);
 
     ExhibitionDetailResponse getExhibitionDetail(Long exhibitionId);
 
