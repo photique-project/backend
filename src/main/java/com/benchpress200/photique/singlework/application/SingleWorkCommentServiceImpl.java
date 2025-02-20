@@ -1,5 +1,7 @@
 package com.benchpress200.photique.singlework.application;
 
+import com.benchpress200.photique.notification.domain.NotificationDomainService;
+import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
 import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentCreateRequest;
@@ -25,6 +27,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
     private final UserDomainService userDomainService;
     private final SingleWorkDomainService singleWorkDomainService;
     private final SingleWorkCommentDomainService singleWorkCommentDomainService;
+    private final NotificationDomainService notificationDomainService;
 
     @Override
     @Transactional
@@ -40,6 +43,11 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
         // 단일작품 댓글 저장
         SingleWorkComment singleWorkComment = singleWorkCommentCreateRequest.toEntity(writer, singleWork);
         singleWorkCommentDomainService.addComment(singleWorkComment);
+
+        // 알림 생성
+        Long singleWorkWriterId = singleWork.getWriter().getId();
+        User singleWorkWriter = userDomainService.findUser(singleWorkWriterId);
+        notificationDomainService.pushNewNotification(singleWorkWriter, Type.SINGLE_WORK_COMMENT, singleWorkId);
     }
 
     @Override

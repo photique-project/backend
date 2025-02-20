@@ -1,5 +1,7 @@
 package com.benchpress200.photique.user.application;
 
+import com.benchpress200.photique.notification.domain.NotificationDomainService;
+import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.user.domain.FollowDomainService;
 import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.dto.FollowRequest;
@@ -22,6 +24,7 @@ public class FollowServiceImpl implements FollowService {
 
     private final UserDomainService userDomainService;
     private final FollowDomainService followDomainService;
+    private final NotificationDomainService notificationDomainService;
 
     @Override
     @Transactional
@@ -37,6 +40,9 @@ public class FollowServiceImpl implements FollowService {
         // 팔로우 저장
         Follow follow = followRequest.toEntity(follower, following);
         followDomainService.createFollow(follow);
+
+        // 알림 생성
+        notificationDomainService.pushNewNotification(following, Type.FOLLOW, followerId);
     }
 
     @Override

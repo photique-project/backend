@@ -8,6 +8,8 @@ import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDetailR
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentUpdateRequest;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
+import com.benchpress200.photique.notification.domain.NotificationDomainService;
+import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
@@ -26,6 +28,7 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
     private final UserDomainService userDomainService;
     private final ExhibitionDomainService exhibitionDomainService;
     private final ExhibitionCommentDomainService exhibitionCommentDomainService;
+    private final NotificationDomainService notificationDomainService;
 
     @Override
     @Transactional
@@ -42,6 +45,11 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
         // 저장
         ExhibitionComment exhibitionComment = exhibitionCommentCreateRequest.toEntity(exhibition, writer);
         exhibitionCommentDomainService.createComment(exhibitionComment);
+
+        // 알림 생성
+        Long exhibitionWriterId = exhibition.getWriter().getId();
+        User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
+        notificationDomainService.pushNewNotification(exhibitionWriter, Type.EXHIBITION_COMMENT, exhibitionId);
     }
 
     @Override

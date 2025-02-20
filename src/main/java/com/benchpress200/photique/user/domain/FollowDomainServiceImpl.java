@@ -3,6 +3,7 @@ package com.benchpress200.photique.user.domain;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.infrastructure.FollowRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,12 @@ public class FollowDomainServiceImpl implements FollowDomainService {
             final Pageable pageable
     ) {
         return followRepository.findByFollowingId(user.getId(), pageable);
+    }
+
+    @Override
+    public List<Follow> getFollowers(final User user) {
+        Long userId = user.getId();
+        return followRepository.findByFollowingId(userId);
     }
 
     @Override

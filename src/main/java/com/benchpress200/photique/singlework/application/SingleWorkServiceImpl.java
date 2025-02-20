@@ -2,6 +2,8 @@ package com.benchpress200.photique.singlework.application;
 
 
 import com.benchpress200.photique.image.domain.ImageDomainService;
+import com.benchpress200.photique.notification.domain.NotificationDomainService;
+import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
 import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
@@ -19,7 +21,9 @@ import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.tag.domain.TagDomainService;
 import com.benchpress200.photique.tag.domain.entity.Tag;
+import com.benchpress200.photique.user.domain.FollowDomainService;
 import com.benchpress200.photique.user.domain.UserDomainService;
+import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
@@ -43,8 +47,10 @@ public class SingleWorkServiceImpl implements SingleWorkService {
     private final SingleWorkDomainService singleWorkDomainService;
     private final SingleWorkCommentDomainService singleWorkCommentDomainService;
     private final TagDomainService tagDomainService;
+    private final NotificationDomainService notificationDomainService;
+    private final FollowDomainService followDomainService;
 
-    
+
     @Override
     @Transactional
     public void postNewSingleWork(final SingleWorkCreateRequest singleWorkCreateRequest) {
@@ -71,6 +77,14 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         // 엘라스틱 서치 저장
         SingleWorkSearch singleWorkSearch = SingleWorkSearch.of(singleWork, writer, tagNames);
         singleWorkDomainService.createNewSingleWorkSearch(singleWorkSearch);
+
+        // 알림생성
+        Long singleWorkId = singleWork.getId();
+        List<Follow> follows = followDomainService.getFollowers(writer);// 보낼 대상은 팔로우들
+        follows.forEach((follow) -> {
+            User follower = follow.getFollower();
+            notificationDomainService.pushNewNotification(follower, Type.FOLLOWING_SINGLE_WORK, singleWorkId);
+        });
     }
 
 
@@ -228,6 +242,11 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         // 작품 좋아요 추가
         SingleWorkLike singleWorkLike = singleWorkLikeIncrementRequest.toEntity(user, singleWork);
         singleWorkDomainService.incrementLike(singleWorkLike);
+
+        // 알림생성
+        Long singleWorkWriterId = singleWork.getWriter().getId();
+        User singleWorkWriter = userDomainService.findUser(singleWorkWriterId);
+        notificationDomainService.pushNewNotification(singleWorkWriter, Type.SINGLE_WORK_LIKE, singleWorkId);
     }
 
     @Override

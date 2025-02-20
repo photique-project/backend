@@ -18,10 +18,14 @@ import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 import com.benchpress200.photique.image.domain.ImageDomainService;
+import com.benchpress200.photique.notification.domain.NotificationDomainService;
+import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.tag.domain.TagDomainService;
 import com.benchpress200.photique.tag.domain.entity.Tag;
+import com.benchpress200.photique.user.domain.FollowDomainService;
 import com.benchpress200.photique.user.domain.UserDomainService;
+import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -45,7 +49,9 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     private final ExhibitionDomainService exhibitionDomainService;
     private final ExhibitionCommentDomainService exhibitionCommentDomainService;
     private final TagDomainService tagDomainService;
-    
+    private final NotificationDomainService notificationDomainService;
+    private final FollowDomainService followDomainService;
+
 
     @Override
     @Transactional
@@ -79,6 +85,14 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 엘라스틱 서치 저장
         ExhibitionSearch exhibitionSearch = ExhibitionSearch.of(exhibition, writer, tagNames);
         exhibitionDomainService.createNewExhibitionSearch(exhibitionSearch);
+
+        // 알림생성
+        Long exhibitionId = exhibition.getId();
+        List<Follow> follows = followDomainService.getFollowers(writer);// 보낼 대상은 팔로워들
+        follows.forEach((follow) -> {
+            User follower = follow.getFollower();
+            notificationDomainService.pushNewNotification(follower, Type.FOLLOWING_EXHIBITION, exhibitionId);
+        });
     }
 
 
@@ -171,6 +185,11 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 좋아요 데이터 저장
         ExhibitionLike exhibitionLike = exhibitionLikeIncrementRequest.toEntity(user, exhibition);
         exhibitionDomainService.incrementLike(exhibitionLike);
+
+        // 알림생성
+        Long exhibitionWriterId = exhibition.getWriter().getId();
+        User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
+        notificationDomainService.pushNewNotification(exhibitionWriter, Type.EXHIBITION_LIKE, exhibitionId);
     }
 
     @Override
@@ -205,6 +224,11 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 좋아요 데이터 저장
         ExhibitionBookmark exhibitionBookmark = exhibitionBookmarkRequest.toEntity(user, exhibition);
         exhibitionDomainService.addBookmark(exhibitionBookmark);
+
+        // 알림생성
+        Long exhibitionWriterId = exhibition.getWriter().getId();
+        User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
+        notificationDomainService.pushNewNotification(exhibitionWriter, Type.EXHIBITION_BOOKMARK, exhibitionId);
     }
 
     @Override

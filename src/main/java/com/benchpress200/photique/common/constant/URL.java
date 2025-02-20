@@ -41,4 +41,9 @@ public class URL {
     // EXHIBITION COMMENT
     public static final String EXHIBITION_COMMENT_DOMAIN = "/exhibitions/{exhibitionId}/comments";
     public static final String EXHIBITION_COMMENT_DATA = "/{commentId}";
+
+    // NOTIFICATION
+    public static final String SUB = "/subscribe";
+    public static final String NOTIFICATION_DOMAIN = "/notifications";
+    public static final String NOTIFICATION_DATA = "/{notificationId}";
 }
