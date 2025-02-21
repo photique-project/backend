@@ -38,7 +38,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             emitters.remove(userId);
         });
 
-        // timeOut 시 처리
+        // time out 시 처리
         sseEmitter.onTimeout(() -> {
             System.out.println("타임아웃");
             emitters.remove(userId);
