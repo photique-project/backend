@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.ServletEndpointManagementContextConfiguration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class NotificationDomainServiceImpl implements NotificationDomainService {
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final NotificationRepository notificationRepository;
+    private final ServletEndpointManagementContextConfiguration servletEndpointManagementContextConfiguration;
 
     @Override
     public SseEmitter subscribe(Long userId) {
@@ -35,21 +37,31 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         // 종료 되었을 때 처리
         sseEmitter.onCompletion(() -> {
             System.out.println("연결종료처리");
+            sseEmitter.complete();
             emitters.remove(userId);
         });
 
         // time out 시 처리
         sseEmitter.onTimeout(() -> {
             System.out.println("타임아웃");
+            sseEmitter.complete();
+            emitters.remove(userId);
+        });
+
+        sseEmitter.onError((throwable) -> {
+            System.out.println("SSE 커넥션 종료");
+            sseEmitter.complete();
             emitters.remove(userId);
         });
 
         try {
             sseEmitter.send(
                     SseEmitter.event().id(String.valueOf(userId))
-                            .data("SSE server connect completed!!"));
+                            .data("SSE server connect completed!"));
         } catch (IOException e) {
-            System.out.println("IOException");
+            System.out.println("SSE IOException");
+            sseEmitter.complete();
+            emitters.remove(userId);
         }
 
         return sseEmitter;
