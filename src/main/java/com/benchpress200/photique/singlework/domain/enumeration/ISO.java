@@ -32,6 +32,7 @@ public enum ISO {
     }
 
     public static ISO fromValue(String input) {
+
         return Arrays.stream(ISO.values())
                 .filter(iso -> iso.value.equals(input))
                 .findFirst()

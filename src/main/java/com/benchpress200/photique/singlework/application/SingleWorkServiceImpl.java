@@ -6,7 +6,10 @@ import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
 import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
+import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkRequest;
+import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeDecrementRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeIncrementRequest;
@@ -90,8 +93,9 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     @Transactional
-    public SingleWorkDetailResponse getSingleWorkDetail(final Long singleWorkId) {
+    public SingleWorkDetailResponse getSingleWorkDetail(final SingleWorkDetailRequest singleWorkDetailRequest) {
         // 단일작품 조회
+        Long singleWorkId = singleWorkDetailRequest.getSingleWorkId();
         SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
 
         // 조회수 증가
@@ -106,14 +110,24 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         // 단일작품 좋아요 수 조회
         Long likeCount = singleWorkDomainService.countLike(singleWork);
 
-        return SingleWorkDetailResponse.from(
+        // 요청한 유저의 작품 좋아요 유무
+        Long userId = singleWorkDetailRequest.getUserId();
+        boolean isLiked = singleWorkDomainService.isLiked(userId, singleWorkId);
+
+        // 요청한 유저의 해당 작품 작가 팔로잉 유무
+        boolean isFollowing = followDomainService.isFollowing(userId, singleWork.getWriter().getId());
+
+        return SingleWorkDetailResponse.of(
                 singleWork,
                 tags,
-                likeCount
+                likeCount,
+                isLiked,
+                isFollowing
         );
     }
 
     @Override
+    @Transactional
     public Page<SingleWorkSearchResponse> searchSingleWorks(
             final SingleWorkSearchRequest singleWorkSearchRequest,
             final Pageable pageable
@@ -136,9 +150,18 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         Page<SingleWorkSearch> singleWorkSearchPage = singleWorkDomainService.searchSingleWorks(target, keywords,
                 categories, pageable);
 
+        // 단일작품 중에서 유저아이디에 해당하는 좋아요 작품 선별해서 좋아요 담기
+        Long userId = singleWorkSearchRequest.getUserId();
+        List<SingleWorkLike> singleWorkLikes = singleWorkDomainService.findLikeByUser(userId);
+
         // 응답 dto 로 변환
         List<SingleWorkSearchResponse> singleWorkSearchResponsePage = singleWorkSearchPage.stream()
-                .map(SingleWorkSearchResponse::from)
+                .map(singleWorkSearch -> {
+                    boolean isLiked = singleWorkLikes.stream()
+                            .anyMatch(like -> like.getSingleWork().getId().equals(singleWorkSearch.getId()));
+
+                    return SingleWorkSearchResponse.of(singleWorkSearch, isLiked);
+                })
                 .toList();
 
         return new PageImpl<>(singleWorkSearchResponsePage, pageable, singleWorkSearchPage.getTotalElements());
@@ -237,7 +260,7 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
 
         // 이미 좋아요 추가헀는지 확인
-        singleWorkDomainService.isLiked(user, singleWork);
+        singleWorkDomainService.isAlreadyLiked(user, singleWork);
 
         // 작품 좋아요 추가
         SingleWorkLike singleWorkLike = singleWorkLikeIncrementRequest.toEntity(user, singleWork);
@@ -262,5 +285,26 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
         // 작품 좋아요 삭제
         singleWorkDomainService.decrementLike(user, singleWork);
+    }
+
+    @Override
+    @Transactional // open-in-view false로 인해서 커밋되기전에 lazy Loading을 보장하기위한 transactional
+    public PopularSingleWorkResponse getPopularSingleWork(final PopularSingleWorkRequest popularSingleWorkRequest) {
+        // 인기 단일작품 조회
+        SingleWork singleWork = singleWorkDomainService.findPopularSingleWork();
+
+        // 해당 작품 좋아요 수 조회
+        Long likeCount = singleWorkDomainService.countLike(singleWork);
+
+        // 요청한 유저의 작품 좋아요 유무
+        Long userId = popularSingleWorkRequest.getUserId();
+        boolean isLiked = singleWorkDomainService.isLiked(userId, singleWork.getId());
+
+        // 응답 dto 변환 및 반환
+        return PopularSingleWorkResponse.of(
+                singleWork,
+                likeCount,
+                isLiked
+        );
     }
 }

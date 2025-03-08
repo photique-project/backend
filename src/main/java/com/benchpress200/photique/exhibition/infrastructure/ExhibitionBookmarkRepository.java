@@ -3,6 +3,7 @@ package com.benchpress200.photique.exhibition.infrastructure;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.user.domain.entity.User;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ExhibitionBookmarkRepository extends JpaRepository<ExhibitionBookmark, Long> {
@@ -15,4 +16,8 @@ public interface ExhibitionBookmarkRepository extends JpaRepository<ExhibitionBo
     void deleteByUser(User user);
 
     void deleteByExhibition(Exhibition exhibition);
+
+    List<ExhibitionBookmark> findByUserId(Long userId);
+
+    boolean existsByUserIdAndExhibitionId(Long userId, Long exhibitionId);
 }

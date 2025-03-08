@@ -30,47 +30,47 @@ public class SingleWorkCreateRequest {
     @NotNull(message = "Id must not be null")
     private Long writerId;
 
-    @NotNull(message = "Image must not be null")
+    @NotNull(message = "Invalid image: image is null")
     @Image
     private MultipartFile image;
 
-    @Size(max = 50, message = "Camera name must not exceed 50 characters")
+    @NotNull
+    @Size(min = 1, max = 30, message = "Invalid camera: 1 ~ 30 characters")
     private String camera;
 
-    @Size(max = 50, message = "Lens name must not exceed 50 characters")
+    @Size(max = 30, message = "Invalid lens: 1 ~ 30 characters")
     private String lens;
 
-    @Enum(enumClass = Aperture.class, message = "Invalid value of aperture")
+    @Enum(enumClass = Aperture.class, message = "Invalid aperture")
     private String aperture;
 
-    @Enum(enumClass = ShutterSpeed.class, message = "Invalid value of shutterSpeed")
+    @Enum(enumClass = ShutterSpeed.class, message = "Invalid shutter speed")
     private String shutterSpeed;
 
-    @Enum(enumClass = ISO.class, message = "Invalid value of iso")
+    @Enum(enumClass = ISO.class, message = "Invalid ISO")
     private String iso;
 
-    @Size(max = 50, message = "Location must not exceed 50 characters")
+    @Size(max = 30, message = "Invalid location: maximum 30 characters")
     private String location;
 
-    @NotNull(message = "Category must not be null")
-    @Enum(enumClass = Category.class, message = "Invalid value of category")
+    @NotNull(message = "Invalid category: category must not be null")
+    @Enum(enumClass = Category.class, message = "Invalid category")
     private String category;
 
-    @NotNull(message = "Date must not be blank.")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @NotNull(message = "Invalid Date: date must not be blank.")
+    @DateTimeFormat(pattern = "yyyy-mm-dd")
     private LocalDate date;
 
-    @NotNull(message = "Date must not be blank.")
-    @Size(max = 5, message = "Tag list size must be between 0 and 5")
+    @Size(max = 5, message = "Invalid Tags: the number of tag must be between 0 and 5")
     @Valid
     private List<NewTagRequest> tags;
 
-    @NotBlank(message = "Title must not be blank.")
-    @Size(max = 30, message = "Title must not exceed 30 characters")
+    @NotBlank(message = "Invalid title: title must not be blank")
+    @Size(min = 1, max = 30, message = "Invalid title: 1 ~ 30 characters")
     private String title;
 
-    @NotBlank(message = "Description must not be blank.")
-    @Size(max = 500, message = "Description must not exceed 30 characters")
+    @NotBlank(message = "Invalid description: description must not be blank.")
+    @Size(min = 1, max = 500, message = "Invalid description: 1 ~ 30 characters")
     private String description;
 
     public SingleWork toSingleWorkEntity(

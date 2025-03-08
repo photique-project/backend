@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ExhibitionRepository extends JpaRepository<Exhibition, Long> {
     List<Exhibition> findByWriter(User user);
+
+    Long countByWriter(User writer);
 }

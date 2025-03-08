@@ -6,5 +6,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SingleWorkRepository extends JpaRepository<SingleWork, Long>, SingleWorkRepositoryCustom {
-    List<SingleWork> findByWriter(final User writer);
+    List<SingleWork> findByWriter(User writer);
+
+    Long countByWriter(User writer);
 }

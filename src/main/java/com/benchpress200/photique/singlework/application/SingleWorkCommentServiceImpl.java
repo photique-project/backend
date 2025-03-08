@@ -51,6 +51,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
     }
 
     @Override
+    @Transactional
     public Page<SingleWorkCommentDetailResponse> getSingleWorkComments(
             final Long singleWorkId,
             final Pageable pageable

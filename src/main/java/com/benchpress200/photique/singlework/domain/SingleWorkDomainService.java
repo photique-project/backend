@@ -69,7 +69,15 @@ public interface SingleWorkDomainService {
 
     void incrementLike(SingleWorkLike singleWorkLike);
 
-    void isLiked(User user, SingleWork singleWork);
+    void isAlreadyLiked(User user, SingleWork singleWork);
 
     void decrementLike(User user, SingleWork singleWork);
+
+    Long countSingleWork(User user);
+
+    SingleWork findPopularSingleWork();
+
+    List<SingleWorkLike> findLikeByUser(Long userId);
+
+    boolean isLiked(Long userId, Long singleWorkId);
 }

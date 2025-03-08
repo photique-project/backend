@@ -16,6 +16,7 @@ import com.benchpress200.photique.exhibition.infrastructure.ExhibitionTagReposit
 import com.benchpress200.photique.exhibition.infrastructure.ExhibitionWorkRepository;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.user.domain.entity.User;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -175,7 +176,7 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     }
 
     @Override
-    public void isLiked(
+    public void isAlreadyLiked(
             final User user,
             final Exhibition exhibition
     ) {
@@ -213,7 +214,7 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     }
 
     @Override
-    public void isBookmarked(
+    public void isAlreadyBookmarked(
             final User user,
             final Exhibition exhibition
     ) {
@@ -235,4 +236,52 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     ) {
         exhibitionBookmarkRepository.deleteByUserAndExhibition(user, exhibition);
     }
+
+    @Override
+    public Long countExhibition(final User user) {
+        return exhibitionRepository.countByWriter(user);
+    }
+
+    @Override
+    public List<ExhibitionLike> findLikeByUser(final Long userId) {
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+
+        return exhibitionLikeRepository.findByUserId(userId);
+    }
+
+    @Override
+    public List<ExhibitionBookmark> findBookmarkByUser(final Long userId) {
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+
+        return exhibitionBookmarkRepository.findByUserId(userId);
+    }
+
+    @Override
+    public boolean isLiked(
+            final Long userId,
+            final Long exhibitionId
+    ) {
+        if (userId == null) {
+            return false;
+        }
+
+        return exhibitionLikeRepository.existsByUserIdAndExhibitionId(userId, exhibitionId);
+    }
+
+    @Override
+    public boolean isBookmarked(
+            final Long userId,
+            final Long exhibitionId
+    ) {
+        if (userId == null) {
+            return false;
+        }
+        
+        return exhibitionBookmarkRepository.existsByUserIdAndExhibitionId(userId, exhibitionId);
+    }
+
 }

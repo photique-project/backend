@@ -49,6 +49,7 @@ public enum Aperture {
     }
 
     public static Aperture fromValue(String input) {
+
         return Arrays.stream(Aperture.values())
                 .filter(aperture -> aperture.value.equals(input))
                 .findFirst()

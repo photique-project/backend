@@ -18,6 +18,10 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +33,38 @@ import org.springframework.data.domain.Sort;
 public class SingleWorkRepositoryImpl implements SingleWorkRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+
+    @Override
+    public SingleWork findPopularSingleWork() {
+        // 이번주 월요일
+        LocalDateTime startOfWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                .atStartOfDay();
+        // 이번주 일요일
+        LocalDateTime endOfWeek = startOfWeek.plusDays(6).withHour(23).withMinute(59).withSecond(59);
+
+        QSingleWork singleWork = QSingleWork.singleWork;
+        QSingleWorkLike like = QSingleWorkLike.singleWorkLike;
+
+        List<SingleWork> popularSingleWorks = queryFactory
+                .select(singleWork)
+                .from(like)
+                .join(like.singleWork, singleWork)
+                .where(like.createdAt.between(startOfWeek, endOfWeek)) // 이번 주 기간 내 좋아요 데이터만 조회
+                .groupBy(singleWork) // 작품별로 그룹핑
+                .orderBy(like.count().desc()) // 좋아요 개수가 많은 순으로 정렬
+                .limit(1) // 인기작품 한 개만 셀렉
+                .fetch();
+
+        if (popularSingleWorks.isEmpty()) {
+            return queryFactory
+                    .selectFrom(singleWork)
+                    .orderBy(singleWork.createdAt.desc()) // 최신 작품 기준 정렬
+                    .fetchFirst(); // 가장 최신 작품 하나만 가져오기
+        }
+
+        return popularSingleWorks.get(0);
+    }
+
 
     @Override
     public Page<SingleWork> searchSingleWorks(

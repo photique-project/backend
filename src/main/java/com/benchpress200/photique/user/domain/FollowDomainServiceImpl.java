@@ -54,4 +54,26 @@ public class FollowDomainServiceImpl implements FollowDomainService {
     public void deleteFollow(final User user) {
         followRepository.deleteByFollowerOrFollowing(user, user);
     }
+
+    @Override
+    public Long countFollowers(final User user) {
+        return followRepository.countByFollowing(user);
+    }
+
+    @Override
+    public Long countFollowings(final User user) {
+        return followRepository.countByFollower(user);
+    }
+
+    @Override
+    public boolean isFollowing(
+            final Long followerId,
+            final Long followingId
+    ) {
+        if (followerId == null) {
+            return false;
+        }
+
+        return followRepository.existsByFollowerIdAndFollowingId(followerId, followingId);
+    }
 }

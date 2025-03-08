@@ -3,6 +3,7 @@ package com.benchpress200.photique.singlework.domain.dto;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.user.domain.entity.User;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,6 +15,8 @@ public class SingleWorkSearchResponse {
     private String image;
     private Long likeCount;
     private Long viewCount;
+    @JsonProperty("isLiked")
+    private boolean isLiked;
 
     @Builder
     record Writer(
@@ -52,7 +55,10 @@ public class SingleWorkSearchResponse {
                 .build();
     }
 
-    public static SingleWorkSearchResponse from(final SingleWorkSearch singleWorkSearch) {
+    public static SingleWorkSearchResponse of(
+            final SingleWorkSearch singleWorkSearch,
+            final boolean isLiked
+    ) {
         return SingleWorkSearchResponse.builder()
                 .id(singleWorkSearch.getId())
                 .writer(Writer.of(singleWorkSearch.getWriterId(), singleWorkSearch.getWriterNickname(),
@@ -60,6 +66,7 @@ public class SingleWorkSearchResponse {
                 .image(singleWorkSearch.getImage())
                 .likeCount(singleWorkSearch.getLikeCount())
                 .viewCount(singleWorkSearch.getViewCount())
+                .isLiked(isLiked)
                 .build();
     }
 

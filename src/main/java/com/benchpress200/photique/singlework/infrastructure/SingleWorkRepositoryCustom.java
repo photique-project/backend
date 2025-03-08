@@ -14,4 +14,6 @@ public interface SingleWorkRepositoryCustom {
             List<Category> categories,
             Pageable pageable
     );
+
+    SingleWork findPopularSingleWork();
 }

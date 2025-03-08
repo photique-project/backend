@@ -4,6 +4,7 @@ import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.singlework.validation.annotation.Enum;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 import lombok.Setter;
 
 @Setter
@@ -12,6 +13,9 @@ public class ExhibitionSearchRequest {
     private String target;
 
     private List<String> keywords;
+
+    @Getter
+    private Long userId;
 
     public Target getTarget() {
         return Target.fromValue(target);

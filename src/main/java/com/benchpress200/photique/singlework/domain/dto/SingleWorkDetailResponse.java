@@ -5,6 +5,7 @@ import com.benchpress200.photique.tag.domain.dto.TagResponse;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +33,11 @@ public class SingleWorkDetailResponse {
     private Long viewCount;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
+    @JsonProperty("isLiked")
+    private boolean isLiked;
+    @JsonProperty("isFollowing")
+    private boolean isFollowing;
+
 
     @Builder
     record Writer(
@@ -50,10 +56,12 @@ public class SingleWorkDetailResponse {
         }
     }
 
-    public static SingleWorkDetailResponse from(
+    public static SingleWorkDetailResponse of(
             final SingleWork singleWork,
             final List<Tag> tags,
-            final Long likeCount
+            final Long likeCount,
+            final boolean isLiked,
+            final boolean isFollowing
     ) {
         List<TagResponse> tagsResponse = tags.stream()
                 .map(TagResponse::from)
@@ -77,6 +85,8 @@ public class SingleWorkDetailResponse {
                 .likeCount(likeCount)
                 .viewCount(singleWork.getViewCount())
                 .createdAt(singleWork.getCreatedAt())
+                .isLiked(isLiked)
+                .isFollowing(isFollowing)
                 .build();
     }
 }

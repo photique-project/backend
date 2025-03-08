@@ -3,6 +3,7 @@ package com.benchpress200.photique.exhibition.application;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRemoveRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
@@ -14,7 +15,7 @@ import org.springframework.data.domain.Pageable;
 public interface ExhibitionService {
     void holdNewExhibition(ExhibitionCreateRequest exhibitionCreateRequest);
 
-    ExhibitionDetailResponse getExhibitionDetail(Long exhibitionId);
+    ExhibitionDetailResponse getExhibitionDetail(ExhibitionDetailRequest exhibitionDetailRequest);
 
     Page<ExhibitionSearchResponse> searchExhibitions(ExhibitionSearchRequest exhibitionSearchRequest,
                                                      Pageable pageable);

@@ -9,6 +9,7 @@ import com.benchpress200.photique.exhibition.application.ExhibitionService;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRemoveRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
@@ -48,9 +49,12 @@ public class ExhibitionController {
     @Auth
     @GetMapping(URL.EXHIBITION_DATA)
     public ApiSuccessResponse<?> getExhibitionDetail(
+            @ModelAttribute final ExhibitionDetailRequest exhibitionDetailRequest,
             @PathVariable final Long exhibitionId
     ) {
-        ExhibitionDetailResponse exhibitionDetailResponse = exhibitionService.getExhibitionDetail(exhibitionId);
+        exhibitionDetailRequest.withExhibitionId(exhibitionId);
+        ExhibitionDetailResponse exhibitionDetailResponse = exhibitionService.getExhibitionDetail(
+                exhibitionDetailRequest);
         return ResponseHandler.handleSuccessResponse(exhibitionDetailResponse, HttpStatus.OK);
     }
 

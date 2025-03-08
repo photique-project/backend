@@ -98,7 +98,7 @@ public class OwnResourceInterceptor implements HandlerInterceptor {
         if (JSON_BODY_HEADER.equals(request.getContentType())) {
             String jsonBody = getRequestBody(request);
 
-            if (jsonBody != null) {
+            if (jsonBody != null && !jsonBody.isEmpty()) {
                 Gson gson = new Gson();
                 JsonObject jsonObject = gson.fromJson(jsonBody, JsonObject.class);
 

@@ -33,6 +33,7 @@ public enum Category {
     }
 
     public static Category fromValue(String input) {
+
         return Arrays.stream(Category.values())
                 .filter(category -> category.value.equals(input))
                 .findFirst()

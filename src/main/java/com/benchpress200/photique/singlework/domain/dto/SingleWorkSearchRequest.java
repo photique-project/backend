@@ -5,6 +5,7 @@ import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.singlework.validation.annotation.Enum;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 import lombok.Setter;
 
 @Setter
@@ -15,6 +16,9 @@ public class SingleWorkSearchRequest {
     private List<String> keywords;
 
     private List<String> categories;
+
+    @Getter
+    private Long userId;
 
     public List<Category> getCategories() {
         if (categories == null) {

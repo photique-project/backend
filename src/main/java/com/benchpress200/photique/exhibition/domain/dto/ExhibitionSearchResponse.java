@@ -2,6 +2,8 @@ package com.benchpress200.photique.exhibition.domain.dto;
 
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.tag.domain.dto.TagResponse;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
@@ -17,9 +19,13 @@ public class ExhibitionSearchResponse {
     private String cardColor;
     private Long likeCount;
     private Long viewCount;
-    private Integer participants;
     private List<TagResponse> tags;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createdAt;
+    @JsonProperty("isLiked")
+    private boolean isLiked;
+    @JsonProperty("isBookmarked")
+    private boolean isBookmarked;
 
     @Builder
     record Writer(
@@ -43,7 +49,11 @@ public class ExhibitionSearchResponse {
         }
     }
 
-    public static ExhibitionSearchResponse from(final ExhibitionSearch exhibitionSearch) {
+    public static ExhibitionSearchResponse of(
+            final ExhibitionSearch exhibitionSearch,
+            final boolean isLiked,
+            final boolean isBookmarked
+    ) {
         return ExhibitionSearchResponse.builder()
                 .id(exhibitionSearch.getId())
                 .writer(
@@ -59,11 +69,12 @@ public class ExhibitionSearchResponse {
                 .cardColor(exhibitionSearch.getCardColor())
                 .likeCount(exhibitionSearch.getLikeCount())
                 .viewCount(exhibitionSearch.getViewCount())
-                .participants(exhibitionSearch.getParticipants())
                 .tags(exhibitionSearch.getTags().stream()
                         .map(TagResponse::from).toList())
 
                 .createdAt(exhibitionSearch.getCreatedAt())
+                .isLiked(isLiked)
+                .isBookmarked(isBookmarked)
                 .build();
 
     }

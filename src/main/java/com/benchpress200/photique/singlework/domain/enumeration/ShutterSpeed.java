@@ -38,6 +38,7 @@ public enum ShutterSpeed {
     }
 
     public static ShutterSpeed fromValue(String input) {
+
         return Arrays.stream(ShutterSpeed.values())
                 .filter(shutterSpeed -> shutterSpeed.value.equals(input))
                 .findFirst()

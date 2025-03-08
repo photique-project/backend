@@ -73,8 +73,26 @@ public class UserServiceImpl implements UserService {
         // 유저 데이터 조회
         User foundUser = userDomainService.findUser(userId);
 
+        // 유저 단일작품 개수 조회
+        Long singleWorkCount = singleWorkDomainService.countSingleWork(foundUser);
+
+        // 유저 전시회 개수 조회
+        Long exhibitionCount = exhibitionDomainService.countExhibition(foundUser);
+
+        // 유저 팔로워 수 조회
+        Long followerCount = followDomainService.countFollowers(foundUser);
+
+        // 유저 팔로잉 수 조회
+        Long followingCount = followDomainService.countFollowings(foundUser);
+
         // 응답 데이터로 변환 후 반환
-        return UserDetailResponse.from(foundUser);
+        return UserDetailResponse.of(
+                foundUser,
+                singleWorkCount,
+                exhibitionCount,
+                followerCount,
+                followingCount
+        );
     }
 
     @Override

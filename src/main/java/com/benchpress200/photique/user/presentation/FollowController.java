@@ -43,13 +43,13 @@ public class FollowController {
 
     @Auth
     @OwnResource
-    @DeleteMapping(URL.FOLLOW_DOMAIN + URL.UNFOLLOW_TARGET)
+    @DeleteMapping(URL.FOLLOW_DOMAIN)
     public ApiSuccessResponse<?> unfollowUser(
             @PathVariable("userId") final Long followerId,
-            @PathVariable("targetUserId") final Long followingId
+            @RequestBody final UnfollowRequest unfollowRequest
+
     ) {
-        UnfollowRequest unfollowRequest = UnfollowRequest.builder().followerId(followerId).followingId(followingId)
-                .build();
+        unfollowRequest.withFollowerId(followerId);
         followService.unfollowUser(unfollowRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }

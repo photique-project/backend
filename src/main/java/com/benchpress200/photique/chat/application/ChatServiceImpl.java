@@ -1,5 +1,6 @@
 package com.benchpress200.photique.chat.application;
 
+import com.benchpress200.photique.chat.domain.ChatDomainService;
 import com.benchpress200.photique.chat.domain.dto.ChatSendRequest;
 import com.benchpress200.photique.chat.domain.dto.ChatSendResponse;
 import com.benchpress200.photique.exhibition.domain.ExhibitionDomainService;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class ChatServiceImpl implements ChatService {
     private final UserDomainService userDomainService;
     private final ExhibitionDomainService exhibitionDomainService;
+    private final ChatDomainService chatDomainService;
 
     @Override
     public ChatSendResponse sendMessage(final ChatSendRequest chatSendRequest) {
@@ -24,7 +26,10 @@ public class ChatServiceImpl implements ChatService {
         Long exhibitionId = chatSendRequest.getExhibitionId();
         exhibitionDomainService.findExhibition(exhibitionId);
 
+        // 현재 관람중인 인원 조회
+        Long activeUsers = chatDomainService.countActiveUsers(exhibitionId);
+
         String content = chatSendRequest.getContent();
-        return ChatSendResponse.of(user, content);
+        return ChatSendResponse.of(user, content, activeUsers);
     }
 }

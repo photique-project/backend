@@ -6,7 +6,10 @@ import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkService;
+import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkRequest;
+import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeDecrementRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeIncrementRequest;
@@ -49,9 +52,12 @@ public class SingleWorkController {
 
     @GetMapping(URL.SINGLE_WORK_DATA)
     public ApiSuccessResponse<?> getSingleWorkDetail(
+            @ModelAttribute final SingleWorkDetailRequest singleWorkDetailRequest,
             @PathVariable final Long singleworkId
     ) {
-        SingleWorkDetailResponse singleWorkDetailResponse = singleWorkService.getSingleWorkDetail(singleworkId);
+        singleWorkDetailRequest.withSingleWorkId(singleworkId);
+        SingleWorkDetailResponse singleWorkDetailResponse = singleWorkService.getSingleWorkDetail(
+                singleWorkDetailRequest);
         return ResponseHandler.handleSuccessResponse(singleWorkDetailResponse, HttpStatus.OK);
     }
 
@@ -113,5 +119,14 @@ public class SingleWorkController {
         singleWorkLikeDecrementRequest.withSingleWorkId(singleworkId);
         singleWorkService.decrementLike(singleWorkLikeDecrementRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping(URL.POPULAR)
+    public ApiSuccessResponse<?> getPopularSingleWork(
+            @ModelAttribute final PopularSingleWorkRequest popularSingleWorkRequest
+    ) {
+        PopularSingleWorkResponse popularSingleWorkResponse = singleWorkService.getPopularSingleWork(
+                popularSingleWorkRequest);
+        return ResponseHandler.handleSuccessResponse(popularSingleWorkResponse, HttpStatus.OK);
     }
 }

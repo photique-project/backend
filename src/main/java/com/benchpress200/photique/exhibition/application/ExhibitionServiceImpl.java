@@ -5,6 +5,7 @@ import com.benchpress200.photique.exhibition.domain.ExhibitionDomainService;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRemoveRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
@@ -98,9 +99,10 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
-    public ExhibitionDetailResponse getExhibitionDetail(final Long exhibitionId) {
+    public ExhibitionDetailResponse getExhibitionDetail(final ExhibitionDetailRequest exhibitionDetailRequest) {
 
         // 전시회 조회
+        Long exhibitionId = exhibitionDetailRequest.getExhibitionId();
         Exhibition exhibition = exhibitionDomainService.findExhibition(exhibitionId);
 
         // 전시회 개별작품 조회
@@ -109,9 +111,16 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 조회수 증가
         exhibitionDomainService.incrementView(exhibition);
 
-        return ExhibitionDetailResponse.from(
+        // 요청한 유저의 전시회 좋아요 북마크 유무
+        Long userId = exhibitionDetailRequest.getUserId();
+        boolean isLiked = exhibitionDomainService.isLiked(userId, exhibitionId);
+        boolean isBookmarked = exhibitionDomainService.isBookmarked(userId, exhibitionId);
+
+        return ExhibitionDetailResponse.of(
                 exhibition,
-                exhibitionWorks
+                exhibitionWorks,
+                isLiked,
+                isBookmarked
         );
     }
 
@@ -129,8 +138,20 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 target, keywords, pageable
         );
 
+        // 전시회에서 유저아이디에 해당하는 좋아요와 북마크 선별해저 담기
+        Long userId = exhibitionSearchRequest.getUserId();
+        List<ExhibitionLike> exhibitionLikes = exhibitionDomainService.findLikeByUser(userId);
+        List<ExhibitionBookmark> exhibitionBookmarks = exhibitionDomainService.findBookmarkByUser(userId);
+
         List<ExhibitionSearchResponse> exhibitionSearchResponsePage = exhibitionSearchPage.stream()
-                .map(ExhibitionSearchResponse::from)
+                .map(exhibitionSearch -> {
+                    boolean isLiked = exhibitionLikes.stream()
+                            .anyMatch(like -> like.getExhibition().getId().equals(exhibitionSearch.getId()));
+                    boolean isBookmarked = exhibitionBookmarks.stream()
+                            .anyMatch(bookmark -> bookmark.getExhibition().getId().equals(exhibitionSearch.getId()));
+
+                    return ExhibitionSearchResponse.of(exhibitionSearch, isLiked, isBookmarked);
+                })
                 .toList();
 
         return new PageImpl<>(exhibitionSearchResponsePage, pageable, exhibitionSearchPage.getTotalElements());
@@ -180,7 +201,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         Exhibition exhibition = exhibitionDomainService.findExhibition(exhibitionId);
 
         // 이미 좋아요를 했다면 409응답
-        exhibitionDomainService.isLiked(user, exhibition);
+        exhibitionDomainService.isAlreadyLiked(user, exhibition);
 
         // 좋아요 데이터 저장
         ExhibitionLike exhibitionLike = exhibitionLikeIncrementRequest.toEntity(user, exhibition);
@@ -219,7 +240,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         Exhibition exhibition = exhibitionDomainService.findExhibition(exhibitionId);
 
         // 이미 북마크 했다면 409응답
-        exhibitionDomainService.isBookmarked(user, exhibition);
+        exhibitionDomainService.isAlreadyBookmarked(user, exhibition);
 
         // 좋아요 데이터 저장
         ExhibitionBookmark exhibitionBookmark = exhibitionBookmarkRequest.toEntity(user, exhibition);

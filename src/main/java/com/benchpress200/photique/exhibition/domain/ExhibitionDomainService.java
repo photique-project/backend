@@ -53,15 +53,25 @@ public interface ExhibitionDomainService {
 
     void deleteExhibitionTag(Exhibition exhibition);
 
-    void isLiked(User user, Exhibition exhibition);
+    void isAlreadyLiked(User user, Exhibition exhibition);
 
     void incrementLike(ExhibitionLike exhibitionLike);
 
     void decrementLike(User user, Exhibition exhibition);
 
-    void isBookmarked(User user, Exhibition exhibition);
+    void isAlreadyBookmarked(User user, Exhibition exhibition);
 
     void addBookmark(ExhibitionBookmark exhibitionBookmark);
 
     void removeBookmark(User user, Exhibition exhibition);
+
+    Long countExhibition(User user);
+
+    List<ExhibitionLike> findLikeByUser(Long userId);
+
+    List<ExhibitionBookmark> findBookmarkByUser(Long userId);
+
+    boolean isLiked(Long userId, Long exhibitionId);
+
+    boolean isBookmarked(Long userId, Long exhibitionId);
 }

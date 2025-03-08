@@ -18,6 +18,7 @@ import com.benchpress200.photique.singlework.infrastructure.SingleWorkTagReposit
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -174,7 +175,7 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
             return;
         }
 
-        singleWork.updateImage(newLens);
+        singleWork.updateLens(newLens);
     }
 
     @Override
@@ -376,7 +377,7 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
     }
 
     @Override
-    public void isLiked(
+    public void isAlreadyLiked(
             final User user,
             final SingleWork singleWork
     ) {
@@ -398,5 +399,43 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
         SingleWorkSearch singleWorkSearch = findSingleWorkSearch(singleWorkId);
         singleWorkSearch.updateLikeCount(likeCount);
         ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
+    }
+
+    @Override
+    public Long countSingleWork(final User user) {
+        return singleWorkRepository.countByWriter(user);
+    }
+
+    @Override
+    public SingleWork findPopularSingleWork() {
+        // 이번주 동안
+        SingleWork singleWork = singleWorkRepository.findPopularSingleWork();
+        if (singleWork == null) {
+            throw new SingleWorkException("No single work found.", HttpStatus.NOT_FOUND);
+        }
+
+        return singleWork;
+    }
+
+    @Override
+    public List<SingleWorkLike> findLikeByUser(final Long userId) {
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+
+        return singleWorkLikeRepository.findByUserId(userId);
+    }
+
+    @Override
+    public boolean isLiked(
+            final Long userId,
+            final Long singleWorkId
+    ) {
+        // 로그인상태가 아니라면 userId null
+        if (userId == null) {
+            return false;
+        }
+
+        return singleWorkLikeRepository.existsByUserIdAndSingleWorkId(userId, singleWorkId);
     }
 }

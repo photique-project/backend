@@ -1,6 +1,9 @@
 package com.benchpress200.photique.singlework.application;
 
+import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkRequest;
+import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
+import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeDecrementRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkLikeIncrementRequest;
@@ -13,7 +16,7 @@ import org.springframework.data.domain.Pageable;
 public interface SingleWorkService {
     void postNewSingleWork(SingleWorkCreateRequest singleWorkCreateRequest);
 
-    SingleWorkDetailResponse getSingleWorkDetail(Long singleworkId);
+    SingleWorkDetailResponse getSingleWorkDetail(SingleWorkDetailRequest singleWorkDetailRequest);
 
     Page<SingleWorkSearchResponse> searchSingleWorks(
             SingleWorkSearchRequest singleWorkSearchRequest,
@@ -27,4 +30,6 @@ public interface SingleWorkService {
     void incrementLike(SingleWorkLikeIncrementRequest singleWorkLikeIncrementRequest);
 
     void decrementLike(SingleWorkLikeDecrementRequest singleWorkLikeDecrementRequest);
+
+    PopularSingleWorkResponse getPopularSingleWork(PopularSingleWorkRequest popularSingleWorkRequest);
 }
