@@ -2,6 +2,7 @@ package com.benchpress200.photique.exception;
 
 
 import com.benchpress200.photique.auth.exception.AuthException;
+import com.benchpress200.photique.chat.exception.ChatException;
 import com.benchpress200.photique.common.response.ApiFailureResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.exception.ExhibitionException;
@@ -103,5 +104,10 @@ public class GlobalExceptionHandler {
         }
 
         return ResponseHandler.handleFailureResponse(e.getMessage(), e.getHttpStatus());
+    }
+
+    @ExceptionHandler(ChatException.class)
+    public void handleChatException() {
+        // TODO: 채팅 에러처리 생각
     }
 }

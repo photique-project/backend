@@ -9,25 +9,25 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ChatSendResponse {
+    private String id;
     private Long userId;
     private String profileImage;
     private String nickname;
     private String content;
-    private Long activeUsers;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
 
     public static ChatSendResponse of(
+            final String id,
             final User user,
-            final String content,
-            final Long activeUsers
+            final String content
     ) {
         return ChatSendResponse.builder()
+                .id(id)
                 .userId(user.getId())
                 .profileImage(user.getProfileImage())
                 .nickname(user.getNickname())
                 .content(content)
-                .activeUsers(activeUsers)
                 .createdAt(LocalDateTime.now())
                 .build();
     }
