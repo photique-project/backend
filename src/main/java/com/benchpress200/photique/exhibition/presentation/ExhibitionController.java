@@ -19,6 +19,8 @@ import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
 import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionRequest;
 import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionResponse;
+import com.benchpress200.photique.exhibition.domain.dto.MyExhibitionRequest;
+import com.benchpress200.photique.exhibition.domain.dto.MyExhibitionResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -156,5 +158,19 @@ public class ExhibitionController {
                 likedExhibitionRequest, pageable);
 
         return ResponseHandler.handleSuccessResponse(likedExhibitionRequestPage, HttpStatus.OK);
+    }
+
+    @Auth
+    @GetMapping(URL.WHO_AM_I)
+    public ApiSuccessResponse<?> getMyExhibitions(
+            @ModelAttribute final MyExhibitionRequest myExhibitionRequest,
+            final Pageable pageable
+    ) {
+        Page<MyExhibitionResponse> myExhibitionResponsePage = exhibitionService.getMyExhibitions(
+                myExhibitionRequest,
+                pageable
+        );
+
+        return ResponseHandler.handleSuccessResponse(myExhibitionResponsePage, HttpStatus.OK);
     }
 }

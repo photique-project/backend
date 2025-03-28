@@ -457,4 +457,18 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
 
         return new PageImpl<>(singleWorkSearches, pageable, singleWorkLikePage.getTotalElements());
     }
+
+    @Override
+    public Page<SingleWorkSearch> findMySingleWorkByUser(
+            final Long userId,
+            final Pageable pageable
+    ) {
+        Page<SingleWorkSearch> singleWorkSearchPage = singleWorkSearchRepository.findByWriterId(userId, pageable);
+
+        if (singleWorkSearchPage.getTotalElements() == 0) {
+            throw new SingleWorkException("Single Work not found", HttpStatus.NOT_FOUND);
+        }
+
+        return singleWorkSearchPage;
+    }
 }

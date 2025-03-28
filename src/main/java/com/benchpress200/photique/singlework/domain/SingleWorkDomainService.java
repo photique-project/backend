@@ -82,4 +82,6 @@ public interface SingleWorkDomainService {
     boolean isLiked(Long userId, Long singleWorkId);
 
     Page<SingleWorkSearch> findLikedSingleWorksByUser(Long userId, Pageable pageable);
+
+    Page<SingleWorkSearch> findMySingleWorkByUser(Long userId, Pageable pageable);
 }

@@ -16,6 +16,8 @@ import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionWorkCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionRequest;
 import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionResponse;
+import com.benchpress200.photique.exhibition.domain.dto.MyExhibitionRequest;
+import com.benchpress200.photique.exhibition.domain.dto.MyExhibitionResponse;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
@@ -308,7 +310,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 요청 유저 조회
         Long userId = likedExhibitionRequest.getUserId();
 
-        // 유저가 좋아요한 전시회 페이지조회
+        // 유저가 좋아요한 전시회 페이지 조회
         Page<ExhibitionSearch> exhibitionSearchPage = exhibitionDomainService.findLikedExhibitionsByUser(userId,
                 pageable);
 
@@ -325,5 +327,35 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .toList();
 
         return new PageImpl<>(likedExhibitionResponsePage, pageable, exhibitionSearchPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional
+    public Page<MyExhibitionResponse> getMyExhibitions(
+            final MyExhibitionRequest myExhibitionRequest,
+            final Pageable pageable
+    ) {
+        Long userId = myExhibitionRequest.getUserId();
+
+        // 요청 유저의 전시회 페이지 조회
+        Page<ExhibitionSearch> exhibitionSearchPage = exhibitionDomainService.findMyExhibitions(userId, pageable);
+
+        // 요청 유저의 좋아요, 북마크 데이터 조회
+        List<ExhibitionLike> exhibitionLikes = exhibitionDomainService.findLikeByUser(userId);
+        List<ExhibitionBookmark> exhibitionBookmarks = exhibitionDomainService.findBookmarkByUser(userId);
+
+        // 응답 페이지 생성 및 반환
+        List<MyExhibitionResponse> myExhibitionResponsePage = exhibitionSearchPage.stream()
+                .map(exhibitionSearch -> {
+                    boolean isLiked = exhibitionLikes.stream()
+                            .anyMatch(like -> like.getExhibition().getId().equals(exhibitionSearch.getId()));
+                    boolean isBookmarked = exhibitionBookmarks.stream()
+                            .anyMatch(bookmark -> bookmark.getExhibition().getId().equals(exhibitionSearch.getId()));
+
+                    return MyExhibitionResponse.of(exhibitionSearch, isLiked, isBookmarked);
+                })
+                .toList();
+
+        return new PageImpl<>(myExhibitionResponsePage, pageable, exhibitionSearchPage.getTotalElements());
     }
 }

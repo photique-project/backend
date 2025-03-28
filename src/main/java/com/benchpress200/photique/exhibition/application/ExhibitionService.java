@@ -13,6 +13,8 @@ import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
 import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionRequest;
 import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionResponse;
+import com.benchpress200.photique.exhibition.domain.dto.MyExhibitionRequest;
+import com.benchpress200.photique.exhibition.domain.dto.MyExhibitionResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -38,4 +40,6 @@ public interface ExhibitionService {
                                                                 Pageable pageable);
 
     Page<LikedExhibitionResponse> getLikedExhibitions(LikedExhibitionRequest likedExhibitionRequest, Pageable pageable);
+
+    Page<MyExhibitionResponse> getMyExhibitions(MyExhibitionRequest myExhibitionRequest, Pageable pageable);
 }

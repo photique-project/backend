@@ -8,6 +8,8 @@ import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainServi
 import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
 import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkResponse;
+import com.benchpress200.photique.singlework.domain.dto.MySingleWorkRequest;
+import com.benchpress200.photique.singlework.domain.dto.MySingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
@@ -318,12 +320,45 @@ public class SingleWorkServiceImpl implements SingleWorkService {
     ) {
         Long userId = likedSingleWorkRequest.getUserId();
 
-        Page<SingleWorkSearch> likedSingleWorkSearchPage = singleWorkDomainService.findLikedSingleWorksByUser(userId,
-                pageable);
+        Page<SingleWorkSearch> likedSingleWorkSearchPage = singleWorkDomainService.findLikedSingleWorksByUser(
+                userId,
+                pageable
+        );
+
         List<LikedSingleWorkResponse> likedSingleWorkResponsePage = likedSingleWorkSearchPage.stream()
                 .map(LikedSingleWorkResponse::from)
                 .toList();
 
         return new PageImpl<>(likedSingleWorkResponsePage, pageable, likedSingleWorkSearchPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional
+    public Page<MySingleWorkResponse> getMySingleWorks(
+            final MySingleWorkRequest mySingleWorkRequest,
+            final Pageable pageable
+    ) {
+        Long userId = mySingleWorkRequest.getUserId();
+
+        // 나의 단일작품 조회
+        Page<SingleWorkSearch> mySingleWorkSearchpage = singleWorkDomainService.findMySingleWorkByUser(
+                userId,
+                pageable
+        );
+
+        // 좋아요 여부 조회
+        List<SingleWorkLike> singleWorkLikes = singleWorkDomainService.findLikeByUser(userId);
+
+        // 페이지 반환
+        List<MySingleWorkResponse> singleWorkSearchResponsePage = mySingleWorkSearchpage.stream()
+                .map(singleWorkSearch -> {
+                    boolean isLiked = singleWorkLikes.stream()
+                            .anyMatch(like -> like.getSingleWork().getId().equals(singleWorkSearch.getId()));
+
+                    return MySingleWorkResponse.of(singleWorkSearch, isLiked);
+                })
+                .toList();
+
+        return new PageImpl<>(singleWorkSearchResponsePage, pageable, mySingleWorkSearchpage.getTotalElements());
     }
 }

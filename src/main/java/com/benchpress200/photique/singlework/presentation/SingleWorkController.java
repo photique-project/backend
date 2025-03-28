@@ -8,6 +8,8 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkService;
 import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkResponse;
+import com.benchpress200.photique.singlework.domain.dto.MySingleWorkRequest;
+import com.benchpress200.photique.singlework.domain.dto.MySingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
@@ -136,7 +138,7 @@ public class SingleWorkController {
     @GetMapping(URL.LIKE)
     public ApiSuccessResponse<?> getLikedSingleWorks(
             @ModelAttribute final LikedSingleWorkRequest likedSingleWorkRequest,
-            Pageable pageable
+            final Pageable pageable
     ) {
         Page<LikedSingleWorkResponse> likedSingleWorkPage = singleWorkService.getLikedSingleWorks(
                 likedSingleWorkRequest,
@@ -144,5 +146,17 @@ public class SingleWorkController {
         );
 
         return ResponseHandler.handleSuccessResponse(likedSingleWorkPage, HttpStatus.OK);
+    }
+
+    @Auth
+    @GetMapping(URL.WHO_AM_I)
+    public ApiSuccessResponse<?> getMySingleWorks(
+            @ModelAttribute final MySingleWorkRequest mySingleWorkRequest,
+            final Pageable pageable
+    ) {
+        Page<MySingleWorkResponse> mySingleWorkResponsePage = singleWorkService.getMySingleWorks(mySingleWorkRequest,
+                pageable);
+
+        return ResponseHandler.handleSuccessResponse(mySingleWorkResponsePage, HttpStatus.OK);
     }
 }

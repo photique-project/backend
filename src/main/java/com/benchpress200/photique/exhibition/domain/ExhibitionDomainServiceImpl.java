@@ -322,4 +322,18 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
 
         return new PageImpl<>(exhibitionSearches, pageable, exhibitionLikePage.getTotalElements());
     }
+
+    @Override
+    public Page<ExhibitionSearch> findMyExhibitions(
+            final Long userId,
+            final Pageable pageable
+    ) {
+        Page<ExhibitionSearch> exhibitionSearchPage = exhibitionSearchRepository.findByWriterId(userId, pageable);
+
+        if (exhibitionSearchPage.getTotalElements() == 0) {
+            throw new ExhibitionException("Exhibition not found", HttpStatus.NOT_FOUND);
+        }
+
+        return exhibitionSearchPage;
+    }
 }
