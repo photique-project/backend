@@ -41,6 +41,11 @@ public class ImageDomainServiceImpl implements ImageDomainService {
             return oldPath;
         }
 
+        // 기본값 설정이라면
+        if (newImage.isEmpty()) {
+            return null;
+        }
+
         delete(oldPath);
         return upload(newImage, newPath);
     }

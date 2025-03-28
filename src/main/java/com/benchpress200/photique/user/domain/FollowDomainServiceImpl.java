@@ -2,11 +2,13 @@ package com.benchpress200.photique.user.domain;
 
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
+import com.benchpress200.photique.user.exception.UserException;
 import com.benchpress200.photique.user.infrastructure.FollowRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,7 +35,13 @@ public class FollowDomainServiceImpl implements FollowDomainService {
             final User user,
             final Pageable pageable
     ) {
-        return followRepository.findByFollowingId(user.getId(), pageable);
+        Page<Follow> followers = followRepository.findByFollowingId(user.getId(), pageable);
+
+        if (followers.getTotalElements() == 0) {
+            throw new UserException("No users found.", HttpStatus.NOT_FOUND);
+        }
+
+        return followers;
     }
 
     @Override
@@ -47,7 +55,18 @@ public class FollowDomainServiceImpl implements FollowDomainService {
             final User user,
             final Pageable pageable
     ) {
-        return followRepository.findByFollowerId(user.getId(), pageable);
+        Page<Follow> followings = followRepository.findByFollowerId(user.getId(), pageable);
+
+        if (followings.getTotalElements() == 0) {
+            throw new UserException("No users found.", HttpStatus.NOT_FOUND);
+        }
+
+        return followings;
+    }
+
+    @Override
+    public List<Follow> getFollowings(final User user) {
+        return followRepository.findByFollower(user);
     }
 
     @Override
@@ -70,7 +89,7 @@ public class FollowDomainServiceImpl implements FollowDomainService {
             final Long followerId,
             final Long followingId
     ) {
-        if (followerId == null) {
+        if (followerId == 0) {
             return false;
         }
 

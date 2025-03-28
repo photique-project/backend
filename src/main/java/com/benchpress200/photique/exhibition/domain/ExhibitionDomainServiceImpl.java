@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -265,7 +266,7 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
             final Long userId,
             final Long exhibitionId
     ) {
-        if (userId == null) {
+        if (userId == 0) {
             return false;
         }
 
@@ -280,8 +281,45 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
         if (userId == null) {
             return false;
         }
-        
+
         return exhibitionBookmarkRepository.existsByUserIdAndExhibitionId(userId, exhibitionId);
     }
 
+    @Override
+    public Page<ExhibitionSearch> findBookmarkedExhibitionsByUser(
+            final Long userId,
+            final Pageable pageable
+    ) {
+        // 유저가 북마크한 전시회 페이지 조회
+        Page<ExhibitionBookmark> exhibitionBookmarkPage = exhibitionBookmarkRepository.findByUserId(userId, pageable);
+
+        // 전시회 아이디에 해당하는 전시회 조회
+        List<ExhibitionSearch> exhibitionSearches = exhibitionBookmarkPage.stream()
+                .map(exhibitionBookmark -> exhibitionSearchRepository.findById(
+                        exhibitionBookmark.getExhibition().getId()).orElseThrow(
+                        () -> new ExhibitionException("Exhibition not found", HttpStatus.NOT_FOUND)
+                ))
+                .toList();
+
+        return new PageImpl<>(exhibitionSearches, pageable, exhibitionBookmarkPage.getTotalElements());
+    }
+
+    @Override
+    public Page<ExhibitionSearch> findLikedExhibitionsByUser(
+            final Long userId,
+            final Pageable pageable
+    ) {
+        // 유저가 좋아요한 전시회 페이지 조회
+        Page<ExhibitionLike> exhibitionLikePage = exhibitionLikeRepository.findByUserId(userId, pageable);
+
+        // 전시회 아이디에 해당하는 전시회 조회
+        List<ExhibitionSearch> exhibitionSearches = exhibitionLikePage.stream()
+                .map(exhibitionBookmark -> exhibitionSearchRepository.findById(
+                        exhibitionBookmark.getExhibition().getId()).orElseThrow(
+                        () -> new ExhibitionException("Exhibition not found", HttpStatus.NOT_FOUND)
+                ))
+                .toList();
+
+        return new PageImpl<>(exhibitionSearches, pageable, exhibitionLikePage.getTotalElements());
+    }
 }

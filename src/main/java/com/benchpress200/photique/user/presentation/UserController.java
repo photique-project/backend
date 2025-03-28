@@ -8,6 +8,7 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserService;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
+import com.benchpress200.photique.user.domain.dto.UserDetailRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailResponse;
 import com.benchpress200.photique.user.domain.dto.UserSearchRequest;
 import com.benchpress200.photique.user.domain.dto.UserSearchResponse;
@@ -52,9 +53,11 @@ public class UserController {
     @Auth
     @GetMapping(URL.USER_DATA)
     public ApiSuccessResponse<?> getUserDetail(
-            @PathVariable("userId") final Long userId
+            @ModelAttribute final UserDetailRequest userDetailRequest,
+            @PathVariable("userId") final Long userId // 팔로우확인을 위한 유저아이디 받아서 넘겨서 응답수정할차례
     ) {
-        UserDetailResponse userDetail = userService.getUserDetail(userId);
+        userDetailRequest.withUserId(userId);
+        UserDetailResponse userDetail = userService.getUserDetail(userDetailRequest);
         return ResponseHandler.handleSuccessResponse(userDetail, HttpStatus.OK);
     }
 
@@ -89,4 +92,5 @@ public class UserController {
         userService.withdraw(userId);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
+    
 }

@@ -41,9 +41,6 @@ public class Exhibition {
     @Column(name = "card_color", length = 30, nullable = false)
     private String cardColor;
 
-    @Column(name = "like_count", nullable = false)
-    private Long likeCount;
-
     @Column(name = "view_count", nullable = false)
     private Long viewCount;
 
@@ -52,7 +49,6 @@ public class Exhibition {
 
     @PrePersist
     public void prePersist() {
-        likeCount = 0L;
         viewCount = 0L;
         createdAt = LocalDateTime.now();
     }
@@ -68,14 +64,6 @@ public class Exhibition {
         this.title = title;
         this.description = description;
         this.cardColor = cardColor;
-    }
-
-    public void incrementLike() {
-        likeCount++;
-    }
-
-    public void decrementLike() {
-        likeCount--;
     }
 
     public void incrementView() {

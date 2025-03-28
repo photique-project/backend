@@ -6,6 +6,8 @@ import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionService;
+import com.benchpress200.photique.exhibition.domain.dto.BookmarkedExhibitionRequest;
+import com.benchpress200.photique.exhibition.domain.dto.BookmarkedExhibitionResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRemoveRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
@@ -15,6 +17,8 @@ import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementR
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
+import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionRequest;
+import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -129,5 +133,28 @@ public class ExhibitionController {
         exhibitionService.removeBookmark(exhibitionBookmarkRemoveRequest);
 
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
+
+    @Auth
+    @GetMapping(URL.BOOKMARK)
+    public ApiSuccessResponse<?> getBookmarkedExhibitions(
+            @ModelAttribute final BookmarkedExhibitionRequest bookmarkedExhibitionRequest,
+            final Pageable pageable
+    ) {
+        Page<BookmarkedExhibitionResponse> bookmaredExhibitionPage = exhibitionService.getBookmarkedExhibitions(
+                bookmarkedExhibitionRequest, pageable);
+        return ResponseHandler.handleSuccessResponse(bookmaredExhibitionPage, HttpStatus.OK);
+    }
+
+    @Auth
+    @GetMapping(URL.LIKE)
+    public ApiSuccessResponse<?> getLikedExhibitions(
+            @ModelAttribute final LikedExhibitionRequest likedExhibitionRequest,
+            final Pageable pageable
+    ) {
+        Page<LikedExhibitionResponse> likedExhibitionRequestPage = exhibitionService.getLikedExhibitions(
+                likedExhibitionRequest, pageable);
+
+        return ResponseHandler.handleSuccessResponse(likedExhibitionRequestPage, HttpStatus.OK);
     }
 }

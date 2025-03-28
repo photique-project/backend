@@ -6,6 +6,8 @@ import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkService;
+import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkRequest;
+import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
@@ -128,5 +130,19 @@ public class SingleWorkController {
         PopularSingleWorkResponse popularSingleWorkResponse = singleWorkService.getPopularSingleWork(
                 popularSingleWorkRequest);
         return ResponseHandler.handleSuccessResponse(popularSingleWorkResponse, HttpStatus.OK);
+    }
+
+    @Auth
+    @GetMapping(URL.LIKE)
+    public ApiSuccessResponse<?> getLikedSingleWorks(
+            @ModelAttribute final LikedSingleWorkRequest likedSingleWorkRequest,
+            Pageable pageable
+    ) {
+        Page<LikedSingleWorkResponse> likedSingleWorkPage = singleWorkService.getLikedSingleWorks(
+                likedSingleWorkRequest,
+                pageable
+        );
+
+        return ResponseHandler.handleSuccessResponse(likedSingleWorkPage, HttpStatus.OK);
     }
 }

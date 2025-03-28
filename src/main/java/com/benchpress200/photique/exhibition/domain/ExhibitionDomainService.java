@@ -74,4 +74,8 @@ public interface ExhibitionDomainService {
     boolean isLiked(Long userId, Long exhibitionId);
 
     boolean isBookmarked(Long userId, Long exhibitionId);
+
+    Page<ExhibitionSearch> findBookmarkedExhibitionsByUser(Long userId, Pageable pageable);
+
+    Page<ExhibitionSearch> findLikedExhibitionsByUser(Long userId, Pageable pageable);
 }

@@ -6,6 +6,8 @@ import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
 import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
+import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkRequest;
+import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
@@ -306,5 +308,22 @@ public class SingleWorkServiceImpl implements SingleWorkService {
                 likeCount,
                 isLiked
         );
+    }
+
+    @Override
+    @Transactional
+    public Page<LikedSingleWorkResponse> getLikedSingleWorks(
+            final LikedSingleWorkRequest likedSingleWorkRequest,
+            final Pageable pageable
+    ) {
+        Long userId = likedSingleWorkRequest.getUserId();
+
+        Page<SingleWorkSearch> likedSingleWorkSearchPage = singleWorkDomainService.findLikedSingleWorksByUser(userId,
+                pageable);
+        List<LikedSingleWorkResponse> likedSingleWorkResponsePage = likedSingleWorkSearchPage.stream()
+                .map(LikedSingleWorkResponse::from)
+                .toList();
+
+        return new PageImpl<>(likedSingleWorkResponsePage, pageable, likedSingleWorkSearchPage.getTotalElements());
     }
 }

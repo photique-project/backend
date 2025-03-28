@@ -80,4 +80,6 @@ public interface SingleWorkDomainService {
     List<SingleWorkLike> findLikeByUser(Long userId);
 
     boolean isLiked(Long userId, Long singleWorkId);
+
+    Page<SingleWorkSearch> findLikedSingleWorksByUser(Long userId, Pageable pageable);
 }

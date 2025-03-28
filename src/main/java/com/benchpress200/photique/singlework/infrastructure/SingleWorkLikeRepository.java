@@ -4,6 +4,8 @@ import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, Long> {
@@ -23,5 +25,5 @@ public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, 
 
     List<SingleWorkLike> findByUserId(Long userId);
 
-
+    Page<SingleWorkLike> findByUserId(Long userId, Pageable pageable);
 }

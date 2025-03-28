@@ -4,6 +4,8 @@ import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ExhibitionBookmarkRepository extends JpaRepository<ExhibitionBookmark, Long> {
@@ -20,4 +22,6 @@ public interface ExhibitionBookmarkRepository extends JpaRepository<ExhibitionBo
     List<ExhibitionBookmark> findByUserId(Long userId);
 
     boolean existsByUserIdAndExhibitionId(Long userId, Long exhibitionId);
+
+    Page<ExhibitionBookmark> findByUserId(Long userId, Pageable pageable);
 }

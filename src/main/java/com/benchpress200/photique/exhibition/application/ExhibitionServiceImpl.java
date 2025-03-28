@@ -2,6 +2,8 @@ package com.benchpress200.photique.exhibition.application;
 
 import com.benchpress200.photique.exhibition.domain.ExhibitionCommentDomainService;
 import com.benchpress200.photique.exhibition.domain.ExhibitionDomainService;
+import com.benchpress200.photique.exhibition.domain.dto.BookmarkedExhibitionRequest;
+import com.benchpress200.photique.exhibition.domain.dto.BookmarkedExhibitionResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRemoveRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
@@ -12,6 +14,8 @@ import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementR
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionWorkCreateRequest;
+import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionRequest;
+import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionResponse;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
@@ -265,5 +269,61 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
         // 북마크 삭제
         exhibitionDomainService.removeBookmark(user, exhibition);
+    }
+
+    @Override
+    @Transactional
+    public Page<BookmarkedExhibitionResponse> getBookmarkedExhibitions(
+            final BookmarkedExhibitionRequest bookmarkedExhibitionRequest,
+            final Pageable pageable
+    ) {
+        // 요청 유저 조회
+        Long userId = bookmarkedExhibitionRequest.getUserId();
+
+        // 유저가 북마크한 전시회조회
+        Page<ExhibitionSearch> exhibitionSearchPage = exhibitionDomainService.findBookmarkedExhibitionsByUser(userId,
+                pageable);
+
+        // 전시회에서 유저아이디에 해당하는 좋아요와 북마크 선별해서 담기
+        List<ExhibitionLike> exhibitionLikes = exhibitionDomainService.findLikeByUser(userId);
+
+        List<BookmarkedExhibitionResponse> bookmarkedExhibitionResponsePage = exhibitionSearchPage.stream()
+                .map(exhibitionSearch -> {
+                    boolean isLiked = exhibitionLikes.stream()
+                            .anyMatch(like -> like.getExhibition().getId().equals(exhibitionSearch.getId()));
+
+                    return BookmarkedExhibitionResponse.of(exhibitionSearch, isLiked);
+                })
+                .toList();
+
+        return new PageImpl<>(bookmarkedExhibitionResponsePage, pageable, exhibitionSearchPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional
+    public Page<LikedExhibitionResponse> getLikedExhibitions(
+            final LikedExhibitionRequest likedExhibitionRequest,
+            final Pageable pageable
+    ) {
+        // 요청 유저 조회
+        Long userId = likedExhibitionRequest.getUserId();
+
+        // 유저가 좋아요한 전시회 페이지조회
+        Page<ExhibitionSearch> exhibitionSearchPage = exhibitionDomainService.findLikedExhibitionsByUser(userId,
+                pageable);
+
+        // 북마크 데이터 조회
+        List<ExhibitionBookmark> exhibitionBookmarks = exhibitionDomainService.findBookmarkByUser(userId);
+
+        List<LikedExhibitionResponse> likedExhibitionResponsePage = exhibitionSearchPage.stream()
+                .map(exhibitionSearch -> {
+                    boolean isBookmarked = exhibitionBookmarks.stream()
+                            .anyMatch(bookmark -> bookmark.getExhibition().getId().equals(exhibitionSearch.getId()));
+
+                    return LikedExhibitionResponse.of(exhibitionSearch, isBookmarked);
+                })
+                .toList();
+
+        return new PageImpl<>(likedExhibitionResponsePage, pageable, exhibitionSearchPage.getTotalElements());
     }
 }

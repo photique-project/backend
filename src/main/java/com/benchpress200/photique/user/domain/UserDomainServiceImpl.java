@@ -57,6 +57,7 @@ public class UserDomainServiceImpl implements UserDomainService {
                 .id(saved.getId())
                 .profileImage(saved.getProfileImage())
                 .nickname(saved.getNickname())
+                .introduction(saved.getIntroduction())
                 .createdAt(saved.getCreatedAt())
                 .build();
 
@@ -94,12 +95,11 @@ public class UserDomainServiceImpl implements UserDomainService {
             final User user,
             final String newNickname
     ) {
-        isDuplicatedNickname(newNickname);
-
         if (newNickname == null) {
             return;
         }
 
+        isDuplicatedNickname(newNickname);
         user.updateNickname(newNickname);
 
         Long userId = user.getId();
@@ -140,6 +140,15 @@ public class UserDomainServiceImpl implements UserDomainService {
 
         // 소개 업데이트
         user.updateIntroduction(newIntroduction);
+
+        // 엘라스틱서치 데이터 조회
+        Long userId = user.getId();
+        UserSearch userSearch = findUserSearch(userId);
+
+        userSearch.updateIntroduction(newIntroduction);
+
+        // 업데이트
+        ElasticsearchUserRollbackContext.addDocumentToUpdate(userSearch);
     }
 
     @Override
@@ -166,6 +175,10 @@ public class UserDomainServiceImpl implements UserDomainService {
             final String keyword,
             final Pageable pageable
     ) {
+        if (keyword.isEmpty()) {
+            throw new UserException("No users found.", HttpStatus.NOT_FOUND);
+        }
+
         Page<UserSearch> userSearchPage = userSearchRepository.search(keyword, pageable);
 
         if (userSearchPage.getTotalElements() == 0) {

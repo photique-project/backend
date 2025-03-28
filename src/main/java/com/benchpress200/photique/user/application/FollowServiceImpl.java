@@ -61,6 +61,7 @@ public class FollowServiceImpl implements FollowService {
     }
 
     @Override
+    @Transactional
     public Page<FollowerResponse> getFollowers(
             final Long userId,
             final Pageable pageable
@@ -70,13 +71,21 @@ public class FollowServiceImpl implements FollowService {
 
         // 본인을 팔로잉하고 있는 페이지 조회
         Page<Follow> followerPage = followDomainService.getFollowers(user, pageable);
-        List<FollowerResponse> followerResponseList = followerPage.stream().map(FollowerResponse::from)
+
+        List<FollowerResponse> followerResponseList = followerPage.stream()
+                .map(follower -> {
+                    // 본인을 팔로워하는 사람들이고 본인도 팔로잉 상태인지 확인
+                    boolean isFollowing = followDomainService.isFollowing(userId, follower.getFollowing().getId());
+
+                    return FollowerResponse.of(follower, isFollowing);
+                })
                 .toList();
 
         return new PageImpl<>(followerResponseList, pageable, followerPage.getTotalElements());
     }
 
     @Override
+    @Transactional
     public Page<FollowingResponse> getFollowings(
             final Long userId,
             final Pageable pageable

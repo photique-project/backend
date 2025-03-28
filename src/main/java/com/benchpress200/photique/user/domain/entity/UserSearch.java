@@ -37,6 +37,9 @@ public class UserSearch {
     @Field(type = FieldType.Text)
     private String nickname;
 
+    @Field(type = FieldType.Keyword, index = false)
+    private String introduction;
+
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
@@ -48,5 +51,9 @@ public class UserSearch {
 
     public void updateProfileImage(final String profileImage) {
         this.profileImage = profileImage;
+    }
+
+    public void updateIntroduction(final String introduction) {
+        this.introduction = introduction;
     }
 }

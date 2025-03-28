@@ -1,6 +1,5 @@
 package com.benchpress200.photique.user.application;
 
-import com.benchpress200.photique.auth.infrastructure.TokenManager;
 import com.benchpress200.photique.exhibition.domain.ExhibitionCommentDomainService;
 import com.benchpress200.photique.exhibition.domain.ExhibitionDomainService;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
@@ -13,10 +12,12 @@ import com.benchpress200.photique.user.domain.FollowDomainService;
 import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
+import com.benchpress200.photique.user.domain.dto.UserDetailRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailResponse;
 import com.benchpress200.photique.user.domain.dto.UserSearchRequest;
 import com.benchpress200.photique.user.domain.dto.UserSearchResponse;
 import com.benchpress200.photique.user.domain.dto.UserUpdateRequest;
+import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
 import jakarta.transaction.Transactional;
@@ -43,8 +44,6 @@ public class UserServiceImpl implements UserService {
     private final ExhibitionCommentDomainService exhibitionCommentDomainService;
     private final FollowDomainService followDomainService;
 
-    private final TokenManager tokenManager;
-
     @Override
     public void validateNickname(final NicknameValidationRequest nicknameValidationRequest) {
         // 닉네임 중복검사 수행
@@ -69,8 +68,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDetailResponse getUserDetail(final Long userId) {
+    public UserDetailResponse getUserDetail(final UserDetailRequest userDetailRequest) {
         // 유저 데이터 조회
+        Long userId = userDetailRequest.getUserId();
         User foundUser = userDomainService.findUser(userId);
 
         // 유저 단일작품 개수 조회
@@ -85,21 +85,24 @@ public class UserServiceImpl implements UserService {
         // 유저 팔로잉 수 조회
         Long followingCount = followDomainService.countFollowings(foundUser);
 
+        // 요청유저의 팔로우 여부 조회
+        Long requestUserId = userDetailRequest.getRequestUserId();
+        boolean isFollowing = followDomainService.isFollowing(requestUserId, userId);
+
         // 응답 데이터로 변환 후 반환
         return UserDetailResponse.of(
                 foundUser,
                 singleWorkCount,
                 exhibitionCount,
                 followerCount,
-                followingCount
+                followingCount,
+                isFollowing
         );
     }
 
     @Override
     @Transactional
-    public void updateUserDetail(
-            final UserUpdateRequest userUpdateRequest
-    ) {
+    public void updateUserDetail(final UserUpdateRequest userUpdateRequest) {
         // 유저 조회
         Long userId = userUpdateRequest.getUserId();
         User user = userDomainService.findUser(userId);
@@ -130,8 +133,19 @@ public class UserServiceImpl implements UserService {
     ) {
         String keyword = userSearchRequest.getKeyword();
         Page<UserSearch> userSearchPage = userDomainService.searchUsers(keyword, pageable);
+
+        // 검색 유저중 팔로우 상태 조회
+        Long userId = userSearchRequest.getUserId();
+        User user = userDomainService.findUser(userId);
+        List<Follow> follows = followDomainService.getFollowings(user);
+
         List<UserSearchResponse> userSearchResponsesList = userSearchPage.stream()
-                .map(UserSearchResponse::from)
+                .map(userSearch -> {
+                    boolean isFollowing = follows.stream()
+                            .anyMatch(follow -> follow.getFollowing().getId().equals(userSearch.getId()));
+
+                    return UserSearchResponse.of(userSearch, isFollowing);
+                })
                 .toList();
 
         return new PageImpl<>(userSearchResponsesList, pageable, userSearchPage.getTotalElements());

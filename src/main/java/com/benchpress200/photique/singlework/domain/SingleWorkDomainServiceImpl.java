@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -431,11 +432,29 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
             final Long userId,
             final Long singleWorkId
     ) {
-        // 로그인상태가 아니라면 userId null
-        if (userId == null) {
+        // 로그인상태가 아니라면 userId 0
+        if (userId == 0) {
             return false;
         }
 
         return singleWorkLikeRepository.existsByUserIdAndSingleWorkId(userId, singleWorkId);
+    }
+
+    @Override
+    public Page<SingleWorkSearch> findLikedSingleWorksByUser(
+            final Long userId,
+            final Pageable pageable
+    ) {
+        // 유저가 좋아요한 작품 페이지 기준으로 조회
+        Page<SingleWorkLike> singleWorkLikePage = singleWorkLikeRepository.findByUserId(userId, pageable);
+
+        List<SingleWorkSearch> singleWorkSearches = singleWorkLikePage.stream()
+                .map(singleWorkLike -> singleWorkSearchRepository.findById(
+                                singleWorkLike.getSingleWork().getId()).orElseThrow(
+                                () -> new SingleWorkException("Single Work not found", HttpStatus.NOT_FOUND)
+                        )
+                ).toList();
+
+        return new PageImpl<>(singleWorkSearches, pageable, singleWorkLikePage.getTotalElements());
     }
 }

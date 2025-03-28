@@ -7,6 +7,5 @@ import lombok.Setter;
 @Setter
 public class UserSearchRequest {
     private String keyword;
-
-
+    private Long userId;
 }
