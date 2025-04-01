@@ -28,7 +28,7 @@ public class ExhibitionSearch {
     @Field(name = "id", type = FieldType.Long)
     private Long id;
 
-    @Field(type = FieldType.Long, index = false)
+    @Field(type = FieldType.Long)
     private Long writerId;
 
     @Field(type = FieldType.Keyword)
@@ -80,6 +80,7 @@ public class ExhibitionSearch {
                 .writerId(writer.getId())
                 .writerNickname(writer.getNickname())
                 .writerProfileImage(writer.getProfileImage())
+                .introduction(writer.getIntroduction())
                 .title(exhibition.getTitle())
                 .cardColor(exhibition.getCardColor())
                 .description(exhibition.getDescription())

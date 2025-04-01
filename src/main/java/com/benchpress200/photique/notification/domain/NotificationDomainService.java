@@ -1,7 +1,6 @@
 package com.benchpress200.photique.notification.domain;
 
 import com.benchpress200.photique.notification.domain.entity.Notification;
-import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -11,7 +10,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public interface NotificationDomainService {
     SseEmitter subscribe(Long userId);
 
-    void pushNewNotification(User user, Type type, Long targetId);
+    Notification createNotification(Notification notification);
+
+    void pushNewNotification(Long userId, Long notificationId);
 
     Page<Notification> findNotifications(User user, Pageable pageable);
 

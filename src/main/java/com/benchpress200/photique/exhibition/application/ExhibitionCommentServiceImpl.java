@@ -9,6 +9,7 @@ import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentUpdateR
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
 import com.benchpress200.photique.notification.domain.NotificationDomainService;
+import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -49,7 +50,18 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
         // 알림 생성
         Long exhibitionWriterId = exhibition.getWriter().getId();
         User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
-        notificationDomainService.pushNewNotification(exhibitionWriter, Type.EXHIBITION_COMMENT, exhibitionId);
+
+        Notification notification = Notification.builder()
+                .user(exhibitionWriter)
+                .type(Type.EXHIBITION_COMMENT)
+                .targetId(exhibitionId)
+                .build();
+
+        notification = notificationDomainService.createNotification(notification);
+
+        // 알림 비동기 처리
+        Long notificationId = notification.getId();
+        notificationDomainService.pushNewNotification(exhibitionWriterId, notificationId);
     }
 
     @Override

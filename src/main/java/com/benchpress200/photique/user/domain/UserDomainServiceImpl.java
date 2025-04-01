@@ -149,6 +149,9 @@ public class UserDomainServiceImpl implements UserDomainService {
 
         // 업데이트
         ElasticsearchUserRollbackContext.addDocumentToUpdate(userSearch);
+
+        // TODO: 현재 유저의 정보를 변경했을 때 ES에 있는 전시회 카드 데이터 업데이트는 반영되지 않고있음
+        // 해당 문제해결을 위해서 CDC 구축 ?
     }
 
     @Override

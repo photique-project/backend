@@ -35,7 +35,7 @@ public class SingleWorkSearch {
     @Field(type = FieldType.Keyword, index = false)
     private String image;
 
-    @Field(type = FieldType.Long, index = false)
+    @Field(type = FieldType.Long)
     private Long writerId;
 
     @Field(type = FieldType.Keyword)

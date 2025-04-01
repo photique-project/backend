@@ -26,6 +26,7 @@ import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 import com.benchpress200.photique.image.domain.ImageDomainService;
 import com.benchpress200.photique.notification.domain.NotificationDomainService;
+import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.tag.domain.TagDomainService;
@@ -98,7 +99,18 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         List<Follow> follows = followDomainService.getFollowers(writer);// 보낼 대상은 팔로워들
         follows.forEach((follow) -> {
             User follower = follow.getFollower();
-            notificationDomainService.pushNewNotification(follower, Type.FOLLOWING_EXHIBITION, exhibitionId);
+            Notification notification = Notification.builder()
+                    .user(follower)
+                    .type(Type.FOLLOWING_EXHIBITION)
+                    .targetId(exhibitionId)
+                    .build();
+
+            notification = notificationDomainService.createNotification(notification);
+
+            // 알림 비동기 처리
+            Long followerId = follow.getId();
+            Long notificationId = notification.getId();
+            notificationDomainService.pushNewNotification(followerId, notificationId);
         });
     }
 
@@ -216,7 +228,18 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 알림생성
         Long exhibitionWriterId = exhibition.getWriter().getId();
         User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
-        notificationDomainService.pushNewNotification(exhibitionWriter, Type.EXHIBITION_LIKE, exhibitionId);
+
+        Notification notification = Notification.builder()
+                .user(exhibitionWriter)
+                .type(Type.EXHIBITION_LIKE)
+                .targetId(exhibitionId)
+                .build();
+
+        notification = notificationDomainService.createNotification(notification);
+
+        // 알림 비동기 처리
+        Long notificationId = notification.getId();
+        notificationDomainService.pushNewNotification(exhibitionWriterId, notificationId);
     }
 
     @Override
@@ -255,7 +278,18 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 알림생성
         Long exhibitionWriterId = exhibition.getWriter().getId();
         User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
-        notificationDomainService.pushNewNotification(exhibitionWriter, Type.EXHIBITION_BOOKMARK, exhibitionId);
+
+        Notification notification = Notification.builder()
+                .user(exhibitionWriter)
+                .type(Type.EXHIBITION_BOOKMARK)
+                .targetId(exhibitionId)
+                .build();
+
+        notification = notificationDomainService.createNotification(notification);
+
+        // 알림 비동기 처리
+        Long notificationId = notification.getId();
+        notificationDomainService.pushNewNotification(exhibitionWriterId, notificationId);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.benchpress200.photique.singlework.application;
 
 import com.benchpress200.photique.image.domain.ImageDomainService;
 import com.benchpress200.photique.notification.domain.NotificationDomainService;
+import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
 import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
@@ -90,7 +91,18 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         List<Follow> follows = followDomainService.getFollowers(writer);// 보낼 대상은 팔로우들
         follows.forEach((follow) -> {
             User follower = follow.getFollower();
-            notificationDomainService.pushNewNotification(follower, Type.FOLLOWING_SINGLE_WORK, singleWorkId);
+            Notification notification = Notification.builder()
+                    .user(follower)
+                    .type(Type.FOLLOWING_SINGLE_WORK)
+                    .targetId(singleWorkId)
+                    .build();
+
+            notificationDomainService.createNotification(notification);
+
+            // 알림 비동기 처리
+            Long followerId = follow.getId();
+            Long notificationId = notification.getId();
+            notificationDomainService.pushNewNotification(followerId, notificationId);
         });
     }
 
@@ -273,7 +285,18 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         // 알림생성
         Long singleWorkWriterId = singleWork.getWriter().getId();
         User singleWorkWriter = userDomainService.findUser(singleWorkWriterId);
-        notificationDomainService.pushNewNotification(singleWorkWriter, Type.SINGLE_WORK_LIKE, singleWorkId);
+
+        Notification notification = Notification.builder()
+                .user(singleWorkWriter)
+                .type(Type.SINGLE_WORK_LIKE)
+                .targetId(singleWorkId)
+                .build();
+
+        notification = notificationDomainService.createNotification(notification);
+
+        // 알림 비동기 처리
+        Long notificationId = notification.getId();
+        notificationDomainService.pushNewNotification(singleWorkWriterId, notificationId);
     }
 
     @Override

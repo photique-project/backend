@@ -19,6 +19,14 @@ public class FollowDomainServiceImpl implements FollowDomainService {
 
     @Override
     public void createFollow(final Follow follow) {
+        // 이미 팔로우 중인지 확인하는 요청
+        Long followerId = follow.getFollower().getId();
+        Long followingId = follow.getFollowing().getId();
+
+        if (followRepository.existsByFollowerIdAndFollowingId(followerId, followingId)) {
+            throw new UserException("Already following the user", HttpStatus.CONFLICT);
+        }
+
         followRepository.save(follow);
     }
 
