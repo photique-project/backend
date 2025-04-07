@@ -1,6 +1,6 @@
 package com.benchpress200.photique.auth.infrastructure;
 
-import com.benchpress200.photique.auth.domain.dto.Tokens;
+import com.benchpress200.photique.auth.domain.model.IssueTokenResult;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
@@ -35,8 +35,8 @@ public class TokenManagerImpl implements TokenManager {
     }
 
     @Override
-    public Tokens issueNewTokens(Long userId) {
-        String accessToken =  TOKEN_PREFIX + Jwts.builder()
+    public IssueTokenResult issueNewTokens(Long userId) {
+        String accessToken = TOKEN_PREFIX + Jwts.builder()
                 .claim(CLAIM_KEY, userId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredTime))
@@ -52,7 +52,7 @@ public class TokenManagerImpl implements TokenManager {
                 .signWith(secretKey)
                 .compact();
 
-        return Tokens.builder()
+        return IssueTokenResult.builder()
                 .userId(userId)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

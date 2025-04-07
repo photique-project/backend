@@ -1,8 +1,8 @@
 package com.benchpress200.photique.user.domain.dto;
 
-import com.benchpress200.photique.common.dtovalidator.Image;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Source;
+import com.benchpress200.photique.user.validation.annotation.ProfileImage;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -26,7 +26,7 @@ public class JoinRequest {
     @Pattern(regexp = "^[^\\s]{1,11}$", message = "Invalid nickname: Nickname must be between 1 and 11 characters long and cannot contain any whitespace")
     private String nickname;
 
-    @Image
+    @ProfileImage
     private MultipartFile profileImage;
 
     public User toEntity(
@@ -40,9 +40,5 @@ public class JoinRequest {
                 .profileImage(profileImageUrl)
                 .source(Source.LOCAL)
                 .build();
-    }
-
-    public boolean hasProfileImage() {
-        return profileImage != null;
     }
 }

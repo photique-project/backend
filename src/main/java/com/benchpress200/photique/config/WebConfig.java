@@ -1,7 +1,7 @@
 package com.benchpress200.photique.config;
 
-import com.benchpress200.photique.auth.interceptor.AuthInterceptor;
-import com.benchpress200.photique.auth.interceptor.OwnResourceInterceptor;
+import com.benchpress200.photique.common.interceptor.AuthInterceptor;
+import com.benchpress200.photique.common.interceptor.OwnResourceInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -27,9 +27,12 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedMethods("GET", "POST", "PATCH", "DELETE")
+                .allowedMethods("GET", "POST", "PATCH", "DELETE", "OPTIONS")
                 .allowedOrigins(allowedOrigins)
                 .exposedHeaders("Set-Cookie")
-                .allowCredentials(true);
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
+
     }
 }

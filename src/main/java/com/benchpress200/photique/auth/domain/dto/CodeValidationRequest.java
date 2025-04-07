@@ -9,7 +9,7 @@ public class CodeValidationRequest {
     @Email(message = "Invalid email")
     private String email;
 
-    @NotBlank(message = "The code must not be blank")
+    @NotBlank(message = "Code for authentication must not be blank")
     private String code;
 
     public boolean validate(String code) {

@@ -17,9 +17,9 @@ if { [ "$IS_GREEN_EXIST" = false ] && [ "$IS_BLUE_EXIST" = false ]; } || [ "$IS_
   fi
 
   echo ">>> blue image를 pull합니다."
-  sudo docker-compose -f docker-compose.backend.dev.yml pull blue-dev
+  sudo docker-compose -f /home/ubuntu/spring/docker-compose.backend.dev.yml pull blue-dev
   echo ">>> blue container를 up합니다."
-  sudo docker-compose -f docker-compose.backend.dev.yml up -d blue-dev
+  sudo docker-compose -f /home/ubuntu/spring/docker-compose.backend.dev.yml up -d blue-dev
   while true; do
     echo ">>> blue health check 중..."
     sleep 3
@@ -31,7 +31,7 @@ if { [ "$IS_GREEN_EXIST" = false ] && [ "$IS_BLUE_EXIST" = false ]; } || [ "$IS_
   done
   sleep 3
   echo ">>> nginx를 다시 실행 합니다."
-  sudo cp /home/ubuntu/nginx.blue.dev.conf /home/ubuntu/nginx/conf.d/default.conf
+  sudo cp /home/ubuntu/nginx/nginx.blue.dev.conf /home/ubuntu/nginx/conf.d/default.conf
   sudo docker exec -i nginx-dev nginx -s reload
 
 # blue가 트래픽 받고 있을 때
@@ -46,9 +46,9 @@ else
         sudo sudo docker rmi "photique/backend-green-dev:0.1.0"
   fi
   echo ">>> green image를 pull합니다."
-  sudo docker-compose -f docker-compose.backend.dev.yml pull green-dev
+  sudo docker-compose -f /home/ubuntu/spring/docker-compose.backend.dev.yml pull green-dev
   echo ">>> green container를 up합니다."
-  sudo docker-compose -f docker-compose.backend.dev.yml up -d green-dev
+  sudo docker-compose -f /home/ubuntu/spring/docker-compose.backend.dev.yml up -d green-dev
   while true; do
     echo ">>> green health check 중..."
     sleep 3
@@ -60,6 +60,6 @@ else
   done
   sleep 3
   echo ">>> nginx를 다시 실행 합니다."
-  sudo cp /home/ubuntu/nginx.green.dev.conf /home/ubuntu/nginx/conf.d/default.conf
+  sudo cp /home/ubuntu/nginx/nginx.green.dev.conf /home/ubuntu/nginx/conf.d/default.conf
   sudo docker exec -i nginx-dev nginx -s reload
 fi

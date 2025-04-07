@@ -41,11 +41,11 @@ public class User {
     @Column(nullable = false, unique = true)
     private String nickname;
 
-    @Column(nullable = false)
-    private Long coin;
-
-    @Column(name= "profile_image" , length = 2048)
+    @Column(name = "profile_image", length = 2048)
     private String profileImage;
+
+    @Column(length = 50)
+    private String introduction;
 
     @Enumerated(EnumType.STRING)
     private Source source;
@@ -53,27 +53,28 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(name= "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
-    private void onCreate() {
-        coin = 0L;
-        role = Role.USER;
-        createdAt = LocalDateTime.now();
+    public void prePersist() {
+        this.role = Role.USER;
+        this.createdAt = LocalDateTime.now();
     }
 
     @Builder
     public User(
-            String email,
-            String password,
-            String nickname,
-            String profileImage,
-            Source source
+            final String email,
+            final String password,
+            final String nickname,
+            final String introduction,
+            final String profileImage,
+            final Source source
     ) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.introduction = introduction;
         this.profileImage = profileImage;
         this.source = source;
     }
@@ -86,7 +87,15 @@ public class User {
         this.nickname = nickname;
     }
 
+    public void updateIntroduction(String introduction) {
+        this.introduction = introduction;
+    }
+
     public void updateProfileImage(String profileImage) {
         this.profileImage = profileImage;
+    }
+
+    public void updateDefaultProfileImage() {
+        this.profileImage = null;
     }
 }
