@@ -24,7 +24,7 @@ jobs:
 
       - name: 앱 빌드
         run: ./gradlew clean build -x test
- 
+
       - name: 도커 이미지 빌드 및 푸시
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
@@ -39,8 +39,9 @@ jobs:
           username: ubuntu
           host: ${{ secrets.HOST_DEV }}
           key: ${{ secrets.KEY }}
-          source: docker-compose.backend.dev.yml, ./deploy-dev.sh, ./rollback-dev.sh
-          target: /home/ubuntu
+          script: mkdir -p /home/ubuntu/spring
+          source: ./docker-compose.backend.dev.yml, ./deploy-dev.sh, ./rollback-dev.sh
+          target: /home/ubuntu/spring
 
       - name: EC2 연결 및 backend 컨테이너 실행
         uses: appleboy/ssh-action@master
