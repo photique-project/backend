@@ -46,4 +46,5 @@ public class URL {
     public static final String SUB = "/subscribe";
     public static final String NOTIFICATION_DOMAIN = "/notifications";
     public static final String NOTIFICATION_DATA = "/{notificationId}";
+    public static final String UNREAD = "/unread";
 }

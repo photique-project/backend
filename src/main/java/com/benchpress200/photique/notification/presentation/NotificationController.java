@@ -5,6 +5,7 @@ import com.benchpress200.photique.common.interceptor.Auth;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.notification.application.NotificationService;
+import com.benchpress200.photique.notification.domain.dto.CountUnreadResponse;
 import com.benchpress200.photique.notification.domain.dto.NotificationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -67,5 +68,14 @@ public class NotificationController {
     ) {
         notificationService.deleteNotification(userId, notificationId);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
+
+    @Auth
+    @GetMapping(URL.UNREAD)
+    public ApiSuccessResponse<?> countUnread(
+            @PathVariable("userId") final Long userId
+    ) {
+        CountUnreadResponse countUnreadResponse = notificationService.countUnread(userId);
+        return ResponseHandler.handleSuccessResponse(countUnreadResponse, HttpStatus.OK);
     }
 }

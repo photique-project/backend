@@ -23,4 +23,6 @@ public interface NotificationDomainService {
     List<Notification> findNotifications(User user);
 
     void deleteNotification(Notification notification);
+
+    long countUnread(User user);
 }

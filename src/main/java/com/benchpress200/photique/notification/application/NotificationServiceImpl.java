@@ -1,6 +1,7 @@
 package com.benchpress200.photique.notification.application;
 
 import com.benchpress200.photique.notification.domain.NotificationDomainService;
+import com.benchpress200.photique.notification.domain.dto.CountUnreadResponse;
 import com.benchpress200.photique.notification.domain.dto.NotificationResponse;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.user.domain.UserDomainService;
@@ -87,5 +88,17 @@ public class NotificationServiceImpl implements NotificationService {
 
         // 노티 삭제
         notificationDomainService.deleteNotification(notification);
+    }
+
+    @Override
+    @Transactional
+    public CountUnreadResponse countUnread(final Long userId) {
+        // 유저 조회
+        User user = userDomainService.findUser(userId);
+
+        // 카운트횟수 반환해서 DTO만들기
+        long count = notificationDomainService.countUnread(user);
+
+        return CountUnreadResponse.from(count);
     }
 }

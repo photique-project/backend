@@ -1,5 +1,6 @@
 package com.benchpress200.photique.notification.application;
 
+import com.benchpress200.photique.notification.domain.dto.CountUnreadResponse;
 import com.benchpress200.photique.notification.domain.dto.NotificationResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,4 +16,6 @@ public interface NotificationService {
     void markAllAsRead(Long userId);
 
     void deleteNotification(Long userId, Long notificationId);
+
+    CountUnreadResponse countUnread(Long userId);
 }

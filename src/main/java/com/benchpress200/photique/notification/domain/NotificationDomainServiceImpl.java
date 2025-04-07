@@ -72,11 +72,12 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             final User user,
             final Pageable pageable
     ) {
-        Page<Notification> notificationPage = notificationRepository.findByUser(user, pageable);
+        Page<Notification> notificationPage = notificationRepository.findByUserOrderByCreatedAtDesc(user, pageable);
+
         if (notificationPage.getTotalElements() == 0) {
             throw new NotificationException("No notifications found.", HttpStatus.NOT_FOUND);
         }
-        return notificationRepository.findByUser(user, pageable);
+        return notificationPage;
     }
 
     @Override
@@ -113,11 +114,16 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         // 노티 엔티티 전송이 아닌 일반 알림을 위한 데이터 전송
         try {
             SseEmitter emitter = emitters.get(userId);
-            emitter.send(SseEmitter.event().id(String.valueOf(notificationId)));
+            emitter.send(SseEmitter.event().id(String.valueOf(notificationId)).data("new"));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public long countUnread(final User user) {
+        return notificationRepository.countByUserAndIsReadFalse(user);
     }
 }
