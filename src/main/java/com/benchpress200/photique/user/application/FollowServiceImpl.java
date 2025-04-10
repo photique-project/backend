@@ -65,7 +65,7 @@ public class FollowServiceImpl implements FollowService {
         User follower = userDomainService.findUser(followerId);
 
         // 팔로잉 유저 조회
-        Long followingId = unfollowRequest.getFollowerId();
+        Long followingId = unfollowRequest.getFollowingId();
         User following = userDomainService.findUser(followingId);
 
         // 본인이 팔로우하고있는 팔로잉 삭제
@@ -87,7 +87,7 @@ public class FollowServiceImpl implements FollowService {
         List<FollowerResponse> followerResponseList = followerPage.stream()
                 .map(follower -> {
                     // 본인을 팔로워하는 사람들이고 본인도 팔로잉 상태인지 확인
-                    boolean isFollowing = followDomainService.isFollowing(userId, follower.getFollowing().getId());
+                    boolean isFollowing = followDomainService.isFollowing(userId, follower.getFollower().getId());
 
                     return FollowerResponse.of(follower, isFollowing);
                 })
