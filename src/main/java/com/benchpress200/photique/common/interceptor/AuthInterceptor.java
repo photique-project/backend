@@ -32,29 +32,41 @@ public class AuthInterceptor implements HandlerInterceptor {
             final HttpServletResponse response,
             final Object handler
     ) {
+        // 핸들러 메서드가 아니라면
         if (!(handler instanceof HandlerMethod handlerMethod)) {
             return true;
         }
 
+        // @Auth 어노테이션이 없다면
         if (!handlerMethod.getMethod().isAnnotationPresent(Auth.class)) {
             return true;
         }
 
         // TODO: 이후에 도메인 서비스로 처리 ㄱ
         String accessToken = findAccessToken(request).orElseThrow(
-                () -> new AuthException("Authentication failed", HttpStatus.UNAUTHORIZED));
+                () -> new AuthException(
+                        "Authentication failed: cookie for authentication not found",
+                        HttpStatus.UNAUTHORIZED)
+        );
+
         URLDecoder.decode(accessToken, StandardCharsets.UTF_8);
 
+        // 토큰에서 유저아이디 조회
+        Long userId = tokenManager.getUserId(accessToken);
+        User user = userDomainService.findUser(userId);
+
+        // 쿠키가 유효하다면, 만료되면 유저아이디 조회 어떻게?
         if (!tokenManager.isExpired(accessToken)) {
-
-            Long userId = tokenManager.getUserId(accessToken);
-            refreshTokenRepository.findById(userId)
-                    .orElseThrow(() -> new AuthException("Authentication failed", HttpStatus.UNAUTHORIZED));
-
-            User user = userDomainService.findUser(userId);
-            Cookie cookie = authDomainService.issueToken(user);
+            Cookie cookie = authDomainService.issueToken(user); // 어세스 토큰과 리프레쉬 토큰 재발급
             response.addCookie(cookie);
+            return true;
         }
+
+        // 어세스토큰은 만료되고 리프레쉬 토큰은 살아있을 때
+        refreshTokenRepository.findById(userId).orElseThrow(
+                () -> new AuthException("Authentication failed: token is expired", HttpStatus.UNAUTHORIZED));
+        Cookie cookie = authDomainService.issueToken(user); // 어세스 토큰과 리프레쉬 토큰 재발급
+        response.addCookie(cookie);
 
         return true;
     }
