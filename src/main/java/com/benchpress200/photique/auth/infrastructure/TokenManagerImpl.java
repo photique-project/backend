@@ -91,12 +91,17 @@ public class TokenManagerImpl implements TokenManager {
             token = token.substring(TOKEN_PREFIX.length());
         }
 
-        return Jwts
-                .parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .get(CLAIM_KEY, Long.class);
+        try {
+            return Jwts
+                    .parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .get(CLAIM_KEY, Long.class);
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰의 Claims 직접 꺼냄
+            return e.getClaims().get(CLAIM_KEY, Long.class);
+        }
     }
 }
