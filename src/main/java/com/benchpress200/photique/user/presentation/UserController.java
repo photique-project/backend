@@ -52,7 +52,7 @@ public class UserController {
 
     @Auth
     @GetMapping(URL.USER_DATA)
-    public ApiSuccessResponse<?> getUserDetail(
+    public ApiSuccessResponse<?> getUserDetails(
             @ModelAttribute final UserDetailRequest userDetailRequest,
             @PathVariable("userId") final Long userId // 팔로우확인을 위한 유저아이디 받아서 넘겨서 응답수정할차례
     ) {
@@ -92,5 +92,4 @@ public class UserController {
         userService.withdraw(userId);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
-    
 }

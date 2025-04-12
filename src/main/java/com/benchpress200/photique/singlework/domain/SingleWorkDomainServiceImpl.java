@@ -115,8 +115,12 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
             final List<Category> categories,
             final Pageable pageable
     ) {
-        Page<SingleWorkSearch> singleWorkSearchPage = singleWorkSearchRepository.search(target, keywords, categories,
-                pageable);
+        Page<SingleWorkSearch> singleWorkSearchPage = singleWorkSearchRepository.search(
+                target,
+                keywords,
+                categories,
+                pageable
+        );
 
         if (singleWorkSearchPage.getTotalElements() == 0) {
             throw new SingleWorkException("No single works found.", HttpStatus.NOT_FOUND);

@@ -4,11 +4,15 @@ import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SingleWorkSearchResponse {
     private Long id;
     private Writer writer;
@@ -16,7 +20,7 @@ public class SingleWorkSearchResponse {
     private Long likeCount;
     private Long viewCount;
     @JsonProperty("isLiked")
-    private boolean isLiked;
+    private boolean liked;
 
     @Builder
     record Writer(
@@ -66,8 +70,7 @@ public class SingleWorkSearchResponse {
                 .image(singleWorkSearch.getImage())
                 .likeCount(singleWorkSearch.getLikeCount())
                 .viewCount(singleWorkSearch.getViewCount())
-                .isLiked(isLiked)
+                .liked(isLiked)
                 .build();
     }
-
 }

@@ -3,11 +3,15 @@ package com.benchpress200.photique.user.domain.dto;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDetailResponse {
     private Long id;
     private String email;

@@ -1,6 +1,7 @@
 package com.benchpress200.photique.singlework.application;
 
 
+import com.benchpress200.photique.common.dto.RestPage;
 import com.benchpress200.photique.image.domain.ImageDomainService;
 import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.entity.Notification;
@@ -38,6 +39,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -144,6 +146,11 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     @Transactional
+    @Cacheable(
+            value = "searchSingleWorkPage",
+            key = "#pageable.pageNumber", // 메서드 파라미터에서 페이지 수를 캐시 키로 사용
+            condition = "#pageable.pageNumber <= 10" // 초반 페이지만 캐싱
+    )
     public Page<SingleWorkSearchResponse> searchSingleWorks(
             final SingleWorkSearchRequest singleWorkSearchRequest,
             final Pageable pageable
@@ -180,8 +187,9 @@ public class SingleWorkServiceImpl implements SingleWorkService {
                 })
                 .toList();
 
-        return new PageImpl<>(singleWorkSearchResponsePage, pageable, singleWorkSearchPage.getTotalElements());
+        return new RestPage<>(singleWorkSearchResponsePage, pageable, singleWorkSearchPage.getTotalElements());
     }
+
 
     @Override
     @Transactional
