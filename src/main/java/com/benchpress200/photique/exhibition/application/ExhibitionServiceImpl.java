@@ -1,5 +1,6 @@
 package com.benchpress200.photique.exhibition.application;
 
+import com.benchpress200.photique.common.dto.RestPage;
 import com.benchpress200.photique.exhibition.domain.ExhibitionCommentDomainService;
 import com.benchpress200.photique.exhibition.domain.ExhibitionDomainService;
 import com.benchpress200.photique.exhibition.domain.dto.BookmarkedExhibitionRequest;
@@ -39,6 +40,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -143,6 +145,12 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     }
 
     @Override
+    @Transactional
+    @Cacheable(
+            value = "searchExhibitionPage",
+            key = "#pageable.pageNumber", // 메서드 파라미터에서 페이지 수를 캐시 키로 사용
+            condition = "#pageable.pageNumber <= 10" // 초반 페이지만 캐싱
+    )
     public Page<ExhibitionSearchResponse> searchExhibitions(
             final ExhibitionSearchRequest exhibitionSearchRequest,
             final Pageable pageable
@@ -172,7 +180,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 })
                 .toList();
 
-        return new PageImpl<>(exhibitionSearchResponsePage, pageable, exhibitionSearchPage.getTotalElements());
+        return new RestPage<>(exhibitionSearchResponsePage, pageable, exhibitionSearchPage.getTotalElements());
     }
 
     @Override

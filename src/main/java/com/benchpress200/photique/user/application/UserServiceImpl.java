@@ -24,6 +24,8 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -67,7 +69,13 @@ public class UserServiceImpl implements UserService {
         userDomainService.registerUser(user);
     }
 
+
     @Override
+    @Transactional
+    @Cacheable(
+            value = "userDetails",
+            key = "#userDetailRequest.userId" // 메서드 파라미터에서 userId 를 캐시 키로 사용
+    )
     public UserDetailResponse getUserDetail(final UserDetailRequest userDetailRequest) {
         // 유저 데이터 조회
         Long userId = userDetailRequest.getUserId();
@@ -102,6 +110,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(
+            value = "userDetails",
+            key = "#userUpdateRequest.userId"
+    )
     public void updateUserDetail(final UserUpdateRequest userUpdateRequest) {
         // 유저 조회
         Long userId = userUpdateRequest.getUserId();
@@ -153,6 +165,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(
+            value = "userDetails",
+            key = "#userId"
+    )
     public void withdraw(final Long userId) {
         // 유저 조회
         User user = userDomainService.findUser(userId);
