@@ -148,8 +148,8 @@ public class SingleWorkServiceImpl implements SingleWorkService {
     @Transactional
     @Cacheable(
             value = "searchSingleWorkPage",
-            key = "#pageable.pageNumber", // 메서드 파라미터에서 페이지 수를 캐시 키로 사용
-            condition = "#pageable.pageNumber <= 10" // 초반 페이지만 캐싱
+            key = "#pageable.pageNumber", // 페이지 번호를 캐싱 키로 지정
+            condition = "#pageable.pageNumber <= 10 and #singleWorkSearchRequest.keywords.isEmpty() and #singleWorkSearchRequest.categories.isEmpty()" // 키워드 없을 때 초반 페이지만 캐싱
     )
     public Page<SingleWorkSearchResponse> searchSingleWorks(
             final SingleWorkSearchRequest singleWorkSearchRequest,

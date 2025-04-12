@@ -148,8 +148,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     @Transactional
     @Cacheable(
             value = "searchExhibitionPage",
-            key = "#pageable.pageNumber", // 메서드 파라미터에서 페이지 수를 캐시 키로 사용
-            condition = "#pageable.pageNumber <= 10" // 초반 페이지만 캐싱
+            key = "#pageable.pageNumber", // 페이지 번호를 캐싱 키로 지정
+            condition = "#pageable.pageNumber <= 10 and #exhibitionSearchRequest.keywords.isEmpty()" // 초반 페이지만 캐싱
     )
     public Page<ExhibitionSearchResponse> searchExhibitions(
             final ExhibitionSearchRequest exhibitionSearchRequest,
