@@ -1,9 +1,12 @@
-package com.benchpress200.photique.exhibition.infrastructure;
+package com.benchpress200.photique.exhibition.scheduler;
 
 import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchExhibitionRollbackContext;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
+import com.benchpress200.photique.exhibition.infrastructure.ExhibitionRepository;
+import com.benchpress200.photique.exhibition.infrastructure.ExhibitionSearchRepository;
 import com.benchpress200.photique.singlework.exception.SingleWorkException;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ public class ExhibitionViewCountScheduler {
     // 마지막 동기화 시점 (초기값: 애플리케이션 시작 기준)
     private LocalDateTime lastSyncTime = LocalDateTime.now().minusSeconds(30);
 
+    @Transactional
     @Scheduled(fixedRate = 30_000) // 30초마다 실행
     public void syncViewCountsToElasticsearch() {
         log.info("[Sync] 전시회 조회수 동기화 시작: {}", lastSyncTime);
