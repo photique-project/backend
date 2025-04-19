@@ -47,6 +47,9 @@ public class Exhibition {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @PrePersist
     public void prePersist() {
         viewCount = 0L;
@@ -68,5 +71,6 @@ public class Exhibition {
 
     public void incrementView() {
         viewCount++;
+        updatedAt = LocalDateTime.now();
     }
 }

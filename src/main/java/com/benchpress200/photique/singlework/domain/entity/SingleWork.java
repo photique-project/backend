@@ -80,6 +80,9 @@ public class SingleWork {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @PrePersist
     public void prePersist() {
         viewCount = 0L;
@@ -161,5 +164,6 @@ public class SingleWork {
 
     public void incrementView() {
         viewCount++;
+        updatedAt = LocalDateTime.now();
     }
 }

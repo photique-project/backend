@@ -122,13 +122,6 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     @Override
     public void incrementView(final Exhibition exhibition) {
         exhibition.incrementView();
-
-        // 엘라스틱서치 데이터 업데이트
-        Long exhibitionId = exhibition.getId();
-        ExhibitionSearch exhibitionSearch = findExhibitionSearch(exhibitionId);
-
-        exhibitionSearch.incrementViewCount();
-        ElasticsearchExhibitionRollbackContext.addDocumentToUpdate(exhibitionSearch);
     }
 
     private ExhibitionSearch findExhibitionSearch(final Long exhibitionId) {
