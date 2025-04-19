@@ -1,9 +1,12 @@
-package com.benchpress200.photique.singlework.infrastructure;
+package com.benchpress200.photique.singlework.scheduler;
 
 import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchSingleWorkRollbackContext;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.exception.SingleWorkException;
+import com.benchpress200.photique.singlework.infrastructure.SingleWorkRepository;
+import com.benchpress200.photique.singlework.infrastructure.SingleWorkSearchRepository;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ public class SingleWorkViewCountScheduler {
     // 마지막 동기화 시점 (초기값: 애플리케이션 시작 기준)
     private LocalDateTime lastSyncTime = LocalDateTime.now().minusSeconds(30);
 
+    @Transactional
     @Scheduled(fixedRate = 30_000) // 30초마다 실행
     public void syncViewCountsToElasticsearch() {
         log.info("[Sync] 단일작품 조회수 동기화 시작: {}", lastSyncTime);
@@ -42,7 +46,6 @@ public class SingleWorkViewCountScheduler {
 
                     singleWorkSearch.updateViewCount(viewCount);
                     ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
-
                 } catch (Exception e) {
                     log.error("[Sync] 단일 작품 조회수 동기화 실패", e);
                 }
