@@ -75,8 +75,8 @@ public class SingleWorkSearch {
         this.commentCount = commentCount;
     }
 
-    public void incrementViewCount() {
-        viewCount++;
+    public void updateViewCount(long viewCount) {
+        this.viewCount = viewCount;
     }
 
     public void updateImage(final String image) {

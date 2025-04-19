@@ -92,8 +92,8 @@ public class ExhibitionSearch {
                 .build();
     }
 
-    public void incrementViewCount() {
-        viewCount++;
+    public void updateViewCount(long viewCount) {
+        this.viewCount += viewCount;
     }
 
     public void updateLikeCount(final Long likeCount) {

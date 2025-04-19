@@ -91,16 +91,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
     @Override
     public void incrementView(final SingleWork singleWork) {
         singleWork.incrementView();
-
-        // 엘라스틱서치 데이터 업데이트
-        Long singleWorkId = singleWork.getId();
-        SingleWorkSearch singleWorkSearch = singleWorkSearchRepository.findById(singleWorkId).orElseThrow(
-                () -> new SingleWorkException("SingleWork with ID " + singleWorkId + " is not found.",
-                        HttpStatus.NOT_FOUND)
-        );
-
-        singleWorkSearch.incrementViewCount();
-        ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
     }
 
     @Override
