@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+// 레디스 캐싱을 위한 PageImpl 상속받은 커스텀 클래스
 @JsonIgnoreProperties(ignoreUnknown = true, value = {"pageable"})
 public class RestPage<T> extends PageImpl<T> {
 

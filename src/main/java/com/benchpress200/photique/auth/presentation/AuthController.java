@@ -25,14 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(URL.BASE_URL + URL.AUTH_DOMAIN)
 @RequiredArgsConstructor
 public class AuthController {
-
     private final AuthService authService;
 
     @PostMapping(URL.LOGIN)
     public ApiSuccessResponse<?> login(
             @RequestBody final LoginRequest loginRequest,
             @RequestParam final boolean auto,
-            final HttpServletResponse response
+            final HttpServletResponse response // 쿠키 추가를 위한 응답 객체
     ) {
         // 응답 객체 조작은 컨트롤러 단에서 처리
         loginRequest.withAutoLogin(auto);
