@@ -8,11 +8,13 @@ public interface AuthDomainService {
 
     void validatePassword(String loginPassword, String password);
 
-    Cookie issueToken(User user);
+    Cookie issueToken(User user, boolean auto);
 
     Cookie expireToken(String token);
 
     void sendMail(String email);
 
     void validateAuthMailCode(String email, String code);
+
+    boolean isUnlimitedToken(final String accessToken);
 }

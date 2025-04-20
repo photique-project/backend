@@ -5,7 +5,6 @@ import com.benchpress200.photique.auth.domain.dto.AuthMailRequest;
 import com.benchpress200.photique.auth.domain.dto.CodeValidationRequest;
 import com.benchpress200.photique.auth.domain.dto.LoginRequest;
 import com.benchpress200.photique.auth.domain.dto.WhoAmIResponse;
-import com.benchpress200.photique.auth.infrastructure.AuthCodeRepository;
 import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.servlet.http.Cookie;
@@ -17,11 +16,8 @@ import org.springframework.stereotype.Service;
 @Transactional
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
-
     private final AuthDomainService authDomainService;
     private final UserDomainService userDomainService;
-
-    private final AuthCodeRepository authCodeRepository;
 
     @Override
     public Cookie login(final LoginRequest loginRequest) {
@@ -34,8 +30,11 @@ public class AuthServiceImpl implements AuthService {
         String password = user.getPassword();
         authDomainService.validatePassword(loginPassword, password);
 
+        // 자동 로그인 확인
+        boolean auto = loginRequest.isAuto();
+
         // 토큰발급
-        return authDomainService.issueToken(user);
+        return authDomainService.issueToken(user, auto);
     }
 
     @Override

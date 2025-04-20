@@ -13,4 +13,10 @@ public class LoginRequest {
     @NotBlank(message = "Invalid password: Password must be at least 8 characters long, include at least one letter, one number, and one special character")
     @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{8,}$", message = "Invalid password: Password must be at least 8 characters long, include at least one letter, one number, and one special character")
     private String password;
+
+    private boolean auto;
+
+    public void withAutoLogin(boolean auto) {
+        this.auto = auto;
+    }
 }

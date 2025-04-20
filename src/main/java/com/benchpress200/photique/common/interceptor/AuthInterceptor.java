@@ -55,9 +55,15 @@ public class AuthInterceptor implements HandlerInterceptor {
         Long userId = tokenManager.getUserId(accessToken);
         User user = userDomainService.findUser(userId);
 
-        // 쿠키가 유효하다면, 만료되면 유저아이디 조회 어떻게?
+        boolean autoLogin = authDomainService.isUnlimitedToken(accessToken);
+
+        if (autoLogin) {
+            return true;
+        }
+
+        // 쿠키가 유효하다면,
         if (!tokenManager.isExpired(accessToken)) {
-            Cookie cookie = authDomainService.issueToken(user); // 어세스 토큰과 리프레쉬 토큰 재발급
+            Cookie cookie = authDomainService.issueToken(user, false); // 어세스 토큰과 리프레쉬 토큰 재발급
             response.addCookie(cookie);
             return true;
         }
@@ -65,7 +71,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         // 어세스토큰은 만료되고 리프레쉬 토큰은 살아있을 때
         refreshTokenRepository.findById(userId).orElseThrow(
                 () -> new AuthException("Authentication failed: token is expired", HttpStatus.UNAUTHORIZED));
-        Cookie cookie = authDomainService.issueToken(user); // 어세스 토큰과 리프레쉬 토큰 재발급
+        Cookie cookie = authDomainService.issueToken(user, false); // 어세스 토큰과 리프레쉬 토큰 재발급
         response.addCookie(cookie);
 
         return true;
