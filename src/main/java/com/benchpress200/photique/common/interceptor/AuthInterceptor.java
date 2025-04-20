@@ -37,7 +37,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         String accessToken = authDomainService.findAccessToken(request);
 
         // 토큰에서 유저아이디 조회
-        Long userId = authDomainService.getUserIdFromToken(accessToken);
+        long userId = authDomainService.getUserIdFromToken(accessToken);
         User user = userDomainService.findUser(userId);
 
         // 자동 로그인 토큰이라면 토큰 재발급없이 통과
