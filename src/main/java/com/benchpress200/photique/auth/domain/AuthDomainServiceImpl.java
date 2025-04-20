@@ -42,15 +42,15 @@ public class AuthDomainServiceImpl implements AuthDomainService {
     }
 
     @Override
-    public Cookie issueToken(final User user) {
+    public Cookie issueToken(final User user, final boolean auto) {
         Long userId = user.getId();
-        IssueTokenResult issueTokenResult = tokenManager.issueNewTokens(userId);
+        IssueTokenResult issueTokenResult = tokenManager.issueNewTokens(userId, auto);
         RefreshToken refreshToken = issueTokenResult.toRefreshTokenEntity();
         refreshTokenRepository.save(refreshToken);
 
         String accessToken = issueTokenResult.getAccessToken();
 
-        return createAuthCookie(accessToken, true);
+        return createAuthCookie(accessToken, true, auto);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class AuthDomainServiceImpl implements AuthDomainService {
         accessTokenCookie.setPath("/");
         accessTokenCookie.setMaxAge(0);
 
-        return createAuthCookie(token, false);
+        return createAuthCookie(token, false, false);
     }
 
     @Override
@@ -92,13 +92,26 @@ public class AuthDomainServiceImpl implements AuthDomainService {
         }
     }
 
-    private Cookie createAuthCookie(final String token, final boolean issueToken) {
+    @Override
+    public boolean isUnlimitedToken(final String accessToken) {
+        return tokenManager.isUnlimitedToken(accessToken);
+    }
+
+    private Cookie createAuthCookie(
+            final String token,
+            final boolean issueToken,
+            final boolean auto
+    ) {
         Cookie accessTokenCookie = new Cookie(AUTH_COOKIE_KEY, token);
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setPath("/");
 
         if (issueToken) {
-            accessTokenCookie.setMaxAge(3600);
+            if (auto) {
+                accessTokenCookie.setMaxAge(60 * 60 * 24 * 365 * 10);
+            } else {
+                accessTokenCookie.setMaxAge(3600);
+            }
         } else {
             accessTokenCookie.setMaxAge(0);
         }
