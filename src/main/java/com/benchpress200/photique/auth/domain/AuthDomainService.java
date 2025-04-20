@@ -17,4 +17,6 @@ public interface AuthDomainService {
     void validateAuthMailCode(String email, String code);
 
     boolean isUnlimitedToken(final String accessToken);
+
+    void isValidUser(String email);
 }

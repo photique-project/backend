@@ -17,6 +17,7 @@ public class URL {
     public static final String USER_DOMAIN = "/users";
     public static final String USER_DATA = "/{userId}";
     public static final String WHO_AM_I = "/me";
+    public static final String PASSWORD = "/password";
 
     // FOLLOW
     public static final String FOLLOW_DOMAIN = "/follows";
