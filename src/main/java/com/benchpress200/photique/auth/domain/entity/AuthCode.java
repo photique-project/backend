@@ -17,7 +17,16 @@ public class AuthCode {
     @Id
     private String email;
     private String code;
+    private boolean isVerified;
 
     @TimeToLive
     private Long timeToLive;
+
+    public void updateVerified() {
+        isVerified = true;
+    }
+
+    public void updateTtl(long ttl) {
+        timeToLive = ttl;
+    }
 }

@@ -2,6 +2,7 @@ package com.benchpress200.photique.user.application;
 
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
+import com.benchpress200.photique.user.domain.dto.ResetPasswordRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailResponse;
 import com.benchpress200.photique.user.domain.dto.UserSearchRequest;
@@ -22,4 +23,6 @@ public interface UserService {
     void withdraw(Long userId);
 
     Page<UserSearchResponse> searchUsers(UserSearchRequest userSearchRequest, Pageable pageable);
+
+    void resetPassword(ResetPasswordRequest resetPasswordRequest);
 }

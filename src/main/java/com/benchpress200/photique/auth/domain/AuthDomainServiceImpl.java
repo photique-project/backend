@@ -74,6 +74,7 @@ public class AuthDomainServiceImpl implements AuthDomainService {
         authCodeRepository.save(AuthCode.builder()
                 .email(email)
                 .code(authCode)
+                .isVerified(false)
                 .timeToLive(180L)
                 .build());
     }
@@ -90,11 +91,27 @@ public class AuthDomainServiceImpl implements AuthDomainService {
         if (!authCode.getCode().equals(code)) {
             throw new AuthException("Invalid code", HttpStatus.UNAUTHORIZED);
         }
+
+        authCode.updateVerified();
+        authCode.updateTtl(600L);
+        authCodeRepository.save(authCode);
     }
 
     @Override
     public boolean isUnlimitedToken(final String accessToken) {
         return tokenManager.isUnlimitedToken(accessToken);
+    }
+
+    @Override
+    public void isValidUser(final String email) {
+        // 인증코드 있는지 확인
+        AuthCode authCode = authCodeRepository.findById(email)
+                .orElseThrow(() -> new AuthException("Verification code has expired", HttpStatus.GONE));
+
+        // 인증됐는지 확인
+        if (!authCode.isVerified()) {
+            throw new AuthException("Verification has not been completed yet", HttpStatus.UNAUTHORIZED);
+        }
     }
 
     private Cookie createAuthCookie(

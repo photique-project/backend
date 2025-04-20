@@ -8,6 +8,7 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserService;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
+import com.benchpress200.photique.user.domain.dto.ResetPasswordRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailResponse;
 import com.benchpress200.photique.user.domain.dto.UserSearchRequest;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -90,6 +92,14 @@ public class UserController {
             @PathVariable("userId") final Long userId
     ) {
         userService.withdraw(userId);
+        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping(URL.PASSWORD)
+    public ApiSuccessResponse<?> resetPassword(
+            @RequestBody final ResetPasswordRequest resetPasswordRequest
+    ) {
+        userService.resetPassword(resetPasswordRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 }
