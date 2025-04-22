@@ -56,6 +56,9 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @PrePersist
     public void prePersist() {
         this.role = Role.USER;
@@ -95,7 +98,7 @@ public class User {
         this.profileImage = profileImage;
     }
 
-    public void updateDefaultProfileImage() {
-        this.profileImage = null;
+    public void markAsUpdated() {
+        updatedAt = LocalDateTime.now();
     }
 }

@@ -95,6 +95,12 @@ public class SingleWorkSearch {
         this.title = title;
     }
 
+    public void updateWriterDetails(final User writer) {
+        writerId = writer.getId();
+        writerNickname = writer.getNickname();
+        writerProfileImage = writer.getProfileImage();
+    }
+
 
     // SingleWorkSearch는 JPA가 관리하는 영속성 객체가 아니기 때문에 엔티티 클래스 내부에 변환메서드 작성했음
     public static SingleWorkSearch of(

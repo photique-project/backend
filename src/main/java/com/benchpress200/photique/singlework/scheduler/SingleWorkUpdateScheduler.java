@@ -1,38 +1,35 @@
 package com.benchpress200.photique.singlework.scheduler;
 
 import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchSingleWorkRollbackContext;
+import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
-import com.benchpress200.photique.singlework.exception.SingleWorkException;
-import com.benchpress200.photique.singlework.infrastructure.SingleWorkRepository;
-import com.benchpress200.photique.singlework.infrastructure.SingleWorkSearchRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SingleWorkViewCountScheduler {
-    private final SingleWorkRepository singleWorkRepository;
-    private final SingleWorkSearchRepository singleWorkSearchRepository;
+public class SingleWorkUpdateScheduler {
+    private static final int UPDATE_INTERVAL = 60;
+    private final SingleWorkDomainService singleWorkDomainService;
 
     // 마지막 동기화 시점 (초기값: 애플리케이션 시작 기준)
-    private LocalDateTime lastSyncTime = LocalDateTime.now().minusSeconds(30);
+    private LocalDateTime lastSyncTime = LocalDateTime.now().minusSeconds(UPDATE_INTERVAL);
 
     @Transactional
-    @Scheduled(fixedRate = 30_000) // 30초마다 실행
+    @Scheduled(fixedRate = UPDATE_INTERVAL * 1000) // 1분마다 실행
     public void syncViewCountsToElasticsearch() {
-        log.info("[Sync] 단일작품 조회수 동기화 시작: {}", lastSyncTime);
+        log.info("[MySQL-ES] 단일작품 동기화 시작: {}", lastSyncTime);
 
         try {
-            List<SingleWork> modifiedSingleWorks = singleWorkRepository.findModifiedSince(lastSyncTime);
-            log.info("[Sync] 업데이트된 작품 수: {}", modifiedSingleWorks.size());
+            List<SingleWork> modifiedSingleWorks = singleWorkDomainService.findSingleWorksModifiedSince(lastSyncTime);
+            log.info("[MySQL-ES] 동기화 단일작품 수: {}", modifiedSingleWorks.size());
 
             for (SingleWork singleWork : modifiedSingleWorks) {
                 try {
@@ -40,19 +37,19 @@ public class SingleWorkViewCountScheduler {
                     Long viewCount = singleWork.getViewCount();
 
                     // ES 도큐먼트 찾기
-                    SingleWorkSearch singleWorkSearch = singleWorkSearchRepository.findById(singleWorkId).orElseThrow(
-                            () -> new SingleWorkException("SingleWork with ID " + singleWorkId + " is not found.",
-                                    HttpStatus.NOT_FOUND));
-
+                    SingleWorkSearch singleWorkSearch = singleWorkDomainService.findSingleWorkSearch(singleWorkId);
+                    // 뷰카운트 뿐만 아니라 다른 것도 일괄업뎃? 코드확인필요
+                    // 하고나서 유저도, 전시회도 확인
+                    // 그리고 검색 쿼리확인
                     singleWorkSearch.updateViewCount(viewCount);
                     ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
                 } catch (Exception e) {
-                    log.error("[Sync] 단일 작품 조회수 동기화 실패", e);
+                    log.error("[MySQL-ES] 단일작품 동기화 실패", e);
                 }
             }
 
         } catch (Exception e) {
-            log.error("[Sync] 전체 ViewCount 동기화 실패", e);
+            log.error("[MySQL-ES] 단일작품 동기화 실패", e);
         } finally {
             lastSyncTime = LocalDateTime.now();
         }

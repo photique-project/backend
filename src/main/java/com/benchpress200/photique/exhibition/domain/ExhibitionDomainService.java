@@ -80,4 +80,8 @@ public interface ExhibitionDomainService {
     Page<ExhibitionSearch> findLikedExhibitionsByUser(Long userId, Pageable pageable);
 
     Page<ExhibitionSearch> findMyExhibitions(Long userId, Pageable pageable);
+
+    List<ExhibitionSearch> findExhibitionSearchesByWriterId(long id);
+
+    void updateAllExhibitionSearch(List<ExhibitionSearch> exhibitionSearches);
 }

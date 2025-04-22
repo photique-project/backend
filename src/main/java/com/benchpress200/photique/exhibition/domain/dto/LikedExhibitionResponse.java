@@ -61,7 +61,7 @@ public class LikedExhibitionResponse {
                                 exhibitionSearch.getWriterId(),
                                 exhibitionSearch.getWriterNickname(),
                                 exhibitionSearch.getWriterProfileImage(),
-                                exhibitionSearch.getIntroduction()
+                                exhibitionSearch.getWriterIntroduction()
                         )
                 )
                 .title(exhibitionSearch.getTitle())

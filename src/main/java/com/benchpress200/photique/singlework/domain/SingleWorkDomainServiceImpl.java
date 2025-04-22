@@ -17,7 +17,9 @@ import com.benchpress200.photique.singlework.infrastructure.SingleWorkSearchRepo
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkTagRepository;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.entity.User;
+import com.benchpress200.photique.user.infrastructure.UserSearchRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
     private final SingleWorkLikeRepository singleWorkLikeRepository;
     private final SingleWorkTagRepository singleWorkTagRepository;
     private final SingleWorkSearchRepository singleWorkSearchRepository;
+    private final UserSearchRepository userSearchRepository;
 
     @Override
     public List<SingleWork> findSingleWork(final User writer) {
@@ -117,17 +120,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
         }
 
         return singleWorkSearchPage;
-    }
-
-    private SingleWorkSearch findSingleWorkSearch(final Long singleWorkId) {
-        if (ElasticsearchSingleWorkRollbackContext.hasDocumentToUpdate()) {
-            return ElasticsearchSingleWorkRollbackContext.getDocumentToUpdate();
-        }
-
-        return singleWorkSearchRepository.findById(singleWorkId).orElseThrow(
-                () -> new SingleWorkException("SingleWork with ID " + singleWorkId + " is not found.",
-                        HttpStatus.NOT_FOUND)
-        );
     }
 
     @Override
@@ -465,4 +457,30 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
 
         return singleWorkSearchPage;
     }
+
+    @Override
+    public List<SingleWork> findSingleWorksModifiedSince(final LocalDateTime time) {
+        return singleWorkRepository.findAllByUpdatedAtAfter(time);
+    }
+
+    @Override
+    public SingleWorkSearch findSingleWorkSearch(final Long id) {
+        if (ElasticsearchSingleWorkRollbackContext.hasDocumentToUpdate()) {
+            return ElasticsearchSingleWorkRollbackContext.getDocumentToUpdate();
+        }
+
+        return singleWorkSearchRepository.findById(id).orElseThrow(
+                () -> new SingleWorkException("SingleWork with ID " + id + " is not found.", HttpStatus.NOT_FOUND));
+    }
+
+    @Override
+    public List<SingleWorkSearch> findSingleWorkSearchesByWriterId(final Long id) {
+        return singleWorkSearchRepository.findAllByWriterId(id);
+    }
+
+    @Override
+    public void updateAllSingleWorkSearch(final List<SingleWorkSearch> singleWorkSearches) {
+        singleWorkSearchRepository.saveAll(singleWorkSearches);
+    }
+
 }

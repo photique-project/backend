@@ -329,4 +329,14 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
 
         return exhibitionSearchPage;
     }
+
+    @Override
+    public List<ExhibitionSearch> findExhibitionSearchesByWriterId(final long id) {
+        return exhibitionSearchRepository.findAllByWriterId(id);
+    }
+
+    @Override
+    public void updateAllExhibitionSearch(final List<ExhibitionSearch> exhibitionSearches) {
+        exhibitionSearchRepository.saveAll(exhibitionSearches);
+    }
 }

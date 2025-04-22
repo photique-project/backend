@@ -9,6 +9,7 @@ import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -84,4 +85,12 @@ public interface SingleWorkDomainService {
     Page<SingleWorkSearch> findLikedSingleWorksByUser(Long userId, Pageable pageable);
 
     Page<SingleWorkSearch> findMySingleWorkByUser(Long userId, Pageable pageable);
+
+    List<SingleWork> findSingleWorksModifiedSince(LocalDateTime time);
+
+    SingleWorkSearch findSingleWorkSearch(Long id);
+
+    List<SingleWorkSearch> findSingleWorkSearchesByWriterId(Long id);
+
+    void updateAllSingleWorkSearch(List<SingleWorkSearch> singleWorkSearches);
 }

@@ -3,8 +3,8 @@ package com.benchpress200.photique.user.application;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
 import com.benchpress200.photique.user.domain.dto.ResetPasswordRequest;
-import com.benchpress200.photique.user.domain.dto.UserDetailRequest;
-import com.benchpress200.photique.user.domain.dto.UserDetailResponse;
+import com.benchpress200.photique.user.domain.dto.UserDetailsRequest;
+import com.benchpress200.photique.user.domain.dto.UserDetailsResponse;
 import com.benchpress200.photique.user.domain.dto.UserSearchRequest;
 import com.benchpress200.photique.user.domain.dto.UserSearchResponse;
 import com.benchpress200.photique.user.domain.dto.UserUpdateRequest;
@@ -16,9 +16,9 @@ public interface UserService {
 
     void join(JoinRequest joinRequest);
 
-    UserDetailResponse getUserDetail(UserDetailRequest userDetailRequest);
+    UserDetailsResponse getUserDetails(UserDetailsRequest userDetailsRequest);
 
-    void updateUserDetail(UserUpdateRequest userUpdateRequest);
+    void updateUserDetails(UserUpdateRequest userUpdateRequest);
 
     void withdraw(Long userId);
 

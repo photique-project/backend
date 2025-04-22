@@ -6,6 +6,8 @@ import com.benchpress200.photique.user.domain.entity.UserSearch;
 import com.benchpress200.photique.user.exception.UserException;
 import com.benchpress200.photique.user.infrastructure.UserRepository;
 import com.benchpress200.photique.user.infrastructure.UserSearchRepository;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -202,5 +204,25 @@ public class UserDomainServiceImpl implements UserDomainService {
         );
 
         ElasticsearchUserRollbackContext.addDocumentToDelete(userSearch);
+    }
+
+    @Override
+    public List<User> findUsersModifiedSince(final LocalDateTime time) {
+        return userRepository.findAllByUpdatedAtAfter(time);
+    }
+
+    @Override
+    public void markAsUpdated(final User user) {
+        user.markAsUpdated();
+    }
+
+    @Override
+    public void updateUserSearch(final UserSearch userSearch) {
+        userSearchRepository.save(userSearch);
+    }
+
+    @Override
+    public void updateAllUserSearch(final List<UserSearch> userSearches) {
+        userSearchRepository.saveAll(userSearches);
     }
 }

@@ -14,12 +14,11 @@ import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
 import com.benchpress200.photique.user.domain.dto.ResetPasswordRequest;
-import com.benchpress200.photique.user.domain.dto.UserDetailRequest;
-import com.benchpress200.photique.user.domain.dto.UserDetailResponse;
+import com.benchpress200.photique.user.domain.dto.UserDetailsRequest;
+import com.benchpress200.photique.user.domain.dto.UserDetailsResponse;
 import com.benchpress200.photique.user.domain.dto.UserSearchRequest;
 import com.benchpress200.photique.user.domain.dto.UserSearchResponse;
 import com.benchpress200.photique.user.domain.dto.UserUpdateRequest;
-import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
 import jakarta.transaction.Transactional;
@@ -40,14 +39,14 @@ public class UserServiceImpl implements UserService {
     @Value("${cloud.aws.s3.path.profile}")
     private String profileImagePath;
 
-    private final ImageDomainService imageDomainService;
     private final UserDomainService userDomainService;
+    private final FollowDomainService followDomainService;
+    private final AuthDomainService authDomainService;
+    private final ImageDomainService imageDomainService;
     private final SingleWorkDomainService singleWorkDomainService;
     private final SingleWorkCommentDomainService singleWorkCommentDomainService;
     private final ExhibitionDomainService exhibitionDomainService;
     private final ExhibitionCommentDomainService exhibitionCommentDomainService;
-    private final FollowDomainService followDomainService;
-    private final AuthDomainService authDomainService;
 
     @Override
     public void validateNickname(final NicknameValidationRequest nicknameValidationRequest) {
@@ -81,11 +80,11 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Cacheable(
             value = "userDetails",
-            key = "#userDetailRequest.userId" // 메서드 파라미터에서 userId 를 캐시 키로 사용
+            key = "#userDetailsRequest.userId" // 메서드 파라미터에서 userId 를 캐시 키로 사용
     )
-    public UserDetailResponse getUserDetail(final UserDetailRequest userDetailRequest) {
+    public UserDetailsResponse getUserDetails(final UserDetailsRequest userDetailsRequest) {
         // 유저 데이터 조회
-        Long userId = userDetailRequest.getUserId();
+        Long userId = userDetailsRequest.getUserId();
         User foundUser = userDomainService.findUser(userId);
 
         // 유저 단일작품 개수 조회
@@ -101,11 +100,11 @@ public class UserServiceImpl implements UserService {
         Long followingCount = followDomainService.countFollowings(foundUser);
 
         // 요청유저의 팔로우 여부 조회
-        Long requestUserId = userDetailRequest.getRequestUserId();
+        Long requestUserId = userDetailsRequest.getRequestUserId();
         boolean isFollowing = followDomainService.isFollowing(requestUserId, userId);
 
         // 응답 데이터로 변환 후 반환
-        return UserDetailResponse.of(
+        return UserDetailsResponse.of(
                 foundUser,
                 singleWorkCount,
                 exhibitionCount,
@@ -121,7 +120,7 @@ public class UserServiceImpl implements UserService {
             value = "userDetails",
             key = "#userUpdateRequest.userId"
     )
-    public void updateUserDetail(final UserUpdateRequest userUpdateRequest) {
+    public void updateUserDetails(final UserUpdateRequest userUpdateRequest) {
         // 유저 조회
         Long userId = userUpdateRequest.getUserId();
         User user = userDomainService.findUser(userId);
@@ -143,6 +142,9 @@ public class UserServiceImpl implements UserService {
         MultipartFile newProfileImage = userUpdateRequest.getProfileImage();
         String updatedProfileImageUrl = imageDomainService.update(newProfileImage, oldPath, profileImagePath);
         userDomainService.updateProfileImage(user, updatedProfileImageUrl);
+
+        // 업데이트 시간 마킹
+        userDomainService.markAsUpdated(user);
     }
 
     @Override
@@ -151,24 +153,21 @@ public class UserServiceImpl implements UserService {
             final UserSearchRequest userSearchRequest,
             final Pageable pageable
     ) {
+        // 키워드 조회
         String keyword = userSearchRequest.getKeyword();
         Page<UserSearch> userSearchPage = userDomainService.searchUsers(keyword, pageable);
 
         // 검색 유저중 팔로우 상태 조회
         Long userId = userSearchRequest.getUserId();
-        User user = userDomainService.findUser(userId);
-        List<Follow> follows = followDomainService.getFollowings(user);
 
-        List<UserSearchResponse> userSearchResponsesList = userSearchPage.stream()
+        List<UserSearchResponse> userSearchResponseList = userSearchPage.stream()
                 .map(userSearch -> {
-                    boolean isFollowing = follows.stream()
-                            .anyMatch(follow -> follow.getFollowing().getId().equals(userSearch.getId()));
-
+                    boolean isFollowing = followDomainService.isFollowing(userId, userSearch.getId());
                     return UserSearchResponse.of(userSearch, isFollowing);
                 })
                 .toList();
 
-        return new PageImpl<>(userSearchResponsesList, pageable, userSearchPage.getTotalElements());
+        return new PageImpl<>(userSearchResponseList, pageable, userSearchPage.getTotalElements());
     }
 
     @Override

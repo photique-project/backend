@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDetailResponse {
+public class UserDetailsResponse {
     private Long id;
     private String email;
     private String nickname;
@@ -26,7 +26,7 @@ public class UserDetailResponse {
     @JsonProperty("isFollowing")
     private boolean isFollowing;
 
-    public static UserDetailResponse of(
+    public static UserDetailsResponse of(
             final User user,
             final Long singleWork,
             final Long exhibition,
@@ -34,7 +34,7 @@ public class UserDetailResponse {
             final Long following,
             final boolean isFollowing
     ) {
-        return UserDetailResponse.builder()
+        return UserDetailsResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
