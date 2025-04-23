@@ -14,8 +14,6 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.annotations.Mapping;
-import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
 @AllArgsConstructor
@@ -24,8 +22,8 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 @Builder
 @Document(indexName = "users", writeTypeHint = WriteTypeHint.FALSE)
 // 저장할 때, _class 필드를 저장하지 않도록 설정하는 옵션
-@Setting(settingPath = "/elasticsearch/settings.json")
-@Mapping(mappingPath = "/elasticsearch/mappings.json")
+//@Setting(settingPath = "/elasticsearch/settings.json")
+//@Mapping(mappingPath = "/elasticsearch/mappings.json")
 public class UserSearch {
     @Id
     @Field(name = "id", type = FieldType.Long)
