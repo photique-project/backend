@@ -95,17 +95,5 @@ public class ExhibitionSearch {
                 .createdAt(exhibition.getCreatedAt())
                 .build();
     }
-
-    public void updateViewCount(long viewCount) {
-        this.viewCount += viewCount;
-    }
-
-    public void updateLikeCount(final Long likeCount) {
-        this.likeCount = likeCount;
-    }
-
-    public void updateCommentCount(final Long commentCount) {
-        this.commentCount = commentCount;
-    }
 }
 

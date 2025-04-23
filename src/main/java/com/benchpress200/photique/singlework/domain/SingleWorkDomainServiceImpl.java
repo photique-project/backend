@@ -17,7 +17,6 @@ import com.benchpress200.photique.singlework.infrastructure.SingleWorkSearchRepo
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkTagRepository;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.infrastructure.UserSearchRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,12 +31,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
-
     private final SingleWorkRepository singleWorkRepository;
     private final SingleWorkLikeRepository singleWorkLikeRepository;
     private final SingleWorkTagRepository singleWorkTagRepository;
     private final SingleWorkSearchRepository singleWorkSearchRepository;
-    private final UserSearchRepository userSearchRepository;
 
     @Override
     public List<SingleWork> findSingleWork(final User writer) {
@@ -129,12 +126,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
     ) {
         // 이미지 업데이트
         singleWork.updateImage(uploadedNewImageUrl);
-
-        // 엘라스틱서치 업데이트
-        Long singleWorkId = singleWork.getId();
-        SingleWorkSearch singleWorkSearch = findSingleWorkSearch(singleWorkId);
-        singleWorkSearch.updateImage(uploadedNewImageUrl);
-        ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
     }
 
     @Override
@@ -251,13 +242,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
 
         Category category = Category.fromValue(newCategory);
         singleWork.updateCategory(category);
-
-        // 엘라스틱 서치 업데이트
-        Long singleWorkId = singleWork.getId();
-        SingleWorkSearch singleWorkSearch = findSingleWorkSearch(singleWorkId);
-
-        singleWorkSearch.updateCategory(newCategory);
-        ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
     }
 
     @Override
@@ -293,16 +277,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
 
         singleWorkTagRepository.deleteBySingleWork(singleWork);
         singleWorkTagRepository.saveAll(singleWorkTags);
-
-        // 엘라스틱서치 업데이트
-        Long singleWorkId = singleWork.getId();
-        SingleWorkSearch singleWorkSearch = findSingleWorkSearch(singleWorkId);
-        List<String> tagNames = tags.stream()
-                .map(Tag::getName)
-                .toList();
-
-        singleWorkSearch.updateTags(tagNames);
-        ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
     }
 
     @Override
@@ -315,12 +289,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
         }
 
         singleWork.updateTitle(newTitle);
-
-        // 엘라스틱서치 업데이트
-        Long singleWorkId = singleWork.getId();
-        SingleWorkSearch singleWorkSearch = findSingleWorkSearch(singleWorkId);
-        singleWorkSearch.updateTitle(newTitle);
-        ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
     }
 
     @Override
@@ -353,14 +321,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
     @Override
     public void incrementLike(final SingleWorkLike singleWorkLike) {
         singleWorkLikeRepository.save(singleWorkLike);
-
-        // 엘라스틱서치 데이터 업데이트
-        SingleWork singleWork = singleWorkLike.getSingleWork();
-        Long singleWorkId = singleWork.getId();
-        Long likeCount = singleWorkLikeRepository.countBySingleWork(singleWork);
-        SingleWorkSearch singleWorkSearch = findSingleWorkSearch(singleWorkId);
-        singleWorkSearch.updateLikeCount(likeCount);
-        ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
     }
 
     @Override
@@ -379,13 +339,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
             final SingleWork singleWork
     ) {
         singleWorkLikeRepository.deleteByUserAndSingleWork(user, singleWork);
-
-        // 엘라스틱서치 데이터 업데이트
-        Long singleWorkId = singleWork.getId();
-        Long likeCount = singleWorkLikeRepository.countBySingleWork(singleWork);
-        SingleWorkSearch singleWorkSearch = findSingleWorkSearch(singleWorkId);
-        singleWorkSearch.updateLikeCount(likeCount);
-        ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
     }
 
     @Override
@@ -464,16 +417,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
     }
 
     @Override
-    public SingleWorkSearch findSingleWorkSearch(final Long id) {
-        if (ElasticsearchSingleWorkRollbackContext.hasDocumentToUpdate()) {
-            return ElasticsearchSingleWorkRollbackContext.getDocumentToUpdate();
-        }
-
-        return singleWorkSearchRepository.findById(id).orElseThrow(
-                () -> new SingleWorkException("SingleWork with ID " + id + " is not found.", HttpStatus.NOT_FOUND));
-    }
-
-    @Override
     public List<SingleWorkSearch> findSingleWorkSearchesByWriterId(final Long id) {
         return singleWorkSearchRepository.findAllByWriterId(id);
     }
@@ -483,4 +426,8 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
         singleWorkSearchRepository.saveAll(singleWorkSearches);
     }
 
+    @Override
+    public void markAsUpdated(final SingleWork singleWork) {
+        singleWork.markAsUpdated();
+    }
 }

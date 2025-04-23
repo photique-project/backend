@@ -60,7 +60,7 @@ public class SingleWorkController {
             @PathVariable final Long singleworkId
     ) {
         singleWorkDetailRequest.withSingleWorkId(singleworkId);
-        SingleWorkDetailResponse singleWorkDetailResponse = singleWorkService.getSingleWorkDetail(
+        SingleWorkDetailResponse singleWorkDetailResponse = singleWorkService.getSingleWorkDetails(
                 singleWorkDetailRequest);
         return ResponseHandler.handleSuccessResponse(singleWorkDetailResponse, HttpStatus.OK);
     }
@@ -82,12 +82,12 @@ public class SingleWorkController {
     @Auth
     @OwnResource
     @PatchMapping(URL.SINGLE_WORK_DATA)
-    public ApiSuccessResponse<?> updateSingleWorkDetail(
+    public ApiSuccessResponse<?> updateSingleWorkDetails(
             @PathVariable final Long singleworkId,
-            @ModelAttribute @Valid final SingleWorkUpdateRequest singleWorkUpdateRequest
+            @RequestBody @Valid final SingleWorkUpdateRequest singleWorkUpdateRequest
     ) {
         singleWorkUpdateRequest.withSingleWorkId(singleworkId);
-        singleWorkService.updateSingleWorkDetail(singleWorkUpdateRequest);
+        singleWorkService.updateSingleWorkDetails(singleWorkUpdateRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 

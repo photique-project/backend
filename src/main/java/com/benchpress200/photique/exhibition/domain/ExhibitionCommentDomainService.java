@@ -20,4 +20,6 @@ public interface ExhibitionCommentDomainService {
     void updateContent(ExhibitionComment exhibitionComment, String newContent);
 
     void deleteComment(ExhibitionComment exhibitionComment);
+
+    long countComments(Exhibition exhibition);
 }

@@ -88,9 +88,9 @@ public interface SingleWorkDomainService {
 
     List<SingleWork> findSingleWorksModifiedSince(LocalDateTime time);
 
-    SingleWorkSearch findSingleWorkSearch(Long id);
-
     List<SingleWorkSearch> findSingleWorkSearchesByWriterId(Long id);
 
     void updateAllSingleWorkSearch(List<SingleWorkSearch> singleWorkSearches);
+
+    void markAsUpdated(SingleWork singleWork);
 }

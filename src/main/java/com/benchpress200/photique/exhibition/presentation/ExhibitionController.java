@@ -11,8 +11,8 @@ import com.benchpress200.photique.exhibition.domain.dto.BookmarkedExhibitionResp
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRemoveRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
-import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailRequest;
-import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailsRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailsResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
@@ -54,14 +54,14 @@ public class ExhibitionController {
 
     @Auth
     @GetMapping(URL.EXHIBITION_DATA)
-    public ApiSuccessResponse<?> getExhibitionDetail(
-            @ModelAttribute final ExhibitionDetailRequest exhibitionDetailRequest,
+    public ApiSuccessResponse<?> getExhibitionDetails(
+            @ModelAttribute final ExhibitionDetailsRequest exhibitionDetailsRequest,
             @PathVariable final Long exhibitionId
     ) {
-        exhibitionDetailRequest.withExhibitionId(exhibitionId);
-        ExhibitionDetailResponse exhibitionDetailResponse = exhibitionService.getExhibitionDetail(
-                exhibitionDetailRequest);
-        return ResponseHandler.handleSuccessResponse(exhibitionDetailResponse, HttpStatus.OK);
+        exhibitionDetailsRequest.withExhibitionId(exhibitionId);
+        ExhibitionDetailsResponse exhibitionDetailsResponse = exhibitionService.getExhibitionDetails(
+                exhibitionDetailsRequest);
+        return ResponseHandler.handleSuccessResponse(exhibitionDetailsResponse, HttpStatus.OK);
     }
 
     @GetMapping

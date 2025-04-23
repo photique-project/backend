@@ -8,8 +8,8 @@ import com.benchpress200.photique.exhibition.domain.dto.BookmarkedExhibitionResp
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRemoveRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionBookmarkRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCreateRequest;
-import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailRequest;
-import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailResponse;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailsRequest;
+import com.benchpress200.photique.exhibition.domain.dto.ExhibitionDetailsResponse;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
@@ -61,7 +61,6 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     private final TagDomainService tagDomainService;
     private final NotificationDomainService notificationDomainService;
     private final FollowDomainService followDomainService;
-
 
     @Override
     @Transactional
@@ -119,10 +118,10 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
-    public ExhibitionDetailResponse getExhibitionDetail(final ExhibitionDetailRequest exhibitionDetailRequest) {
+    public ExhibitionDetailsResponse getExhibitionDetails(final ExhibitionDetailsRequest exhibitionDetailsRequest) {
 
         // 전시회 조회
-        Long exhibitionId = exhibitionDetailRequest.getExhibitionId();
+        Long exhibitionId = exhibitionDetailsRequest.getExhibitionId();
         Exhibition exhibition = exhibitionDomainService.findExhibition(exhibitionId);
 
         // 전시회 개별작품 조회
@@ -132,11 +131,14 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         exhibitionDomainService.incrementView(exhibition);
 
         // 요청한 유저의 전시회 좋아요 북마크 유무
-        Long userId = exhibitionDetailRequest.getUserId();
+        Long userId = exhibitionDetailsRequest.getUserId();
         boolean isLiked = exhibitionDomainService.isLiked(userId, exhibitionId);
         boolean isBookmarked = exhibitionDomainService.isBookmarked(userId, exhibitionId);
 
-        return ExhibitionDetailResponse.of(
+        // 업데이트 마킹
+        exhibitionDomainService.markAsUpdated(exhibition);
+
+        return ExhibitionDetailsResponse.of(
                 exhibition,
                 exhibitionWorks,
                 isLiked,
@@ -166,15 +168,12 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
         // 전시회에서 유저아이디에 해당하는 좋아요와 북마크 선별해저 담기
         Long userId = exhibitionSearchRequest.getUserId();
-        List<ExhibitionLike> exhibitionLikes = exhibitionDomainService.findLikeByUser(userId);
-        List<ExhibitionBookmark> exhibitionBookmarks = exhibitionDomainService.findBookmarkByUser(userId);
 
         List<ExhibitionSearchResponse> exhibitionSearchResponsePage = exhibitionSearchPage.stream()
                 .map(exhibitionSearch -> {
-                    boolean isLiked = exhibitionLikes.stream()
-                            .anyMatch(like -> like.getExhibition().getId().equals(exhibitionSearch.getId()));
-                    boolean isBookmarked = exhibitionBookmarks.stream()
-                            .anyMatch(bookmark -> bookmark.getExhibition().getId().equals(exhibitionSearch.getId()));
+                    long exhibitionId = exhibitionSearch.getId();
+                    boolean isLiked = exhibitionDomainService.isLiked(userId, exhibitionId);
+                    boolean isBookmarked = exhibitionDomainService.isBookmarked(userId, exhibitionId);
 
                     return ExhibitionSearchResponse.of(exhibitionSearch, isLiked, isBookmarked);
                 })
@@ -248,6 +247,9 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 알림 비동기 처리
         Long notificationId = notification.getId();
         notificationDomainService.pushNewNotification(exhibitionWriterId, notificationId);
+
+        // 업데이트 마킹
+        exhibitionDomainService.markAsUpdated(exhibition);
     }
 
     @Override
@@ -263,6 +265,9 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
         // 좋아요 삭제
         exhibitionDomainService.decrementLike(user, exhibition);
+
+        // 업데이트 마킹
+        exhibitionDomainService.markAsUpdated(exhibition);
     }
 
     @Override
@@ -329,12 +334,10 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 pageable);
 
         // 전시회에서 유저아이디에 해당하는 좋아요와 북마크 선별해서 담기
-        List<ExhibitionLike> exhibitionLikes = exhibitionDomainService.findLikeByUser(userId);
-
         List<BookmarkedExhibitionResponse> bookmarkedExhibitionResponsePage = exhibitionSearchPage.stream()
                 .map(exhibitionSearch -> {
-                    boolean isLiked = exhibitionLikes.stream()
-                            .anyMatch(like -> like.getExhibition().getId().equals(exhibitionSearch.getId()));
+                    long exhibitionId = exhibitionSearch.getId();
+                    boolean isLiked = exhibitionDomainService.isLiked(userId, exhibitionId);
 
                     return BookmarkedExhibitionResponse.of(exhibitionSearch, isLiked);
                 })
@@ -357,12 +360,10 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 pageable);
 
         // 북마크 데이터 조회
-        List<ExhibitionBookmark> exhibitionBookmarks = exhibitionDomainService.findBookmarkByUser(userId);
-
         List<LikedExhibitionResponse> likedExhibitionResponsePage = exhibitionSearchPage.stream()
                 .map(exhibitionSearch -> {
-                    boolean isBookmarked = exhibitionBookmarks.stream()
-                            .anyMatch(bookmark -> bookmark.getExhibition().getId().equals(exhibitionSearch.getId()));
+                    long exhibitionId = exhibitionSearch.getId();
+                    boolean isBookmarked = exhibitionDomainService.isBookmarked(userId, exhibitionId);
 
                     return LikedExhibitionResponse.of(exhibitionSearch, isBookmarked);
                 })
@@ -383,16 +384,12 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         Page<ExhibitionSearch> exhibitionSearchPage = exhibitionDomainService.findMyExhibitions(userId, pageable);
 
         // 요청 유저의 좋아요, 북마크 데이터 조회
-        List<ExhibitionLike> exhibitionLikes = exhibitionDomainService.findLikeByUser(userId);
-        List<ExhibitionBookmark> exhibitionBookmarks = exhibitionDomainService.findBookmarkByUser(userId);
-
         // 응답 페이지 생성 및 반환
         List<MyExhibitionResponse> myExhibitionResponsePage = exhibitionSearchPage.stream()
                 .map(exhibitionSearch -> {
-                    boolean isLiked = exhibitionLikes.stream()
-                            .anyMatch(like -> like.getExhibition().getId().equals(exhibitionSearch.getId()));
-                    boolean isBookmarked = exhibitionBookmarks.stream()
-                            .anyMatch(bookmark -> bookmark.getExhibition().getId().equals(exhibitionSearch.getId()));
+                    long exhibitionId = exhibitionSearch.getId();
+                    boolean isLiked = exhibitionDomainService.isLiked(userId, exhibitionId);
+                    boolean isBookmarked = exhibitionDomainService.isBookmarked(userId, exhibitionId);
 
                     return MyExhibitionResponse.of(exhibitionSearch, isLiked, isBookmarked);
                 })

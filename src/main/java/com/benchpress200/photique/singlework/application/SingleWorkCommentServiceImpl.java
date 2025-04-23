@@ -60,6 +60,9 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
         // 알림 비동기 처리
         Long notificationId = notification.getId();
         notificationDomainService.pushNewNotification(singleWorkWriterId, notificationId);
+
+        // 업데이트 마킹
+        singleWorkDomainService.markAsUpdated(singleWork);
     }
 
     @Override
@@ -110,7 +113,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
         // 작품 조회
         Long singleWorkId = singleWorkCommentDeleteRequest.getSingleWorkId();
-        singleWorkDomainService.findSingleWork(singleWorkId);
+        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
 
         // 댓글 조회
         Long commentId = singleWorkCommentDeleteRequest.getCommentId();
@@ -118,5 +121,8 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
         // 댓글 삭제
         singleWorkCommentDomainService.deleteComment(singleWorkComment);
+
+        // 업데이트 마킹
+        singleWorkDomainService.markAsUpdated(singleWork);
     }
 }

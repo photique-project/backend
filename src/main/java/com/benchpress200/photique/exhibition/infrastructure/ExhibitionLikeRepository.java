@@ -18,7 +18,7 @@ public interface ExhibitionLikeRepository extends JpaRepository<ExhibitionLike, 
 
     void deleteByExhibition(Exhibition exhibition);
 
-    Long countByExhibition(Exhibition exhibition);
+    long countByExhibition(Exhibition exhibition);
 
     List<ExhibitionLike> findByUserId(Long userId);
 

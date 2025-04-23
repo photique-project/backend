@@ -62,6 +62,9 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
         // 알림 비동기 처리
         Long notificationId = notification.getId();
         notificationDomainService.pushNewNotification(exhibitionWriterId, notificationId);
+
+        // 업데이트 마킹
+        exhibitionDomainService.markAsUpdated(exhibition);
     }
 
     @Override
@@ -112,7 +115,7 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
         // 전시회 조회
         Long exhibitionId = exhibitionCommentDeleteRequest.getExhibitionId();
-        exhibitionDomainService.findExhibition(exhibitionId);
+        Exhibition exhibition = exhibitionDomainService.findExhibition(exhibitionId);
 
         // 댓글 조회
         Long commentId = exhibitionCommentDeleteRequest.getCommentId();
@@ -120,5 +123,8 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
         // 댓글 삭제
         exhibitionCommentDomainService.deleteComment(exhibitionComment);
+
+        // 업데이트 마킹
+        exhibitionDomainService.markAsUpdated(exhibition);
     }
 }

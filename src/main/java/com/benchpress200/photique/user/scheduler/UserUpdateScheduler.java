@@ -31,18 +31,18 @@ public class UserUpdateScheduler {
     // ES 데이터의 업데이트는 즉시 업데이트가 아닌 스케줄러를 통해 업데이트
     @Transactional
     @Scheduled(fixedRate = UPDATE_INTERVAL * 1000) // 1분마다 실행
-    public void syncUserDetailsToElasticsearch() {
+    public void syncUsersToElasticsearch() {
         log.info("[MySQL-ES] 유저 데이터 동기화 시작: {}", lastSyncTime);
 
         List<User> modifiedUsers = userDomainService.findUsersModifiedSince(lastSyncTime);
         log.info("[MySQL-ES] 동기화 유저 수: {}", modifiedUsers.size());
 
-        List<UserSearch> userSearches = new ArrayList<>();
-        List<SingleWorkSearch> singleWorkSearches = new ArrayList<>();
-        List<ExhibitionSearch> exhibitionSearches = new ArrayList<>();
+        List<UserSearch> userSearchesToUpdate = new ArrayList<>();
+        List<SingleWorkSearch> singleWorkSearchesToUpdate = new ArrayList<>();
+        List<ExhibitionSearch> exhibitionSearchesToUpdate = new ArrayList<>();
 
         modifiedUsers.forEach(user -> {
-            userSearches.add(
+            userSearchesToUpdate.add(
                     UserSearch.builder()
                             .id(user.getId())
                             .profileImage(user.getProfileImage())
@@ -54,28 +54,27 @@ public class UserUpdateScheduler {
 
             // 해당 유저의 모든 ES 단일작품 조회 및 업데이트
             long userId = user.getId();
-            List<SingleWorkSearch> singleWorkSearchesToUpdate = singleWorkDomainService.findSingleWorkSearchesByWriterId(
+            List<SingleWorkSearch> singleWorkSearches = singleWorkDomainService.findSingleWorkSearchesByWriterId(
                     userId);
 
-            singleWorkSearchesToUpdate.forEach(singleWorkSearch -> singleWorkSearch.updateWriterDetails(user));
-            singleWorkSearches.addAll(singleWorkSearchesToUpdate);
+            singleWorkSearches.forEach(singleWorkSearch -> singleWorkSearch.updateWriterDetails(user));
+            singleWorkSearchesToUpdate.addAll(singleWorkSearches);
 
             // 해당 유저의 모든 ES 전시회 조회 및 업데이트
-            List<ExhibitionSearch> exhibitionSearchesToUpdate = exhibitionDomainService.findExhibitionSearchesByWriterId(
+            List<ExhibitionSearch> exhibitionSearches = exhibitionDomainService.findExhibitionSearchesByWriterId(
                     userId);
 
-            exhibitionSearchesToUpdate.forEach(exhibitionSearch -> exhibitionSearch.updateWriterDetails(user));
-            exhibitionSearches.addAll(exhibitionSearchesToUpdate);
+            exhibitionSearches.forEach(exhibitionSearch -> exhibitionSearch.updateWriterDetails(user));
+            exhibitionSearchesToUpdate.addAll(exhibitionSearches);
 
         });
 
         // 벌크 업데이트
-        userDomainService.updateAllUserSearch(userSearches);
-        singleWorkDomainService.updateAllSingleWorkSearch(singleWorkSearches);
-        exhibitionDomainService.updateAllExhibitionSearch(exhibitionSearches);
+        userDomainService.updateAllUserSearch(userSearchesToUpdate);
+        singleWorkDomainService.updateAllSingleWorkSearch(singleWorkSearchesToUpdate);
+        exhibitionDomainService.updateAllExhibitionSearch(exhibitionSearchesToUpdate);
 
         // 동기화 시간 최신화
         lastSyncTime = LocalDateTime.now();
     }
-
 }
