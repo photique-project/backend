@@ -31,8 +31,7 @@ public class UserDetailsResponse {
             final Long singleWork,
             final Long exhibition,
             final Long follower,
-            final Long following,
-            final boolean isFollowing
+            final Long following
     ) {
         return UserDetailsResponse.builder()
                 .id(user.getId())
@@ -45,7 +44,10 @@ public class UserDetailsResponse {
                 .follower(follower)
                 .following(following)
                 .createdAt(user.getCreatedAt())
-                .isFollowing(isFollowing)
                 .build();
+    }
+
+    public void updateFollowingStatus(boolean isFollowing) {
+        this.isFollowing = isFollowing;
     }
 }

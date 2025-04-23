@@ -9,6 +9,7 @@ import com.benchpress200.photique.image.domain.ImageDomainService;
 import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
 import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.user.application.cache.UserCacheService;
 import com.benchpress200.photique.user.domain.FollowDomainService;
 import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
@@ -26,7 +27,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +47,7 @@ public class UserServiceImpl implements UserService {
     private final SingleWorkCommentDomainService singleWorkCommentDomainService;
     private final ExhibitionDomainService exhibitionDomainService;
     private final ExhibitionCommentDomainService exhibitionCommentDomainService;
+    private final UserCacheService userCacheService;
 
     @Override
     public void validateNickname(final NicknameValidationRequest nicknameValidationRequest) {
@@ -78,40 +79,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @Cacheable(
-            value = "userDetails",
-            key = "#userDetailsRequest.userId" // 메서드 파라미터에서 userId 를 캐시 키로 사용
-    )
     public UserDetailsResponse getUserDetails(final UserDetailsRequest userDetailsRequest) {
-        // 유저 데이터 조회
-        Long userId = userDetailsRequest.getUserId();
-        User foundUser = userDomainService.findUser(userId);
-
-        // 유저 단일작품 개수 조회
-        Long singleWorkCount = singleWorkDomainService.countSingleWork(foundUser);
-
-        // 유저 전시회 개수 조회
-        Long exhibitionCount = exhibitionDomainService.countExhibition(foundUser);
-
-        // 유저 팔로워 수 조회
-        Long followerCount = followDomainService.countFollowers(foundUser);
-
-        // 유저 팔로잉 수 조회
-        Long followingCount = followDomainService.countFollowings(foundUser);
+        // 캐시 데이터 우선 조회 서비스 호출
+        UserDetailsResponse userDetailsResponse = userCacheService.getUserDetails(userDetailsRequest);
 
         // 요청유저의 팔로우 여부 조회
-        Long requestUserId = userDetailsRequest.getRequestUserId();
+        // 각각의 요청 유저마다 팔로잉 상태는 다르므로 해당 값은 캐싱에서 제외
+        long userId = userDetailsRequest.getUserId();
+        long requestUserId = userDetailsRequest.getRequestUserId();
         boolean isFollowing = followDomainService.isFollowing(requestUserId, userId);
 
-        // 응답 데이터로 변환 후 반환
-        return UserDetailsResponse.of(
-                foundUser,
-                singleWorkCount,
-                exhibitionCount,
-                followerCount,
-                followingCount,
-                isFollowing
-        );
+        // 팔로잉 여부 할당
+        userDetailsResponse.updateFollowingStatus(isFollowing);
+
+        // 유저상세조회 dto 반환
+        return userDetailsResponse;
     }
 
     @Override
