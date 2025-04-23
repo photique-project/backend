@@ -10,6 +10,7 @@ import com.benchpress200.photique.auth.infrastructure.RefreshTokenRepository;
 import com.benchpress200.photique.auth.infrastructure.TokenManager;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -112,6 +113,40 @@ public class AuthDomainServiceImpl implements AuthDomainService {
         if (!authCode.isVerified()) {
             throw new AuthException("Verification has not been completed yet", HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @Override
+    public String findAccessToken(final HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            throw new AuthException("Authentication failed: cookie for authentication not found",
+                    HttpStatus.UNAUTHORIZED);
+        }
+
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("Authorization")) {
+                return cookie.getValue();
+            }
+        }
+
+        throw new AuthException("Authentication failed: cookie for authentication not found", HttpStatus.UNAUTHORIZED);
+    }
+
+    @Override
+    public long getUserIdFromToken(final String accessToken) {
+        return tokenManager.getUserId(accessToken);
+    }
+
+    @Override
+    public boolean isAccessTokenExpired(final String accessToken) {
+        return tokenManager.isExpired(accessToken);
+    }
+
+    @Override
+    public void isRefreshTokenPresent(long userId) {
+        refreshTokenRepository.findById(userId).orElseThrow(
+                () -> new AuthException("Authentication failed: token is expired", HttpStatus.UNAUTHORIZED));
     }
 
     private Cookie createAuthCookie(

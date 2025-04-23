@@ -20,4 +20,6 @@ public interface SingleWorkCommentDomainService {
     void updateContent(SingleWorkComment singleWorkComment, String newContent);
 
     void deleteComment(SingleWorkComment singleWorkComment);
+
+    long countComments(SingleWork singleWork);
 }

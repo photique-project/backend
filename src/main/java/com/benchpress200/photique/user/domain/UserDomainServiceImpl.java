@@ -6,6 +6,8 @@ import com.benchpress200.photique.user.domain.entity.UserSearch;
 import com.benchpress200.photique.user.exception.UserException;
 import com.benchpress200.photique.user.infrastructure.UserRepository;
 import com.benchpress200.photique.user.infrastructure.UserSearchRepository;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -101,15 +103,6 @@ public class UserDomainServiceImpl implements UserDomainService {
 
         isDuplicatedNickname(newNickname);
         user.updateNickname(newNickname);
-
-        Long userId = user.getId();
-        UserSearch userSearch = findUserSearch(userId);
-
-        // 엘라스틱서치 데이터 업데이트
-        userSearch.updateNickname(newNickname);
-
-        // 업데이트
-        ElasticsearchUserRollbackContext.addDocumentToUpdate(userSearch);
     }
 
     private UserSearch findUserSearch(final Long userId) {
@@ -140,18 +133,6 @@ public class UserDomainServiceImpl implements UserDomainService {
 
         // 소개 업데이트
         user.updateIntroduction(newIntroduction);
-
-        // 엘라스틱서치 데이터 조회
-        Long userId = user.getId();
-        UserSearch userSearch = findUserSearch(userId);
-
-        userSearch.updateIntroduction(newIntroduction);
-
-        // 업데이트
-        ElasticsearchUserRollbackContext.addDocumentToUpdate(userSearch);
-
-        // TODO: 현재 유저의 정보를 변경했을 때 ES에 있는 전시회 카드 데이터 업데이트는 반영되지 않고있음
-        // 해당 문제해결을 위해서 CDC 구축 ?
     }
 
     @Override
@@ -161,16 +142,6 @@ public class UserDomainServiceImpl implements UserDomainService {
     ) {
         // 프로파일 이미지 업데이트
         user.updateProfileImage(newProfileImage);
-
-        // 엘라스틱서치 데이터 조회
-        Long userId = user.getId();
-        UserSearch userSearch = findUserSearch(userId);
-
-        // 엘라스틱서치 데이터 업데이트
-        userSearch.updateProfileImage(newProfileImage);
-
-        // 업데이트
-        ElasticsearchUserRollbackContext.addDocumentToUpdate(userSearch);
     }
 
     @Override
@@ -202,5 +173,25 @@ public class UserDomainServiceImpl implements UserDomainService {
         );
 
         ElasticsearchUserRollbackContext.addDocumentToDelete(userSearch);
+    }
+
+    @Override
+    public List<User> findUsersModifiedSince(final LocalDateTime time) {
+        return userRepository.findAllByUpdatedAtAfter(time);
+    }
+
+    @Override
+    public void markAsUpdated(final User user) {
+        user.markAsUpdated();
+    }
+
+    @Override
+    public void updateUserSearch(final UserSearch userSearch) {
+        userSearchRepository.save(userSearch);
+    }
+
+    @Override
+    public void updateAllUserSearch(final List<UserSearch> userSearches) {
+        userSearchRepository.saveAll(userSearches);
     }
 }

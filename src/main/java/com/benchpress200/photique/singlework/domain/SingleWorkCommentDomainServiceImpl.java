@@ -1,9 +1,7 @@
 package com.benchpress200.photique.singlework.domain;
 
-import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchSingleWorkRollbackContext;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
-import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.exception.SingleWorkException;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkCommentRepository;
 import com.benchpress200.photique.singlework.infrastructure.SingleWorkSearchRepository;
@@ -34,18 +32,6 @@ public class SingleWorkCommentDomainServiceImpl implements SingleWorkCommentDoma
     @Override
     public void addComment(final SingleWorkComment singleWorkComment) {
         singleWorkCommentRepository.save(singleWorkComment);
-
-        // 엘라스틱서치 데이터 업데이트
-        SingleWork singleWork = singleWorkComment.getSingleWork();
-        Long singleWorkId = singleWork.getId();
-        Long commentCount = singleWorkCommentRepository.countBySingleWork(singleWork);
-        SingleWorkSearch singleWorkSearch = singleWorkSearchRepository.findById(singleWorkId).orElseThrow(
-                () -> new SingleWorkException("Single work with id " + singleWorkId + " is not found.",
-                        HttpStatus.NOT_FOUND)
-        );
-
-        singleWorkSearch.updateCommentCount(commentCount);
-        ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
     }
 
     @Override
@@ -77,17 +63,10 @@ public class SingleWorkCommentDomainServiceImpl implements SingleWorkCommentDoma
     @Override
     public void deleteComment(final SingleWorkComment singleWorkComment) {
         singleWorkCommentRepository.delete(singleWorkComment);
+    }
 
-        // 엘라스틱서치 업데이트
-        SingleWork singleWork = singleWorkComment.getSingleWork();
-        Long singleWorkId = singleWork.getId();
-        Long commentCount = singleWorkCommentRepository.countBySingleWork(singleWork);
-        SingleWorkSearch singleWorkSearch = singleWorkSearchRepository.findById(singleWorkId).orElseThrow(
-                () -> new SingleWorkException("Single work with id " + singleWorkId + " is not found.",
-                        HttpStatus.NOT_FOUND)
-        );
-
-        singleWorkSearch.updateCommentCount(commentCount);
-        ElasticsearchSingleWorkRollbackContext.addDocumentToUpdate(singleWorkSearch);
+    @Override
+    public long countComments(final SingleWork singleWork) {
+        return singleWorkCommentRepository.countBySingleWork(singleWork);
     }
 }

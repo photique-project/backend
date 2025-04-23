@@ -8,6 +8,7 @@ import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.user.domain.entity.User;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -67,10 +68,6 @@ public interface ExhibitionDomainService {
 
     Long countExhibition(User user);
 
-    List<ExhibitionLike> findLikeByUser(Long userId);
-
-    List<ExhibitionBookmark> findBookmarkByUser(Long userId);
-
     boolean isLiked(Long userId, Long exhibitionId);
 
     boolean isBookmarked(Long userId, Long exhibitionId);
@@ -80,4 +77,16 @@ public interface ExhibitionDomainService {
     Page<ExhibitionSearch> findLikedExhibitionsByUser(Long userId, Pageable pageable);
 
     Page<ExhibitionSearch> findMyExhibitions(Long userId, Pageable pageable);
+
+    List<ExhibitionSearch> findExhibitionSearchesByWriterId(long id);
+
+    List<Exhibition> findExhibitionsModifiedSince(LocalDateTime time);
+
+    void updateAllExhibitionSearch(List<ExhibitionSearch> exhibitionSearches);
+
+    void markAsUpdated(Exhibition exhibition);
+
+    List<ExhibitionTag> findExhibitionTag(Exhibition exhibition);
+
+    long countLike(Exhibition exhibition);
 }

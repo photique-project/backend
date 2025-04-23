@@ -6,11 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class ApiSuccessResponse<T> extends ResponseEntity<SuccessData<T>> {
-    public ApiSuccessResponse(T data, HttpStatus status) {
+    public ApiSuccessResponse(final T data, final HttpStatus status) {
         super(new SuccessData<>(data), status);
     }
 
-    public ApiSuccessResponse(HttpStatus status) {
+    public ApiSuccessResponse(final HttpStatus status) {
         super(status);
     }
 

@@ -10,7 +10,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ExhibitionDetailResponse {
+public class ExhibitionDetailsResponse {
     private Long id;
     private Writer writer;
     private String title;
@@ -58,7 +58,7 @@ public class ExhibitionDetailResponse {
 
     }
 
-    public static ExhibitionDetailResponse of(
+    public static ExhibitionDetailsResponse of(
             final Exhibition exhibition,
             final List<ExhibitionWork> exhibitionWorks,
             final boolean isLiked,
@@ -68,7 +68,7 @@ public class ExhibitionDetailResponse {
                 .map(Work::from)
                 .toList();
 
-        return ExhibitionDetailResponse.builder()
+        return ExhibitionDetailsResponse.builder()
                 .id(exhibition.getId())
                 .writer(Writer.from(exhibition.getWriter()))
                 .title(exhibition.getTitle())

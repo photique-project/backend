@@ -20,14 +20,14 @@ import org.springframework.data.domain.Pageable;
 public interface SingleWorkService {
     void postNewSingleWork(SingleWorkCreateRequest singleWorkCreateRequest);
 
-    SingleWorkDetailResponse getSingleWorkDetail(SingleWorkDetailRequest singleWorkDetailRequest);
+    SingleWorkDetailResponse getSingleWorkDetails(SingleWorkDetailRequest singleWorkDetailRequest);
 
     Page<SingleWorkSearchResponse> searchSingleWorks(
             SingleWorkSearchRequest singleWorkSearchRequest,
             Pageable pageable
     );
 
-    void updateSingleWorkDetail(SingleWorkUpdateRequest singleWorkUpdateRequest);
+    void updateSingleWorkDetails(SingleWorkUpdateRequest singleWorkUpdateRequest);
 
     void removeSingleWork(Long singleworkId);
 

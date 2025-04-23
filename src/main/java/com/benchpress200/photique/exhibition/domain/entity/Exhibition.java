@@ -71,6 +71,9 @@ public class Exhibition {
 
     public void incrementView() {
         viewCount++;
+    }
+
+    public void markAsUpdated() {
         updatedAt = LocalDateTime.now();
     }
 }

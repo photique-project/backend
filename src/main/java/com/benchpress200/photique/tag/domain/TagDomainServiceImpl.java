@@ -1,5 +1,6 @@
 package com.benchpress200.photique.tag.domain;
 
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.tag.infrastructure.TagRepository;
@@ -38,6 +39,13 @@ public class TagDomainServiceImpl implements TagDomainService {
     public List<Tag> findTags(final List<SingleWorkTag> singleWorkTags) {
         return singleWorkTags.stream()
                 .map(SingleWorkTag::getTag)
+                .toList();
+    }
+
+    @Override
+    public List<Tag> findExhibitionTags(final List<ExhibitionTag> exhibitionTags) {
+        return exhibitionTags.stream()
+                .map(ExhibitionTag::getTag)
                 .toList();
     }
 }

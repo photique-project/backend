@@ -111,13 +111,16 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     @Transactional
-    public SingleWorkDetailResponse getSingleWorkDetail(final SingleWorkDetailRequest singleWorkDetailRequest) {
+    public SingleWorkDetailResponse getSingleWorkDetails(final SingleWorkDetailRequest singleWorkDetailRequest) {
         // 단일작품 조회
         Long singleWorkId = singleWorkDetailRequest.getSingleWorkId();
         SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
 
         // 조회수 증가
         singleWorkDomainService.incrementView(singleWork);
+
+        // 업데이트 마킹
+        singleWorkDomainService.markAsUpdated(singleWork);
 
         // 단일작품 태그 리스트 조회
         List<SingleWorkTag> singleWorkTags = singleWorkDomainService.findSingleWorkTag(singleWork);
@@ -175,14 +178,12 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
         // 단일작품 중에서 유저아이디에 해당하는 좋아요 작품 선별해서 좋아요 담기
         Long userId = singleWorkSearchRequest.getUserId();
-        List<SingleWorkLike> singleWorkLikes = singleWorkDomainService.findLikeByUser(userId);
 
         // 응답 dto 로 변환
         List<SingleWorkSearchResponse> singleWorkSearchResponsePage = singleWorkSearchPage.stream()
                 .map(singleWorkSearch -> {
-                    boolean isLiked = singleWorkLikes.stream()
-                            .anyMatch(like -> like.getSingleWork().getId().equals(singleWorkSearch.getId()));
-
+                    // 해당 작품을 이 유저가 좋아하는지확인
+                    boolean isLiked = singleWorkDomainService.isLiked(userId, singleWorkSearch.getId());
                     return SingleWorkSearchResponse.of(singleWorkSearch, isLiked);
                 })
                 .toList();
@@ -193,16 +194,10 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     @Transactional
-    public void updateSingleWorkDetail(final SingleWorkUpdateRequest singleWorkUpdateRequest) {
+    public void updateSingleWorkDetails(final SingleWorkUpdateRequest singleWorkUpdateRequest) {
         // 단일작품 조회
         Long singleWorkId = singleWorkUpdateRequest.getId();
         SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
-
-        // 이미지 업데이트
-        String oldImageUrl = singleWork.getImage();
-        MultipartFile newImage = singleWorkUpdateRequest.getImage();
-        String updatedNewImageUrl = imageDomainService.update(newImage, oldImageUrl, imagePath); // 이미지 업데이트 로직확인
-        singleWorkDomainService.updateImage(singleWork, updatedNewImageUrl);
 
         // 카메라 업데이트
         String newCamera = singleWorkUpdateRequest.getCamera();
@@ -248,6 +243,9 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         // 설명 업데이트
         String newDescription = singleWorkUpdateRequest.getDescription();
         singleWorkDomainService.updateDescription(singleWork, newDescription);
+
+        // 업데이트 마킹
+        singleWorkDomainService.markAsUpdated(singleWork);
     }
 
     @Override
@@ -305,6 +303,9 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         // 알림 비동기 처리
         Long notificationId = notification.getId();
         notificationDomainService.pushNewNotification(singleWorkWriterId, notificationId);
+
+        // 업데이트 마킹
+        singleWorkDomainService.markAsUpdated(singleWork);
     }
 
     @Override
@@ -320,6 +321,9 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
         // 작품 좋아요 삭제
         singleWorkDomainService.decrementLike(user, singleWork);
+
+        // 업데이트 마킹
+        singleWorkDomainService.markAsUpdated(singleWork);
     }
 
     @Override

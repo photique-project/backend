@@ -2,6 +2,8 @@ package com.benchpress200.photique.user.domain;
 
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -29,4 +31,13 @@ public interface UserDomainService {
     Page<UserSearch> searchUsers(String keyword, Pageable pageable);
 
     void deleteUser(User user);
+
+    List<User> findUsersModifiedSince(LocalDateTime time);
+
+    void markAsUpdated(User user);
+
+    void updateUserSearch(UserSearch userSearch);
+
+    void updateAllUserSearch(List<UserSearch> userSearches);
+
 }

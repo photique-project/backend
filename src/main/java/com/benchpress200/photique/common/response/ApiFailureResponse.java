@@ -5,10 +5,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class ApiFailureResponse extends ResponseEntity<FailureMessage> {
-    public ApiFailureResponse(String message, HttpStatus status) {
+    public ApiFailureResponse(final String message, final HttpStatus status) {
         super(new FailureMessage(message), status);
     }
-    public ApiFailureResponse(HttpStatus status) {
+
+    public ApiFailureResponse(final HttpStatus status) {
         super(status);
     }
 

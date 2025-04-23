@@ -67,32 +67,10 @@ public class SingleWorkSearch {
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
     private LocalDateTime createdAt;
 
-    public void updateLikeCount(final Long likeCount) {
-        this.likeCount = likeCount;
-    }
-
-    public void updateCommentCount(final Long commentCount) {
-        this.commentCount = commentCount;
-    }
-
-    public void updateViewCount(long viewCount) {
-        this.viewCount = viewCount;
-    }
-
-    public void updateImage(final String image) {
-        this.image = image;
-    }
-
-    public void updateCategory(final String category) {
-        this.category = category;
-    }
-
-    public void updateTags(final List<String> tags) {
-        this.tags = tags;
-    }
-
-    public void updateTitle(final String title) {
-        this.title = title;
+    public void updateWriterDetails(final User writer) {
+        writerId = writer.getId();
+        writerNickname = writer.getNickname();
+        writerProfileImage = writer.getProfileImage();
     }
 
 

@@ -9,8 +9,8 @@ import com.benchpress200.photique.user.application.UserService;
 import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
 import com.benchpress200.photique.user.domain.dto.ResetPasswordRequest;
-import com.benchpress200.photique.user.domain.dto.UserDetailRequest;
-import com.benchpress200.photique.user.domain.dto.UserDetailResponse;
+import com.benchpress200.photique.user.domain.dto.UserDetailsRequest;
+import com.benchpress200.photique.user.domain.dto.UserDetailsResponse;
 import com.benchpress200.photique.user.domain.dto.UserSearchRequest;
 import com.benchpress200.photique.user.domain.dto.UserSearchResponse;
 import com.benchpress200.photique.user.domain.dto.UserUpdateRequest;
@@ -55,11 +55,11 @@ public class UserController {
     @Auth
     @GetMapping(URL.USER_DATA)
     public ApiSuccessResponse<?> getUserDetails(
-            @ModelAttribute final UserDetailRequest userDetailRequest,
+            @ModelAttribute final UserDetailsRequest userDetailsRequest,
             @PathVariable("userId") final Long userId // 팔로우확인을 위한 유저아이디 받아서 넘겨서 응답수정할차례
     ) {
-        userDetailRequest.withUserId(userId);
-        UserDetailResponse userDetail = userService.getUserDetail(userDetailRequest);
+        userDetailsRequest.withUserId(userId);
+        UserDetailsResponse userDetail = userService.getUserDetails(userDetailsRequest);
         return ResponseHandler.handleSuccessResponse(userDetail, HttpStatus.OK);
     }
 
@@ -71,7 +71,7 @@ public class UserController {
             @ModelAttribute @Valid final UserUpdateRequest userUpdateRequest
     ) {
         userUpdateRequest.withUserId(userId);
-        userService.updateUserDetail(userUpdateRequest);
+        userService.updateUserDetails(userUpdateRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 

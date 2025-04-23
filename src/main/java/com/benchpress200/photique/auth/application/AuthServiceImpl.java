@@ -38,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Cookie logout(String token) {
+    public Cookie logout(final String token) {
         // 토큰 폐기
         return authDomainService.expireToken(token);
     }

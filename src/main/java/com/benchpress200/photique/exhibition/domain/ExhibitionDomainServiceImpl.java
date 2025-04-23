@@ -16,7 +16,7 @@ import com.benchpress200.photique.exhibition.infrastructure.ExhibitionTagReposit
 import com.benchpress200.photique.exhibition.infrastructure.ExhibitionWorkRepository;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.user.domain.entity.User;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -182,14 +182,6 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     @Override
     public void incrementLike(final ExhibitionLike exhibitionLike) {
         exhibitionLikeRepository.save(exhibitionLike);
-
-        // 엘라스틱서치 데이터 업데이트
-        Exhibition exhibition = exhibitionLike.getExhibition();
-        Long exhibitionId = exhibition.getId();
-        Long likeCount = exhibitionLikeRepository.countByExhibition(exhibition);
-        ExhibitionSearch exhibitionSearch = findExhibitionSearch(exhibitionId);
-        exhibitionSearch.updateLikeCount(likeCount);
-        ElasticsearchExhibitionRollbackContext.addDocumentToUpdate(exhibitionSearch);
     }
 
     @Override
@@ -198,13 +190,6 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
             final Exhibition exhibition
     ) {
         exhibitionLikeRepository.deleteByUserAndExhibition(user, exhibition);
-
-        // 엘라스틱서치 데이터 업데이트
-        Long exhibitionId = exhibition.getId();
-        Long likeCount = exhibitionLikeRepository.countByExhibition(exhibition);
-        ExhibitionSearch exhibitionSearch = findExhibitionSearch(exhibitionId);
-        exhibitionSearch.updateLikeCount(likeCount);
-        ElasticsearchExhibitionRollbackContext.addDocumentToUpdate(exhibitionSearch);
     }
 
     @Override
@@ -234,24 +219,6 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     @Override
     public Long countExhibition(final User user) {
         return exhibitionRepository.countByWriter(user);
-    }
-
-    @Override
-    public List<ExhibitionLike> findLikeByUser(final Long userId) {
-        if (userId == null) {
-            return new ArrayList<>();
-        }
-
-        return exhibitionLikeRepository.findByUserId(userId);
-    }
-
-    @Override
-    public List<ExhibitionBookmark> findBookmarkByUser(final Long userId) {
-        if (userId == null) {
-            return new ArrayList<>();
-        }
-
-        return exhibitionBookmarkRepository.findByUserId(userId);
     }
 
     @Override
@@ -328,5 +295,35 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
         }
 
         return exhibitionSearchPage;
+    }
+
+    @Override
+    public List<ExhibitionSearch> findExhibitionSearchesByWriterId(final long id) {
+        return exhibitionSearchRepository.findAllByWriterId(id);
+    }
+
+    @Override
+    public void updateAllExhibitionSearch(final List<ExhibitionSearch> exhibitionSearches) {
+        exhibitionSearchRepository.saveAll(exhibitionSearches);
+    }
+
+    @Override
+    public void markAsUpdated(final Exhibition exhibition) {
+        exhibition.markAsUpdated();
+    }
+
+    @Override
+    public List<Exhibition> findExhibitionsModifiedSince(final LocalDateTime time) {
+        return exhibitionRepository.findAllByUpdatedAtAfter(time);
+    }
+
+    @Override
+    public List<ExhibitionTag> findExhibitionTag(final Exhibition exhibition) {
+        return exhibitionTagRepository.findByExhibition(exhibition);
+    }
+
+    @Override
+    public long countLike(final Exhibition exhibition) {
+        return exhibitionLikeRepository.countByExhibition(exhibition);
     }
 }

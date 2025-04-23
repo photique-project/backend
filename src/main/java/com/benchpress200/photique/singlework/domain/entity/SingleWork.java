@@ -164,6 +164,9 @@ public class SingleWork {
 
     public void incrementView() {
         viewCount++;
+    }
+
+    public void markAsUpdated() {
         updatedAt = LocalDateTime.now();
     }
 }
