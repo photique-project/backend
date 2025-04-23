@@ -39,7 +39,6 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -149,11 +148,11 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     @Transactional
-    @Cacheable(
-            value = "searchSingleWorkPage",
-            key = "#pageable.pageNumber", // 페이지 번호를 캐싱 키로 지정
-            condition = "#pageable.pageNumber <= 10 and #singleWorkSearchRequest.keywords.isEmpty() and #singleWorkSearchRequest.categories.isEmpty()" // 키워드 없을 때 초반 페이지만 캐싱
-    )
+//    @Cacheable(
+//            value = "searchSingleWorkPage",
+//            key = "#pageable.pageNumber", // 페이지 번호를 캐싱 키로 지정
+//            condition = "#pageable.pageNumber <= 10 and #singleWorkSearchRequest.keywords.isEmpty() and #singleWorkSearchRequest.categories.isEmpty()" // 키워드 없을 때 초반 페이지만 캐싱
+//    )
     public Page<SingleWorkSearchResponse> searchSingleWorks(
             final SingleWorkSearchRequest singleWorkSearchRequest,
             final Pageable pageable

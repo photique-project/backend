@@ -40,7 +40,6 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -148,11 +147,11 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
-    @Cacheable(
-            value = "searchExhibitionPage",
-            key = "#pageable.pageNumber", // 페이지 번호를 캐싱 키로 지정
-            condition = "#pageable.pageNumber <= 10 and #exhibitionSearchRequest.keywords.isEmpty()" // 초반 페이지만 캐싱
-    )
+//    @Cacheable(
+//            value = "searchExhibitionPage",
+//            key = "#pageable.pageNumber", // 페이지 번호를 캐싱 키로 지정
+//            condition = "#pageable.pageNumber <= 10 and #exhibitionSearchRequest.keywords.isEmpty()" // 초반 페이지만 캐싱
+//    )
     public Page<ExhibitionSearchResponse> searchExhibitions(
             final ExhibitionSearchRequest exhibitionSearchRequest,
             final Pageable pageable
