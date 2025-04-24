@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,7 @@ public class ExhibitionUpdateScheduler {
     private final ExhibitionDomainService exhibitionDomainService;
     private final ExhibitionCommentDomainService exhibitionCommentDomainService;
     private final TagDomainService tagDomainService;
+    private final CacheManager cacheManager;
 
     // 마지막 동기화 시점 (초기값: 애플리케이션 시작 기준)
     private LocalDateTime lastSyncTime = LocalDateTime.now().minusSeconds(UPDATE_INTERVAL);
@@ -34,12 +37,20 @@ public class ExhibitionUpdateScheduler {
     public void syncViewCountsToElasticsearch() {
         log.info("[MySQL-ES] 전시회 동기화 시작: {}", lastSyncTime);
 
-        List<Exhibition> modifiedSingleWorks = exhibitionDomainService.findExhibitionsModifiedSince(lastSyncTime);
-        log.info("[MySQL-ES] 동기화 전시회 수: {}", modifiedSingleWorks.size());
+        List<Exhibition> modifiedExhibitions = exhibitionDomainService.findExhibitionsModifiedSince(lastSyncTime);
+        log.info("[MySQL-ES] 동기화 전시회 수: {}", modifiedExhibitions.size());
+
+        // 동기화 대상있다면 해당 검색 데이터 캐시 초기화
+        if (!modifiedExhibitions.isEmpty()) {
+            Cache cache = cacheManager.getCache("searchExhibitionPage");
+            if (cache != null) {
+                cache.clear();
+            }
+        }
 
         List<ExhibitionSearch> exhibitionSearchesToUpdate = new ArrayList<>();
 
-        modifiedSingleWorks.forEach(exhibition -> {
+        modifiedExhibitions.forEach(exhibition -> {
             List<ExhibitionTag> exhibitionTags = exhibitionDomainService.findExhibitionTag(exhibition);
             List<Tag> tags = tagDomainService.findExhibitionTags(exhibitionTags);
 

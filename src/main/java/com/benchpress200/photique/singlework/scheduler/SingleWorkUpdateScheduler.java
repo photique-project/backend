@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,7 @@ public class SingleWorkUpdateScheduler {
     private final SingleWorkDomainService singleWorkDomainService;
     private final SingleWorkCommentDomainService singleWorkCommentDomainService;
     private final TagDomainService tagDomainService;
+    private final CacheManager cacheManager;
 
     // 마지막 동기화 시점 (초기값: 애플리케이션 시작 기준)
     private LocalDateTime lastSyncTime = LocalDateTime.now().minusSeconds(UPDATE_INTERVAL);
@@ -36,6 +39,14 @@ public class SingleWorkUpdateScheduler {
 
         List<SingleWork> modifiedSingleWorks = singleWorkDomainService.findSingleWorksModifiedSince(lastSyncTime);
         log.info("[MySQL-ES] 동기화 단일작품 수: {}", modifiedSingleWorks.size());
+
+        // 동기화 대상있다면 해당 검색 데이터 캐시 초기화
+        if (!modifiedSingleWorks.isEmpty()) {
+            Cache cache = cacheManager.getCache("searchSingleWorkPage");
+            if (cache != null) {
+                cache.clear();
+            }
+        }
 
         List<SingleWorkSearch> singleWorkSearchesToUpdate = new ArrayList<>();
 
