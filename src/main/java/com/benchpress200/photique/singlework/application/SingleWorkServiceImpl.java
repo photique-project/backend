@@ -36,6 +36,7 @@ import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -164,12 +165,18 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         // 단일작품 중에서 유저아이디에 해당하는 좋아요 작품 선별해서 좋아요 담기
         Long userId = singleWorkSearchRequest.getUserId();
 
-        // 응답 dto 로 변환
-        // 이부분 조인쿼리 한 번으로 해결할 방법 찾자
+        // 검섹페이지에 있는 단일작품 id 리스트 가져오기
+        List<Long> singleWorkIds = singleWorkSearchPage.stream()
+                .map(SingleWorkSearch::getId)
+                .toList();
+
+        // 한 번의 쿼리로 요청 유저가 좋아요한 작품 id를 HashSet 으로 반환
+        Set<Long> likedSingleWorkIds = singleWorkDomainService.findLikedSingleWorkIds(userId, singleWorkIds);
+
         List<SingleWorkSearchResponse> singleWorkSearchResponsePage = singleWorkSearchPage.stream()
                 .map(singleWorkSearch -> {
-                    // 해당 작품을 이 유저가 좋아하는지확인
-                    boolean isLiked = singleWorkDomainService.isLiked(userId, singleWorkSearch.getId());
+                    long singleWorkId = singleWorkSearch.getId();
+                    boolean isLiked = likedSingleWorkIds.contains(singleWorkId);
                     return SingleWorkSearchResponse.of(singleWorkSearch, isLiked);
                 })
                 .toList();

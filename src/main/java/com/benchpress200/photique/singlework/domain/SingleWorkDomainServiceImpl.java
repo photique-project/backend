@@ -20,7 +20,9 @@ import com.benchpress200.photique.user.domain.entity.User;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -429,5 +431,21 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
     @Override
     public void markAsUpdated(final SingleWork singleWork) {
         singleWork.markAsUpdated();
+    }
+
+    @Override
+    public Set<Long> findLikedSingleWorkIds(
+            final Long userId,
+            final List<Long> singleWorkIds
+    ) {
+        if (userId == 0) {
+            return new HashSet<>();
+        }
+
+        List<Long> likedIds = singleWorkLikeRepository.findLikedSingleWorkIdsByUserIdAndSingleWorkIds(
+                userId,
+                singleWorkIds
+        );
+        return new HashSet<>(likedIds);
     }
 }

@@ -17,7 +17,9 @@ import com.benchpress200.photique.exhibition.infrastructure.ExhibitionWorkReposi
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -325,5 +327,39 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     @Override
     public long countLike(final Exhibition exhibition) {
         return exhibitionLikeRepository.countByExhibition(exhibition);
+    }
+
+    @Override
+    public Set<Long> findLikedExhibitionIds(
+            long userId,
+            final List<Long> exhibitionIds
+    ) {
+        if (userId == 0) {
+            return new HashSet<>();
+        }
+
+        List<Long> likedIds = exhibitionLikeRepository.findLikedExhibitionIdsByUserIdAndExhibitionIds(
+                userId,
+                exhibitionIds
+        );
+
+        return new HashSet<>(likedIds);
+    }
+
+    @Override
+    public Set<Long> findBookmarkedExhibitionIds(
+            long userId,
+            final List<Long> exhibitionIds
+    ) {
+        if (userId == 0) {
+            return new HashSet<>();
+        }
+
+        List<Long> bookmarkedIds = exhibitionBookmarkRepository.findBookmarkedExhibitionIdsByUserIdAndExhibitionIds(
+                userId,
+                exhibitionIds
+        );
+
+        return new HashSet<>(bookmarkedIds);
     }
 }

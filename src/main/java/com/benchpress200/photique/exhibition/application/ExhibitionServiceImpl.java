@@ -38,6 +38,7 @@ import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -164,11 +165,20 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // 전시회에서 유저아이디에 해당하는 좋아요와 북마크 선별해저 담기
         Long userId = exhibitionSearchRequest.getUserId();
 
+        // 검섹페이지에 있는 전시회 id 리스트 가져오기
+        List<Long> exhibitionIds = exhibitionSearchPage.stream()
+                .map(ExhibitionSearch::getId)
+                .toList();
+
+        // 한 번의 쿼리로 요청 유저가 좋아요,북마크한 전시회 id를 HashSet 으로 반환
+        Set<Long> likedExhibitionIds = exhibitionDomainService.findLikedExhibitionIds(userId, exhibitionIds);
+        Set<Long> bookmarkedExhibitionIds = exhibitionDomainService.findBookmarkedExhibitionIds(userId, exhibitionIds);
+
         List<ExhibitionSearchResponse> exhibitionSearchResponsePage = exhibitionSearchPage.stream()
                 .map(exhibitionSearch -> {
                     long exhibitionId = exhibitionSearch.getId();
-                    boolean isLiked = exhibitionDomainService.isLiked(userId, exhibitionId);
-                    boolean isBookmarked = exhibitionDomainService.isBookmarked(userId, exhibitionId);
+                    boolean isLiked = likedExhibitionIds.contains(exhibitionId);
+                    boolean isBookmarked = bookmarkedExhibitionIds.contains(exhibitionId);
 
                     return ExhibitionSearchResponse.of(exhibitionSearch, isLiked, isBookmarked);
                 })
