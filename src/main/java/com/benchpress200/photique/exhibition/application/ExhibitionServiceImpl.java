@@ -1,6 +1,7 @@
 package com.benchpress200.photique.exhibition.application;
 
 import com.benchpress200.photique.common.dto.RestPage;
+import com.benchpress200.photique.exhibition.application.cache.ExhibitionCacheService;
 import com.benchpress200.photique.exhibition.domain.ExhibitionCommentDomainService;
 import com.benchpress200.photique.exhibition.domain.ExhibitionDomainService;
 import com.benchpress200.photique.exhibition.domain.dto.BookmarkedExhibitionRequest;
@@ -29,7 +30,6 @@ import com.benchpress200.photique.image.domain.ImageDomainService;
 import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.Type;
-import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.tag.domain.TagDomainService;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.FollowDomainService;
@@ -38,8 +38,10 @@ import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -60,9 +62,14 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     private final TagDomainService tagDomainService;
     private final NotificationDomainService notificationDomainService;
     private final FollowDomainService followDomainService;
+    private final ExhibitionCacheService exhibitionCacheService;
 
     @Override
     @Transactional
+    @CacheEvict(
+            value = "searchExhibitionPage",
+            allEntries = true
+    )
     public void holdNewExhibition(final ExhibitionCreateRequest exhibitionCreateRequest) {
         // 작가 조회
         Long writerId = exhibitionCreateRequest.getWriterId();
@@ -147,32 +154,31 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
-//    @Cacheable(
-//            value = "searchExhibitionPage",
-//            key = "#pageable.pageNumber", // 페이지 번호를 캐싱 키로 지정
-//            condition = "#pageable.pageNumber <= 10 and #exhibitionSearchRequest.keywords.isEmpty()" // 초반 페이지만 캐싱
-//    )
     public Page<ExhibitionSearchResponse> searchExhibitions(
             final ExhibitionSearchRequest exhibitionSearchRequest,
             final Pageable pageable
     ) {
-
         // 검색조건
-        Target target = exhibitionSearchRequest.getTarget();
-        List<String> keywords = exhibitionSearchRequest.getKeywords();
-
-        Page<ExhibitionSearch> exhibitionSearchPage = exhibitionDomainService.searchExhibitions(
-                target, keywords, pageable
-        );
+        Page<ExhibitionSearch> exhibitionSearchPage = exhibitionCacheService.searchExhibitions(exhibitionSearchRequest,
+                pageable);
 
         // 전시회에서 유저아이디에 해당하는 좋아요와 북마크 선별해저 담기
         Long userId = exhibitionSearchRequest.getUserId();
 
+        // 검섹페이지에 있는 전시회 id 리스트 가져오기
+        List<Long> exhibitionIds = exhibitionSearchPage.stream()
+                .map(ExhibitionSearch::getId)
+                .toList();
+
+        // 한 번의 쿼리로 요청 유저가 좋아요,북마크한 전시회 id를 HashSet 으로 반환
+        Set<Long> likedExhibitionIds = exhibitionDomainService.findLikedExhibitionIds(userId, exhibitionIds);
+        Set<Long> bookmarkedExhibitionIds = exhibitionDomainService.findBookmarkedExhibitionIds(userId, exhibitionIds);
+
         List<ExhibitionSearchResponse> exhibitionSearchResponsePage = exhibitionSearchPage.stream()
                 .map(exhibitionSearch -> {
                     long exhibitionId = exhibitionSearch.getId();
-                    boolean isLiked = exhibitionDomainService.isLiked(userId, exhibitionId);
-                    boolean isBookmarked = exhibitionDomainService.isBookmarked(userId, exhibitionId);
+                    boolean isLiked = likedExhibitionIds.contains(exhibitionId);
+                    boolean isBookmarked = bookmarkedExhibitionIds.contains(exhibitionId);
 
                     return ExhibitionSearchResponse.of(exhibitionSearch, isLiked, isBookmarked);
                 })
@@ -183,6 +189,10 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
+    @CacheEvict(
+            value = "searchExhibitionPage",
+            allEntries = true
+    )
     public void removeExhibition(final Long exhibitionId) {
         // 전시회 조회
         Exhibition exhibition = exhibitionDomainService.findExhibition(exhibitionId);

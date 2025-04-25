@@ -28,8 +28,8 @@ jobs:
       - name: 도커 이미지 빌드 및 푸시
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO_BLUE_DEV }}:0.1.0 .
-          docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO_GREEN_DEV }}:0.1.0 .
+          docker build -f docker/Dockerfile -t ${{ secrets.DOCKER_REPO_BLUE_DEV }}:0.1.0 .
+          docker build -f docker/Dockerfile -t ${{ secrets.DOCKER_REPO_GREEN_DEV }}:0.1.0 .
           docker push ${{ secrets.DOCKER_REPO_BLUE_DEV }}:0.1.0
           docker push ${{ secrets.DOCKER_REPO_GREEN_DEV }}:0.1.0
 
@@ -40,7 +40,7 @@ jobs:
           host: ${{ secrets.HOST_DEV }}
           key: ${{ secrets.KEY }}
           script: mkdir -p /home/ubuntu/spring
-          source: ./docker-compose.backend.dev.yml, ./deploy-dev.sh, ./rollback-dev.sh
+          source: docker/docker-compose.backend.dev.yml, deployment/deploy-dev.sh, deployment/rollback-dev.sh
           target: /home/ubuntu/spring
 
       - name: EC2 연결 및 backend 컨테이너 실행
@@ -51,7 +51,7 @@ jobs:
           key: ${{ secrets.KEY }}
           script: |
             echo ">>> 사용되지 않는 도커 시스템 리소스 정리"
-            sudo docker system prune -a -f
+            docker system prune -a -f
             chmod +x /home/ubuntu/spring/deploy-dev.sh
             echo ">>> 배포 스크립트 실행 시작"
             bash /home/ubuntu/spring/deploy-dev.sh

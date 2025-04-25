@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ExhibitionLikeRepository extends JpaRepository<ExhibitionLike, Long> {
 
@@ -25,4 +27,10 @@ public interface ExhibitionLikeRepository extends JpaRepository<ExhibitionLike, 
     boolean existsByUserIdAndExhibitionId(Long userId, Long exhibitionId);
 
     Page<ExhibitionLike> findByUserId(Long userId, Pageable pageable);
+
+    @Query("SELECT e.id FROM ExhibitionLike l JOIN l.exhibition e WHERE l.user.id = :userId AND e.id IN :exhibitionIds")
+    List<Long> findLikedExhibitionIdsByUserIdAndExhibitionIds(
+            @Param("userId") long userId,
+            @Param("exhibitionIds") List<Long> exhibitionIds
+    );
 }

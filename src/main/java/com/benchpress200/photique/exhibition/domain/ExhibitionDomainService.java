@@ -10,6 +10,7 @@ import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -89,4 +90,8 @@ public interface ExhibitionDomainService {
     List<ExhibitionTag> findExhibitionTag(Exhibition exhibition);
 
     long countLike(Exhibition exhibition);
+
+    Set<Long> findLikedExhibitionIds(long userId, List<Long> exhibitionIds);
+
+    Set<Long> findBookmarkedExhibitionIds(long userId, List<Long> exhibitionIds);
 }

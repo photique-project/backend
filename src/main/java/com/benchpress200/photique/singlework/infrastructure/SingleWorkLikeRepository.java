@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, Long> {
 
@@ -26,4 +28,10 @@ public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, 
     List<SingleWorkLike> findByUserId(Long userId);
 
     Page<SingleWorkLike> findByUserId(Long userId, Pageable pageable);
+
+    @Query("SELECT s.id FROM SingleWorkLike l JOIN l.singleWork s WHERE l.user.id = :userId AND s.id IN :singleWorkIds")
+    List<Long> findLikedSingleWorkIdsByUserIdAndSingleWorkIds(
+            @Param("userId") Long userId,
+            @Param("singleWorkIds") List<Long> singleWorkIds
+    );
 }

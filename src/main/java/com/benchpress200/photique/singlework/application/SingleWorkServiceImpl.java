@@ -6,6 +6,7 @@ import com.benchpress200.photique.image.domain.ImageDomainService;
 import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.Type;
+import com.benchpress200.photique.singlework.application.cache.SingleWorkCacheService;
 import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
 import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
 import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkRequest;
@@ -26,8 +27,6 @@ import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
-import com.benchpress200.photique.singlework.domain.enumeration.Category;
-import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.tag.domain.TagDomainService;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.FollowDomainService;
@@ -37,8 +36,10 @@ import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -58,10 +59,15 @@ public class SingleWorkServiceImpl implements SingleWorkService {
     private final TagDomainService tagDomainService;
     private final NotificationDomainService notificationDomainService;
     private final FollowDomainService followDomainService;
+    private final SingleWorkCacheService singleWorkCacheService;
 
 
     @Override
     @Transactional
+    @CacheEvict(
+            value = "searchSingleWorkPage",
+            allEntries = true
+    )
     public void postNewSingleWork(final SingleWorkCreateRequest singleWorkCreateRequest) {
         // 작성자 조회
         Long writerId = singleWorkCreateRequest.getWriterId();
@@ -148,41 +154,29 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     @Transactional
-//    @Cacheable(
-//            value = "searchSingleWorkPage",
-//            key = "#pageable.pageNumber", // 페이지 번호를 캐싱 키로 지정
-//            condition = "#pageable.pageNumber <= 10 and #singleWorkSearchRequest.keywords.isEmpty() and #singleWorkSearchRequest.categories.isEmpty()" // 키워드 없을 때 초반 페이지만 캐싱
-//    )
     public Page<SingleWorkSearchResponse> searchSingleWorks(
             final SingleWorkSearchRequest singleWorkSearchRequest,
             final Pageable pageable
     ) {
-
-        // 테스트를 위해 사용했던 RDBMS 검색로직
-//        Page<SingleWork> singleWorks = singleWorkRepository.searchSingleWorks(
-//                singleWorkSearchRequest.getTarget(),
-//                singleWorkSearchRequest.getKeywords(),
-//                singleWorkSearchRequest.getCategories(),
-//                pageable
-//        );
-
-        // 검색조건
-        Target target = singleWorkSearchRequest.getTarget();
-        List<String> keywords = singleWorkSearchRequest.getKeywords();
-        List<Category> categories = singleWorkSearchRequest.getCategories();
-
         // 단일작품 검색
-        Page<SingleWorkSearch> singleWorkSearchPage = singleWorkDomainService.searchSingleWorks(target, keywords,
-                categories, pageable);
+        Page<SingleWorkSearch> singleWorkSearchPage = singleWorkCacheService.searchSingleWorks(singleWorkSearchRequest,
+                pageable);
 
         // 단일작품 중에서 유저아이디에 해당하는 좋아요 작품 선별해서 좋아요 담기
         Long userId = singleWorkSearchRequest.getUserId();
 
-        // 응답 dto 로 변환
+        // 검섹페이지에 있는 단일작품 id 리스트 가져오기
+        List<Long> singleWorkIds = singleWorkSearchPage.stream()
+                .map(SingleWorkSearch::getId)
+                .toList();
+
+        // 한 번의 쿼리로 요청 유저가 좋아요한 작품 id를 HashSet 으로 반환
+        Set<Long> likedSingleWorkIds = singleWorkDomainService.findLikedSingleWorkIds(userId, singleWorkIds);
+
         List<SingleWorkSearchResponse> singleWorkSearchResponsePage = singleWorkSearchPage.stream()
                 .map(singleWorkSearch -> {
-                    // 해당 작품을 이 유저가 좋아하는지확인
-                    boolean isLiked = singleWorkDomainService.isLiked(userId, singleWorkSearch.getId());
+                    long singleWorkId = singleWorkSearch.getId();
+                    boolean isLiked = likedSingleWorkIds.contains(singleWorkId);
                     return SingleWorkSearchResponse.of(singleWorkSearch, isLiked);
                 })
                 .toList();
@@ -249,6 +243,10 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     @Transactional
+    @CacheEvict(
+            value = "searchSingleWorkPage",
+            allEntries = true
+    )
     public void removeSingleWork(final Long singleworkId) {
         SingleWork singleWork = singleWorkDomainService.findSingleWork(singleworkId);
 

@@ -11,6 +11,7 @@ import com.benchpress200.photique.user.domain.entity.User;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -93,4 +94,6 @@ public interface SingleWorkDomainService {
     void updateAllSingleWorkSearch(List<SingleWorkSearch> singleWorkSearches);
 
     void markAsUpdated(SingleWork singleWork);
+
+    Set<Long> findLikedSingleWorkIds(Long userId, List<Long> singleWorkIds);
 }
