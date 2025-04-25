@@ -40,7 +40,7 @@ out/
 *.xml
 .env.dev
 .env.prod
-!docker-compose.backend.dev.yml
+!docker/docker-compose.backend.dev.yml
 !docker-compose.backend.prod.yml
 !deployment-dev.yml
 !deployment-prod.yml
