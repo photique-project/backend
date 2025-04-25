@@ -23,6 +23,10 @@ public class FollowDomainServiceImpl implements FollowDomainService {
         Long followerId = follow.getFollower().getId();
         Long followingId = follow.getFollowing().getId();
 
+        if (followerId.equals(followingId)) {
+            throw new UserException("Following yourself is not allowed", HttpStatus.BAD_REQUEST);
+        }
+
         if (followRepository.existsByFollowerIdAndFollowingId(followerId, followingId)) {
             throw new UserException("Already following the user", HttpStatus.CONFLICT);
         }
