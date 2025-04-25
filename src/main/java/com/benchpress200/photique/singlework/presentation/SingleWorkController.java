@@ -55,7 +55,7 @@ public class SingleWorkController {
 
 
     @GetMapping(URL.SINGLE_WORK_DATA)
-    public ApiSuccessResponse<?> getSingleWorkDetail(
+    public ApiSuccessResponse<?> getSingleWorkDetails(
             @ModelAttribute final SingleWorkDetailRequest singleWorkDetailRequest,
             @PathVariable final Long singleworkId
     ) {
