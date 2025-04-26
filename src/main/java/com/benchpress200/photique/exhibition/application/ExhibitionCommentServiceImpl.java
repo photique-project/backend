@@ -57,11 +57,11 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
                 .targetId(exhibitionId)
                 .build();
 
-        notification = notificationDomainService.createNotification(notification);
+        // 알림 데이터 비동기 생성
+        notificationDomainService.createNotification(notification);
 
         // 알림 비동기 처리
-        Long notificationId = notification.getId();
-        notificationDomainService.pushNewNotification(exhibitionWriterId, notificationId);
+        notificationDomainService.pushNewNotification(exhibitionWriterId);
 
         // 업데이트 마킹
         exhibitionDomainService.markAsUpdated(exhibition);

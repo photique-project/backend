@@ -39,8 +39,6 @@ public interface SingleWorkDomainService {
     Page<SingleWorkSearch> searchSingleWorks(Target target, List<String> keywords, List<Category> categories,
                                              Pageable pageable);
 
-    void updateImage(SingleWork singleWork, String uploadedNewImageUrl);
-
     void updateCamera(SingleWork singleWork, String newCamera);
 
     void updateLens(SingleWork singleWork, String newLens);
@@ -77,8 +75,6 @@ public interface SingleWorkDomainService {
 
     Long countSingleWork(User user);
 
-    SingleWork findPopularSingleWork();
-
     List<SingleWorkLike> findLikeByUser(Long userId);
 
     boolean isLiked(Long userId, Long singleWorkId);
@@ -96,4 +92,8 @@ public interface SingleWorkDomainService {
     void markAsUpdated(SingleWork singleWork);
 
     Set<Long> findLikedSingleWorkIds(Long userId, List<Long> singleWorkIds);
+
+    SingleWork findSingleWorkWithWriter(Long id);
+
+    List<SingleWorkTag> findSingleWorkTagWithTag(SingleWork singleWork);
 }

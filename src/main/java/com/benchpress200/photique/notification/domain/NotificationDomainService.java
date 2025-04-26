@@ -10,9 +10,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public interface NotificationDomainService {
     SseEmitter subscribe(Long userId);
 
-    Notification createNotification(Notification notification);
+    void createNotification(Notification notification);
 
-    void pushNewNotification(Long userId, Long notificationId);
+    void pushNewNotification(Long userId);
 
     Page<Notification> findNotifications(User user, Pageable pageable);
 

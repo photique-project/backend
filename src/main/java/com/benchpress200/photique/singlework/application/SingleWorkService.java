@@ -4,8 +4,6 @@ import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.MySingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.MySingleWorkResponse;
-import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkRequest;
-import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
@@ -34,8 +32,6 @@ public interface SingleWorkService {
     void incrementLike(SingleWorkLikeIncrementRequest singleWorkLikeIncrementRequest);
 
     void decrementLike(SingleWorkLikeDecrementRequest singleWorkLikeDecrementRequest);
-
-    PopularSingleWorkResponse getPopularSingleWork(PopularSingleWorkRequest popularSingleWorkRequest);
 
     Page<LikedSingleWorkResponse> getLikedSingleWorks(LikedSingleWorkRequest likedSingleWorkRequest, Pageable pageable);
 

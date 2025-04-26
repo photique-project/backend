@@ -38,13 +38,27 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
     private final SingleWorkTagRepository singleWorkTagRepository;
     private final SingleWorkSearchRepository singleWorkSearchRepository;
 
+
+    @Override
+    public List<SingleWorkTag> findSingleWorkTagWithTag(final SingleWork singleWork) {
+        return singleWorkTagRepository.findWithTag(singleWork);
+    }
+
+    @Override
+    public SingleWork findSingleWorkWithWriter(final Long id) {
+        return singleWorkRepository.findWithWriter(id).orElseThrow(
+                () -> new SingleWorkException("Single work with id " + id + " is not found.",
+                        HttpStatus.NOT_FOUND)
+        );
+    }
+
     @Override
     public List<SingleWork> findSingleWork(final User writer) {
         return singleWorkRepository.findByWriter(writer);
     }
 
     @Override
-    public SingleWork findSingleWork(Long id) {
+    public SingleWork findSingleWork(final Long id) {
         return singleWorkRepository.findById(id).orElseThrow(
                 () -> new SingleWorkException("Single work with id " + id + " is not found.",
                         HttpStatus.NOT_FOUND)
@@ -119,15 +133,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
         }
 
         return singleWorkSearchPage;
-    }
-
-    @Override
-    public void updateImage(
-            final SingleWork singleWork,
-            final String uploadedNewImageUrl
-    ) {
-        // 이미지 업데이트
-        singleWork.updateImage(uploadedNewImageUrl);
     }
 
     @Override
@@ -346,17 +351,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
     @Override
     public Long countSingleWork(final User user) {
         return singleWorkRepository.countByWriter(user);
-    }
-
-    @Override
-    public SingleWork findPopularSingleWork() {
-        // 이번주 동안
-        SingleWork singleWork = singleWorkRepository.findPopularSingleWork();
-        if (singleWork == null) {
-            throw new SingleWorkException("No single work found.", HttpStatus.NOT_FOUND);
-        }
-
-        return singleWork;
     }
 
     @Override

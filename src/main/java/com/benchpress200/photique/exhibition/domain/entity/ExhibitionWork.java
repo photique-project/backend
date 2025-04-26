@@ -38,6 +38,7 @@ public class ExhibitionWork {
     @Column(length = 200, nullable = false)
     private String description;
 
+
     @Builder
     public ExhibitionWork(
             final Exhibition exhibition,

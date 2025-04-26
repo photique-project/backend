@@ -49,12 +49,11 @@ public class FollowServiceImpl implements FollowService {
                 .targetId(followerId)
                 .build();
 
-        notification = notificationDomainService.createNotification(notification);
-
-        Long notificationId = notification.getId();
+        // 알림 데이터 비동기 생성
+        notificationDomainService.createNotification(notification);
 
         // 비동기처리
-        notificationDomainService.pushNewNotification(followingId, notificationId);
+        notificationDomainService.pushNewNotification(followingId);
     }
 
     @Override
