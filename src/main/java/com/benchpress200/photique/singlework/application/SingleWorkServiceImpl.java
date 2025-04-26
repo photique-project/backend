@@ -13,8 +13,6 @@ import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.MySingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.MySingleWorkResponse;
-import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkRequest;
-import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
@@ -104,12 +102,12 @@ public class SingleWorkServiceImpl implements SingleWorkService {
                     .targetId(singleWorkId)
                     .build();
 
+            // 알림 데이터 비동기 생성
             notificationDomainService.createNotification(notification);
 
             // 알림 비동기 처리
             Long followerId = follow.getId();
-            Long notificationId = notification.getId();
-            notificationDomainService.pushNewNotification(followerId, notificationId);
+            notificationDomainService.pushNewNotification(followerId);
         });
     }
 
@@ -119,7 +117,7 @@ public class SingleWorkServiceImpl implements SingleWorkService {
     public SingleWorkDetailResponse getSingleWorkDetails(final SingleWorkDetailRequest singleWorkDetailRequest) {
         // 단일작품 조회
         Long singleWorkId = singleWorkDetailRequest.getSingleWorkId();
-        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
+        SingleWork singleWork = singleWorkDomainService.findSingleWorkWithWriter(singleWorkId);
 
         // 조회수 증가
         singleWorkDomainService.incrementView(singleWork);
@@ -128,10 +126,12 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         singleWorkDomainService.markAsUpdated(singleWork);
 
         // 단일작품 태그 리스트 조회
-        List<SingleWorkTag> singleWorkTags = singleWorkDomainService.findSingleWorkTag(singleWork);
+        List<SingleWorkTag> singleWorkTags = singleWorkDomainService.findSingleWorkTagWithTag(singleWork);
 
         // 단일작품 태그와 매칭되는 태그 조회
-        List<Tag> tags = tagDomainService.findTags(singleWorkTags);
+        List<Tag> tags = singleWorkTags.stream()
+                .map(SingleWorkTag::getTag)
+                .toList();
 
         // 단일작품 좋아요 수 조회
         Long likeCount = singleWorkDomainService.countLike(singleWork);
@@ -295,11 +295,11 @@ public class SingleWorkServiceImpl implements SingleWorkService {
                 .targetId(singleWorkId)
                 .build();
 
-        notification = notificationDomainService.createNotification(notification);
+        // 알림 데이터 비동기 생성
+        notificationDomainService.createNotification(notification);
 
         // 알림 비동기 처리
-        Long notificationId = notification.getId();
-        notificationDomainService.pushNewNotification(singleWorkWriterId, notificationId);
+        notificationDomainService.pushNewNotification(singleWorkWriterId);
 
         // 업데이트 마킹
         singleWorkDomainService.markAsUpdated(singleWork);
@@ -321,27 +321,6 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
         // 업데이트 마킹
         singleWorkDomainService.markAsUpdated(singleWork);
-    }
-
-    @Override
-    @Transactional // open-in-view false로 인해서 커밋되기전에 lazy Loading을 보장하기위한 transactional
-    public PopularSingleWorkResponse getPopularSingleWork(final PopularSingleWorkRequest popularSingleWorkRequest) {
-        // 인기 단일작품 조회
-        SingleWork singleWork = singleWorkDomainService.findPopularSingleWork();
-
-        // 해당 작품 좋아요 수 조회
-        Long likeCount = singleWorkDomainService.countLike(singleWork);
-
-        // 요청한 유저의 작품 좋아요 유무
-        Long userId = popularSingleWorkRequest.getUserId();
-        boolean isLiked = singleWorkDomainService.isLiked(userId, singleWork.getId());
-
-        // 응답 dto 변환 및 반환
-        return PopularSingleWorkResponse.of(
-                singleWork,
-                likeCount,
-                isLiked
-        );
     }
 
     @Override

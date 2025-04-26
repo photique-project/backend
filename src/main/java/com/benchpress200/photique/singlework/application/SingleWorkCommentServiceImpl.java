@@ -55,11 +55,11 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
                 .targetId(singleWorkId)
                 .build();
 
-        notification = notificationDomainService.createNotification(notification);
+        // 알림 데이터 비동기 생성
+        notificationDomainService.createNotification(notification);
 
         // 알림 비동기 처리
-        Long notificationId = notification.getId();
-        notificationDomainService.pushNewNotification(singleWorkWriterId, notificationId);
+        notificationDomainService.pushNewNotification(singleWorkWriterId);
 
         // 업데이트 마킹
         singleWorkDomainService.markAsUpdated(singleWork);

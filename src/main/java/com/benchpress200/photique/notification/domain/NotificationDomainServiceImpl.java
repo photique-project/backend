@@ -62,9 +62,10 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         return sseEmitter;
     }
 
+    @Async
     @Override
-    public Notification createNotification(Notification notification) {
-        return notificationRepository.save(notification);
+    public void createNotification(final Notification notification) {
+        notificationRepository.save(notification);
     }
 
     @Override
@@ -104,7 +105,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     }
 
     @Async
-    public void pushNewNotification(final Long userId, final Long notificationId) {
+    public void pushNewNotification(final Long userId) {
 
         // 로그인상태가 아닌 유저라면 실시간 알림 전송 X
         if (!emitters.containsKey(userId)) {
@@ -114,7 +115,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         // 노티 엔티티 전송이 아닌 일반 알림을 위한 데이터 전송
         try {
             SseEmitter emitter = emitters.get(userId);
-            emitter.send(SseEmitter.event().id(String.valueOf(notificationId)).data("new"));
+            emitter.send(SseEmitter.event().id(String.valueOf(userId)).data("new"));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {

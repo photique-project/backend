@@ -24,7 +24,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,6 +39,14 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     private final ExhibitionLikeRepository exhibitionLikeRepository;
     private final ExhibitionBookmarkRepository exhibitionBookmarkRepository;
     private final ExhibitionSearchRepository exhibitionSearchRepository;
+
+    @Override
+    public Exhibition findExhibitionWithWorksAndWriter(final @Param("id") Long id) {
+        return exhibitionRepository.findWithWorksAndWriter(id).orElseThrow(
+                () -> new ExhibitionException("Exhibition with id [" + id + "] is not found.",
+                        HttpStatus.NOT_FOUND)
+        );
+    }
 
     @Override
     public List<Exhibition> findExhibition(final User user) {
@@ -103,6 +113,7 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
         exhibitionTagRepository.saveAll(exhibitionTags);
     }
 
+    @Async
     @Override
     public void createNewExhibitionSearch(final ExhibitionSearch exhibitionSearch) {
         ElasticsearchExhibitionRollbackContext.addDocumentToSave(exhibitionSearch);

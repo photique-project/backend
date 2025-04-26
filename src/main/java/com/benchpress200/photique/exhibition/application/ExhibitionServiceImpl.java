@@ -112,12 +112,12 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                     .targetId(exhibitionId)
                     .build();
 
-            notification = notificationDomainService.createNotification(notification);
+            // 알림 데이터 비동기 생성
+            notificationDomainService.createNotification(notification);
 
             // 알림 비동기 처리
             Long followerId = follow.getId();
-            Long notificationId = notification.getId();
-            notificationDomainService.pushNewNotification(followerId, notificationId);
+            notificationDomainService.pushNewNotification(followerId);
         });
     }
 
@@ -125,13 +125,12 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     @Override
     @Transactional
     public ExhibitionDetailsResponse getExhibitionDetails(final ExhibitionDetailsRequest exhibitionDetailsRequest) {
-
         // 전시회 조회
         Long exhibitionId = exhibitionDetailsRequest.getExhibitionId();
-        Exhibition exhibition = exhibitionDomainService.findExhibition(exhibitionId);
+        Exhibition exhibition = exhibitionDomainService.findExhibitionWithWorksAndWriter(exhibitionId);
 
         // 전시회 개별작품 조회
-        List<ExhibitionWork> exhibitionWorks = exhibitionDomainService.findExhibitionWorks(exhibition);
+        List<ExhibitionWork> exhibitionWorks = exhibition.getExhibitionWorks();
 
         // 조회수 증가
         exhibitionDomainService.incrementView(exhibition);
@@ -251,11 +250,11 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .targetId(exhibitionId)
                 .build();
 
-        notification = notificationDomainService.createNotification(notification);
+        // 알림 데이터 비동기 생성
+        notificationDomainService.createNotification(notification);
 
         // 알림 비동기 처리
-        Long notificationId = notification.getId();
-        notificationDomainService.pushNewNotification(exhibitionWriterId, notificationId);
+        notificationDomainService.pushNewNotification(exhibitionWriterId);
 
         // 업데이트 마킹
         exhibitionDomainService.markAsUpdated(exhibition);
@@ -307,11 +306,11 @@ public class ExhibitionServiceImpl implements ExhibitionService {
                 .targetId(exhibitionId)
                 .build();
 
-        notification = notificationDomainService.createNotification(notification);
+        // 알림 데이터 비동기 생성
+        notificationDomainService.createNotification(notification);
 
         // 알림 비동기 처리
-        Long notificationId = notification.getId();
-        notificationDomainService.pushNewNotification(exhibitionWriterId, notificationId);
+        notificationDomainService.pushNewNotification(exhibitionWriterId);
     }
 
     @Override

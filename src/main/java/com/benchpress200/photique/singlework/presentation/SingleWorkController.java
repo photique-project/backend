@@ -10,8 +10,6 @@ import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.LikedSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.MySingleWorkRequest;
 import com.benchpress200.photique.singlework.domain.dto.MySingleWorkResponse;
-import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkRequest;
-import com.benchpress200.photique.singlework.domain.dto.PopularSingleWorkResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkDetailResponse;
@@ -123,15 +121,6 @@ public class SingleWorkController {
         singleWorkLikeDecrementRequest.withSingleWorkId(singleworkId);
         singleWorkService.decrementLike(singleWorkLikeDecrementRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
-    }
-
-    @GetMapping(URL.POPULAR)
-    public ApiSuccessResponse<?> getPopularSingleWork(
-            @ModelAttribute final PopularSingleWorkRequest popularSingleWorkRequest
-    ) {
-        PopularSingleWorkResponse popularSingleWorkResponse = singleWorkService.getPopularSingleWork(
-                popularSingleWorkRequest);
-        return ResponseHandler.handleSuccessResponse(popularSingleWorkResponse, HttpStatus.OK);
     }
 
     @Auth

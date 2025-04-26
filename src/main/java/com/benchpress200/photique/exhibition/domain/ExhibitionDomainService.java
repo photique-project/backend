@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 
 public interface ExhibitionDomainService {
     List<Exhibition> findExhibition(User user);
@@ -94,4 +95,6 @@ public interface ExhibitionDomainService {
     Set<Long> findLikedExhibitionIds(long userId, List<Long> exhibitionIds);
 
     Set<Long> findBookmarkedExhibitionIds(long userId, List<Long> exhibitionIds);
+
+    Exhibition findExhibitionWithWorksAndWriter(@Param("id") Long id);
 }
