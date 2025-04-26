@@ -28,7 +28,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -100,7 +99,6 @@ public class SingleWorkDomainServiceImpl implements SingleWorkDomainService {
         singleWorkTagRepository.saveAll(singleWorkTags);
     }
 
-    @Async
     @Override
     public void createNewSingleWorkSearch(final SingleWorkSearch singleWorkSearch) {
         ElasticsearchSingleWorkRollbackContext.addDocumentToSave(singleWorkSearch);

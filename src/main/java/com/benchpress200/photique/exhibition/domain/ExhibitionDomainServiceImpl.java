@@ -26,7 +26,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -113,7 +112,6 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
         exhibitionTagRepository.saveAll(exhibitionTags);
     }
 
-    @Async
     @Override
     public void createNewExhibitionSearch(final ExhibitionSearch exhibitionSearch) {
         ElasticsearchExhibitionRollbackContext.addDocumentToSave(exhibitionSearch);
