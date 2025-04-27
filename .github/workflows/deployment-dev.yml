@@ -50,6 +50,10 @@ jobs:
           host: ${{ secrets.HOST_DEV }}
           key: ${{ secrets.KEY }}
           script: |
+            mv /home/ubuntu/spring/docker/docker-compose.backend.dev.yml /home/ubuntu/spring/
+            mv /home/ubuntu/spring/deployment/*.sh /home/ubuntu/spring/
+            rm -rf /home/ubuntu/spring/docker
+            rm -rf /home/ubuntu/spring/deployment
             echo ">>> 사용되지 않는 도커 시스템 리소스 정리"
             docker system prune -a -f
             chmod +x /home/ubuntu/spring/deploy-dev.sh
