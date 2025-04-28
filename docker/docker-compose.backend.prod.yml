@@ -1,6 +1,6 @@
 version: '3'
 services:
-  blue-dev:
+  blue-prod:
     image: photique/backend-blue-prod:0.1.0
     container_name: blue-prod
     volumes:
@@ -15,7 +15,7 @@ services:
     user: root
 
 
-  green-dev:
+  green-prod:
     image: photique/backend-green-prod:0.1.0
     container_name: green-prod
     volumes:
