@@ -14,6 +14,8 @@ import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,10 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "userDetails", key = "#followRequest.followerId"),
+            @CacheEvict(value = "userDetails", key = "#followRequest.followingId"),
+    })
     public void followUser(final FollowRequest followRequest) {
         // 팔로워 유저 조회
         Long followerId = followRequest.getFollowerId();
@@ -58,6 +64,10 @@ public class FollowServiceImpl implements FollowService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "userDetails", key = "#unfollowRequest.followerId"),
+            @CacheEvict(value = "userDetails", key = "#unfollowRequest.followingId"),
+    })
     public void unfollowUser(final UnfollowRequest unfollowRequest) {
         // 팔로워 유저 조회
         Long followerId = unfollowRequest.getFollowerId();
