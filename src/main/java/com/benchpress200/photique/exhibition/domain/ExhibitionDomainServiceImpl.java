@@ -136,10 +136,6 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     }
 
     private ExhibitionSearch findExhibitionSearch(final Long exhibitionId) {
-        if (ElasticsearchExhibitionRollbackContext.hasDocumentToUpdate()) {
-            return ElasticsearchExhibitionRollbackContext.getDocumentToUpdate();
-        }
-
         return exhibitionSearchRepository.findById(exhibitionId).orElseThrow(
                 () -> new ExhibitionException("Exhibition with ID " + exhibitionId + " is not found.",
                         HttpStatus.NOT_FOUND)

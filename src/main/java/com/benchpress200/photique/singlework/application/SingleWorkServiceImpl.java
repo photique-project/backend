@@ -187,6 +187,32 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     @Transactional
+    @CacheEvict(
+            value = "searchSingleWorkPage",
+            allEntries = true
+    )
+    public void removeSingleWork(final Long singleworkId) {
+        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleworkId);
+
+        // s3 이미지 삭제
+        String imageUrl = singleWork.getImage();
+        imageDomainService.delete(imageUrl);
+
+        // 단일작품 좋아요 삭제
+        singleWorkDomainService.deleteSingleWorkLike(singleWork);
+
+        // 단일작품 태그 삭제
+        singleWorkDomainService.deleteSingleWorkTag(singleWork);
+
+        // 단일작품 댓글 삭제
+        singleWorkCommentDomainService.deleteComment(singleWork);
+
+        // 단일작품 삭제
+        singleWorkDomainService.deleteSingleWork(singleWork);
+    }
+
+    @Override
+    @Transactional
     public void updateSingleWorkDetails(final SingleWorkUpdateRequest singleWorkUpdateRequest) {
         // 단일작품 조회
         Long singleWorkId = singleWorkUpdateRequest.getId();
@@ -239,32 +265,6 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
         // 업데이트 마킹
         singleWorkDomainService.markAsUpdated(singleWork);
-    }
-
-    @Override
-    @Transactional
-    @CacheEvict(
-            value = "searchSingleWorkPage",
-            allEntries = true
-    )
-    public void removeSingleWork(final Long singleworkId) {
-        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleworkId);
-
-        // s3 이미지 삭제
-        String imageUrl = singleWork.getImage();
-        imageDomainService.delete(imageUrl);
-
-        // 단일작품 좋아요 삭제
-        singleWorkDomainService.deleteSingleWorkLike(singleWork);
-
-        // 단일작품 태그 삭제
-        singleWorkDomainService.deleteSingleWorkTag(singleWork);
-
-        // 단일작품 댓글 삭제
-        singleWorkCommentDomainService.deleteComment(singleWork);
-
-        // 단일작품 삭제
-        singleWorkDomainService.deleteSingleWork(singleWork);
     }
 
     @Override
