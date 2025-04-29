@@ -38,6 +38,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -62,10 +63,10 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     @Transactional
-    @CacheEvict(
-            value = "searchSingleWorkPage",
-            allEntries = true
-    )
+    @Caching(evict = {
+            @CacheEvict(value = "userDetails", key = "#singleWorkCreateRequest.writerId"),
+            @CacheEvict(value = "searchSingleWorkPage", allEntries = true),
+    })
     public void postNewSingleWork(final SingleWorkCreateRequest singleWorkCreateRequest) {
         // 작성자 조회
         Long writerId = singleWorkCreateRequest.getWriterId();
@@ -187,10 +188,10 @@ public class SingleWorkServiceImpl implements SingleWorkService {
 
     @Override
     @Transactional
-    @CacheEvict(
-            value = "searchSingleWorkPage",
-            allEntries = true
-    )
+    @Caching(evict = {
+            @CacheEvict(value = "userDetails", allEntries = true),
+            @CacheEvict(value = "searchSingleWorkPage", allEntries = true),
+    })
     public void removeSingleWork(final Long singleworkId) {
         SingleWork singleWork = singleWorkDomainService.findSingleWork(singleworkId);
 
