@@ -61,43 +61,31 @@ public class TransactionRollbackListener {
 
     private void flushUserSearchQuery() {
         if (ElasticsearchUserRollbackContext.hasDocumentToSave()) {
-            userSearchRepository.save(ElasticsearchUserRollbackContext.getDocumentToSave());
-        }
-
-        if (ElasticsearchUserRollbackContext.hasDocumentToUpdate()) {
-            userSearchRepository.update(ElasticsearchUserRollbackContext.getDocumentToUpdate());
+            userSearchRepository.saveAll(ElasticsearchUserRollbackContext.getDocumentToSave());
         }
 
         if (ElasticsearchUserRollbackContext.hasDocumentToDelete()) {
-            userSearchRepository.delete(ElasticsearchUserRollbackContext.getDocumentToDelete());
+            userSearchRepository.deleteAll(ElasticsearchUserRollbackContext.getDocumentToDelete());
         }
     }
 
     private void flushSingleWorkSearchQuery() {
         if (ElasticsearchSingleWorkRollbackContext.hasDocumentToSave()) {
-            singleWorkSearchRepository.save(ElasticsearchSingleWorkRollbackContext.getDocumentToSave());
-        }
-
-        if (ElasticsearchSingleWorkRollbackContext.hasDocumentToUpdate()) {
-            singleWorkSearchRepository.update(ElasticsearchSingleWorkRollbackContext.getDocumentToUpdate());
+            singleWorkSearchRepository.saveAll(ElasticsearchSingleWorkRollbackContext.getDocumentToSave());
         }
 
         if (ElasticsearchSingleWorkRollbackContext.hasDocumentToDelete()) {
-            singleWorkSearchRepository.delete(ElasticsearchSingleWorkRollbackContext.getDocumentToDelete());
+            singleWorkSearchRepository.deleteAll(ElasticsearchSingleWorkRollbackContext.getDocumentToDelete());
         }
     }
 
     private void flushExhibitionSearchQuery() {
         if (ElasticsearchExhibitionRollbackContext.hasDocumentToSave()) {
-            exhibitionSearchRepository.save(ElasticsearchExhibitionRollbackContext.getDocumentToSave());
-        }
-
-        if (ElasticsearchExhibitionRollbackContext.hasDocumentToUpdate()) {
-            exhibitionSearchRepository.update(ElasticsearchExhibitionRollbackContext.getDocumentToUpdate());
+            exhibitionSearchRepository.saveAll(ElasticsearchExhibitionRollbackContext.getDocumentToSave());
         }
 
         if (ElasticsearchExhibitionRollbackContext.hasDocumentToDelete()) {
-            exhibitionSearchRepository.delete(ElasticsearchExhibitionRollbackContext.getDocumentToDelete());
+            exhibitionSearchRepository.deleteAll(ElasticsearchExhibitionRollbackContext.getDocumentToDelete());
         }
     }
 

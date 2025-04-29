@@ -27,6 +27,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -154,10 +155,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @CacheEvict(
-            value = "userDetails",
-            key = "#userId"
-    )
+    @Caching(evict = {
+            @CacheEvict(value = "userDetails", key = "#userId"),
+            @CacheEvict(value = "searchSingleWorkPage", allEntries = true),
+            @CacheEvict(value = "searchExhibitionPage", allEntries = true)
+    })
     public void withdraw(final Long userId) {
         // 유저 조회
         User user = userDomainService.findUser(userId);
