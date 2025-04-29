@@ -42,6 +42,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -66,10 +67,10 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
-    @CacheEvict(
-            value = "searchExhibitionPage",
-            allEntries = true
-    )
+    @Caching(evict = {
+            @CacheEvict(value = "userDetails", key = "#exhibitionCreateRequest.writerId"),
+            @CacheEvict(value = "searchExhibitionPage", allEntries = true),
+    })
     public void holdNewExhibition(final ExhibitionCreateRequest exhibitionCreateRequest) {
         // 작가 조회
         Long writerId = exhibitionCreateRequest.getWriterId();
@@ -188,10 +189,10 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
-    @CacheEvict(
-            value = "searchExhibitionPage",
-            allEntries = true
-    )
+    @Caching(evict = {
+            @CacheEvict(value = "userDetails", allEntries = true),
+            @CacheEvict(value = "searchExhibitionPage", allEntries = true),
+    })
     public void removeExhibition(final Long exhibitionId) {
         // 전시회 조회
         Exhibition exhibition = exhibitionDomainService.findExhibition(exhibitionId);
