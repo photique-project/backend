@@ -27,8 +27,12 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 
     @Override
     public SseEmitter subscribe(Long userId) {
-        SseEmitter sseEmitter = new SseEmitter(60L * 1000 * 10);
+        if (emitters.containsKey(userId)) {
+            emitters.get(userId).complete();
+        }
+
         // emitter추가
+        SseEmitter sseEmitter = new SseEmitter(60L * 1000 * 10);
         emitters.put(userId, sseEmitter);
 
         // 종료 되었을 때 처리
