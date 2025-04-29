@@ -105,16 +105,6 @@ public class UserDomainServiceImpl implements UserDomainService {
         user.updateNickname(newNickname);
     }
 
-    private UserSearch findUserSearch(final Long userId) {
-        if (ElasticsearchUserRollbackContext.hasDocumentToUpdate()) {
-            return ElasticsearchUserRollbackContext.getDocumentToUpdate();
-        }
-
-        return userSearchRepository.findById(userId).orElseThrow(
-                () -> new UserException("User with id {" + userId + "} is not found", HttpStatus.NOT_FOUND)
-        );
-    }
-
     @Override
     public void updateIntroduction(
             final User user,
