@@ -142,6 +142,9 @@
 <br><br>
 
 # 🚀 CI/CD Pipeline
+<img src="https://github.com/user-attachments/assets/84e2af0e-c9e5-43c6-96f3-5a0c56756f0f" width="800"/>
+
+
 
 <br><br>
 
