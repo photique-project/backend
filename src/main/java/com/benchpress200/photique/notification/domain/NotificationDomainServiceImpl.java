@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.actuate.autoconfigure.endpoint.web.ServletEndpointManagementContextConfiguration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,7 +22,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class NotificationDomainServiceImpl implements NotificationDomainService {
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final NotificationRepository notificationRepository;
-    private final ServletEndpointManagementContextConfiguration servletEndpointManagementContextConfiguration;
 
     @Override
     public SseEmitter subscribe(Long userId) {

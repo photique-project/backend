@@ -142,16 +142,49 @@
 <br><br>
 
 # 🚀 CI/CD Pipeline
+
 <img src="https://github.com/user-attachments/assets/84e2af0e-c9e5-43c6-96f3-5a0c56756f0f" width="800"/>
 
+### 개발 서버 배포 파이프라인 - AWS EC2 free tier
 
+1. 로컬에서 변경사항 commit
+2. main 브랜치로 push
+3. main -> develop 브랜치로 pr 보냄으로써 개발 서버 배포 워크 플로우 실행
+4. 정상 배포되면 merge
+
+### 프로덕트 서버 배포 파이프라인 - GCP VM
+
+1. 로컬에서 변경사항 commit
+2. main 브랜치로 push
+3. main -> release 브랜치로 pr 보냄으로써 개발 서버 배포 워크 플로우 실행
+4. 정상 배포되면 merge
 
 <br><br>
 
 # 💥 Tech Selection & Trouble Shooting
 
+| 타이틀                                  | 주요 내용                                                        | 문서 링크                                                                                                 |
+|--------------------------------------|--------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| 🔐 스프링 인증인가 도입기                      | 인증-인가 적용 방식 결정                                               | [자세히 보기](https://bronze-humerus-068.notion.site/15e207dd9eb88121b36bf0881566af56?pvs=4)               |
+| 🚀 개발 서버 배포 파이프라인 구축기                | 개발 서버 초기 세팅 및 무중단 배포 적용                                      | [자세히 보기](https://bronze-humerus-068.notion.site/15e207dd9eb8814584b2ef55b9b96637?pvs=4)               |
+| 👁️ 모니터링 시스템 구축기                     | 그라파나를 활용한 로그, 시스템 메트릭 시각화                                    | [자세히 보기](https://bronze-humerus-068.notion.site/16b207dd9eb88059bb54f3c53db2be0d?pvs=4)               |
+| 🍽️ 설정파일 관리 전환기                      | 깃허브 서브모듈 기반의 설정파일 관리                                         | [자세히 보기](https://bronze-humerus-068.notion.site/177207dd9eb880849e7dd77ce3720471?pvs=4)               |
+| 🔍 검색 기능 도입기                         | Elasticsearch 도입                                             | [자세히 보기](https://bronze-humerus-068.notion.site/177207dd9eb8809ea49cf7621acc55df?pvs=4)               |
+| 👥 Request Body 두 번 읽기?!             | HttpServletRequestWrapper 상속받은 커스텀 클래스를 통해서 요청 바디스트림 여러 번 소모 | [자세히 보기](https://bronze-humerus-068.notion.site/Request-Body-187207dd9eb8807aa327cfa9a988d19b?pvs=4)  |
+| ↩️ S3 이미지는 누가 롤백함?                   | ThreadedLocal을 활용하여 @Transactional의 결과를 감지하는 리스너 추가          | [자세히 보기](https://bronze-humerus-068.notion.site/S3-19c207dd9eb88001a37feee1d22e14d0?pvs=4)            |
+| ↪️️ 그럼, Elasticsearch 데이터는 누가 롤백함??? | S3 롤백과 같은 동작을 하는 es 데이터 담당 리스너 추가                            | [자세히 보기](https://bronze-humerus-068.notion.site/Elasticsearch-19c207dd9eb880679cd4fefc4d7665a2?pvs=4) |
+| 🔔 알림 기능 도입기                         | SSE 도입을 통한 알림 기능 추가                                          | [자세히 보기](https://bronze-humerus-068.notion.site/19f207dd9eb880348a83d1e8ff977022?pvs=4)               |
+| 💬 채팅방 구현기                           | WebSocket with STOMP 도입을 통한 채팅 기능 추가                         | [자세히 보기](https://bronze-humerus-068.notion.site/19f207dd9eb880dc9481dc6dc3fd58e8?pvs=4)               |
+| 💀 DB connection 고갈                  | JPA의 open-in-view: false 설정                                  | [자세히 보기](https://bronze-humerus-068.notion.site/DB-connection-1a3207dd9eb880f4b449fd194aa3335c?pvs=4) |
+| 📣 알림 서비스 비동기 처리                     | SSE 알림을 @Async 처리                                            | [자세히 보기](https://bronze-humerus-068.notion.site/1c8207dd9eb88087a183c090c8e2cc5a?pvs=4)               |
+| 💨 캐싱 적용하기                           | Redis 기반 캐싱 적용                                               | [자세히 보기](https://bronze-humerus-068.notion.site/1d3207dd9eb8809f99cbfe5982473dce?pvs=4)               |
+| 🚛 Nginx 최대로 활용하기                    | Nginx 커넥션 설정 및 rate limiting 추가                              | [자세히 보기](https://bronze-humerus-068.notion.site/Nginx-1d3207dd9eb8808b866beb362f09f745?pvs=4)         |
+| 🐳 도커 볼륨 마운트 이해하기                    | 도커의 볼륨 마운트 기준 이해                                             | [자세히 보기](https://bronze-humerus-068.notion.site/1d3207dd9eb880909754c91b17e2bbd0?pvs=4)               |
+| 👀 조회수 업데이트 레이스 컨디션                  | RDBMS 게시글 조회수 업데이트 방치 및 검색 데이터 조회수 스케줄러 처리                   | [자세히 보기](https://bronze-humerus-068.notion.site/1da207dd9eb880658126c720b1acd797?pvs=4)               |
+| 🧪 API 처리 스레드 수 조절하기                 | jmeter 부하테스트를 통한 톰캣 스레드, hikari pool 커넥션 사이즈 최적화             | [자세히 보기](https://bronze-humerus-068.notion.site/API-1da207dd9eb88033a9f5f48cdfc98c19?pvs=4)           |
+| 🫢 단일쿼리가 30번씩 나간다고?!                 | JPQL을 통한 join 처리                                             | [자세히 보기](https://bronze-humerus-068.notion.site/30-1df207dd9eb88002bec1f0d3f3d98292?pvs=4)            |
+| 🛫 쿼리 최적화 경험하기                       | Lazy Loading 문제 개선하기                                         | [자세히 보기](https://bronze-humerus-068.notion.site/1e1207dd9eb880e08bf7c45815ce4964?pvs=4)               |
+| 🚀 프로덕트 서버 배포 파이프라인 구축기              | 기존에 구축해놨던 파이프라인을 활용하여 GCP에 프로덕트 서버 배포                        | [자세히 보기](https://bronze-humerus-068.notion.site/1e2207dd9eb880eebe20e5561b233842?pvs=4)               |
+
 <br><br>
 
-# 🙋🏻 How to Use
-
-<br><br>
