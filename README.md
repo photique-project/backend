@@ -5,7 +5,7 @@
 <br>
 
 [![Organization](https://img.shields.io/badge/GitHub-Organization-white?logo=github&style=flat)](https://github.com/photique-project)<br>
-[![Frontend](https://img.shields.io/badge/GitHub-Frontend-blue?logo=github&style=flat)](https://github.com/photique-project/backend)<br>
+[![Frontend](https://img.shields.io/badge/GitHub-Frontend-blue?logo=github&style=flat)](https://github.com/photique-project/frontend)<br>
 [![ERD](https://img.shields.io/badge/ERD-photique-purple?logo=erd&style=flat)](https://www.erdcloud.com/d/exY4do6Mumbr6z6fE)
 
 <br><br>
