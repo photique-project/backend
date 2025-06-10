@@ -88,6 +88,4 @@ public class TransactionRollbackListener {
             exhibitionSearchRepository.deleteAll(ElasticsearchExhibitionRollbackContext.getDocumentToDelete());
         }
     }
-
-
 }
