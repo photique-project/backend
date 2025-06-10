@@ -4,6 +4,7 @@ import com.benchpress200.photique.auth.domain.model.IssueTokenResult;
 import com.benchpress200.photique.auth.exception.AuthException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
 import java.net.URLDecoder;
@@ -71,29 +72,6 @@ public class TokenManagerImpl implements TokenManager {
     }
 
     @Override
-    public boolean isExpired(String token) {
-        token = URLDecoder.decode(token, StandardCharsets.UTF_8);
-
-        if (token.startsWith(TOKEN_PREFIX)) {
-            token = token.substring(TOKEN_PREFIX.length());
-        }
-
-        try {
-            return Jwts
-                    .parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getExpiration()
-                    .before(new Date());
-
-        } catch (ExpiredJwtException e) {
-            return false;
-        }
-    }
-
-    @Override
     public Long getUserId(String token) {
         token = URLDecoder.decode(token, StandardCharsets.UTF_8);
 
@@ -112,6 +90,32 @@ public class TokenManagerImpl implements TokenManager {
         } catch (ExpiredJwtException e) {
             // 만료된 토큰의 Claims 직접 꺼냄
             return e.getClaims().get(CLAIM_KEY, Long.class);
+        } catch (JwtException | IllegalArgumentException e) {
+            // 유효하지 않은 토큰일 경우
+            throw new AuthException("Authentication failed: invalid token", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @Override
+    public boolean isExpired(String token) {
+        token = URLDecoder.decode(token, StandardCharsets.UTF_8);
+
+        if (token.startsWith(TOKEN_PREFIX)) {
+            token = token.substring(TOKEN_PREFIX.length());
+        }
+
+        try {
+            return Jwts
+                    .parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getExpiration()
+                    .before(new Date());
+
+        } catch (ExpiredJwtException e) {
+            return true;
         }
     }
 
@@ -134,7 +138,9 @@ public class TokenManagerImpl implements TokenManager {
                     .parseSignedClaims(accessToken);
 
             return !payloadJson.contains("\"exp\"");
-        } catch (Exception e) {
+        } catch (ExpiredJwtException e) {
+            return false;
+        } catch (JwtException | IllegalArgumentException e) {
             // 서명 불일치, 잘못된 포맷 등
             throw new AuthException("Authentication failed: invalid token", HttpStatus.UNAUTHORIZED);
         }

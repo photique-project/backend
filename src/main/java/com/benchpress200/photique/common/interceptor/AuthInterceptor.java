@@ -45,13 +45,14 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // 쿠키가 유효하다면,
+        // 어세스 토큰이 유효하다면,
         if (!authDomainService.isAccessTokenExpired(accessToken)) {
             Cookie cookie = authDomainService.issueToken(user, false); // 어세스 토큰과 리프레쉬 토큰 재발급
             response.addCookie(cookie);
             return true;
         }
 
+        // 어세스 토큰은 만료됐지만 리프레쉬 토큰이 만료되지 않았다면,
         // 리프레쉬 토큰 만료여부 확인 -> 만료되었으면 예외처리됨
         authDomainService.isRefreshTokenPresent(userId);
         Cookie cookie = authDomainService.issueToken(user, false); // 어세스 토큰과 리프레쉬 토큰 재발급
