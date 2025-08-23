@@ -4,7 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.auth.domain.entity.AuthCode;
-import com.benchpress200.photique.auth.infrastructure.AuthCodeRepository;
+import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;

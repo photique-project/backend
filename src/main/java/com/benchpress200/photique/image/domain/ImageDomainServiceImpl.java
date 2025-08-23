@@ -1,7 +1,6 @@
 package com.benchpress200.photique.image.domain;
 
 import com.benchpress200.photique.common.transaction.rollbackcontext.ImageRollbackContext;
-import com.benchpress200.photique.image.infrastructure.ImageUploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

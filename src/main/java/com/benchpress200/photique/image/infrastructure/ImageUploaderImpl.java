@@ -2,6 +2,7 @@ package com.benchpress200.photique.image.infrastructure;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.benchpress200.photique.image.domain.ImageUploader;
 import com.benchpress200.photique.image.exception.ImageUploaderException;
 import java.io.File;
 import java.io.FileOutputStream;

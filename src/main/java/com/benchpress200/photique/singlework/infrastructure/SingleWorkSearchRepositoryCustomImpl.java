@@ -12,6 +12,7 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
+import com.benchpress200.photique.singlework.domain.repository.SingleWorkSearchRepositoryCustom;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

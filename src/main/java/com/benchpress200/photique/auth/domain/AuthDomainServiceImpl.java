@@ -4,10 +4,8 @@ import com.benchpress200.photique.auth.domain.entity.AuthCode;
 import com.benchpress200.photique.auth.domain.entity.RefreshToken;
 import com.benchpress200.photique.auth.domain.model.IssueTokenResult;
 import com.benchpress200.photique.auth.exception.AuthException;
-import com.benchpress200.photique.auth.infrastructure.AuthCodeRepository;
-import com.benchpress200.photique.auth.infrastructure.AuthMailManager;
-import com.benchpress200.photique.auth.infrastructure.RefreshTokenRepository;
-import com.benchpress200.photique.auth.infrastructure.TokenManager;
+import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
+import com.benchpress200.photique.auth.domain.repository.RefreshTokenRepository;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,7 +41,10 @@ public class AuthDomainServiceImpl implements AuthDomainService {
     }
 
     @Override
-    public Cookie issueToken(final User user, final boolean auto) {
+    public Cookie issueToken(
+            final User user,
+            final boolean auto
+    ) {
         Long userId = user.getId();
         IssueTokenResult issueTokenResult = tokenManager.issueNewTokens(userId, auto);
         RefreshToken refreshToken = issueTokenResult.toRefreshTokenEntity();

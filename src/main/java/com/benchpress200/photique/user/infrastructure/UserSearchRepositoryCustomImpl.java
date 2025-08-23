@@ -9,6 +9,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
+import com.benchpress200.photique.user.domain.repository.UserSearchRepositoryCustom;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

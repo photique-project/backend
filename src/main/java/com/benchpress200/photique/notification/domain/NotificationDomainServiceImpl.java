@@ -2,7 +2,7 @@ package com.benchpress200.photique.notification.domain;
 
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.exception.NotificationException;
-import com.benchpress200.photique.notification.infrastructure.NotificationRepository;
+import com.benchpress200.photique.notification.domain.repository.NotificationRepository;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;

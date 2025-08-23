@@ -4,8 +4,8 @@ import com.benchpress200.photique.common.transaction.rollbackcontext.Elasticsear
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
 import com.benchpress200.photique.user.exception.UserException;
-import com.benchpress200.photique.user.infrastructure.UserRepository;
-import com.benchpress200.photique.user.infrastructure.UserSearchRepository;
+import com.benchpress200.photique.user.domain.repository.UserRepository;
+import com.benchpress200.photique.user.domain.repository.UserSearchRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

@@ -8,6 +8,7 @@ import com.benchpress200.photique.singlework.domain.entity.QSingleWorkTag;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
+import com.benchpress200.photique.singlework.domain.repository.SingleWorkRepositoryCustom;
 import com.benchpress200.photique.tag.domain.entity.QTag;
 import com.benchpress200.photique.user.domain.entity.QUser;
 import com.querydsl.core.BooleanBuilder;

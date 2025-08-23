@@ -4,10 +4,10 @@ import com.benchpress200.photique.common.transaction.rollbackcontext.Elasticsear
 import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchSingleWorkRollbackContext;
 import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchUserRollbackContext;
 import com.benchpress200.photique.common.transaction.rollbackcontext.ImageRollbackContext;
-import com.benchpress200.photique.exhibition.infrastructure.ExhibitionSearchRepository;
-import com.benchpress200.photique.image.infrastructure.ImageUploader;
-import com.benchpress200.photique.singlework.infrastructure.SingleWorkSearchRepository;
-import com.benchpress200.photique.user.infrastructure.UserSearchRepository;
+import com.benchpress200.photique.exhibition.domain.repository.ExhibitionSearchRepository;
+import com.benchpress200.photique.image.domain.ImageUploader;
+import com.benchpress200.photique.singlework.domain.repository.SingleWorkSearchRepository;
+import com.benchpress200.photique.user.domain.repository.UserSearchRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.AfterReturning;

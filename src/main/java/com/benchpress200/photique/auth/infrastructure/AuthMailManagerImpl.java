@@ -2,6 +2,7 @@ package com.benchpress200.photique.auth.infrastructure;
 
 import static java.lang.Boolean.TRUE;
 
+import com.benchpress200.photique.auth.domain.AuthMailManager;
 import com.benchpress200.photique.auth.exception.AuthException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -18,7 +19,7 @@ public class AuthMailManagerImpl implements AuthMailManager {
     private final JavaMailSender javaMailSender;
 
     @Override
-    public String sendMail(String email)  {
+    public String sendMail(String email) {
         String code = generateRandomCode();
         MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -31,8 +32,9 @@ public class AuthMailManagerImpl implements AuthMailManager {
 
             helper.setText(htmlContent, TRUE);
 
-        } catch(MessagingException e) {
-            throw new AuthException("Authentication Mail Sender Error", e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (MessagingException e) {
+            throw new AuthException("Authentication Mail Sender Error", e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         javaMailSender.send(message);
