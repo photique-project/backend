@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 public interface SingleWorkSearchRepository extends ElasticsearchRepository<SingleWorkSearch, Long>,
-        SingleWorkSearchRepositoryCustom, CommonSearchRepositoryCustom {
+        SingleWorkSearchRepositoryCustom {
     Page<SingleWorkSearch> findByWriterId(Long writerId, Pageable pageable);
 
     List<SingleWorkSearch> findAllByWriterId(Long writerId);

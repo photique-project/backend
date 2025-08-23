@@ -11,9 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @SpringBootApplication
 public class PhotiqueApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(PhotiqueApplication.class, args);
     }
-
 }

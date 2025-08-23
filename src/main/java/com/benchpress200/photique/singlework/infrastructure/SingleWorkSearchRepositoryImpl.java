@@ -21,10 +21,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.stereotype.Repository;
 
 
+@Repository
 @RequiredArgsConstructor
-public class SingleWorkSearchRepositoryCustomImpl implements SingleWorkSearchRepositoryCustom {
+public class SingleWorkSearchRepositoryImpl implements SingleWorkSearchRepositoryCustom {
     private final ElasticsearchClient elasticsearchClient;
 
     @Override

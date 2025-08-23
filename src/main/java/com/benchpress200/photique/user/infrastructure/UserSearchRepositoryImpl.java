@@ -17,9 +17,16 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.stereotype.Repository;
 
+// UserSearchRepositoryCustom의 구현체이지만,
+// UserSearchRepositoryCustom 인터페이스를 UserSearchRepository가 상속하고 있고
+// 현재 이 구현체를 UserSearchRepositoryCustomImpl로 뒀을 때
+// @Repository로 빈 등록은 되지만 구현체로 찾지 못해서 에러 발생
+// => 네이밍을 최종으로 상속받는 인터페이스 기준으로 해야 정상 인식
+@Repository
 @RequiredArgsConstructor
-public class UserSearchRepositoryCustomImpl implements UserSearchRepositoryCustom {
+public class UserSearchRepositoryImpl implements UserSearchRepositoryCustom {
     private final ElasticsearchClient elasticsearchClient;
 
     @Override
@@ -37,8 +44,8 @@ public class UserSearchRepositoryCustomImpl implements UserSearchRepositoryCusto
                         .query(keyword)
                         .fuzziness("AUTO")
                         .build()._toQuery());
-
             }
+
             keywordBoolQuery.minimumShouldMatch("1");
 
             // 정렬 적용
