@@ -71,7 +71,8 @@ public class TransactionRollbackListener {
 
     private void flushSingleWorkSearchQuery() {
         if (ElasticsearchSingleWorkRollbackContext.hasDocumentToSave()) {
-            singleWorkSearchRepository.saveAll(ElasticsearchSingleWorkRollbackContext.getDocumentToSave());
+            throw new RuntimeException();
+//            singleWorkSearchRepository.saveAll(ElasticsearchSingleWorkRollbackContext.getDocumentToSave());
         }
 
         if (ElasticsearchSingleWorkRollbackContext.hasDocumentToDelete()) {

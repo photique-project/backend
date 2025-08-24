@@ -1,7 +1,5 @@
-package com.benchpress200.photique.singlework.domain.dto;
+package com.benchpress200.photique.singlework.presentation.request;
 
-import com.benchpress200.photique.singlework.domain.entity.SingleWork;
-import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
@@ -9,8 +7,6 @@ import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
 import com.benchpress200.photique.singlework.validation.annotation.Enum;
 import com.benchpress200.photique.singlework.validation.annotation.Image;
 import com.benchpress200.photique.tag.domain.dto.NewTagRequest;
-import com.benchpress200.photique.tag.domain.entity.Tag;
-import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,14 +15,12 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 @Getter
-@Setter
 @NoArgsConstructor
-public class SingleWorkCreateRequest {
+public class CreateSingleWorkRequest {
     @NotNull(message = "Id must not be null")
     private Long writerId;
 
@@ -72,40 +66,4 @@ public class SingleWorkCreateRequest {
     @NotBlank(message = "Invalid description: description must not be blank.")
     @Size(min = 1, max = 500, message = "Invalid description: 1 ~ 500 characters")
     private String description;
-
-    public SingleWork toSingleWorkEntity(
-            final User writer,
-            final String imageUrl
-    ) {
-        return SingleWork.builder()
-                .writer(writer)
-                .image(imageUrl)
-                .camera(camera)
-                .lens(lens)
-                .aperture(Aperture.fromValue(aperture))
-                .shutterSpeed(ShutterSpeed.fromValue(shutterSpeed))
-                .iso(ISO.fromValue(iso))
-                .location(location)
-                .category(Category.fromValue(category))
-                .date(date)
-                .title(title)
-                .description(description)
-                .build();
-    }
-
-    public List<SingleWorkTag> toSingleWorkTagEntities(
-            final SingleWork singleWork,
-            final List<Tag> tags
-    ) {
-        return tags.stream()
-                .map(tag -> SingleWorkTag.builder()
-                        .singleWork(singleWork)
-                        .tag(tag)
-                        .build())
-                .toList();
-    }
-
-    public List<String> getTags() {
-        return tags.stream().map(NewTagRequest::getName).toList();
-    }
 }

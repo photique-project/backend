@@ -1,9 +1,9 @@
 name: 개발서버 Spring App 배포
 
-on:
-  pull_request:
-    branches:
-      - "develop"
+#on:
+#  pull_request:
+#    branches:
+#      - "develop"
 
 jobs:
   build-and-deploy:
