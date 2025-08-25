@@ -1,4 +1,4 @@
-package com.benchpress200.photique.user.infrastructure;
+package com.benchpress200.photique.user.infrastructure.repository;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOptions;

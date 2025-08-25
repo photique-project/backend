@@ -1,6 +1,5 @@
 package com.benchpress200.photique.user.application;
 
-import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
 import com.benchpress200.photique.user.domain.dto.ResetPasswordRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailsRequest;
@@ -13,8 +12,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface UserService {
     void validateNickname(NicknameValidationRequest nicknameValidationRequest);
-
-    void join(JoinRequest joinRequest);
 
     UserDetailsResponse getUserDetails(UserDetailsRequest userDetailsRequest);
 

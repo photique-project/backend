@@ -12,7 +12,6 @@ import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.user.application.cache.UserCacheService;
 import com.benchpress200.photique.user.domain.FollowDomainService;
 import com.benchpress200.photique.user.domain.UserDomainService;
-import com.benchpress200.photique.user.domain.dto.JoinRequest;
 import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
 import com.benchpress200.photique.user.domain.dto.ResetPasswordRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailsRequest;
@@ -56,27 +55,6 @@ public class UserServiceImpl implements UserService {
         String nickname = nicknameValidationRequest.getNickname();
         userDomainService.isDuplicatedNickname(nickname);
     }
-
-    @Override
-    @Transactional
-    public void join(final JoinRequest joinRequest) {
-        // 이메일 인증 완료 여부 확인
-        String email = joinRequest.getEmail();
-        authDomainService.isValidUser(email);
-
-        // 비밀번호 인코딩
-        String rawPassword = joinRequest.getPassword();
-        String encodedPassword = userDomainService.encodePassword(rawPassword);
-
-        // 이미지 S3 업로드
-        MultipartFile newImage = joinRequest.getProfileImage();
-        String uploadedImageUrl = imageDomainService.upload(newImage, profileImagePath);
-
-        // 새 유저 생성
-        User user = joinRequest.toEntity(encodedPassword, uploadedImageUrl);
-        userDomainService.registerUser(user);
-    }
-
 
     @Override
     @Transactional

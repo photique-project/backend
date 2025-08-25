@@ -5,7 +5,7 @@ import com.benchpress200.photique.common.transaction.rollbackcontext.Elasticsear
 import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchUserRollbackContext;
 import com.benchpress200.photique.common.transaction.rollbackcontext.ImageRollbackContext;
 import com.benchpress200.photique.exhibition.domain.repository.ExhibitionSearchRepository;
-import com.benchpress200.photique.image.domain.ImageUploader;
+import com.benchpress200.photique.image.domain.ImageUploaderPort;
 import com.benchpress200.photique.singlework.domain.repository.SingleWorkSearchRepository;
 import com.benchpress200.photique.user.domain.repository.UserSearchRepository;
 import java.util.List;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TransactionRollbackListener {
     // 롤백리스너에서는 인프라 롤백을 위해 인프라 바로 호출
-    private final ImageUploader imageUploader;
+    private final ImageUploaderPort imageUploader;
     private final UserSearchRepository userSearchRepository;
     private final SingleWorkSearchRepository singleWorkSearchRepository;
     private final ExhibitionSearchRepository exhibitionSearchRepository;

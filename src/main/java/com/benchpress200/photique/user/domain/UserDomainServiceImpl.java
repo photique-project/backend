@@ -3,9 +3,9 @@ package com.benchpress200.photique.user.domain;
 import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchUserRollbackContext;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
-import com.benchpress200.photique.user.exception.UserException;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
 import com.benchpress200.photique.user.domain.repository.UserSearchRepository;
+import com.benchpress200.photique.user.exception.UserException;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -39,32 +39,6 @@ public class UserDomainServiceImpl implements UserDomainService {
     @Override
     public String encodePassword(final String password) {
         return passwordEncoder.encode(password);
-    }
-
-    @Override
-    public void registerUser(final User user) {
-        // 이메일 중복검사
-        String email = user.getEmail();
-        isDuplicatedEmail(email);
-
-        // 닉네임 중복검사
-        String nickname = user.getNickname();
-        isDuplicatedNickname(nickname);
-
-        // RDBMS 저장
-        User saved = userRepository.save(user);
-
-        // Elasticsearch 엔티티 생성
-        UserSearch userSearch = UserSearch.builder()
-                .id(saved.getId())
-                .profileImage(saved.getProfileImage())
-                .nickname(saved.getNickname())
-                .introduction(saved.getIntroduction())
-                .createdAt(saved.getCreatedAt())
-                .build();
-
-        // Elasticsearch 저장 (예외발생 시 롤백을 위한 컨텍스트에 저장)
-        ElasticsearchUserRollbackContext.addDocumentToSave(userSearch);
     }
 
     @Override

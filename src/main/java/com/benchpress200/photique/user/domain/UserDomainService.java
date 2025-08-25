@@ -13,8 +13,7 @@ public interface UserDomainService {
     void isDuplicatedNickname(String nickname);
 
     String encodePassword(String password);
-
-    void registerUser(User user);
+    
 
     User findUser(Long userId);
 

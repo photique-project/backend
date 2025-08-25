@@ -1,4 +1,4 @@
-package com.benchpress200.photique.image.exception;
+package com.benchpress200.photique.image.domain.exception;
 
 import lombok.Getter;
 
