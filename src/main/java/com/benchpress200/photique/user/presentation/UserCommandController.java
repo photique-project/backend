@@ -27,8 +27,6 @@ public class UserCommandController implements UserCommandControllerDocs {
             @RequestPart("user") @Valid final JoinRequest joinRequest,
             @RequestPart(value = "profileImage", required = false) final MultipartFile profileImages
     ) {
-        // TODO: 여기 멀티파트에 걸리는 데이터와 다른 파라미터 널 허용하는지 여부 확인하고 스웨거 응답 docs 정리 후 단위 테스트 코드 작성하고 API 리팩 완료
-        // TODO: 마지막인 인증과 인가 처리 추가
         JoinCommand joinCommand = joinRequest.toCommand(profileImages);
         userCommandService.join(joinCommand);
 

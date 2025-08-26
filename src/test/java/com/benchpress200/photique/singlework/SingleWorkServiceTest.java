@@ -22,11 +22,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @DisplayName("단일 작품 서비스 로직 테스트")
 public class SingleWorkServiceTest {
     @Autowired
