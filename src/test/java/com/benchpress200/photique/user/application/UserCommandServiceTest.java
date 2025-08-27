@@ -1,78 +1,273 @@
 package com.benchpress200.photique.user.application;
 
+import com.benchpress200.photique.AbstractTestContainerConfig;
+import com.benchpress200.photique.auth.domain.entity.AuthCode;
+import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
+import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
+import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
+import com.benchpress200.photique.image.domain.ImageUploaderPort;
+import com.benchpress200.photique.user.application.command.JoinCommand;
+import com.benchpress200.photique.user.domain.entity.User;
+import com.benchpress200.photique.user.domain.entity.UserSearch;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
+import com.benchpress200.photique.user.domain.repository.UserSearchRepository;
+import java.util.Optional;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 @SpringBootTest
 @DisplayName("유저 도메인 Command 테스트")
 @ActiveProfiles("test")
-public class UserCommandServiceTest {
-    // MySQL
-    @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+public class UserCommandServiceTest extends AbstractTestContainerConfig {
+    @MockitoSpyBean
+    AuthCodeRepository authCodeRepository;
 
-//    // Elasticsearch
-//    @Container
-//    static ElasticsearchContainer elasticsearch =
-//            new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.17.9")
-//                    .withEnv("discovery.type", "single-node");
-//
-//    // Redis
-//    @Container
-//    static GenericContainer<?> redis =
-//            new GenericContainer<>(DockerImageName.parse("redis:5.0.3-alpine"))
-//                    .withExposedPorts(6379);
+    @MockitoSpyBean
+    ImageUploaderPort imageUploaderPort;
 
-
-    @DynamicPropertySource
-    static void overrideProps(DynamicPropertyRegistry registry) {
-        // MySQL
-        registry.add("spring.datasource.url", mysql::getJdbcUrl);
-        registry.add("spring.datasource.username", mysql::getUsername);
-        registry.add("spring.datasource.password", mysql::getPassword);
-
-//        // Elasticsearch
-//        registry.add("spring.elasticsearch.uris", elasticsearch::getHttpHostAddress);
-//
-//        // Redis
-//        registry.add("spring.data.redis.host", redis::getHost);
-//        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
-    }
-
-
-    @Autowired
+    @MockitoSpyBean
     UserRepository userRepository;
 
-    // TODO: 테스트 설계
-    // TODO: 단위 테스트 다하고 스웨커 응답 문서 정리
-    @Test
-    @DisplayName("join 메서드 커밋 테스트")
-    void join_메서드_커밋_테스트() {
+    @MockitoSpyBean
+    UserSearchRepository userSearchRepository;
 
+    @Autowired
+    UserCommandService userCommandService;
+
+    @AfterEach
+    void cleanUp() {
+        userRepository.deleteAll();
+        userSearchRepository.deleteAll();
     }
 
     @Test
-    @DisplayName("join 메서드 롤백 테스트 - ")
-    void testJoinWith() {
+    @DisplayName("join 커밋 테스트")
+    void join_커밋_테스트() {
+        // GIVEN
+        String email = "example@google.com";
+        String password = "password12!@";
+        String nickname = "nickname";
 
+        JoinCommand joinCommand = JoinCommand.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .build();
+
+        Mockito
+                .doReturn(Optional.of(new AuthCode("email", "code", true, 1L)))
+                .when(authCodeRepository)
+                .findById(Mockito.any());
+
+        // WHEN
+        userCommandService.join(joinCommand);
+        Optional<User> user = userRepository.findByEmail(email);
+
+        // THEN
+        Assertions.assertThat(user.isPresent()).isTrue();
+
+        // WHEN
+        Optional<UserSearch> userSearch = userSearchRepository.findById(user.get().getId());
+
+        // THEN
+        Assertions.assertThat(userSearch.isPresent()).isTrue();
     }
 
     @Test
-    @DisplayName("MySQL 저장 실패 테스트")
-    void testJoin() {
+    @DisplayName("join 롤백 테스트 - 이메일 인증 코드 조회 실패")
+    void join_롤백_테스트_이메일_인증_코드_조회_실패() {
+        // GIVEN
+        String email = "example@google.com";
+        String password = "password12!@";
+        String nickname = "nickname";
 
+        JoinCommand joinCommand = JoinCommand.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .build();
+
+        Mockito
+                .doReturn(Optional.empty())
+                .when(authCodeRepository)
+                .findById(Mockito.any());
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> userCommandService.join(joinCommand))
+                .isInstanceOf(MailAuthenticationCodeExpirationException.class);
+
+        // WHEN
+        Optional<User> user = userRepository.findByEmail(email);
+
+        // THEN
+        Assertions.assertThat(user.isPresent()).isFalse();
+
+        // WHEN
+        Iterable<UserSearch> userSearch = userSearchRepository.findAll();
+
+        // THEN
+        Assertions.assertThat(userSearch).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("join 롤백 테스트 - 이메일 인증 코드 미인증")
+    void join_롤백_테스트_이메일_인증_코드_미인증() {
+        // GIVEN
+        String email = "example@google.com";
+        String password = "password12!@";
+        String nickname = "nickname";
+
+        JoinCommand joinCommand = JoinCommand.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .build();
+
+        Mockito
+                .doReturn(Optional.of(new AuthCode("email", "code", false, 1L)))
+                .when(authCodeRepository)
+                .findById(Mockito.any());
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> userCommandService.join(joinCommand))
+                .isInstanceOf(MailAuthenticationCodeNotVerifiedException.class);
+
+        // WHEN
+        Optional<User> user = userRepository.findByEmail(email);
+
+        // THEN
+        Assertions.assertThat(user.isPresent()).isFalse();
+
+        // WHEN
+        Iterable<UserSearch> userSearch = userSearchRepository.findAll();
+
+        // THEN
+        Assertions.assertThat(userSearch).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("join 롤백 테스트 - 이미지 업로드 실패")
+    void join_롤백_테스트_이미지_업로드_실패() {
+        // GIVEN
+        String email = "example@google.com";
+        String password = "password12!@";
+        String nickname = "nickname";
+        MultipartFile profileImage = Mockito.mock(MultipartFile.class);
+
+        JoinCommand joinCommand = JoinCommand.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .profileImage(profileImage)
+                .build();
+
+        Mockito
+                .doReturn(Optional.of(new AuthCode("email", "code", true, 1L)))
+                .when(authCodeRepository)
+                .findById(Mockito.any());
+
+        Mockito.doThrow(RuntimeException.class).when(imageUploaderPort).upload(Mockito.any(), Mockito.any());
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> userCommandService.join(joinCommand))
+                .isInstanceOf(RuntimeException.class);
+
+        // WHEN
+        Optional<User> user = userRepository.findByEmail(email);
+
+        // THEN
+        Assertions.assertThat(user.isPresent()).isFalse();
+
+        // WHEN
+        Iterable<UserSearch> userSearch = userSearchRepository.findAll();
+
+        // THEN
+        Assertions.assertThat(userSearch).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("join 롤백 테스트 - MySQL 저장 실패")
+    void join_롤백_테스트_MySQL_저장_실패() {
+        // GIVEN
+        String email = "example@google.com";
+        String password = "password12!@";
+        String nickname = "nickname";
+
+        JoinCommand joinCommand = JoinCommand.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .build();
+
+        Mockito
+                .doReturn(Optional.of(new AuthCode("email", "code", true, 1L)))
+                .when(authCodeRepository)
+                .findById(Mockito.any());
+
+        Mockito.doThrow(RuntimeException.class).when(userRepository).save(Mockito.any());
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> userCommandService.join(joinCommand))
+                .isInstanceOf(RuntimeException.class);
+
+        // WHEN
+        Optional<User> user = userRepository.findByEmail(email);
+
+        // THEN
+        Assertions.assertThat(user.isPresent()).isFalse();
+
+        // WHEN
+        Iterable<UserSearch> userSearch = userSearchRepository.findAll();
+
+        // THEN
+        Assertions.assertThat(userSearch).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("join 롤백 테스트 - Elasticsearch 저장 실패")
+    void join_롤백_테스트_Elasticsearch_저장_실패() {
+        // GIVEN
+        String email = "example@google.com";
+        String password = "password12!@";
+        String nickname = "nickname";
+
+        JoinCommand joinCommand = JoinCommand.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .build();
+
+        Mockito
+                .doReturn(Optional.of(new AuthCode("email", "code", true, 1L)))
+                .when(authCodeRepository)
+                .findById(Mockito.any());
+
+        Mockito.doThrow(RuntimeException.class).when(userSearchRepository).save(Mockito.any());
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> userCommandService.join(joinCommand))
+                .isInstanceOf(RuntimeException.class);
+
+        // WHEN
+        Optional<User> user = userRepository.findByEmail(email);
+
+        // THEN
+        Assertions.assertThat(user.isPresent()).isFalse();
+
+        // WHEN
+        Iterable<UserSearch> userSearch = userSearchRepository.findAll();
+
+        // THEN
+        Assertions.assertThat(userSearch).hasSize(0);
     }
 }
