@@ -2,9 +2,13 @@ package com.benchpress200.photique;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
-class PhotiqueApplicationTests {
+@Testcontainers
+@ActiveProfiles("test")
+class PhotiqueApplicationTests extends AbstractTestContainerConfig {
 
     @Test
     void contextLoads() {

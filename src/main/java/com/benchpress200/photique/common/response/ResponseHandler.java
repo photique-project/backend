@@ -41,12 +41,4 @@ public class ResponseHandler {
                         LocalDateTime.now()
                 ));
     }
-
-    private record ResponseBody<T>(
-            int status,
-            String message,
-            T data,
-            LocalDateTime timestamp
-    ) {
-    }
 }

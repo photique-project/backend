@@ -29,7 +29,7 @@ public class UserCommandController implements UserCommandControllerDocs {
     ) {
         JoinCommand joinCommand = joinRequest.toCommand(profileImages);
         userCommandService.join(joinCommand);
-
+        
         return ResponseHandler.handleResponse(
                 HttpStatus.CREATED,
                 "Join completed"

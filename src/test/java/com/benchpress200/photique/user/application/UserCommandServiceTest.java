@@ -26,7 +26,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 @SpringBootTest
-@DisplayName("유저 도메인 Command 테스트")
+@DisplayName("UserCommandService 테스트")
 @ActiveProfiles("test")
 public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @MockitoSpyBean
