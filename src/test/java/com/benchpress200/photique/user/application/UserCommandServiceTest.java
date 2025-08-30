@@ -7,18 +7,24 @@ import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNo
 import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
 import com.benchpress200.photique.image.domain.ImageUploaderPort;
 import com.benchpress200.photique.user.application.command.JoinCommand;
+import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
+import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
+import com.benchpress200.photique.user.domain.enumeration.Provider;
+import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
 import com.benchpress200.photique.user.domain.repository.UserSearchRepository;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +49,23 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
     @Autowired
     UserCommandService userCommandService;
+
+    Long testUserId;
+
+    @BeforeEach
+    void setUp() {
+        User user = User.builder()
+                .email("test@google.com")
+                .password("password")
+                .nickname("dummy")
+                .profileImage("profileImageUrl")
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
+
+        User savedUser = userRepository.save(user);
+        testUserId = savedUser.getId();
+    }
 
     @AfterEach
     void cleanUp() {
@@ -269,5 +292,116 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
         // THEN
         Assertions.assertThat(userSearch).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("updateUserDetails 커밋 테스트")
+    void updateUserDetails_커밋_테스트() {
+        // GIVEN
+        Optional<User> originalUser = userRepository.findById(testUserId);
+
+        String updateNickname = "updateNickname";
+        String updateIntroduction = "introduction";
+        String updateProfileImageUrl = "updateProfileImageUrl";
+        MockMultipartFile updateProfileImage = new MockMultipartFile("profileImage", "test.png",
+                "image/png", "dummy".getBytes());
+
+        UpdateUserDetailsCommand updateUserDetailsCommand = UpdateUserDetailsCommand.builder()
+                .userId(testUserId)
+                .nickname(updateNickname)
+                .introduction(updateIntroduction)
+                .profileImage(updateProfileImage)
+                .build();
+
+        Mockito.doReturn(updateProfileImageUrl).when(imageUploaderPort)
+                .update(Mockito.any(), Mockito.any(), Mockito.any());
+
+        // WHEN
+        userCommandService.updateUserDetails(updateUserDetailsCommand);
+        Optional<User> updatedUser = userRepository.findById(testUserId);
+
+        // THEN
+        Assertions.assertThat(originalUser.isPresent()).isTrue();
+        Assertions.assertThat(updatedUser.isPresent()).isTrue();
+        Assertions.assertThat(updatedUser.get().getNickname()).isNotEqualTo(originalUser.get().getNickname());
+        Assertions.assertThat(updatedUser.get().getNickname()).isEqualTo(updateNickname);
+        Assertions.assertThat(updatedUser.get().getIntroduction()).isNotEqualTo(originalUser.get().getIntroduction());
+        Assertions.assertThat(updatedUser.get().getIntroduction()).isEqualTo(updateIntroduction);
+        Assertions.assertThat(updatedUser.get().getProfileImage()).isNotEqualTo(originalUser.get().getProfileImage());
+        Assertions.assertThat(updatedUser.get().getProfileImage()).isEqualTo(updateProfileImageUrl);
+    }
+
+    @Test
+    @DisplayName("updateUserDetails 롤벡 테스트 - 유저 조회 실패")
+    void updateUserDetails_롤백_테스트_유저_조회_실패() {
+        // GIVEN
+        Optional<User> originalUser = userRepository.findById(testUserId);
+
+        String updateNickname = "updateNickname";
+        String updateIntroduction = "introduction";
+        String updateProfileImageUrl = "updateProfileImageUrl";
+        MockMultipartFile updateProfileImage = new MockMultipartFile("profileImage", "test.png",
+                "image/png", "dummy".getBytes());
+
+        UpdateUserDetailsCommand updateUserDetailsCommand = UpdateUserDetailsCommand.builder()
+                .userId(-1 * testUserId) // 없는 id 가진 유저 데이터 조회하도록
+                .nickname(updateNickname)
+                .introduction(updateIntroduction)
+                .profileImage(updateProfileImage)
+                .build();
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> userCommandService.updateUserDetails(updateUserDetailsCommand))
+                .isInstanceOf(UserNotFoundException.class);
+        Mockito.reset(userRepository);
+        Optional<User> updatedUser = userRepository.findById(testUserId);
+
+        // THEN
+        Assertions.assertThat(originalUser.isPresent()).isTrue();
+        Assertions.assertThat(updatedUser.isPresent()).isTrue();
+        Assertions.assertThat(updatedUser.get().getNickname()).isEqualTo(originalUser.get().getNickname());
+        Assertions.assertThat(updatedUser.get().getNickname()).isNotEqualTo(updateNickname);
+        Assertions.assertThat(updatedUser.get().getIntroduction()).isEqualTo(originalUser.get().getIntroduction());
+        Assertions.assertThat(updatedUser.get().getIntroduction()).isNotEqualTo(updateIntroduction);
+        Assertions.assertThat(updatedUser.get().getProfileImage()).isEqualTo(originalUser.get().getProfileImage());
+        Assertions.assertThat(updatedUser.get().getProfileImage()).isNotEqualTo(updateProfileImageUrl);
+    }
+
+    @Test
+    @DisplayName("updateUserDetails 롤벡 테스트 - 프로필 이미지 업데이트 실패")
+    void updateUserDetails_롤백_테스트_프로필_이미지_업데이트_실패() {
+        // GIVEN
+        Optional<User> originalUser = userRepository.findById(testUserId);
+
+        String updateNickname = "updateNickname";
+        String updateIntroduction = "introduction";
+        String updateProfileImageUrl = "updateProfileImageUrl";
+        MockMultipartFile updateProfileImage = new MockMultipartFile("profileImage", "test.png",
+                "image/png", "dummy".getBytes());
+
+        UpdateUserDetailsCommand updateUserDetailsCommand = UpdateUserDetailsCommand.builder()
+                .userId(testUserId)
+                .nickname(updateNickname)
+                .introduction(updateIntroduction)
+                .profileImage(updateProfileImage)
+                .build();
+
+        Mockito.doThrow(RuntimeException.class).when(imageUploaderPort)
+                .update(Mockito.any(), Mockito.any(), Mockito.any());
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> userCommandService.updateUserDetails(updateUserDetailsCommand))
+                .isInstanceOf(RuntimeException.class);
+        Optional<User> updatedUser = userRepository.findById(testUserId);
+
+        // THEN
+        Assertions.assertThat(originalUser.isPresent()).isTrue();
+        Assertions.assertThat(updatedUser.isPresent()).isTrue();
+        Assertions.assertThat(updatedUser.get().getNickname()).isEqualTo(originalUser.get().getNickname());
+        Assertions.assertThat(updatedUser.get().getNickname()).isNotEqualTo(updateNickname);
+        Assertions.assertThat(updatedUser.get().getIntroduction()).isEqualTo(originalUser.get().getIntroduction());
+        Assertions.assertThat(updatedUser.get().getIntroduction()).isNotEqualTo(updateIntroduction);
+        Assertions.assertThat(updatedUser.get().getProfileImage()).isEqualTo(originalUser.get().getProfileImage());
+        Assertions.assertThat(updatedUser.get().getProfileImage()).isNotEqualTo(updateProfileImageUrl);
     }
 }
