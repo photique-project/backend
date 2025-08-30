@@ -36,13 +36,15 @@ public class UserCommandControllerTest {
     MockMvc mockMvc;
 
     @MockitoBean
-    private UserCommandService userCommandService;
+    UserCommandService userCommandService;
 
     @BeforeEach
     void setUp() {
         // 컨트롤러 단위 테스트이므로 UserCommandService는 항상 정상 동작하도록 설정
         Mockito.doNothing().when(userCommandService).join(Mockito.any());
+        Mockito.doNothing().when(userCommandService).updateUserDetails(Mockito.any());
     }
+
 
     @Test
     @DisplayName("join 성공 테스트")
@@ -219,7 +221,158 @@ public class UserCommandControllerTest {
                 .andExpect(jsonPath("$.message").value("Invalid profile image"));
     }
 
-    // 잘못된 파일들 제공
+    @Test
+    @DisplayName("updateUserDetails 성공 테스트")
+    void updateUserDetails_성공_테스트() throws Exception {
+        // GIVEN
+        MockMultipartFile userPart = new MockMultipartFile(
+                "user",
+                "",
+                "application/json",
+                ("{ \"nickname\": \"updateNick\", " +
+                        "\"introduction\": \"introduction\" }").getBytes()
+        );
+
+        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
+                "image/png", "dummy".getBytes());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/1")
+                .file(userPart)
+                .file(profileImage)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$.status").value(204))
+                .andExpect(jsonPath("$.message").value("User details updated"));
+    }
+
+    @Test
+    @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 경로 변수")
+    void updateUserDetails_실패_테스트_유효하지_않은_경로_변수() throws Exception {
+        // GIVEN
+        MockMultipartFile userPart = new MockMultipartFile(
+                "user",
+                "",
+                "application/json",
+                ("{ \"nickname\": \"updateNick\", " +
+                        "\"introduction\": \"introduction\" }").getBytes()
+        );
+
+        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
+                "image/png", "dummy".getBytes());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/a")
+                .file(userPart)
+                .file(profileImage)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Invalid path variable type"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "",              // 빈 문자열
+            " ",             // 공백
+            "abcdefghijkl",  // 12자 초과
+            "nick name",     // 공백 포함
+    })
+    @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 닉네임")
+    void updateUserDetails_실패_테스트_유효하지_않은_닉네임(final String nickname) throws Exception {
+        // GIVEN
+        MockMultipartFile userPart = new MockMultipartFile(
+                "user",
+                "",
+                "application/json",
+                ("{ \"nickname\": \"" + nickname + "\", " +
+                        "\"introduction\": \"introduction\" }").getBytes()
+        );
+
+        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
+                "image/png", "dummy".getBytes());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/1")
+                .file(userPart)
+                .file(profileImage)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Invalid nickname"));
+    }
+
+    @Test
+    @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 소개")
+    void updateUserDetails_실패_테스트_유효하지_않은_소개() throws Exception {
+        String invalidIntroduction = "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijz";
+
+        // GIVEN
+        MockMultipartFile userPart = new MockMultipartFile(
+                "user",
+                "",
+                "application/json",
+                ("{ \"nickname\": \"updateNick\", " +
+                        "\"introduction\": \"" + invalidIntroduction + "\" }").getBytes()
+        );
+
+        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
+                "image/png", "dummy".getBytes());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/1")
+                .file(userPart)
+                .file(profileImage)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Invalid introduction"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getInvalidFiles")
+    @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 프로필 이미지")
+    void updateUserDetails_실패_테스트_유효하지_않은_프로필_이미지(final MockMultipartFile profileImage) throws Exception {
+        // GIVEN
+        MockMultipartFile userPart = new MockMultipartFile(
+                "user",
+                "",
+                "application/json",
+                ("{ \"nickname\": \"updateNick\", " +
+                        "\"introduction\": \"introduction\" }").getBytes()
+        );
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/1")
+                .file(userPart)
+                .file(profileImage)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Invalid profile image"));
+    }
+
+    // 유효하지 않은 프로필 이미지 파일
     static Stream<MockMultipartFile> getInvalidFiles() {
         return Stream.of(
                 new MockMultipartFile("profileImage", "empty.png", "image/png", new byte[0]), // 빈 파일
