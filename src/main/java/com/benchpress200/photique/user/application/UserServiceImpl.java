@@ -18,7 +18,6 @@ import com.benchpress200.photique.user.domain.dto.UserDetailsRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailsResponse;
 import com.benchpress200.photique.user.domain.dto.UserSearchRequest;
 import com.benchpress200.photique.user.domain.dto.UserSearchResponse;
-import com.benchpress200.photique.user.domain.dto.UserUpdateRequest;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
 import jakarta.transaction.Transactional;
@@ -31,7 +30,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -73,39 +71,6 @@ public class UserServiceImpl implements UserService {
 
         // 유저상세조회 dto 반환
         return userDetailsResponse;
-    }
-
-    @Override
-    @Transactional
-    @CacheEvict(
-            value = "userDetails",
-            key = "#userUpdateRequest.userId"
-    )
-    public void updateUserDetails(final UserUpdateRequest userUpdateRequest) {
-        // 유저 조회
-        Long userId = userUpdateRequest.getUserId();
-        User user = userDomainService.findUser(userId);
-
-        // 비밀번호 업데이트
-        String newPassword = userUpdateRequest.getPassword();
-        userDomainService.updatePassword(user, newPassword);
-
-        // 닉네임 업데이트
-        String newNickname = userUpdateRequest.getNickname();
-        userDomainService.updateNickname(user, newNickname);
-
-        // 한 줄 소개 업데이트
-        String newIntroduction = userUpdateRequest.getIntroduction();
-        userDomainService.updateIntroduction(user, newIntroduction);
-
-        // 프로필 이미지 업데이트
-        String oldPath = user.getProfileImage();
-        MultipartFile newProfileImage = userUpdateRequest.getProfileImage();
-        String updatedProfileImageUrl = imageDomainService.update(newProfileImage, oldPath, profileImagePath);
-        userDomainService.updateProfileImage(user, updatedProfileImageUrl);
-
-        // 업데이트 시간 마킹
-        userDomainService.markAsUpdated(user);
     }
 
     @Override

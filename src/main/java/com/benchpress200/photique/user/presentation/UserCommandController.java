@@ -4,12 +4,15 @@ import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserCommandService;
 import com.benchpress200.photique.user.application.command.JoinCommand;
+import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
 import com.benchpress200.photique.user.presentation.request.JoinRequest;
+import com.benchpress200.photique.user.presentation.request.UpdateUserDetailsRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,28 +28,31 @@ public class UserCommandController implements UserCommandControllerDocs {
     @Override
     public ResponseEntity<?> join(
             @RequestPart("user") @Valid final JoinRequest joinRequest,
-            @RequestPart(value = "profileImage", required = false) final MultipartFile profileImages
+            @RequestPart(value = "profileImage", required = false) final MultipartFile profileImage
     ) {
-        JoinCommand joinCommand = joinRequest.toCommand(profileImages);
+        JoinCommand joinCommand = joinRequest.toCommand(profileImage);
         userCommandService.join(joinCommand);
-        
+
         return ResponseHandler.handleResponse(
                 HttpStatus.CREATED,
                 "Join completed"
         );
     }
 
-//    @Auth
-//    @OwnResource
-//    @PatchMapping(URL.USER_DATA)
-//    public ApiSuccessResponse<?> updateUserDetails(
-//            @PathVariable("userId") final Long userId,
-//            @ModelAttribute @Valid final UserUpdateRequest userUpdateRequest
-//    ) {
-//        userUpdateRequest.withUserId(userId);
-//        userService.updateUserDetails(userUpdateRequest);
-//        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
-//    }
+    @Override
+    public ResponseEntity<?> updateUserDetails(
+            @PathVariable("userId") final Long userId,
+            @RequestPart("user") @Valid final UpdateUserDetailsRequest updateUserDetailsRequest,
+            @RequestPart(value = "profileImage", required = false) final MultipartFile profileImage
+    ) {
+        UpdateUserDetailsCommand updateUserDetailsCommand = updateUserDetailsRequest.toCommand(userId, profileImage);
+        userCommandService.updateUserDetails(updateUserDetailsCommand);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NO_CONTENT,
+                "User details updated"
+        );
+    }
 //
 //    @Auth
 //    @OwnResource

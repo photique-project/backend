@@ -6,6 +6,8 @@ import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNo
 import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
 import com.benchpress200.photique.image.domain.ImageUploaderPort;
 import com.benchpress200.photique.user.application.command.JoinCommand;
+import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
+import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
@@ -82,7 +84,39 @@ public class UserCommandServiceImpl implements UserCommandService {
                 .introduction(newUser.getIntroduction())
                 .createdAt(newUser.getCreatedAt())
                 .build();
-        
+
         userSearchRepository.save(userSearch);
+    }
+
+
+    @Transactional
+    public void updateUserDetails(final UpdateUserDetailsCommand updateUserDetailsCommand) {
+        // 유저 조회
+        Long userId = updateUserDetailsCommand.getUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        // 닉네임 업데이트
+        String newNickname = updateUserDetailsCommand.getNickname();
+        user.updateNickname(newNickname);
+
+        // 한 줄 소개 업데이트
+        String newIntroduction = updateUserDetailsCommand.getIntroduction();
+        user.updateIntroduction(newIntroduction);
+
+        // 프로필 이미지 업데이트
+        String oldPath = user.getProfileImage();
+        MultipartFile newProfileImage = updateUserDetailsCommand.getProfileImage();
+        String uploadedImageUrl = null;
+
+        // 업데이트 이미지 설정헀다면 S3 업로드
+        if (newProfileImage != null) {
+            uploadedImageUrl = imageUploaderPort.update(newProfileImage, oldPath, profileImagePath);
+
+            // 이미 이미지는 S3에 올라갔으니 롤백 감지하면 S3 이미지 삭제처리하도록 이벤트 발행
+            eventPublisher.publishEvent(new DeleteProfileImageEvent(uploadedImageUrl));
+        }
+
+        user.updateProfileImage(uploadedImageUrl);
     }
 }

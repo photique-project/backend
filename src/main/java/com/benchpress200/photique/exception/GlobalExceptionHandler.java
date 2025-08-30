@@ -6,6 +6,7 @@ import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNo
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.image.domain.exception.ImageUploaderFileWriteException;
 import com.benchpress200.photique.image.domain.exception.S3UploadException;
+import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -108,6 +109,17 @@ public class GlobalExceptionHandler {
         return ResponseHandler.handleResponse(
                 HttpStatus.BAD_REQUEST,
                 sb.toString()
+        );
+    }
+
+    // 전달받은 id를 가진 유저 찾지 못했을 때 예외 처리 응답
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<?> handleUserNotFoundException(final UserNotFoundException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NOT_FOUND,
+                errorMessage
         );
     }
 }
