@@ -7,6 +7,7 @@ import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
 import com.benchpress200.photique.image.domain.ImageUploaderPort;
 import com.benchpress200.photique.user.application.command.JoinCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
+import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
@@ -118,5 +119,18 @@ public class UserCommandServiceImpl implements UserCommandService {
         }
 
         user.updateProfileImage(uploadedImageUrl);
+    }
+
+    @Transactional
+    public void updateUserPassword(final UpdateUserPasswordCommand updateUserPasswordCommand) {
+        // 유저 조회
+        Long userId = updateUserPasswordCommand.getUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        // 비밀번호 업데이트
+        String password = updateUserPasswordCommand.getPassword();
+        String encodedPassword = passwordEncoderPort.encode(password);
+        user.updatePassword(encodedPassword);
     }
 }

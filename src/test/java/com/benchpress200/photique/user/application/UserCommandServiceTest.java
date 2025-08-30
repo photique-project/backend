@@ -8,11 +8,13 @@ import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
 import com.benchpress200.photique.image.domain.ImageUploaderPort;
 import com.benchpress200.photique.user.application.command.JoinCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
+import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
+import com.benchpress200.photique.user.domain.port.PasswordEncoderPort;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
 import com.benchpress200.photique.user.domain.repository.UserSearchRepository;
 import java.util.Optional;
@@ -49,6 +51,9 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
     @Autowired
     UserCommandService userCommandService;
+
+    @Autowired
+    PasswordEncoderPort passwordEncoderPort;
 
     Long testUserId;
 
@@ -403,5 +408,34 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
         Assertions.assertThat(updatedUser.get().getIntroduction()).isNotEqualTo(updateIntroduction);
         Assertions.assertThat(updatedUser.get().getProfileImage()).isEqualTo(originalUser.get().getProfileImage());
         Assertions.assertThat(updatedUser.get().getProfileImage()).isNotEqualTo(updateProfileImageUrl);
+    }
+
+    @Test
+    @DisplayName("updateUserPassword 커밋 테스트")
+    void updateUserPassword_커밋_테스트() {
+        // GIVEN
+        Optional<User> originalUser = userRepository.findById(testUserId);
+        String updatePassword = "updatePassword";
+
+        UpdateUserPasswordCommand updateUserPasswordCommand = UpdateUserPasswordCommand.builder()
+                .userId(testUserId)
+                .password(updatePassword)
+                .build();
+
+        // WHEN
+        userCommandService.updateUserPassword(updateUserPasswordCommand);
+        Optional<User> updatedUser = userRepository.findById(testUserId);
+
+        // THEN
+        Assertions.assertThat(originalUser.isPresent()).isTrue();
+        Assertions.assertThat(updatedUser.isPresent()).isTrue();
+        Assertions.assertThat(originalUser.get().getPassword()).isNotEqualTo(updatedUser.get().getPassword());
+        Assertions.assertThat(passwordEncoderPort.matches(updatePassword, updatedUser.get().getPassword())).isTrue();
+    }
+
+    @Test
+    @DisplayName("updateUserPassword 롤백 테스트 - 유저 조회 실패")
+    void updateUserPassword_롤백_테스트_유저_조회_실패() {
+        
     }
 }

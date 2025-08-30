@@ -5,14 +5,17 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserCommandService;
 import com.benchpress200.photique.user.application.command.JoinCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
+import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
 import com.benchpress200.photique.user.presentation.request.JoinRequest;
 import com.benchpress200.photique.user.presentation.request.UpdateUserDetailsRequest;
+import com.benchpress200.photique.user.presentation.request.UpdateUserPasswordRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,6 +56,20 @@ public class UserCommandController implements UserCommandControllerDocs {
                 "User details updated"
         );
     }
+
+    @Override
+    public ResponseEntity<?> updateUserPassword(
+            @PathVariable("userId") final Long userId,
+            @RequestBody @Valid final UpdateUserPasswordRequest updateUserPasswordRequest
+    ) {
+        UpdateUserPasswordCommand updateUserPasswordCommand = updateUserPasswordRequest.toCommand(userId);
+        userCommandService.updateUserPassword(updateUserPasswordCommand);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NO_CONTENT,
+                "User password updated"
+        );
+    }
 //
 //    @Auth
 //    @OwnResource
@@ -71,4 +88,5 @@ public class UserCommandController implements UserCommandControllerDocs {
 //        userService.resetPassword(resetPasswordRequest);
 //        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
 //    }
+    // TODO: 비밀번호만 업데이트하는 API도 추가
 }
