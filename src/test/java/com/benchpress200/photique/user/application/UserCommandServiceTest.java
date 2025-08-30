@@ -358,7 +358,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
         // WHEN and THEN
         Assertions.assertThatThrownBy(() -> userCommandService.updateUserDetails(updateUserDetailsCommand))
                 .isInstanceOf(UserNotFoundException.class);
-        Mockito.reset(userRepository);
         Optional<User> updatedUser = userRepository.findById(testUserId);
 
         // THEN
@@ -436,6 +435,23 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @Test
     @DisplayName("updateUserPassword 롤백 테스트 - 유저 조회 실패")
     void updateUserPassword_롤백_테스트_유저_조회_실패() {
-        
+        // GIVEN
+        Optional<User> originalUser = userRepository.findById(testUserId);
+        String updatePassword = "updatePassword";
+
+        UpdateUserPasswordCommand updateUserPasswordCommand = UpdateUserPasswordCommand.builder()
+                .userId(-1 * testUserId) // 없는 id 가진 유저 데이터 조회하도록
+                .password(updatePassword)
+                .build();
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> userCommandService.updateUserPassword(updateUserPasswordCommand))
+                .isInstanceOf(UserNotFoundException.class);
+        Optional<User> updatedUser = userRepository.findById(testUserId);
+
+        // THEN
+        Assertions.assertThat(originalUser.isPresent()).isTrue();
+        Assertions.assertThat(updatedUser.isPresent()).isTrue();
+        Assertions.assertThat(originalUser.get().getPassword()).isEqualTo(updatedUser.get().getPassword());
     }
 }
