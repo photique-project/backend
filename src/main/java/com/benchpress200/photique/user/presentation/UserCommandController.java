@@ -77,7 +77,7 @@ public class UserCommandController implements UserCommandControllerDocs {
 
     @PatchMapping(URL.PASSWORD)
     public ResponseEntity<?> resetUserPassword(
-            @RequestBody final ResetUserPasswordRequest resetUserPasswordRequest
+            @RequestBody @Valid final ResetUserPasswordRequest resetUserPasswordRequest
     ) {
         ResetUserPasswordCommand resetUserPasswordCommand = resetUserPasswordRequest.toCommand();
         userCommandService.resetUserPassword(resetUserPasswordCommand);
