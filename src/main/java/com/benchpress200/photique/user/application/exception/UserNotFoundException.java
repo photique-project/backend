@@ -2,7 +2,11 @@ package com.benchpress200.photique.user.application.exception;
 
 public class UserNotFoundException extends RuntimeException {
 
-    public UserNotFoundException(Long userId) {
+    public UserNotFoundException(final Long userId) {
         super("User with ID [" + userId + "] not found");
+    }
+
+    public UserNotFoundException(final String email) {
+        super("User with email [" + email + "] not found");
     }
 }

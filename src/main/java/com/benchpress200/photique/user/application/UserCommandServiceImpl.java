@@ -6,6 +6,7 @@ import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNo
 import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
 import com.benchpress200.photique.image.domain.ImageUploaderPort;
 import com.benchpress200.photique.user.application.command.JoinCommand;
+import com.benchpress200.photique.user.application.command.ResetUserPasswordCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
@@ -130,6 +131,22 @@ public class UserCommandServiceImpl implements UserCommandService {
 
         // 비밀번호 업데이트
         String password = updateUserPasswordCommand.getPassword();
+        String encodedPassword = passwordEncoderPort.encode(password);
+        user.updatePassword(encodedPassword);
+    }
+
+
+    // 여기서 @Transactional이 없다면, 유저 엔티티를 조회한 후 엔티티 매니저를 close하기 떄문에
+    // 변경 감지가 동작하지 않고 update 쿼리가 나가지 않음
+    @Transactional
+    public void resetUserPassword(final ResetUserPasswordCommand resetUserPasswordCommand) {
+        // 유저 조회
+        String email = resetUserPasswordCommand.getEmail();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        // 비밀번호 업데이트
+        String password = resetUserPasswordCommand.getPassword();
         String encodedPassword = passwordEncoderPort.encode(password);
         user.updatePassword(encodedPassword);
     }

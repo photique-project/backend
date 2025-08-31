@@ -4,9 +4,12 @@ import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserCommandService;
 import com.benchpress200.photique.user.application.command.JoinCommand;
+import com.benchpress200.photique.user.application.command.ResetUserPasswordCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
+import com.benchpress200.photique.user.presentation.constant.ResponseMessage;
 import com.benchpress200.photique.user.presentation.request.JoinRequest;
+import com.benchpress200.photique.user.presentation.request.ResetUserPasswordRequest;
 import com.benchpress200.photique.user.presentation.request.UpdateUserDetailsRequest;
 import com.benchpress200.photique.user.presentation.request.UpdateUserPasswordRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +42,7 @@ public class UserCommandController implements UserCommandControllerDocs {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.CREATED,
-                "Join completed"
+                ResponseMessage.JOIN_COMPLETED
         );
     }
 
@@ -53,7 +57,7 @@ public class UserCommandController implements UserCommandControllerDocs {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.NO_CONTENT,
-                "User details updated"
+                ResponseMessage.USER_DETAILS_UPDATED
         );
     }
 
@@ -67,10 +71,23 @@ public class UserCommandController implements UserCommandControllerDocs {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.NO_CONTENT,
-                "User password updated"
+                ResponseMessage.USER_PASSWORD_UPDATED
         );
     }
-//
+
+    @PatchMapping(URL.PASSWORD)
+    public ResponseEntity<?> resetUserPassword(
+            @RequestBody final ResetUserPasswordRequest resetUserPasswordRequest
+    ) {
+        ResetUserPasswordCommand resetUserPasswordCommand = resetUserPasswordRequest.toCommand();
+        userCommandService.resetUserPassword(resetUserPasswordCommand);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NO_CONTENT,
+                ResponseMessage.USER_PASSWORD_UPDATED
+        );
+    }
+
 //    @Auth
 //    @OwnResource
 //    @DeleteMapping(URL.USER_DATA)
@@ -81,12 +98,4 @@ public class UserCommandController implements UserCommandControllerDocs {
 //        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
 //    }
 //
-//    @PatchMapping(URL.PASSWORD)
-//    public ApiSuccessResponse<?> resetPassword(
-//            @RequestBody final ResetPasswordRequest resetPasswordRequest
-//    ) {
-//        userService.resetPassword(resetPasswordRequest);
-//        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
-//    }
-    // TODO: 비밀번호만 업데이트하는 API도 추가
 }

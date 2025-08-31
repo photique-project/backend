@@ -7,6 +7,7 @@ import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNo
 import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
 import com.benchpress200.photique.image.domain.ImageUploaderPort;
 import com.benchpress200.photique.user.application.command.JoinCommand;
+import com.benchpress200.photique.user.application.command.ResetUserPasswordCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
@@ -57,10 +58,12 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
     Long testUserId;
 
+    static final String testUserEmail = "test@google.com";
+
     @BeforeEach
     void setUp() {
         User user = User.builder()
-                .email("test@google.com")
+                .email(testUserEmail)
                 .password("password")
                 .nickname("dummy")
                 .profileImage("profileImageUrl")
@@ -448,6 +451,52 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
         Assertions.assertThatThrownBy(() -> userCommandService.updateUserPassword(updateUserPasswordCommand))
                 .isInstanceOf(UserNotFoundException.class);
         Optional<User> updatedUser = userRepository.findById(testUserId);
+
+        // THEN
+        Assertions.assertThat(originalUser.isPresent()).isTrue();
+        Assertions.assertThat(updatedUser.isPresent()).isTrue();
+        Assertions.assertThat(originalUser.get().getPassword()).isEqualTo(updatedUser.get().getPassword());
+    }
+
+    @Test
+    @DisplayName("resetUserPassword 커밋 테스트")
+    void resetUserPassword_커밋_테스트() {
+        // GIVEN
+        Optional<User> originalUser = userRepository.findByEmail(testUserEmail);
+        String updatePassword = "updatePassword";
+
+        ResetUserPasswordCommand resetUserPasswordCommand = ResetUserPasswordCommand.builder()
+                .email(testUserEmail)
+                .password(updatePassword)
+                .build();
+
+        // WHEN
+        userCommandService.resetUserPassword(resetUserPasswordCommand);
+        Optional<User> updatedUser = userRepository.findByEmail(testUserEmail);
+
+        // THEN
+        Assertions.assertThat(originalUser.isPresent()).isTrue();
+        Assertions.assertThat(updatedUser.isPresent()).isTrue();
+        Assertions.assertThat(originalUser.get().getPassword()).isNotEqualTo(updatedUser.get().getPassword());
+        Assertions.assertThat(passwordEncoderPort.matches(updatePassword, updatedUser.get().getPassword())).isTrue();
+    }
+
+    @Test
+    @DisplayName("resetUserPassword 롤백 테스트 - 유저 조회 실패")
+    void resetUserPassword_롤백_테스트_유저_조회_실패() {
+        // GIVEN
+        Optional<User> originalUser = userRepository.findByEmail(testUserEmail);
+        String updatePassword = "updatePassword";
+
+        ResetUserPasswordCommand resetUserPasswordCommand = ResetUserPasswordCommand.builder()
+                .email(testUserEmail + "dummy")
+                .password(updatePassword)
+                .build();
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> userCommandService.resetUserPassword(resetUserPasswordCommand))
+                .isInstanceOf(UserNotFoundException.class);
+        Optional<User> updatedUser = userRepository.findByEmail(testUserEmail);
 
         // THEN
         Assertions.assertThat(originalUser.isPresent()).isTrue();

@@ -1,6 +1,5 @@
 package com.benchpress200.photique.user.application;
 
-import com.benchpress200.photique.auth.domain.AuthDomainService;
 import com.benchpress200.photique.exhibition.domain.ExhibitionCommentDomainService;
 import com.benchpress200.photique.exhibition.domain.ExhibitionDomainService;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
@@ -13,7 +12,6 @@ import com.benchpress200.photique.user.application.cache.UserCacheService;
 import com.benchpress200.photique.user.domain.FollowDomainService;
 import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.dto.NicknameValidationRequest;
-import com.benchpress200.photique.user.domain.dto.ResetPasswordRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailsRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailsResponse;
 import com.benchpress200.photique.user.domain.dto.UserSearchRequest;
@@ -23,7 +21,6 @@ import com.benchpress200.photique.user.domain.entity.UserSearch;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
@@ -34,12 +31,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    @Value("${cloud.aws.s3.path.profile}")
-    private String profileImagePath;
-
     private final UserDomainService userDomainService;
     private final FollowDomainService followDomainService;
-    private final AuthDomainService authDomainService;
     private final ImageDomainService imageDomainService;
     private final SingleWorkDomainService singleWorkDomainService;
     private final SingleWorkCommentDomainService singleWorkCommentDomainService;
@@ -96,7 +89,6 @@ public class UserServiceImpl implements UserService {
         return new PageImpl<>(userSearchResponseList, pageable, userSearchPage.getTotalElements());
     }
 
-    @Override
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "userDetails", key = "#userId"),
@@ -165,20 +157,5 @@ public class UserServiceImpl implements UserService {
 
         // 유저삭제
         userDomainService.deleteUser(user);
-    }
-
-    @Override
-    @Transactional
-    public void resetPassword(final ResetPasswordRequest resetPasswordRequest) {
-        // 이메일 인증완료 되었는지 확인
-        String email = resetPasswordRequest.getEmail();
-        authDomainService.isValidUser(email);
-
-        // 유저조회
-        User user = userDomainService.findUser(email);
-
-        // 비밀번호 업데이트
-        String newPassword = resetPasswordRequest.getPassword();
-        userDomainService.updatePassword(user, newPassword);
     }
 }

@@ -372,6 +372,76 @@ public class UserCommandControllerTest {
                 .andExpect(jsonPath("$.message").value("Invalid profile image"));
     }
 
+
+    @Test
+    @DisplayName("updateUserPassword 성공 테스트")
+    void updateUserPassword_성공_테스트() throws Exception {
+        // GIVEN
+        RequestBuilder request = MockMvcRequestBuilders
+                .patch(URL.BASE_URL + URL.USER_DOMAIN + "/1" + URL.PASSWORD)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content("{\"password\":\"newPassword12!@\"}");
+
+        Mockito.doNothing().when(userCommandService).updateUserPassword(Mockito.any());
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$.status").value(204))
+                .andExpect(jsonPath("$.message").value("User password updated"));
+    }
+
+    @Test
+    @DisplayName("updateUserPassword 실패 테스트 - 유효하지 않은 경로 변수")
+    void updateUserPassword_실패_테스트_유효하지_않은_경로_변수() throws Exception {
+        // GIVEN
+        RequestBuilder request = MockMvcRequestBuilders
+                .patch(URL.BASE_URL + URL.USER_DOMAIN + "/a" + URL.PASSWORD)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content("{\"password\":\"newPassword12!@\"}");
+
+        Mockito.doNothing().when(userCommandService).updateUserPassword(Mockito.any());
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Invalid path variable type"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "",                // 빈 문자열
+            " ",               // 공백
+            "12345678",        // 숫자만 있고 문자/특수문자 없음
+            "password",        // 문자만 있고 숫자/특수문자 없음
+            "password1",       // 문자+숫자만 있고 특수문자 없음
+            "!!!!!!!!",        // 특수문자만 있고 숫자/문자 없음
+            "pass!@#$",        // 문자+특수문자만 있고 숫자 없음
+            "1234!@#$",        // 숫자+특수문자만 있고 문자 없음
+            "pa1!",            // 길이가 8 미만 (4자리)
+            "PasswordPassword" // 8자 이상이지만 숫자/특수문자 없음
+    })
+    @DisplayName("updateUserPassword 실패 테스트 - 유효하지 않은 비밀번호")
+    void updateUserPassword_실패_테스트_유효하지_않은_비밀번호(final String invalidPassword) throws Exception {
+        // GIVEN
+        RequestBuilder request = MockMvcRequestBuilders
+                .patch(URL.BASE_URL + URL.USER_DOMAIN + "/1" + URL.PASSWORD)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content("{\"password\":\"" + invalidPassword + "\"}");
+
+        Mockito.doNothing().when(userCommandService).updateUserPassword(Mockito.any());
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Invalid password"));
+    }
+
     // 유효하지 않은 프로필 이미지 파일
     static Stream<MockMultipartFile> getInvalidFiles() {
         return Stream.of(

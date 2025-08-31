@@ -3,6 +3,7 @@ package com.benchpress200.photique.user.presentation;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseBody;
 import com.benchpress200.photique.user.presentation.request.JoinRequest;
+import com.benchpress200.photique.user.presentation.request.ResetUserPasswordRequest;
 import com.benchpress200.photique.user.presentation.request.UpdateUserDetailsRequest;
 import com.benchpress200.photique.user.presentation.request.UpdateUserPasswordRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -272,8 +273,74 @@ public interface UserCommandControllerDocs {
     );
 
     /**
-     * 비밀번호 찾기 API
+     * 비밀번호 찾기(재설정) API
      */
+    @PatchMapping(
+            path = URL.PASSWORD,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(
+            summary = "유저 비밀번호 재설정",
+            description = "유저 비밀번호를 재설정합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "유저 비밀번호 재설정 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 204, \"message\": \"User password updated\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "유효하지 않은 파라미터",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 400, \"message\": \"Invalid {}\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "존재하지 않는 유저",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 404, \"message\": \"User with email [email] not found\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 에러",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 500, \"message\": \"Server Error\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            )
+    })
+    ResponseEntity<?> resetUserPassword(
+            @Parameter(description = "유저 이메일과 재설정 비밀번호") ResetUserPasswordRequest resetUserPasswordRequest
+    );
 
     /**
      * 회원탈퇴 API

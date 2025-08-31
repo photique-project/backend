@@ -1,6 +1,7 @@
 package com.benchpress200.photique.user.application;
 
 import com.benchpress200.photique.user.application.command.JoinCommand;
+import com.benchpress200.photique.user.application.command.ResetUserPasswordCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
 
@@ -10,4 +11,6 @@ public interface UserCommandService {
     void updateUserDetails(UpdateUserDetailsCommand updateUserDetailsCommand);
 
     void updateUserPassword(UpdateUserPasswordCommand updateUserPasswordCommand);
+
+    void resetUserPassword(ResetUserPasswordCommand resetUserPasswordCommand);
 }
