@@ -13,4 +13,6 @@ public interface UserCommandService {
     void updateUserPassword(UpdateUserPasswordCommand updateUserPasswordCommand);
 
     void resetUserPassword(ResetUserPasswordCommand resetUserPasswordCommand);
+
+    void withdraw(Long userId);
 }

@@ -13,12 +13,17 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "User API", description = "유저 도메인 API 입니다.")
+@RequestMapping(URL.BASE_URL + URL.USER_DOMAIN)
 public interface UserCommandControllerDocs {
     /**
      * 회원가입 API
@@ -345,4 +350,66 @@ public interface UserCommandControllerDocs {
     /**
      * 회원탈퇴 API
      */
+    @DeleteMapping(URL.USER_DATA)
+    @Operation(
+            summary = "회원 탈퇴",
+            description = "회원 탈퇴를 진행합니다. 유저와 관련된 모든 데이터가 영구적으로 삭제됩니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "회원 탈퇴 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 204, \"message\": \"User account has been deleted successfully\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "유효하지 않은 파라미터",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 400, \"message\": \"Invalid {}\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "존재하지 않는 유저",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 404, \"message\": \"User with id [id] not found\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 에러",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 500, \"message\": \"Server Error\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            )
+    })
+    ResponseEntity<?> withdraw(
+            @Parameter(description = "유저 id") Long userId
+    );
 }

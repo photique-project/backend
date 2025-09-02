@@ -1,6 +1,5 @@
 package com.benchpress200.photique.user.presentation;
 
-import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserCommandService;
 import com.benchpress200.photique.user.application.command.JoinCommand;
@@ -12,22 +11,17 @@ import com.benchpress200.photique.user.presentation.request.JoinRequest;
 import com.benchpress200.photique.user.presentation.request.ResetUserPasswordRequest;
 import com.benchpress200.photique.user.presentation.request.UpdateUserDetailsRequest;
 import com.benchpress200.photique.user.presentation.request.UpdateUserPasswordRequest;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "User API", description = "유저 도메인 API 입니다.")
 @RestController
-@RequestMapping(URL.BASE_URL + URL.USER_DOMAIN)
 @RequiredArgsConstructor
 public class UserCommandController implements UserCommandControllerDocs {
     private final UserCommandService userCommandService;
@@ -75,7 +69,7 @@ public class UserCommandController implements UserCommandControllerDocs {
         );
     }
 
-    @PatchMapping(URL.PASSWORD)
+    @Override
     public ResponseEntity<?> resetUserPassword(
             @RequestBody @Valid final ResetUserPasswordRequest resetUserPasswordRequest
     ) {
@@ -88,14 +82,13 @@ public class UserCommandController implements UserCommandControllerDocs {
         );
     }
 
-//    @Auth
-//    @OwnResource
-//    @DeleteMapping(URL.USER_DATA)
-//    public ApiSuccessResponse<?> withdraw(
-//            @PathVariable("userId") final Long userId
-//    ) {
-//        userService.withdraw(userId);
-//        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
-//    }
-//
+    @Override
+    public ResponseEntity<?> withdraw(@PathVariable("userId") final Long userId) {
+        userCommandService.withdraw(userId);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NO_CONTENT,
+                ResponseMessage.WITHDRAW_COMPLETED
+        );
+    }
 }
