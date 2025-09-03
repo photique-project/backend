@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class DeleteProfileImageEvent {
-    private String profileImageUrl;
+public class UserSearchSaveRollbackEvent {
+    private Long userId;
 }

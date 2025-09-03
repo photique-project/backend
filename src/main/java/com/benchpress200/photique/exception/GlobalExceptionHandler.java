@@ -5,6 +5,7 @@ import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeEx
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.image.domain.exception.ImageUploaderFileWriteException;
+import com.benchpress200.photique.image.domain.exception.S3DeleteException;
 import com.benchpress200.photique.image.domain.exception.S3UploadException;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
@@ -124,12 +125,26 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // 경로 변수로 전달한 값의 타입 오류 예외 처리 응답
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<?> handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.BAD_REQUEST,
                 "Invalid path variable type"
+        );
+    }
+
+    @ExceptionHandler(S3DeleteException.class)
+    public ResponseEntity<?> handleS3DeleteException(final S3DeleteException s3DeleteException) {
+        String errorMessage = s3DeleteException.getMessage();
+        String imageUrl = s3DeleteException.getImageUrl();
+        log.error(errorMessage);
+        log.error("[{}] delete failed", imageUrl);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                SERVER_ERROR_MESSAGE
         );
     }
 }

@@ -5,7 +5,7 @@ import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeEx
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
 import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
 import com.benchpress200.photique.image.domain.ImageUploaderPort;
-import com.benchpress200.photique.singlework.domain.repository.SingleWorkRepository;
+import com.benchpress200.photique.image.domain.event.ImageUploadRollbackEvent;
 import com.benchpress200.photique.user.application.command.JoinCommand;
 import com.benchpress200.photique.user.application.command.ResetUserPasswordCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
@@ -15,7 +15,7 @@ import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
-import com.benchpress200.photique.user.domain.event.DeleteProfileImageEvent;
+import com.benchpress200.photique.user.domain.event.UserSearchSaveRollbackEvent;
 import com.benchpress200.photique.user.domain.port.PasswordEncoderPort;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
 import com.benchpress200.photique.user.domain.repository.UserSearchRepository;
@@ -38,14 +38,13 @@ public class UserCommandServiceImpl implements UserCommandService {
     private final ImageUploaderPort imageUploaderPort;
     private final UserRepository userRepository;
     private final UserSearchRepository userSearchRepository;
-    private final SingleWorkRepository singleWorkRepository;
 
     @Transactional
     public void join(final JoinCommand joinCommand) {
         // 이메일 인증 완료 여부 확인
         String email = joinCommand.getEmail();
 
-        // 인증코드 있는지 확인
+        // 인증 코드 있는지 확인
         AuthCode authCode = authCodeRepository.findById(email)
                 .orElseThrow(MailAuthenticationCodeExpirationException::new);
 
@@ -67,7 +66,7 @@ public class UserCommandServiceImpl implements UserCommandService {
             uploadedImageUrl = imageUploaderPort.upload(profileImage, profileImagePath);
 
             // 이미 이미지는 S3에 올라갔으니 롤백감지하면 S3 이미지 삭제처리하도록 이벤트 발행
-            eventPublisher.publishEvent(new DeleteProfileImageEvent(uploadedImageUrl));
+            eventPublisher.publishEvent(new ImageUploadRollbackEvent(uploadedImageUrl));
         }
 
         // 새 유저 엔티티 변환 및 저장
@@ -78,9 +77,11 @@ public class UserCommandServiceImpl implements UserCommandService {
                 Role.USER
         );
 
+        // 유저 엔티티의 id 생성 전략이 DB의 Auto Increment이기 때문에 즉시 쿼리 실행됨
+        // 이후 트랜잭션이 끝나는 시점에 commit만 나감
         User newUser = userRepository.save(user);
 
-        // 마지막으로 ES 저장해서 ES 저장 실패시 다 롤백 되도록
+        // ES에 저장할 유저 검색 엔티티 생성
         UserSearch userSearch = UserSearch.builder()
                 .id(newUser.getId())
                 .profileImage(newUser.getProfileImage())
@@ -90,6 +91,10 @@ public class UserCommandServiceImpl implements UserCommandService {
                 .build();
 
         userSearchRepository.save(userSearch);
+
+        // ES 저장 성공하면 이후에 커밋 이벤트 장애 발생하면 롤백하도록 이벤트 발행
+        eventPublisher.publishEvent(new UserSearchSaveRollbackEvent(newUser.getId()));
+        // TODO: 테스트 코드 확인할 차례
     }
 
 
@@ -98,6 +103,8 @@ public class UserCommandServiceImpl implements UserCommandService {
         // 유저 조회
         Long userId = updateUserDetailsCommand.getUserId();
         User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        UserSearch userSearch = userSearchRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 닉네임 업데이트
@@ -118,10 +125,12 @@ public class UserCommandServiceImpl implements UserCommandService {
             uploadedImageUrl = imageUploaderPort.update(newProfileImage, oldPath, profileImagePath);
 
             // 이미 이미지는 S3에 올라갔으니 롤백 감지하면 S3 이미지 삭제처리하도록 이벤트 발행
-            eventPublisher.publishEvent(new DeleteProfileImageEvent(uploadedImageUrl));
+            eventPublisher.publishEvent(new ImageUploadRollbackEvent(uploadedImageUrl));
         }
 
         user.updateProfileImage(uploadedImageUrl);
+        // TODO: 검색 데이터에도 저장해야함, NULL을 줘서 변경안해는 것도 가능하도록
+        // es롤백도 보장하도록
     }
 
     @Transactional
@@ -159,69 +168,12 @@ public class UserCommandServiceImpl implements UserCommandService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        // 유저 이미지 삭제
-        String profileImage = user.getProfileImage();
-        if (profileImage != null) {
-            imageUploaderPort.delete(profileImage);
-        }
-        // TODO: 다른 도메인 리팩토링 & 테스트 완료하고 마지막에 다시 작성
-        // 페이지네이션으로 조회해서
-//
-//        // 우선 S3 업로드 이미지 삭제를 위해 순차적으로 조회하면서 배치 처리 해야함
-//        List<SingleWork> singleWorks = singleWorkRepository.findByWriter(user);
-//        // 유저작성 단일작품 조회
-//        List<SingleWork> singleWorks = singleWorkDomainService.findSingleWork(user);
-//
-//        // 단일작품 이미지 삭제
-//        List<String> singleWorksImage = singleWorks.stream().
-//                map(SingleWork::getImage)
-//                .toList();
-//        singleWorksImage.forEach(imageDomainService::delete);
-//
-//        // 단일작품 좋아요 데이터는 두 테이블을 참조하기 때문에 따로 삭제
-//        singleWorks.forEach(singleWorkDomainService::deleteLike);
-//
-//        // 마찬가지로 단일작품 댓글도 두 테이블을 참조하기 때문에 따로 삭제
-//        singleWorks.forEach(singleWorkCommentDomainService::deleteComment);
-//
-//        // 단일작품 이미지 따로 삭제했으면 단일작품 삭제하면 나머지 cascade 로 모두삭제됨
-//        singleWorks.forEach(singleWorkDomainService::deleteSingleWork);
-//
-//        // 유저작성 전시회 조회
-//        List<Exhibition> exhibitions = exhibitionDomainService.findExhibition(user);
-//
-//        // 전시회 순회하면서 작품 리스트 찾고 이미지 딜리트
-//        exhibitions.forEach(exhibition -> {
-//            List<ExhibitionWork> exhibitionWorks = exhibitionDomainService.findExhibitionWork(exhibition);
-//            exhibitionWorks.forEach(exhibitionWork -> imageDomainService.delete(exhibitionWork.getImage()));
-//            exhibitionDomainService.deleteExhibitionWork(exhibition);
-//        });
-//
-//        // 전시회 좋아요 데이터는 두 테이블을 참조하기 때문에 따로 삭제
-//        exhibitions.forEach(exhibitionDomainService::deleteLike);
-//
-//        // 전시회 북마크 데이터는 두 테이블을 참조하기 때문에 따로 삭제
-//        exhibitions.forEach(exhibitionDomainService::deleteBookmark);
-//
-//        // 전시회 댓글 데이터는 두 테이블을 참조하기 때문에 따로 삭제
-//        exhibitions.forEach(exhibitionCommentDomainService::deleteComment);
-//
-//        // 전시회 삭제 - cascade
-//        exhibitions.forEach(exhibitionDomainService::deleteExhibition);
-//
-//        // 유저가 작성한 단일작품, 전시회 좋아요, 북마크, 댓글 삭제
-//        singleWorkDomainService.deleteLike(user);
-//        singleWorkCommentDomainService.deleteComment(user);
-//
-//        exhibitionDomainService.deleteLike(user);
-//        exhibitionDomainService.deleteBookmark(user);
-//        exhibitionCommentDomainService.deleteComment(user);
-//
-//        // 유저관련 팔로우 팔로잉 데이터 삭제
-//        // 유저 엔티티전달하면 팔로워 랄로잉모두속하는거삭제
-//        followDomainService.deleteFollow(user);
-//
-//        // 유저삭제
-//        userDomainService.deleteUser(user);
+        // 소프트 딜리트
+        // 해당 유저 로그인 & 상세조회 불가능
+        // 해당 유저가 작성한 게시글 조회 가능
+        user.markAsDeleted();
+
+        // 유저 검색 데이터 삭제
+        userSearchRepository.deleteById(userId);
     }
 }

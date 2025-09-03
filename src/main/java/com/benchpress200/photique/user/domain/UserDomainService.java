@@ -13,7 +13,7 @@ public interface UserDomainService {
     void isDuplicatedNickname(String nickname);
 
     String encodePassword(String password);
-    
+
 
     User findUser(Long userId);
 
@@ -33,7 +33,6 @@ public interface UserDomainService {
 
     List<User> findUsersModifiedSince(LocalDateTime time);
 
-    void markAsUpdated(User user);
 
     void updateUserSearch(UserSearch userSearch);
 

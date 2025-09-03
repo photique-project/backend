@@ -65,6 +65,9 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Builder
     public User(
             final String email,
@@ -98,7 +101,7 @@ public class User {
         this.profileImage = profileImage;
     }
 
-    public void markAsUpdated() {
-        updatedAt = LocalDateTime.now();
+    public void markAsDeleted() {
+        this.deletedAt = LocalDateTime.now();
     }
 }

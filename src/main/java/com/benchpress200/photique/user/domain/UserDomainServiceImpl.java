@@ -145,11 +145,6 @@ public class UserDomainServiceImpl implements UserDomainService {
     }
 
     @Override
-    public void markAsUpdated(final User user) {
-        user.markAsUpdated();
-    }
-
-    @Override
     public void updateUserSearch(final UserSearch userSearch) {
         userSearchRepository.save(userSearch);
     }
