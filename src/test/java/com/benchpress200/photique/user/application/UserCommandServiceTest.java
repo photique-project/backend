@@ -73,6 +73,16 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
         User savedUser = userRepository.save(user);
         testUserId = savedUser.getId();
+
+        UserSearch userSearch = UserSearch.builder()
+                .id(savedUser.getId())
+                .profileImage(savedUser.getProfileImage())
+                .nickname(savedUser.getNickname())
+                .introduction(savedUser.getIntroduction())
+                .createdAt(savedUser.getCreatedAt())
+                .build();
+
+        userSearchRepository.save(userSearch);
     }
 
     @AfterEach
@@ -85,6 +95,8 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("join 커밋 테스트")
     void join_커밋_테스트() {
         // GIVEN
+        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
+        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
         String email = "example@google.com";
         String password = "password12!@";
         String nickname = "nickname";
@@ -118,6 +130,8 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("join 롤백 테스트 - 이메일 인증 코드 조회 실패")
     void join_롤백_테스트_이메일_인증_코드_조회_실패() {
         // GIVEN
+        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
+        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
         String email = "example@google.com";
         String password = "password12!@";
         String nickname = "nickname";
@@ -154,6 +168,8 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("join 롤백 테스트 - 이메일 인증 코드 미인증")
     void join_롤백_테스트_이메일_인증_코드_미인증() {
         // GIVEN
+        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
+        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
         String email = "example@google.com";
         String password = "password12!@";
         String nickname = "nickname";
@@ -190,6 +206,8 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("join 롤백 테스트 - 이미지 업로드 실패")
     void join_롤백_테스트_이미지_업로드_실패() {
         // GIVEN
+        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
+        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
         String email = "example@google.com";
         String password = "password12!@";
         String nickname = "nickname";
@@ -230,6 +248,8 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("join 롤백 테스트 - MySQL 저장 실패")
     void join_롤백_테스트_MySQL_저장_실패() {
         // GIVEN
+        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
+        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
         String email = "example@google.com";
         String password = "password12!@";
         String nickname = "nickname";
@@ -268,6 +288,8 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("join 롤백 테스트 - Elasticsearch 저장 실패")
     void join_롤백_테스트_Elasticsearch_저장_실패() {
         // GIVEN
+        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
+        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
         String email = "example@google.com";
         String password = "password12!@";
         String nickname = "nickname";
@@ -322,7 +344,7 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         Mockito.doReturn(updateProfileImageUrl).when(imageUploaderPort)
-                .update(Mockito.any(), Mockito.any(), Mockito.any());
+                .upload(Mockito.any(), Mockito.any());
 
         // WHEN
         userCommandService.updateUserDetails(updateUserDetailsCommand);
@@ -394,7 +416,7 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         Mockito.doThrow(RuntimeException.class).when(imageUploaderPort)
-                .update(Mockito.any(), Mockito.any(), Mockito.any());
+                .upload(Mockito.any(), Mockito.any());
 
         // WHEN and THEN
         Assertions.assertThatThrownBy(() -> userCommandService.updateUserDetails(updateUserDetailsCommand))
@@ -502,5 +524,59 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
         Assertions.assertThat(originalUser.isPresent()).isTrue();
         Assertions.assertThat(updatedUser.isPresent()).isTrue();
         Assertions.assertThat(originalUser.get().getPassword()).isEqualTo(updatedUser.get().getPassword());
+    }
+
+    @Test
+    @DisplayName("withdraw 커밋 테스트")
+    void withdraw_커밋_테스트() {
+        // GIVEN
+        Long userId = testUserId;
+
+        // WHEN
+        userCommandService.withdraw(userId);
+        Optional<User> deletedUser = userRepository.findById(userId);
+        Optional<UserSearch> deletedUserSearch = userSearchRepository.findById(userId);
+
+        // THEN
+        Assertions.assertThat(deletedUser.isPresent()).isTrue();
+        Assertions.assertThat(deletedUser.get().getDeletedAt()).isNotNull();
+        Assertions.assertThat(deletedUserSearch.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("withdraw 롤백 테스트 - 유저 조회 실패")
+    void withdraw_롤백_테스트_유저_조회_실패() {
+        // GIVEN
+        Long userId = -1 * testUserId;
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> userCommandService.withdraw(userId))
+                .isInstanceOf(UserNotFoundException.class);
+        Optional<User> user = userRepository.findById(testUserId);
+        Optional<UserSearch> userSearch = userSearchRepository.findById(testUserId);
+
+        // THEN
+        Assertions.assertThat(user.isPresent()).isTrue();
+        Assertions.assertThat(user.get().getDeletedAt()).isNull();
+        Assertions.assertThat(userSearch.isPresent()).isTrue();
+    }
+
+    @Test
+    @DisplayName("withdraw 롤백 테스트 - Elasticsearch 예외")
+    void withdraw_롤백_테스트_Elasticsearch_예외() {
+        // GIVEN
+        Long userId = testUserId;
+
+        // WHEN and THEN
+        Mockito.doThrow(RuntimeException.class).when(userSearchRepository).deleteById(userId);
+        Assertions.assertThatThrownBy(
+                () -> userCommandService.withdraw(userId)
+        ).isInstanceOf(RuntimeException.class);
+
+        Optional<User> user = userRepository.findById(testUserId);
+        Optional<UserSearch> userSearch = userSearchRepository.findById(testUserId);
+        Assertions.assertThat(user.isPresent()).isTrue();
+        Assertions.assertThat(user.get().getDeletedAt()).isNull();
+        Assertions.assertThat(userSearch.isPresent()).isTrue();
     }
 }

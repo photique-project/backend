@@ -28,7 +28,8 @@ public class UpdateUserDetailsRequest {
             final MultipartFile profileImage
     ) {
         // 이미지 파일 검증 로직
-        if (!ProfileImageValidator.isValid(profileImage)) {
+        // 유저 업데이트에서는 빈 파일이라면 기본값 설정을 취급
+        if (!ProfileImageValidator.isValid(profileImage) && !profileImage.isEmpty()) {
             throw new InvalidProfileImageException();
         }
 

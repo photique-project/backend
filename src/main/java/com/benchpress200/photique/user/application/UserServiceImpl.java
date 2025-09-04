@@ -1,10 +1,5 @@
 package com.benchpress200.photique.user.application;
 
-import com.benchpress200.photique.exhibition.domain.ExhibitionCommentDomainService;
-import com.benchpress200.photique.exhibition.domain.ExhibitionDomainService;
-import com.benchpress200.photique.image.domain.ImageDomainService;
-import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
-import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
 import com.benchpress200.photique.user.application.cache.UserCacheService;
 import com.benchpress200.photique.user.domain.FollowDomainService;
 import com.benchpress200.photique.user.domain.UserDomainService;
@@ -27,11 +22,6 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
     private final UserDomainService userDomainService;
     private final FollowDomainService followDomainService;
-    private final ImageDomainService imageDomainService;
-    private final SingleWorkDomainService singleWorkDomainService;
-    private final SingleWorkCommentDomainService singleWorkCommentDomainService;
-    private final ExhibitionDomainService exhibitionDomainService;
-    private final ExhibitionCommentDomainService exhibitionCommentDomainService;
     private final UserCacheService userCacheService;
 
     @Override

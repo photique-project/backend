@@ -15,7 +15,9 @@ import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.entity.UserSearch;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
+import com.benchpress200.photique.user.domain.event.UserSearchDeleteRollbackEvent;
 import com.benchpress200.photique.user.domain.event.UserSearchSaveRollbackEvent;
+import com.benchpress200.photique.user.domain.event.UserSearchUpdateRollbackEvent;
 import com.benchpress200.photique.user.domain.port.PasswordEncoderPort;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
 import com.benchpress200.photique.user.domain.repository.UserSearchRepository;
@@ -81,22 +83,14 @@ public class UserCommandServiceImpl implements UserCommandService {
         // 이후 트랜잭션이 끝나는 시점에 commit만 나감
         User newUser = userRepository.save(user);
 
-        // ES에 저장할 유저 검색 엔티티 생성
-        UserSearch userSearch = UserSearch.builder()
-                .id(newUser.getId())
-                .profileImage(newUser.getProfileImage())
-                .nickname(newUser.getNickname())
-                .introduction(newUser.getIntroduction())
-                .createdAt(newUser.getCreatedAt())
-                .build();
-
+        // ES에 저장할 유저 검색 엔티티 생성 및 저장
+        UserSearch userSearch = UserSearch.from(newUser);
         userSearchRepository.save(userSearch);
 
-        // ES 저장 성공하면 이후에 커밋 이벤트 장애 발생하면 롤백하도록 이벤트 발행
+        // 이미 insert 쿼리는 날아갔지만 commit 보내는 시점에 에러가 발생하여 롤백될 수 있으니
+        // 이 트랜잭션이 롤백됐을 때 ES에 저장한 유저 검색 데이터를 롤백할 이벤트 발행
         eventPublisher.publishEvent(new UserSearchSaveRollbackEvent(newUser.getId()));
-        // TODO: 테스트 코드 확인할 차례
     }
-
 
     @Transactional
     public void updateUserDetails(final UpdateUserDetailsCommand updateUserDetailsCommand) {
@@ -106,31 +100,48 @@ public class UserCommandServiceImpl implements UserCommandService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
         UserSearch userSearch = userSearchRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+        UserSearch oldUserSearch = UserSearch.from(user);
 
         // 닉네임 업데이트
         String newNickname = updateUserDetailsCommand.getNickname();
-        user.updateNickname(newNickname);
+
+        if (newNickname != null) { // null이면 닉네임 유지
+            user.updateNickname(newNickname);
+            userSearch.updateNickname(newNickname);
+        }
 
         // 한 줄 소개 업데이트
         String newIntroduction = updateUserDetailsCommand.getIntroduction();
-        user.updateIntroduction(newIntroduction);
 
-        // 프로필 이미지 업데이트
-        String oldPath = user.getProfileImage();
-        MultipartFile newProfileImage = updateUserDetailsCommand.getProfileImage();
-        String uploadedImageUrl = null;
-
-        // 업데이트 이미지 설정헀다면 S3 업로드
-        if (newProfileImage != null) {
-            uploadedImageUrl = imageUploaderPort.update(newProfileImage, oldPath, profileImagePath);
-
-            // 이미 이미지는 S3에 올라갔으니 롤백 감지하면 S3 이미지 삭제처리하도록 이벤트 발행
-            eventPublisher.publishEvent(new ImageUploadRollbackEvent(uploadedImageUrl));
+        if (newIntroduction != null) { // null이면 소개 유지
+            user.updateIntroduction(newIntroduction);
+            userSearch.updateIntroduction(newIntroduction);
         }
 
-        user.updateProfileImage(uploadedImageUrl);
-        // TODO: 검색 데이터에도 저장해야함, NULL을 줘서 변경안해는 것도 가능하도록
-        // es롤백도 보장하도록
+        // 프로필 이미지 업데이트
+
+        MultipartFile newProfileImage = updateUserDetailsCommand.getProfileImage();
+
+        if (newProfileImage != null) { // null이면 프로필 이미지 유지
+            String oldProfileImageUrl = user.getProfileImage();
+            imageUploaderPort.delete(oldProfileImageUrl);
+
+            if (newProfileImage.isEmpty()) { // 기본값으로 업데이트
+                user.updateProfileImage(null);
+                userSearch.updateProfileImage(null);
+            } else {
+                String newProfileImageUrl = imageUploaderPort.upload(newProfileImage, profileImagePath);
+                user.updateProfileImage(newProfileImageUrl);
+                userSearch.updateProfileImage(newProfileImageUrl);
+            }
+        }
+
+        // ES 업데이트 엔티티 저장
+        userSearchRepository.save(userSearch);
+
+        // 이미 update 쿼리는 날아갔지만 commit 보내는 시점에 에러가 발생하여 롤백될 수 있으니
+        // 이 트랜잭션이 롤백됐을 때 ES에 저장한 유저 검색 데이터를 롤백할 이벤트 발행
+        eventPublisher.publishEvent(new UserSearchUpdateRollbackEvent(oldUserSearch));
     }
 
     @Transactional
@@ -167,6 +178,7 @@ public class UserCommandServiceImpl implements UserCommandService {
         // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+        UserSearch userSearch = UserSearch.from(user);
 
         // 소프트 딜리트
         // 해당 유저 로그인 & 상세조회 불가능
@@ -175,5 +187,9 @@ public class UserCommandServiceImpl implements UserCommandService {
 
         // 유저 검색 데이터 삭제
         userSearchRepository.deleteById(userId);
+
+        // 이미 update 쿼리는 날아갔지만 commit 보내는 시점에 에러가 발생하여 롤백될 수 있으니
+        // 이 트랜잭션이 롤백됐을 때 ES에서 삭제한 유저 검색 데이터를 롤백할 이벤트 발행
+        eventPublisher.publishEvent(new UserSearchDeleteRollbackEvent(userSearch));
     }
 }

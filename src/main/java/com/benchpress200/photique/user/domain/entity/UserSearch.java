@@ -44,4 +44,26 @@ public class UserSearch {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
     private LocalDateTime createdAt;
+
+    public void updateNickname(final String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateIntroduction(final String introduction) {
+        this.introduction = introduction;
+    }
+
+    public void updateProfileImage(final String profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public static UserSearch from(final User user) {
+        return UserSearch.builder()
+                .id(user.getId())
+                .profileImage(user.getProfileImage())
+                .nickname(user.getNickname())
+                .introduction(user.getIntroduction())
+                .createdAt(user.getCreatedAt())
+                .build();
+    }
 }
