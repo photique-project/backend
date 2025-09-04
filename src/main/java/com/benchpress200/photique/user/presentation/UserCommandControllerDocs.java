@@ -350,7 +350,10 @@ public interface UserCommandControllerDocs {
     /**
      * 회원탈퇴 API
      */
-    @DeleteMapping(URL.USER_DATA)
+    @DeleteMapping(
+            path = URL.USER_DATA,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     @Operation(
             summary = "회원 탈퇴",
             description = "회원 탈퇴를 진행합니다. 유저와 관련된 모든 데이터가 영구적으로 삭제됩니다."
@@ -378,6 +381,32 @@ public interface UserCommandControllerDocs {
                             examples = {
                                     @ExampleObject(
                                             value = "{ \"status\": 400, \"message\": \"Invalid {}\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 401, \"message\": \"Authentication failed\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "유효하지 않은 접근",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 403, \"message\": \"Access denied\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
                                     )
                             }
                     )

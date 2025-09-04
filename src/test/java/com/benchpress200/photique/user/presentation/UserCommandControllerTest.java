@@ -355,7 +355,7 @@ public class UserCommandControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getInvalidProfileImages")
+    @MethodSource("getInvalidProfileImagesWhenUpdate")
     @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 프로필 이미지")
     void updateUserDetails_실패_테스트_유효하지_않은_프로필_이미지(final MockMultipartFile profileImage) throws Exception {
         // GIVEN
@@ -456,15 +456,6 @@ public class UserCommandControllerTest {
                 .andExpect(jsonPath("$.message").value("Invalid password"));
     }
 
-    // 유효하지 않은 프로필 이미지 파일
-    static Stream<MockMultipartFile> getInvalidProfileImages() {
-        return Stream.of(
-                new MockMultipartFile("profileImage", "empty.png", "image/png", new byte[0]), // 빈 파일
-                new MockMultipartFile("profileImage", "big.png", "image/png", new byte[5 * 1024 * 1024 + 1]), // 5MB 초과
-                new MockMultipartFile("profileImage", "file.txt", "text/plain", "dummy".getBytes()) // 확장자 틀림
-        );
-    }
-
     @Test
     @DisplayName("resetUserPassword 성공 테스트")
     void resetUserPassword_성공_테스트() throws Exception {
@@ -539,6 +530,40 @@ public class UserCommandControllerTest {
                 .andExpect(jsonPath("$.message").value("Invalid password"));
     }
 
+    @Test
+    @DisplayName("withdraw 성공 테스트")
+    void withdraw_성공_테스트() throws Exception {
+        // GIVEN
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete(URL.BASE_URL + URL.USER_DOMAIN + "/1")
+                .accept(MediaType.APPLICATION_JSON);
+
+        Mockito.doNothing().when(userCommandService).withdraw(Mockito.any());
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isNoContent())
+                .andExpect(jsonPath("$.status").value(204))
+                .andExpect(jsonPath("$.message").value("User account has been deleted successfully"));
+    }
+
+    @Test
+    @DisplayName("withdraw 실패 테스트 - 유효하지 않은 경로 변수")
+    void withdraw_실패_테스트_유효하지_않은_경로_변수() throws Exception {
+        // GIVEN
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete(URL.BASE_URL + URL.USER_DOMAIN + "/a")
+                .accept(MediaType.APPLICATION_JSON);
+
+        Mockito.doNothing().when(userCommandService).withdraw(Mockito.any());
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Invalid path variable type"));
+    }
+
 
     // 유효하지 않은 비밀번호
     static Stream<String> getInvalidPasswords() {
@@ -576,6 +601,23 @@ public class UserCommandControllerTest {
                 " ",             // 공백
                 "abcdefghijkl",  // 12자 초과
                 "nick name"      // 공백 포함
+        );
+    }
+
+    // 유효하지 않은 프로필 이미지 파일
+    static Stream<MockMultipartFile> getInvalidProfileImages() {
+        return Stream.of(
+                new MockMultipartFile("profileImage", "empty.png", "image/png", new byte[0]), // 빈 파일
+                new MockMultipartFile("profileImage", "big.png", "image/png", new byte[5 * 1024 * 1024 + 1]), // 5MB 초과
+                new MockMultipartFile("profileImage", "file.txt", "text/plain", "dummy".getBytes()) // 확장자 틀림
+        );
+    }
+
+    // 유효하지 않은 프로필 이미지 파일 (유저 업데이트에서는 프로필 이미지를 빈 파일로 보내면 기본값 설정이므로 빈 파일 제외)
+    static Stream<MockMultipartFile> getInvalidProfileImagesWhenUpdate() {
+        return Stream.of(
+                new MockMultipartFile("profileImage", "big.png", "image/png", new byte[5 * 1024 * 1024 + 1]), // 5MB 초과
+                new MockMultipartFile("profileImage", "file.txt", "text/plain", "dummy".getBytes()) // 확장자 틀림
         );
     }
 }
