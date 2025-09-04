@@ -1,26 +1,37 @@
 package com.benchpress200.photique.user.presentation;
 
-import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
-import com.benchpress200.photique.user.application.UserService;
+import com.benchpress200.photique.user.application.UserQueryService;
+import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
+import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
+import com.benchpress200.photique.user.presentation.constant.ResponseMessage;
 import com.benchpress200.photique.user.presentation.request.ValidateNicknameRequest;
+import com.benchpress200.photique.user.presentation.response.ValidateNicknameResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 public class UserQueryController implements UserQueryControllerDocs {
-    private final UserService userService;
+    private final UserQueryService userQueryService;
 
     @Override
-    public ApiSuccessResponse<?> validateNickname(
+    public ResponseEntity<?> validateNickname(
             @ModelAttribute @Valid final ValidateNicknameRequest validateNicknameRequest
     ) {
-        // TODO: 409응답은 실제 리소스 생성, 수정 시 충돌나면 응답하는게 적절하고, 실제 중복검사는 200으로 주고 결과를 바디에 담는 것이 좋을듯
-        return ResponseHandler.handleSuccessResponse(HttpStatus.OK);
+        ValidateNicknameQuery validateNicknameQuery = validateNicknameRequest.toQuery();
+        ValidateNicknameResult validateNicknameResult = userQueryService.validateNickname(validateNicknameQuery);
+        ValidateNicknameResponse validateNicknameResponse = ValidateNicknameResponse.from(validateNicknameResult);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.OK,
+                ResponseMessage.NICKNAME_VALIDATED,
+                validateNicknameResponse
+        );
     }
 
 //    @GetMapping(URL.USER_DATA)

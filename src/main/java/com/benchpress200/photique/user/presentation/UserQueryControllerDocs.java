@@ -30,14 +30,14 @@ public interface UserQueryControllerDocs {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "회원가입 성공",
+                    description = "닉네임 중복 검사 성공",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ResponseBody.class),
                             examples = {
                                     @ExampleObject(
-                                            value = "{ \"status\": 201, \"message\": \"Join completed\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
-                                    )
+                                            value = "{ \"status\": 200, \"message\": \"Nickname duplication check completed\", \"data\": {\"isDuplicated\": true}, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    ) // 데이터 isDuplicated로 넣자
                             }
                     )
             ),

@@ -4,7 +4,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.common.constant.URL;
-import com.benchpress200.photique.user.application.UserCommandService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.stream.Stream;
