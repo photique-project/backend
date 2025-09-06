@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserQueryController implements UserQueryControllerDocs {
     private final UserQueryService userQueryService;
-
+    
     @Override
     public ResponseEntity<?> validateNickname(
             @ModelAttribute @Valid final ValidateNicknameRequest validateNicknameRequest
