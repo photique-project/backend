@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +23,10 @@ public interface UserQueryControllerDocs {
     /**
      * 닉네임 중복 검사 API
      */
-    @GetMapping(URL.VALIDATE_NICKNAME)
+    @GetMapping(
+            path = URL.VALIDATE_NICKNAME,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     @Operation(
             summary = "닉네임 중복 검사",
             description = "닉네임 중복 검사를 진행합니다.."
