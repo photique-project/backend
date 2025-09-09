@@ -3,6 +3,7 @@ package com.benchpress200.photique.exception;
 
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
+import com.benchpress200.photique.auth.exception.LoginRequestObjectReadException;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.image.domain.exception.ImageUploaderFileWriteException;
 import com.benchpress200.photique.image.domain.exception.S3DeleteException;
@@ -135,12 +136,24 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // S3 이미지 삭제 예외 처리 응답
     @ExceptionHandler(S3DeleteException.class)
     public ResponseEntity<?> handleS3DeleteException(final S3DeleteException s3DeleteException) {
         String errorMessage = s3DeleteException.getMessage();
         String imageUrl = s3DeleteException.getImageUrl();
         log.error(errorMessage);
         log.error("[{}] delete failed", imageUrl);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                SERVER_ERROR_MESSAGE
+        );
+    }
+
+    @ExceptionHandler(LoginRequestObjectReadException.class)
+    public ResponseEntity<?> handleLoginRequestObjectReadException(final LoginRequestObjectReadException e) {
+        String errorMessage = e.getMessage();
+        log.error(errorMessage);
 
         return ResponseHandler.handleResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,

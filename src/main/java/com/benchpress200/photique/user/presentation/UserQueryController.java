@@ -12,13 +12,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 public class UserQueryController implements UserQueryControllerDocs {
     private final UserQueryService userQueryService;
-    
+
     @Override
     public ResponseEntity<?> validateNickname(
             @ModelAttribute @Valid final ValidateNicknameRequest validateNicknameRequest
@@ -34,15 +35,15 @@ public class UserQueryController implements UserQueryControllerDocs {
         );
     }
 
-//    @GetMapping(URL.USER_DATA)
-//    public ApiSuccessResponse<?> getUserDetails(
-//            @ModelAttribute final UserDetailsRequest userDetailsRequest,
-//            @PathVariable("userId") final Long userId // 팔로우확인을 위한 유저아이디 받아서 넘겨서 응답수정할차례
-//    ) {
-//        userDetailsRequest.withUserId(userId);
-//        UserDetailsResponse userDetail = userService.getUserDetails(userDetailsRequest);
-//        return ResponseHandler.handleSuccessResponse(userDetail, HttpStatus.OK);
-//    }
+    @Override
+    public ResponseEntity<?> getUserDetails(@PathVariable("userId") final Long userId) {
+        // TODO: 서비스클래스에서 스프링 시큐리티로 로그인한 유저 아이디 조회
+        // 토큰 인증방식 문서작성하고 스프링 시큐리티로 교체한 후 API 리팩토링 진행
+        return ResponseHandler.handleResponse(
+                HttpStatus.OK,
+                "User with id [" + userId + "] found"
+        );
+    }
 //
 //    @GetMapping
 //    public ApiSuccessResponse<?> searchUsers(

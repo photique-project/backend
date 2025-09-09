@@ -29,7 +29,7 @@ public interface UserQueryControllerDocs {
     )
     @Operation(
             summary = "닉네임 중복 검사",
-            description = "닉네임 중복 검사를 진행합니다.."
+            description = "닉네임 중복 검사를 진행합니다."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -75,4 +75,71 @@ public interface UserQueryControllerDocs {
     ResponseEntity<?> validateNickname(
             @Parameter(description = "닉네임 중복 검사") ValidateNicknameRequest validateNicknameRequest
     );
+
+    /**
+     * 유저 상세 정보 조회 API
+     */
+    @GetMapping(
+            path = URL.USER_DATA,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(
+            summary = "유저 상세 정보 조회",
+            description = "유저 상세 정보를 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "유저 상세 정보 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 200, \"message\": \"User with id [id] found\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "유효하지 않은 파라미터",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 400, \"message\": \"Invalid {}\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "유저 조회 실패",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 404, \"message\": \"User with id [id] not found\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 에러",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseBody.class),
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{ \"status\": 500, \"message\": \"Server Error\", \"data\": null, \"timestamp\": \"YYYY-MM-DDThh:mm:ss\" }"
+                                    )
+                            }
+                    )
+            )
+    })
+    ResponseEntity<?> getUserDetails(@Parameter(description = "유저 id") Long userId);
 }
