@@ -5,9 +5,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.user.application.UserQueryService;
+import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.stream.Stream;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,7 +18,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -27,7 +28,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @SpringBootTest
 @DisplayName("UserQueryController 테스트")
 @ActiveProfiles("test")
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false) // Security Filter 비활성화
 public class UserQueryControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -44,8 +45,7 @@ public class UserQueryControllerTest {
         // GIVEN
         String validNickname = "nickname";
         RequestBuilder request = MockMvcRequestBuilders
-                .multipart(HttpMethod.GET,
-                        URL.BASE_URL + URL.USER_DOMAIN + URL.VALIDATE_NICKNAME + "?nickname=" + validNickname)
+                .get(URL.BASE_URL + URL.USER_DOMAIN + URL.VALIDATE_NICKNAME + "?nickname=" + validNickname)
                 .accept(MediaType.APPLICATION_JSON);
 
         boolean result = false;
@@ -66,8 +66,7 @@ public class UserQueryControllerTest {
     void validateNickname_실패_테스트_유효하지_않은_닉네임(final String invalidNickname) throws Exception {
         // GIVEN
         RequestBuilder request = MockMvcRequestBuilders
-                .multipart(HttpMethod.GET,
-                        URL.BASE_URL + URL.USER_DOMAIN + URL.VALIDATE_NICKNAME + "?nickname=" + invalidNickname)
+                .get(URL.BASE_URL + URL.USER_DOMAIN + URL.VALIDATE_NICKNAME + "?nickname=" + invalidNickname)
                 .accept(MediaType.APPLICATION_JSON);
 
         // WHEN and THEN
@@ -75,6 +74,64 @@ public class UserQueryControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.message").value("Invalid nickname"));
+    }
+
+    @Test
+    @DisplayName("getUserDetails 성공 테스트")
+    void getUserDetails_성공_테스트() throws Exception {
+        // GIVEN
+        long userId = 1L;
+        String nickname = "nickname";
+        long singleWorkCount = 0L;
+        long exhibitionCount = 0L;
+        long followerCount = 0L;
+        long followingCount = 0L;
+        boolean isFollowing = false;
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get(URL.BASE_URL + URL.USER_DOMAIN + "/" + userId)
+                .accept(MediaType.APPLICATION_JSON);
+
+        UserDetailsResult userDetailsResult = UserDetailsResult.builder()
+                .userId(userId)
+                .nickname(nickname)
+                .singleWorkCount(singleWorkCount)
+                .exhibitionCount(exhibitionCount)
+                .followerCount(followerCount)
+                .followingCount(followingCount)
+                .isFollowing(isFollowing)
+                .build();
+
+        Mockito.doReturn(userDetailsResult).when(userQueryService).getUserDetails(userId);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message").value("User with id [" + userId + "] found"))
+                .andExpect(jsonPath("$.data.userId").value(userId))
+                .andExpect(jsonPath("$.data.nickname").value(nickname))
+                .andExpect(jsonPath("$.data.profileImage").value(Matchers.nullValue()))
+                .andExpect(jsonPath("$.data.singleWorkCount").value(singleWorkCount))
+                .andExpect(jsonPath("$.data.exhibitionCount").value(exhibitionCount))
+                .andExpect(jsonPath("$.data.followerCount").value(followerCount))
+                .andExpect(jsonPath("$.data.followingCount").value(followingCount))
+                .andExpect(jsonPath("$.data.isFollowing").value(isFollowing));
+    }
+
+    @Test
+    @DisplayName("getUserDetails 실패 테스트 - 유효하지 않은 경로 변수")
+    void getUserDetails_실패_테스트_유효하지_않은_경로_변수() throws Exception {
+        // GIVEN
+        RequestBuilder request = MockMvcRequestBuilders
+                .get(URL.BASE_URL + URL.USER_DOMAIN + "/a")
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Invalid path variable type"));
     }
 
     // 유효하지 않은 닉네임
