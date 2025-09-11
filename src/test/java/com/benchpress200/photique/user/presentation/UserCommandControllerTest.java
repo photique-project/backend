@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @SpringBootTest
 @DisplayName("UserCommandController 테스트")
 @ActiveProfiles("test")
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false) // Security Filter 비활성화
 public class UserCommandControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -39,6 +39,7 @@ public class UserCommandControllerTest {
 
     @MockitoBean
     UserCommandService userCommandService;
+
 
     @BeforeEach
     void setUp() {

@@ -1,8 +1,6 @@
 package com.benchpress200.photique.exhibition.presentation;
 
 import com.benchpress200.photique.common.constant.URL;
-import com.benchpress200.photique.common.interceptor.Auth;
-import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionCommentService;
@@ -31,8 +29,6 @@ public class ExhibitionCommentController {
 
     private final ExhibitionCommentService exhibitionCommentService;
 
-    @Auth
-    @OwnResource
     @PostMapping
     public ApiSuccessResponse<?> createExhibitionComment(
             @PathVariable("exhibitionId") final Long exhibitionId,
@@ -44,7 +40,6 @@ public class ExhibitionCommentController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 
-    @Auth
     @GetMapping
     public ApiSuccessResponse<?> getExhibitionComments(
             @PathVariable("exhibitionId") final Long exhibitionId,
@@ -56,8 +51,6 @@ public class ExhibitionCommentController {
         return ResponseHandler.handleSuccessResponse(exhibitionCommentPage, HttpStatus.OK);
     }
 
-    @Auth
-    @OwnResource
     @PatchMapping(URL.EXHIBITION_COMMENT_DATA)
     public ApiSuccessResponse<?> updateExhibitionComment(
             @PathVariable("exhibitionId") final Long exhibitionId,
@@ -70,9 +63,7 @@ public class ExhibitionCommentController {
 
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
-
-    @Auth
-    @OwnResource
+    
     @DeleteMapping(URL.EXHIBITION_COMMENT_DATA)
     public ApiSuccessResponse<?> deleteExhibitionComment(
             @PathVariable("exhibitionId") final Long exhibitionId,

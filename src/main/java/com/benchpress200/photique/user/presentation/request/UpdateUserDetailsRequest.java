@@ -3,7 +3,6 @@ package com.benchpress200.photique.user.presentation.request;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
 import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
 import com.benchpress200.photique.user.presentation.validator.ProfileImageValidator;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -16,11 +15,9 @@ public class UpdateUserDetailsRequest {
     private Long userId;
 
     @Pattern(regexp = "^[^\\s]{1,11}$", message = "Invalid nickname")
-    @Schema(description = "1글자 이상 11글자 이하만 가능하며 공백을 포함할 수 없습니다.", example = "nickname")
     private String nickname;
 
     @Size(max = 50, message = "Invalid introduction")
-    @Schema(description = "50글지 이하만 가능합니다.", example = "Hello")
     private String introduction;
 
     public UpdateUserDetailsCommand toCommand(

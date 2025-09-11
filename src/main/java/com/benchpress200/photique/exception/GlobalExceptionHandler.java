@@ -9,6 +9,7 @@ import com.benchpress200.photique.image.domain.exception.ImageUploaderFileWriteE
 import com.benchpress200.photique.image.domain.exception.S3DeleteException;
 import com.benchpress200.photique.image.domain.exception.S3UploadException;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
+import com.benchpress200.photique.user.exception.DuplicatedUserException;
 import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -150,6 +151,7 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // 로그인 필터에 들어오 요청 객체 I/O 예외 처리 응답
     @ExceptionHandler(LoginRequestObjectReadException.class)
     public ResponseEntity<?> handleLoginRequestObjectReadException(final LoginRequestObjectReadException e) {
         String errorMessage = e.getMessage();
@@ -158,6 +160,17 @@ public class GlobalExceptionHandler {
         return ResponseHandler.handleResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 SERVER_ERROR_MESSAGE
+        );
+    }
+
+    // 새 유저 저장 중에 중복된 이메일 또는 닉네임 예외 처리 응답
+    @ExceptionHandler(DuplicatedUserException.class)
+    public ResponseEntity<?> handleDuplicatedUserException(final DuplicatedUserException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.CONFLICT,
+                errorMessage
         );
     }
 }

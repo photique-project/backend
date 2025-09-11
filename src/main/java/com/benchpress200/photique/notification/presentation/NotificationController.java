@@ -1,7 +1,6 @@
 package com.benchpress200.photique.notification.presentation;
 
 import com.benchpress200.photique.common.constant.URL;
-import com.benchpress200.photique.common.interceptor.Auth;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.notification.application.NotificationService;
@@ -31,7 +30,6 @@ public class NotificationController {
         return notificationService.subscribe(userId);
     }
 
-    @Auth
     @GetMapping
     public ApiSuccessResponse<?> getNotifications(
             @PathVariable("userId") final Long userId,
@@ -41,7 +39,6 @@ public class NotificationController {
         return ResponseHandler.handleSuccessResponse(notificationRequestPage, HttpStatus.OK);
     }
 
-    @Auth
     @PatchMapping(URL.NOTIFICATION_DATA)
     public ApiSuccessResponse<?> markAsRead(
             @PathVariable("userId") final Long userId,
@@ -51,7 +48,6 @@ public class NotificationController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @Auth
     @PatchMapping
     public ApiSuccessResponse<?> markAllAsRead(
             @PathVariable("userId") final Long userId
@@ -60,7 +56,6 @@ public class NotificationController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @Auth
     @DeleteMapping(URL.NOTIFICATION_DATA)
     public ApiSuccessResponse<?> deleteNotification(
             @PathVariable("userId") final Long userId,
@@ -69,8 +64,7 @@ public class NotificationController {
         notificationService.deleteNotification(userId, notificationId);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
-
-    @Auth
+    
     @GetMapping(URL.UNREAD)
     public ApiSuccessResponse<?> countUnread(
             @PathVariable("userId") final Long userId

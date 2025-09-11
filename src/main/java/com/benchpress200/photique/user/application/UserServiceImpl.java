@@ -8,12 +8,9 @@ import com.benchpress200.photique.user.domain.dto.UserDetailsRequest;
 import com.benchpress200.photique.user.domain.dto.UserDetailsResponse;
 import com.benchpress200.photique.user.domain.dto.UserSearchRequest;
 import com.benchpress200.photique.user.domain.dto.UserSearchResponse;
-import com.benchpress200.photique.user.domain.entity.UserSearch;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -58,18 +55,19 @@ public class UserServiceImpl implements UserService {
     ) {
         // 키워드 조회
         String keyword = userSearchRequest.getKeyword();
-        Page<UserSearch> userSearchPage = userDomainService.searchUsers(keyword, pageable);
+//        Page<UserSearch> userSearchPage = userDomainService.searchUsers(keyword, pageable);
+//
+//        // 검색 유저중 팔로우 상태 조회
+//        Long userId = userSearchRequest.getUserId();
+//
+//        List<UserSearchResponse> userSearchResponseList = userSearchPage.stream()
+//                .map(userSearch -> {
+//                    boolean isFollowing = followDomainService.isFollowing(userId, userSearch.getId());
+//                    return UserSearchResponse.of(userSearch, isFollowing);
+//                })
+//                .toList();
 
-        // 검색 유저중 팔로우 상태 조회
-        Long userId = userSearchRequest.getUserId();
-
-        List<UserSearchResponse> userSearchResponseList = userSearchPage.stream()
-                .map(userSearch -> {
-                    boolean isFollowing = followDomainService.isFollowing(userId, userSearch.getId());
-                    return UserSearchResponse.of(userSearch, isFollowing);
-                })
-                .toList();
-
-        return new PageImpl<>(userSearchResponseList, pageable, userSearchPage.getTotalElements());
+//        return new PageImpl<>(userSearchResponseList, pageable, userSearchPage.getTotalElements());
+        return null;
     }
 }

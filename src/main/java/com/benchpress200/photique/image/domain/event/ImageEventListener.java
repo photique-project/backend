@@ -28,7 +28,7 @@ public class ImageEventListener {
     // 커밋이 되지않고 바로 제거한다면 해당 트랜잭션이 롤백됐을 때
     // 해당 이미지를 다시 살릴 방법이 없으므로 트랜잭션 커밋 이벤트가 확정되면 삭제처리
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handAfterWithdrawCommit(final ImageDeleteCommitEvent imageDeleteCommitEvent) {
+    public void handAfterImageDeleteCommit(final ImageDeleteCommitEvent imageDeleteCommitEvent) {
         String imageUrl = imageDeleteCommitEvent.getImageUrl();
         imageUploaderPort.delete(imageUrl);
     }

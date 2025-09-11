@@ -1,16 +1,9 @@
 package com.benchpress200.photique.user.domain;
 
-import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchUserRollbackContext;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.domain.entity.UserSearch;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
-import com.benchpress200.photique.user.domain.repository.UserSearchRepository;
 import com.benchpress200.photique.user.exception.UserException;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,7 +13,6 @@ import org.springframework.stereotype.Service;
 public class UserDomainServiceImpl implements UserDomainService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final UserSearchRepository userSearchRepository;
 
     @Override
     public void isDuplicatedEmail(final String email) {
@@ -52,105 +44,5 @@ public class UserDomainServiceImpl implements UserDomainService {
         return userRepository.findByEmail(email).orElseThrow(
                 () -> new UserException("User with email {" + email + "} is not found", HttpStatus.NOT_FOUND)
         );
-    }
-
-    @Override
-    public void updatePassword(
-            final User user,
-            final String newPassword
-    ) {
-        // 비번이 null 아니면 수정, null 이면 유지
-        if (newPassword != null) {
-            String encodedPassword = encodePassword(newPassword);
-            user.updatePassword(encodedPassword);
-        }
-    }
-
-    @Override
-    public void updateNickname(
-            final User user,
-            final String newNickname
-    ) {
-        if (newNickname == null) {
-            return;
-        }
-
-        isDuplicatedNickname(newNickname);
-        user.updateNickname(newNickname);
-    }
-
-    @Override
-    public void updateIntroduction(
-            final User user,
-            final String newIntroduction
-    ) {
-        // 소개 수정 X
-        if (newIntroduction == null) {
-            return;
-        }
-
-        // 소개 기본값 설정
-        if (newIntroduction.isEmpty()) {
-            user.updateIntroduction(null);
-            return;
-        }
-
-        // 소개 업데이트
-        user.updateIntroduction(newIntroduction);
-    }
-
-    @Override
-    public void updateProfileImage(
-            final User user,
-            final String newProfileImage
-    ) {
-        // 프로파일 이미지 업데이트
-        user.updateProfileImage(newProfileImage);
-    }
-
-    @Override
-    public Page<UserSearch> searchUsers(
-            final String keyword,
-            final Pageable pageable
-    ) {
-        if (keyword.isEmpty()) {
-            throw new UserException("No users found.", HttpStatus.NOT_FOUND);
-        }
-
-        Page<UserSearch> userSearchPage = userSearchRepository.search(keyword, pageable);
-
-        if (userSearchPage.getTotalElements() == 0) {
-            throw new UserException("No users found.", HttpStatus.NOT_FOUND);
-        }
-
-        return userSearchPage;
-    }
-
-    @Override
-    public void deleteUser(final User user) {
-        userRepository.delete(user);
-
-        // 엘라스틱 서치 데이터 삭제
-        Long userId = user.getId();
-        UserSearch userSearch = userSearchRepository.findById(user.getId()).orElseThrow(
-                () -> new UserException("User with id {" + userId + "} is not found", HttpStatus.NOT_FOUND)
-        );
-
-        ElasticsearchUserRollbackContext.addDocumentToDelete(userSearch);
-    }
-
-    @Override
-    public List<User> findUsersModifiedSince(final LocalDateTime time) {
-        return userRepository.findAllByUpdatedAtAfter(time);
-    }
-
-    @Override
-    public void updateUserSearch(final UserSearch userSearch) {
-        userSearchRepository.save(userSearch);
-    }
-
-    @Override
-    public void updateAllUserSearch(final List<UserSearch> userSearches) {
-        userSearchRepository.saveAll(userSearches);
     }
 }

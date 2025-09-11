@@ -2,8 +2,6 @@ package com.benchpress200.photique.user.presentation;
 
 
 import com.benchpress200.photique.common.constant.URL;
-import com.benchpress200.photique.common.interceptor.Auth;
-import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.FollowService;
@@ -29,8 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class FollowController {
     private final FollowService followService;
 
-    @Auth
-    @OwnResource
     @PostMapping(URL.FOLLOW_DOMAIN)
     public ApiSuccessResponse<?> followUser(
             @PathVariable("userId") final Long followerId,
@@ -41,8 +37,6 @@ public class FollowController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 
-    @Auth
-    @OwnResource
     @DeleteMapping(URL.FOLLOW_DOMAIN)
     public ApiSuccessResponse<?> unfollowUser(
             @PathVariable("userId") final Long followerId,
@@ -54,7 +48,6 @@ public class FollowController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @Auth
     @GetMapping(URL.FOLLOWER)
     public ApiSuccessResponse<?> getFollowers(
             @PathVariable("userId") final Long userId,
@@ -64,7 +57,6 @@ public class FollowController {
         return ResponseHandler.handleSuccessResponse(followerResponsePage, HttpStatus.OK);
     }
 
-    @Auth
     @GetMapping(URL.FOLLOWING)
     public ApiSuccessResponse<?> getFollowings(
             @PathVariable("userId") final Long userId,

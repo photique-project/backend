@@ -1,27 +1,31 @@
 package com.benchpress200.photique.auth.filter;
 
-import com.benchpress200.photique.auth.domain.AuthenticationTokenManagerPort;
+import com.benchpress200.photique.auth.domain.port.AuthenticationTokenManagerPort;
 import com.benchpress200.photique.auth.domain.result.AuthenticationTokens;
+import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import com.benchpress200.photique.auth.exception.LoginRequestObjectReadException;
 import com.benchpress200.photique.auth.filter.request.LoginRequest;
-import com.benchpress200.photique.auth.filter.result.UserAuthenticationResult;
+import com.benchpress200.photique.auth.filter.response.LoginSuccessResponse;
+import com.benchpress200.photique.common.response.ResponseBody;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.MimeTypeUtils;
 
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+    private static final String REFRESH_TOKEN_KEY = "refreshToken";
+
     private final AuthenticationManager authenticationManager;
     private final AuthenticationTokenManagerPort authenticationTokenManagerPort;
     private final ObjectMapper objectMapper;
@@ -44,9 +48,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         }
     }
 
-    // 로그인 성공 => 토큰 발급
-    // 어세시 토큰: 바디
-    // 리프레쉬 토큰: 쿠키
     @Override
     protected void successfulAuthentication(
             final HttpServletRequest request,
@@ -54,33 +55,35 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             final FilterChain chain,
             final Authentication authentication
     ) throws IOException {
-        UserAuthenticationResult userAuthenticationResult = (UserAuthenticationResult) authentication.getPrincipal();
-        Long userId = userAuthenticationResult.getUserId();
-        String role = userAuthenticationResult.getRole();
+        AuthenticationUserResult authenticationUserResult = (AuthenticationUserResult) authentication.getPrincipal();
+        Long userId = authenticationUserResult.getUserId();
+        String role = authenticationUserResult.getRole();
+
         AuthenticationTokens authenticationTokens = authenticationTokenManagerPort.issueTokens(userId, role);
-        // TODO: 어세스, 리프레시 발급 로직 구현할 차례
 
-        // 공백을 위한 인코딩
-        token = URLEncoder.encode(token, StandardCharsets.UTF_8);
+        String accessToken = authenticationTokens.getAccessToken();
+        String refreshToken = authenticationTokens.getRefreshToken();
+        int refreshTokenExpiredTime = (int) (authenticationTokens.getRefreshTokenExpiredTime() / 1_000); // 초 단위로 변환
 
-        Cookie cookie = new Cookie("Authorization", token);
+        Cookie cookie = new Cookie(REFRESH_TOKEN_KEY, refreshToken);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
-        cookie.setMaxAge(3600);
+        cookie.setMaxAge(refreshTokenExpiredTime);
         response.addCookie(cookie);
 
         response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/json");
-        AuthResponse authResponse = AuthResponse.builder()
-                .status(HttpServletResponse.SC_OK)
-                .message("Login completed successfully")
-                .build();
+        response.setContentType(MimeTypeUtils.APPLICATION_JSON_VALUE);
 
-        String jsonString = objectMapper.writeValueAsString(
-                authResponse
+        LoginSuccessResponse loginSuccessResponse = new LoginSuccessResponse(accessToken);
+        ResponseBody<LoginSuccessResponse> responseBody = new ResponseBody<>(
+                HttpServletResponse.SC_OK,
+                "Login completed successfully",
+                loginSuccessResponse,
+                LocalDateTime.now()
         );
 
+        String jsonString = objectMapper.writeValueAsString(responseBody);
         response.getWriter().write(jsonString);
     }
 
@@ -91,14 +94,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             final AuthenticationException failed
     ) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        AuthResponse authResponse = AuthResponse.builder()
-                .status(HttpServletResponse.SC_UNAUTHORIZED)
-                .message("Authentication failed")
-                .build();
+        response.setContentType(MimeTypeUtils.APPLICATION_JSON_VALUE);
 
-        String jsonString = objectMapper.writeValueAsString(authResponse);
+        ResponseBody<?> responseBody = new ResponseBody<>(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                "Authentication failed",
+                null,
+                LocalDateTime.now()
+        );
 
+        String jsonString = objectMapper.writeValueAsString(responseBody);
         response.getWriter().write(jsonString);
     }
 }

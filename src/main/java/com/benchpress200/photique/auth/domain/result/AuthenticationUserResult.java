@@ -1,4 +1,4 @@
-package com.benchpress200.photique.auth.filter.result;
+package com.benchpress200.photique.auth.domain.result;
 
 import com.benchpress200.photique.user.domain.entity.User;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 @Builder
 @RequiredArgsConstructor
-public class UserAuthenticationResult implements UserDetails {
+public class AuthenticationUserResult implements UserDetails {
     private final Long userId;
     private final String username;
     private final String password;
@@ -36,8 +36,8 @@ public class UserAuthenticationResult implements UserDetails {
         return this.username;
     }
 
-    public static UserAuthenticationResult from(final User user) {
-        return UserAuthenticationResult.builder()
+    public static AuthenticationUserResult from(final User user) {
+        return AuthenticationUserResult.builder()
                 .userId(user.getId())
                 .username(user.getEmail())
                 .password(user.getPassword())
