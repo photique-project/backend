@@ -3,6 +3,7 @@ package com.benchpress200.photique.user.presentation.response;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -19,6 +20,7 @@ public class UserDetailsResponse {
     private Long followingCount;
     private LocalDateTime createdAt;
     @JsonProperty("isFollowing")
+    @Getter(AccessLevel.NONE)
     private boolean isFollowing;
 
     public static UserDetailsResponse from(final UserDetailsResult userDetailsResult) {

@@ -12,7 +12,6 @@ import com.benchpress200.photique.user.application.command.UpdateUserDetailsComm
 import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.domain.entity.UserSearch;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.port.PasswordEncoderPort;
@@ -46,9 +45,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @MockitoSpyBean
     UserRepository userRepository;
 
-    @MockitoSpyBean
-    UserSearchRepository userSearchRepository;
-
     @Autowired
     UserCommandService userCommandService;
 
@@ -72,22 +68,11 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
         User savedUser = userRepository.save(user);
         testUserId = savedUser.getId();
-
-        UserSearch userSearch = UserSearch.builder()
-                .id(savedUser.getId())
-                .profileImage(savedUser.getProfileImage())
-                .nickname(savedUser.getNickname())
-                .introduction(savedUser.getIntroduction())
-                .createdAt(savedUser.getCreatedAt())
-                .build();
-
-        userSearchRepository.save(userSearch);
     }
 
     @AfterEach
     void cleanUp() {
         userRepository.deleteAll();
-        userSearchRepository.deleteAll();
     }
 
     @Test
@@ -95,7 +80,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     void join_커밋_테스트() {
         // GIVEN
         userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
         String email = "example@google.com";
         String password = "password12!@";
         String nickname = "nickname";
@@ -117,12 +101,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
         // THEN
         Assertions.assertThat(user.isPresent()).isTrue();
-
-        // WHEN
-        Optional<UserSearch> userSearch = userSearchRepository.findById(user.get().getId());
-
-        // THEN
-        Assertions.assertThat(userSearch.isPresent()).isTrue();
     }
 
     @Test
@@ -130,7 +108,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     void join_롤백_테스트_이메일_인증_코드_조회_실패() {
         // GIVEN
         userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
         String email = "example@google.com";
         String password = "password12!@";
         String nickname = "nickname";
@@ -155,12 +132,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
         // THEN
         Assertions.assertThat(user.isPresent()).isFalse();
-
-        // WHEN
-        Iterable<UserSearch> userSearch = userSearchRepository.findAll();
-
-        // THEN
-        Assertions.assertThat(userSearch).hasSize(0);
     }
 
     @Test
@@ -168,7 +139,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     void join_롤백_테스트_이메일_인증_코드_미인증() {
         // GIVEN
         userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
         String email = "example@google.com";
         String password = "password12!@";
         String nickname = "nickname";
@@ -193,12 +163,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
         // THEN
         Assertions.assertThat(user.isPresent()).isFalse();
-
-        // WHEN
-        Iterable<UserSearch> userSearch = userSearchRepository.findAll();
-
-        // THEN
-        Assertions.assertThat(userSearch).hasSize(0);
     }
 
     @Test
@@ -206,7 +170,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     void join_롤백_테스트_이미지_업로드_실패() {
         // GIVEN
         userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
         String email = "example@google.com";
         String password = "password12!@";
         String nickname = "nickname";
@@ -235,12 +198,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
         // THEN
         Assertions.assertThat(user.isPresent()).isFalse();
-
-        // WHEN
-        Iterable<UserSearch> userSearch = userSearchRepository.findAll();
-
-        // THEN
-        Assertions.assertThat(userSearch).hasSize(0);
     }
 
     @Test
@@ -248,7 +205,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     void join_롤백_테스트_MySQL_저장_실패() {
         // GIVEN
         userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
         String email = "example@google.com";
         String password = "password12!@";
         String nickname = "nickname";
@@ -275,52 +231,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
         // THEN
         Assertions.assertThat(user.isPresent()).isFalse();
-
-        // WHEN
-        Iterable<UserSearch> userSearch = userSearchRepository.findAll();
-
-        // THEN
-        Assertions.assertThat(userSearch).hasSize(0);
-    }
-
-    @Test
-    @DisplayName("join 롤백 테스트 - Elasticsearch 저장 실패")
-    void join_롤백_테스트_Elasticsearch_저장_실패() {
-        // GIVEN
-        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        userSearchRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        String email = "example@google.com";
-        String password = "password12!@";
-        String nickname = "nickname";
-
-        JoinCommand joinCommand = JoinCommand.builder()
-                .email(email)
-                .password(password)
-                .nickname(nickname)
-                .build();
-
-        Mockito
-                .doReturn(Optional.of(new AuthCode("email", "code", true, 1L)))
-                .when(authCodeRepository)
-                .findById(Mockito.any());
-
-        Mockito.doThrow(RuntimeException.class).when(userSearchRepository).save(Mockito.any());
-
-        // WHEN and THEN
-        Assertions.assertThatThrownBy(() -> userCommandService.join(joinCommand))
-                .isInstanceOf(RuntimeException.class);
-
-        // WHEN
-        Optional<User> user = userRepository.findByEmail(email);
-
-        // THEN
-        Assertions.assertThat(user.isPresent()).isFalse();
-
-        // WHEN
-        Iterable<UserSearch> userSearch = userSearchRepository.findAll();
-
-        // THEN
-        Assertions.assertThat(userSearch).hasSize(0);
     }
 
     @Test
@@ -534,12 +444,10 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
         // WHEN
         userCommandService.withdraw(userId);
         Optional<User> deletedUser = userRepository.findById(userId);
-        Optional<UserSearch> deletedUserSearch = userSearchRepository.findById(userId);
 
         // THEN
         Assertions.assertThat(deletedUser.isPresent()).isTrue();
         Assertions.assertThat(deletedUser.get().getDeletedAt()).isNotNull();
-        Assertions.assertThat(deletedUserSearch.isEmpty()).isTrue();
     }
 
     @Test
@@ -552,30 +460,9 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
         Assertions.assertThatThrownBy(() -> userCommandService.withdraw(userId))
                 .isInstanceOf(UserNotFoundException.class);
         Optional<User> user = userRepository.findById(testUserId);
-        Optional<UserSearch> userSearch = userSearchRepository.findById(testUserId);
 
         // THEN
         Assertions.assertThat(user.isPresent()).isTrue();
         Assertions.assertThat(user.get().getDeletedAt()).isNull();
-        Assertions.assertThat(userSearch.isPresent()).isTrue();
-    }
-
-    @Test
-    @DisplayName("withdraw 롤백 테스트 - Elasticsearch 예외")
-    void withdraw_롤백_테스트_Elasticsearch_예외() {
-        // GIVEN
-        Long userId = testUserId;
-
-        // WHEN and THEN
-        Mockito.doThrow(RuntimeException.class).when(userSearchRepository).deleteById(userId);
-        Assertions.assertThatThrownBy(
-                () -> userCommandService.withdraw(userId)
-        ).isInstanceOf(RuntimeException.class);
-
-        Optional<User> user = userRepository.findById(testUserId);
-        Optional<UserSearch> userSearch = userSearchRepository.findById(testUserId);
-        Assertions.assertThat(user.isPresent()).isTrue();
-        Assertions.assertThat(user.get().getDeletedAt()).isNull();
-        Assertions.assertThat(userSearch.isPresent()).isTrue();
     }
 }
