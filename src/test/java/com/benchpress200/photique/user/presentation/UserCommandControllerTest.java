@@ -3,8 +3,10 @@ package com.benchpress200.photique.user.presentation;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.user.application.UserCommandService;
+import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -20,6 +22,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,6 +36,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @DisplayName("UserCommandController 테스트")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false) // Security Filter 비활성화
+@EnableMethodSecurity(prePostEnabled = false)
 public class UserCommandControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -224,6 +231,10 @@ public class UserCommandControllerTest {
     @DisplayName("updateUserDetails 성공 테스트")
     void updateUserDetails_성공_테스트() throws Exception {
         // GIVEN
+        Long userId = 1L;
+
+        createMockAuthentication(userId);
+
         Map<String, Object> jsonBody = Map.of(
                 "nickname", "newNickname",
                 "introduction", "newIntroduction"
@@ -240,7 +251,7 @@ public class UserCommandControllerTest {
                 "image/png", "dummy".getBytes());
 
         RequestBuilder request = MockMvcRequestBuilders
-                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/1")
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/" + userId)
                 .file(userPart)
                 .file(profileImage)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -358,6 +369,10 @@ public class UserCommandControllerTest {
     @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 프로필 이미지")
     void updateUserDetails_실패_테스트_유효하지_않은_프로필_이미지(final MockMultipartFile profileImage) throws Exception {
         // GIVEN
+        Long userId = 1L;
+        
+        createMockAuthentication(userId);
+
         Map<String, Object> jsonBody = Map.of(
                 "nickname", "newNickname",
                 "introduction", "newIntroduction"
@@ -371,7 +386,7 @@ public class UserCommandControllerTest {
         );
 
         RequestBuilder request = MockMvcRequestBuilders
-                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/1")
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/" + userId)
                 .file(userPart)
                 .file(profileImage)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -389,15 +404,19 @@ public class UserCommandControllerTest {
     @DisplayName("updateUserPassword 성공 테스트")
     void updateUserPassword_성공_테스트() throws Exception {
         // GIVEN
+        Long userId = 1L;
+
         Map<String, Object> jsonBody = Map.of(
                 "password", "newPassword12!@"
         );
 
         RequestBuilder request = MockMvcRequestBuilders
-                .patch(URL.BASE_URL + URL.USER_DOMAIN + "/1" + URL.PASSWORD)
+                .patch(URL.BASE_URL + URL.USER_DOMAIN + "/" + userId + URL.PASSWORD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(jsonBody));
+
+        createMockAuthentication(userId);
 
         Mockito.doNothing().when(userCommandService).updateUserPassword(Mockito.any());
 
@@ -533,11 +552,14 @@ public class UserCommandControllerTest {
     @DisplayName("withdraw 성공 테스트")
     void withdraw_성공_테스트() throws Exception {
         // GIVEN
+        Long userId = 1L;
         RequestBuilder request = MockMvcRequestBuilders
-                .delete(URL.BASE_URL + URL.USER_DOMAIN + "/1")
+                .delete(URL.BASE_URL + URL.USER_DOMAIN + "/" + userId)
                 .accept(MediaType.APPLICATION_JSON);
 
         Mockito.doNothing().when(userCommandService).withdraw(Mockito.any());
+
+        createMockAuthentication(userId);
 
         // WHEN and THEN
         mockMvc.perform(request)
@@ -618,5 +640,17 @@ public class UserCommandControllerTest {
                 new MockMultipartFile("profileImage", "big.png", "image/png", new byte[5 * 1024 * 1024 + 1]), // 5MB 초과
                 new MockMultipartFile("profileImage", "file.txt", "text/plain", "dummy".getBytes()) // 확장자 틀림
         );
+    }
+
+    // @PreAuthorize 검증 통과를 위한 임시 인증 객체 생성
+    void createMockAuthentication(final Long userId) {
+        AuthenticationUserResult authenticationUserResult = AuthenticationUserResult.builder()
+                .userId(userId)
+                .role(Role.USER.getValue())
+                .build();
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(authenticationUserResult, null,
+                authenticationUserResult.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

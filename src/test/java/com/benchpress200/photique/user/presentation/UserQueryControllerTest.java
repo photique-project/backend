@@ -5,9 +5,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.user.application.UserQueryService;
+import com.benchpress200.photique.user.application.result.MyDetailsResult;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -133,6 +135,53 @@ public class UserQueryControllerTest {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.message").value("Invalid path variable type"));
     }
+
+    @Test
+    @DisplayName("getMyDetails 성공 테스트")
+    void getMyDetails_성공_테스트() throws Exception {
+        // GIVEN
+        Long userId = 1L;
+        String email = "example@example.com";
+        String nickname = "nickname";
+        String introduction = "introduction";
+        Long singleWorkCount = 0L;
+        Long exhibitionCount = 0L;
+        Long followerCount = 0L;
+        Long followingCount = 0L;
+        LocalDateTime createdAt = LocalDateTime.now();
+
+        MyDetailsResult myDetailsResult = MyDetailsResult.builder()
+                .userId(userId)
+                .email(email)
+                .nickname(nickname)
+                .introduction(introduction)
+                .singleWorkCount(singleWorkCount)
+                .exhibitionCount(exhibitionCount)
+                .followerCount(followerCount)
+                .followingCount(followingCount)
+                .build();
+
+        Mockito.doReturn(myDetailsResult).when(userQueryService).getMyDetails();
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get(URL.BASE_URL + URL.USER_DOMAIN + URL.MY_DATA)
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message").value("My data found"))
+                .andExpect(jsonPath("$.data.userId").value(userId))
+                .andExpect(jsonPath("$.data.email").value(email))
+                .andExpect(jsonPath("$.data.nickname").value(nickname))
+                .andExpect(jsonPath("$.data.introduction").value(introduction))
+                .andExpect(jsonPath("$.data.singleWorkCount").value(singleWorkCount))
+                .andExpect(jsonPath("$.data.exhibitionCount").value(exhibitionCount))
+                .andExpect(jsonPath("$.data.followerCount").value(followerCount))
+                .andExpect(jsonPath("$.data.followingCount").value(followingCount));
+    }
+
 
     // 유효하지 않은 닉네임
     static Stream<String> getInvalidNicknames() {

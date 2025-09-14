@@ -401,6 +401,12 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .password(updatePassword)
                 .build();
 
+        AuthCode authCode = AuthCode.builder()
+                .isVerified(true)
+                .build();
+
+        Mockito.doReturn(Optional.of(authCode)).when(authCodeRepository).findById(Mockito.any());
+
         // WHEN
         userCommandService.resetUserPassword(resetUserPasswordCommand);
         Optional<User> updatedUser = userRepository.findByEmail(testUserEmail);
