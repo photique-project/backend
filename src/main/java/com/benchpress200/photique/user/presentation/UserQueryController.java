@@ -4,10 +4,12 @@ import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserQueryService;
 import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
+import com.benchpress200.photique.user.application.result.MyDetailsResult;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.benchpress200.photique.user.presentation.constant.ResponseMessage;
 import com.benchpress200.photique.user.presentation.request.ValidateNicknameRequest;
+import com.benchpress200.photique.user.presentation.response.MyDetailsResponse;
 import com.benchpress200.photique.user.presentation.response.UserDetailsResponse;
 import com.benchpress200.photique.user.presentation.response.ValidateNicknameResponse;
 import jakarta.validation.Valid;
@@ -57,6 +59,21 @@ public class UserQueryController {
                 HttpStatus.OK,
                 "User with id [" + userId + "] found",
                 userDetailsResponse
+        );
+    }
+
+    @GetMapping(
+            path = URL.MY_DATA,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> getMyDetails() {
+        MyDetailsResult myDetailsResult = userQueryService.getMyDetails();
+        MyDetailsResponse myDetailsResponse = MyDetailsResponse.from(myDetailsResult);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.OK,
+                "My data found",
+                myDetailsResponse
         );
     }
 //

@@ -142,7 +142,7 @@ public class ExhibitionController {
         return ResponseHandler.handleSuccessResponse(likedExhibitionRequestPage, HttpStatus.OK);
     }
 
-    @GetMapping(URL.WHO_AM_I)
+    @GetMapping(URL.MY_DATA)
     public ApiSuccessResponse<?> getMyExhibitions(
             @ModelAttribute final MyExhibitionRequest myExhibitionRequest,
             final Pageable pageable

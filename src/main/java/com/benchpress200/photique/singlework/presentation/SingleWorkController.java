@@ -107,7 +107,7 @@ public class SingleWorkController {
         singleWorkService.decrementLike(singleWorkLikeDecrementRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
-    
+
     @GetMapping(URL.LIKE)
     public ApiSuccessResponse<?> getLikedSingleWorks(
             @ModelAttribute final LikedSingleWorkRequest likedSingleWorkRequest,
@@ -121,7 +121,7 @@ public class SingleWorkController {
         return ResponseHandler.handleSuccessResponse(likedSingleWorkPage, HttpStatus.OK);
     }
 
-    @GetMapping(URL.WHO_AM_I)
+    @GetMapping(URL.MY_DATA)
     public ApiSuccessResponse<?> getMySingleWorks(
             @ModelAttribute final MySingleWorkRequest mySingleWorkRequest,
             final Pageable pageable

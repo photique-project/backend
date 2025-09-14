@@ -2,7 +2,9 @@ package com.benchpress200.photique.user.application;
 
 import com.benchpress200.photique.AbstractTestContainerConfig;
 import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
+import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
+import com.benchpress200.photique.user.application.result.MyDetailsResult;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -38,7 +40,7 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
     void cleanUp() {
         userRepository.deleteAll();
     }
-    
+
     @Test
     @DisplayName("validateNickname 테스트 - 중복되지 않은 닉네임")
     void validateNickname_테스트_중복되지_않은_닉네임() {
@@ -118,5 +120,70 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
         Assertions.assertThat(userDetailsResult.getFollowerCount()).isEqualTo(0L);
         Assertions.assertThat(userDetailsResult.getFollowingCount()).isEqualTo(0L);
         Assertions.assertThat(userDetailsResult.isFollowing()).isFalse();
+    }
+
+    @Test
+    @DisplayName("getMyDetails 테스트 - 인증된 유저 조회 성공")
+    void getMyDetails_테스트_인증된_유저_조회_성공() {
+        // GIVEN
+        String email = "example@example.com";
+        String password = "password12!@";
+        String nickname = "nickname";
+        String profileImage = "profileImage";
+
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .profileImage(profileImage)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
+
+        user = userRepository.save(user);
+        Long userId = user.getId();
+
+        Mockito.doReturn(userId).when(authenticationUserProviderPort).getCurrentUserId();
+
+        // WHEN
+        MyDetailsResult myDetailsResult = userQueryService.getMyDetails();
+
+        // THEN
+        Assertions.assertThat(myDetailsResult.getUserId()).isEqualTo(userId);
+        Assertions.assertThat(myDetailsResult.getEmail()).isEqualTo(email);
+        Assertions.assertThat(myDetailsResult.getNickname()).isEqualTo(nickname);
+        Assertions.assertThat(myDetailsResult.getIntroduction()).isEqualTo(null);
+        Assertions.assertThat(myDetailsResult.getProfileImage()).isEqualTo(profileImage);
+        Assertions.assertThat(myDetailsResult.getSingleWorkCount()).isEqualTo(0L);
+        Assertions.assertThat(myDetailsResult.getExhibitionCount()).isEqualTo(0L);
+        Assertions.assertThat(myDetailsResult.getFollowerCount()).isEqualTo(0L);
+        Assertions.assertThat(myDetailsResult.getFollowingCount()).isEqualTo(0L);
+    }
+
+    @Test
+    @DisplayName("getMyDetails 테스트 - 인증된 유저 조회 실패")
+    void getMyDetails_테스트_인증된_유저_조회_실패() {
+        // GIVEN
+        String email = "example@example.com";
+        String password = "password12!@";
+        String nickname = "nickname";
+        String profileImage = "profileImage";
+
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .profileImage(profileImage)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
+
+        user = userRepository.save(user);
+        Long userId = user.getId();
+
+        Mockito.doReturn(userId * -1).when(authenticationUserProviderPort).getCurrentUserId();
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> userQueryService.getMyDetails()).isInstanceOf(UserNotFoundException.class);
     }
 }
