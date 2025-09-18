@@ -3,13 +3,17 @@ package com.benchpress200.photique.user.presentation;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserQueryService;
+import com.benchpress200.photique.user.application.query.SearchUsersQuery;
 import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
+import com.benchpress200.photique.user.application.result.SearchUsersResult;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.benchpress200.photique.user.presentation.constant.ResponseMessage;
+import com.benchpress200.photique.user.presentation.request.SearchUsersRequest;
 import com.benchpress200.photique.user.presentation.request.ValidateNicknameRequest;
 import com.benchpress200.photique.user.presentation.response.MyDetailsResponse;
+import com.benchpress200.photique.user.presentation.response.SearchUsersResponse;
 import com.benchpress200.photique.user.presentation.response.UserDetailsResponse;
 import com.benchpress200.photique.user.presentation.response.ValidateNicknameResponse;
 import jakarta.validation.Valid;
@@ -76,13 +80,19 @@ public class UserQueryController {
                 myDetailsResponse
         );
     }
-//
-//    @GetMapping
-//    public ApiSuccessResponse<?> searchUsers(
-//            @ModelAttribute @Valid final UserSearchRequest userSearchRequest,
-//            final Pageable pageable
-//    ) {
-//        Page<UserSearchResponse> userSearchResponsePage = userService.searchUsers(userSearchRequest, pageable);
-//        return ResponseHandler.handleSuccessResponse(userSearchResponsePage, HttpStatus.OK);
-//    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> searchUsers(
+            @ModelAttribute @Valid final SearchUsersRequest searchUsersRequest
+    ) {
+        SearchUsersQuery searchUsersQuery = searchUsersRequest.toQuery();
+        SearchUsersResult searchUsersResult = userQueryService.searchUsers(searchUsersQuery);
+        SearchUsersResponse searchUsersResponse = SearchUsersResponse.from(searchUsersResult);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.OK,
+                "User search completed",
+                searchUsersResponse
+        );
+    }
 }

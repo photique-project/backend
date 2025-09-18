@@ -5,14 +5,21 @@ import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import com.benchpress200.photique.exhibition.domain.repository.ExhibitionRepository;
 import com.benchpress200.photique.singlework.domain.repository.SingleWorkRepository;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
+import com.benchpress200.photique.user.application.query.SearchUsersQuery;
 import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
+import com.benchpress200.photique.user.application.result.SearchUsersResult;
+import com.benchpress200.photique.user.application.result.SearchedUser;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.repository.FollowRepository;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -94,6 +101,37 @@ public class UserQueryService implements UserDetailsService {
                 followerCount,
                 followingCount
         );
+    }
+
+    public SearchUsersResult searchUsers(final SearchUsersQuery searchUsersQuery) {
+        String keyword = searchUsersQuery.getKeyword();
+        Pageable pageable = searchUsersQuery.getPageable();
+
+        // 닉네임 접두사 기반 검색
+        Page<User> userPage = userRepository.findByNicknameContaining(keyword, pageable);
+
+        // 요청 유저 id 조회
+        Long currentUserId = authenticationUserProviderPort.getCurrentUserId();
+
+        // 검색한 유저 페이지에서 id를 set으로 추출
+        List<Long> userIds = userPage.stream()
+                .map(User::getId)
+                .toList();
+
+        // 검색 결과 유저들 중에서 요청 유저가 팔로우한 유저 셋으로 조회
+        Set<Long> followingIds = followRepository.findFollowingIds(currentUserId, userIds);
+
+        // 각 유저마다 팔로우 여부를 확인
+        List<SearchedUser> users = userPage.stream()
+                .map(user -> {
+                    Long userId = user.getId();
+                    boolean isFollowing = followingIds.contains(userId);
+
+                    return SearchedUser.of(user, isFollowing);
+                })
+                .toList();
+
+        return SearchUsersResult.of(users, userPage);
     }
 
 

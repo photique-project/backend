@@ -1,10 +1,11 @@
 package com.benchpress200.photique.user.domain.repository;
 
 import com.benchpress200.photique.user.domain.entity.User;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
@@ -13,5 +14,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByNickname(String nickname);
 
-    List<User> findAllByUpdatedAtAfter(LocalDateTime time);
+    Page<User> findByNicknameContaining(String keyword, Pageable pageable);
+
+    Page<User> findByNicknameStartingWith(String keyword, Pageable pageable);
+
+    @Query(
+            value = "SELECT * FROM users " +
+                    "WHERE MATCH(nickname) AGAINST (CONCAT('+', ?1) IN BOOLEAN MODE)",
+            nativeQuery = true
+    )
+    Page<User> searchByNicknameFts(String keyword, Pageable pageable);
 }

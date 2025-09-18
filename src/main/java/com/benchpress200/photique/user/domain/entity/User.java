@@ -52,9 +52,11 @@ public class User {
     private String introduction;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Provider provider;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
     @CreatedDate
