@@ -2,7 +2,7 @@ package com.benchpress200.photique.singlework.application;
 
 import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.entity.Notification;
-import com.benchpress200.photique.notification.domain.enumeration.Type;
+import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
 import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
 import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentCreateRequest;
@@ -50,16 +50,16 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
         User singleWorkWriter = userDomainService.findUser(singleWorkWriterId);
 
         Notification notification = Notification.builder()
-                .user(singleWorkWriter)
-                .type(Type.SINGLE_WORK_COMMENT)
+                .receiver(singleWorkWriter)
+                .type(NotificationType.SINGLE_WORK_COMMENT)
                 .targetId(singleWorkId)
                 .build();
 
-        // 알림 데이터 비동기 생성
-        notificationDomainService.createNotification(notification);
-
-        // 알림 비동기 처리
-        notificationDomainService.pushNewNotification(singleWorkWriterId);
+//        // 알림 데이터 비동기 생성
+//        notificationDomainService.createNotification(notification);
+//
+//        // 알림 비동기 처리
+//        notificationDomainService.pushNewNotification(singleWorkWriterId);
 
         // 업데이트 마킹
         singleWorkDomainService.markAsUpdated(singleWork);

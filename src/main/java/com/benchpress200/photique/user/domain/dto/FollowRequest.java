@@ -21,7 +21,7 @@ public class FollowRequest {
     ) {
         return Follow.builder()
                 .follower(follower)
-                .following(following)
+                .followee(following)
                 .build();
     }
 }

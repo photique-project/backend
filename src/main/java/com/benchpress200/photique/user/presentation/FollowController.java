@@ -5,7 +5,6 @@ import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.FollowService;
-import com.benchpress200.photique.user.domain.dto.FollowRequest;
 import com.benchpress200.photique.user.domain.dto.FollowerResponse;
 import com.benchpress200.photique.user.domain.dto.FollowingResponse;
 import com.benchpress200.photique.user.domain.dto.UnfollowRequest;
@@ -16,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,16 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class FollowController {
     private final FollowService followService;
-
-    @PostMapping(URL.FOLLOW_DOMAIN)
-    public ApiSuccessResponse<?> followUser(
-            @PathVariable("userId") final Long followerId,
-            @RequestBody final FollowRequest followRequest
-    ) {
-        followRequest.withFollowerId(followerId);
-        followService.followUser(followRequest);
-        return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
-    }
 
     @DeleteMapping(URL.FOLLOW_DOMAIN)
     public ApiSuccessResponse<?> unfollowUser(

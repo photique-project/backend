@@ -8,9 +8,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    Page<Notification> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
+    Page<Notification> findByReceiverOrderByCreatedAtDesc(User receiver, Pageable pageable);
 
-    List<Notification> findByUser(User user);
+    List<Notification> findByReceiver(User receiver);
 
-    Long countByUserAndIsReadFalse(User user);
+    Long countByReceiverAndIsReadFalse(User receiver);
 }

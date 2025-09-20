@@ -10,6 +10,7 @@ import com.benchpress200.photique.image.domain.exception.S3DeleteException;
 import com.benchpress200.photique.image.domain.exception.S3UploadException;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.exception.DuplicatedUserException;
+import com.benchpress200.photique.user.presentation.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -170,6 +171,16 @@ public class GlobalExceptionHandler {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.CONFLICT,
+                errorMessage
+        );
+    }
+
+    @ExceptionHandler(InvalidFollowRequestException.class)
+    public ResponseEntity<?> handleInvalidFollowRequestException(final InvalidFollowRequestException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
                 errorMessage
         );
     }

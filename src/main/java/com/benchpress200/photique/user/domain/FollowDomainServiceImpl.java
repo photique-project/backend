@@ -2,8 +2,8 @@ package com.benchpress200.photique.user.domain;
 
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.exception.UserException;
 import com.benchpress200.photique.user.domain.repository.FollowRepository;
+import com.benchpress200.photique.user.exception.UserException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,28 +18,11 @@ public class FollowDomainServiceImpl implements FollowDomainService {
     private final FollowRepository followRepository;
 
     @Override
-    public void createFollow(final Follow follow) {
-        // 이미 팔로우 중인지 확인하는 요청
-        Long followerId = follow.getFollower().getId();
-        Long followingId = follow.getFollowing().getId();
-
-        if (followerId.equals(followingId)) {
-            throw new UserException("Following yourself is not allowed", HttpStatus.BAD_REQUEST);
-        }
-
-        if (followRepository.existsByFollowerIdAndFollowingId(followerId, followingId)) {
-            throw new UserException("Already following the user", HttpStatus.CONFLICT);
-        }
-
-        followRepository.save(follow);
-    }
-
-    @Override
     public void deleteFollow(
             final User follower,
             final User following
     ) {
-        followRepository.deleteByFollowerAndFollowing(follower, following);
+        followRepository.deleteByFollowerAndFollowee(follower, following);
     }
 
     @Override
@@ -47,7 +30,7 @@ public class FollowDomainServiceImpl implements FollowDomainService {
             final User user,
             final Pageable pageable
     ) {
-        Page<Follow> followers = followRepository.findByFollowingId(user.getId(), pageable);
+        Page<Follow> followers = followRepository.findByFolloweeId(user.getId(), pageable);
 
         if (followers.getTotalElements() == 0) {
             throw new UserException("No users found.", HttpStatus.NOT_FOUND);
@@ -59,7 +42,7 @@ public class FollowDomainServiceImpl implements FollowDomainService {
     @Override
     public List<Follow> getFollowers(final User user) {
         Long userId = user.getId();
-        return followRepository.findByFollowingId(userId);
+        return followRepository.findByFolloweeId(userId);
     }
 
     @Override
@@ -76,25 +59,6 @@ public class FollowDomainServiceImpl implements FollowDomainService {
         return followings;
     }
 
-    @Override
-    public List<Follow> getFollowings(final User user) {
-        return followRepository.findByFollower(user);
-    }
-
-    @Override
-    public void deleteFollow(final User user) {
-        followRepository.deleteByFollowerOrFollowing(user, user);
-    }
-
-    @Override
-    public Long countFollowers(final User user) {
-        return followRepository.countByFollowing(user);
-    }
-
-    @Override
-    public Long countFollowings(final User user) {
-        return followRepository.countByFollower(user);
-    }
 
     @Override
     public boolean isFollowing(
@@ -105,6 +69,6 @@ public class FollowDomainServiceImpl implements FollowDomainService {
             return false;
         }
 
-        return followRepository.existsByFollowerIdAndFollowingId(followerId, followingId);
+        return followRepository.existsByFollowerIdAndFolloweeId(followerId, followingId);
     }
 }

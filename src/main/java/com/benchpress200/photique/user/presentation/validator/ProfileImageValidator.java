@@ -4,6 +4,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class ProfileImageValidator {
     private static final long MAX_SIZE = 5 * 1024 * 1024;
+    private static final String JPG = ".jpg";
+    private static final String JPEG = ".jpeg";
+    private static final String PNG = ".png";
 
     private ProfileImageValidator() {
     }
@@ -27,9 +30,9 @@ public class ProfileImageValidator {
         String filename = file.getOriginalFilename();
 
         return filename != null && (
-                filename.endsWith(".jpg") ||
-                        filename.endsWith(".jpeg") ||
-                        filename.endsWith(".png")
+                filename.endsWith(JPG) ||
+                        filename.endsWith(JPEG) ||
+                        filename.endsWith(PNG)
         );
     }
 }

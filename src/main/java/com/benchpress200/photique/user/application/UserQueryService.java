@@ -54,7 +54,7 @@ public class UserQueryService implements UserDetailsService {
         Long exhibitionCount = exhibitionRepository.countByWriter(user);
 
         // 본인'을' 팔로우하는 유저 카운팅
-        Long followerCount = followRepository.countByFollowing(user);
+        Long followerCount = followRepository.countByFollowee(user);
 
         // 본인'이' 팔로우하는 유저 카운팅
         Long followingCount = followRepository.countByFollower(user);
@@ -63,7 +63,7 @@ public class UserQueryService implements UserDetailsService {
         Long currentUserId = authenticationUserProviderPort.getCurrentUserId();
 
         // 본인 팔로우 유무 조회
-        boolean isFollowing = followRepository.existsByFollowerIdAndFollowingId(currentUserId, userId);
+        boolean isFollowing = followRepository.existsByFollowerIdAndFolloweeId(currentUserId, userId);
 
         return UserDetailsResult.of(
                 user,
@@ -89,7 +89,7 @@ public class UserQueryService implements UserDetailsService {
         Long exhibitionCount = exhibitionRepository.countByWriter(user);
 
         // 본인'을' 팔로우하는 유저 카운팅
-        Long followerCount = followRepository.countByFollowing(user);
+        Long followerCount = followRepository.countByFollowee(user);
 
         // 본인'이' 팔로우하는 유저 카운팅
         Long followingCount = followRepository.countByFollower(user);
@@ -119,7 +119,7 @@ public class UserQueryService implements UserDetailsService {
                 .toList();
 
         // 검색 결과 유저들 중에서 요청 유저가 팔로우한 유저 셋으로 조회
-        Set<Long> followingIds = followRepository.findFollowingIds(currentUserId, userIds);
+        Set<Long> followingIds = followRepository.findFolloweeIds(currentUserId, userIds);
 
         // 각 유저마다 팔로우 여부를 확인
         List<SearchedUser> users = userPage.stream()

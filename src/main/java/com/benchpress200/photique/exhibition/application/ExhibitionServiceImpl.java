@@ -27,9 +27,8 @@ import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 import com.benchpress200.photique.image.domain.ImageDomainService;
-import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.entity.Notification;
-import com.benchpress200.photique.notification.domain.enumeration.Type;
+import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
 import com.benchpress200.photique.tag.domain.TagDomainService;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.FollowDomainService;
@@ -61,7 +60,6 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     private final ExhibitionDomainService exhibitionDomainService;
     private final ExhibitionCommentDomainService exhibitionCommentDomainService;
     private final TagDomainService tagDomainService;
-    private final NotificationDomainService notificationDomainService;
     private final FollowDomainService followDomainService;
     private final ExhibitionCacheService exhibitionCacheService;
 
@@ -108,17 +106,17 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         follows.forEach((follow) -> {
             User follower = follow.getFollower();
             Notification notification = Notification.builder()
-                    .user(follower)
-                    .type(Type.FOLLOWING_EXHIBITION)
+                    .receiver(follower)
+                    .type(NotificationType.FOLLOWING_EXHIBITION)
                     .targetId(exhibitionId)
                     .build();
 
-            // 알림 데이터 비동기 생성
-            notificationDomainService.createNotification(notification);
-
-            // 알림 비동기 처리
-            Long followerId = follow.getId();
-            notificationDomainService.pushNewNotification(followerId);
+//            // 알림 데이터 비동기 생성
+//            notificationDomainService.createNotification(notification);
+//
+//            // 알림 비동기 처리
+//            Long followerId = follow.getId();
+//            notificationDomainService.pushNewNotification(followerId);
         });
     }
 
@@ -246,16 +244,16 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
 
         Notification notification = Notification.builder()
-                .user(exhibitionWriter)
-                .type(Type.EXHIBITION_LIKE)
+                .receiver(exhibitionWriter)
+                .type(NotificationType.EXHIBITION_LIKE)
                 .targetId(exhibitionId)
                 .build();
 
-        // 알림 데이터 비동기 생성
-        notificationDomainService.createNotification(notification);
-
-        // 알림 비동기 처리
-        notificationDomainService.pushNewNotification(exhibitionWriterId);
+//        // 알림 데이터 비동기 생성
+//        notificationDomainService.createNotification(notification);
+//
+//        // 알림 비동기 처리
+//        notificationDomainService.pushNewNotification(exhibitionWriterId);
 
         // 업데이트 마킹
         exhibitionDomainService.markAsUpdated(exhibition);
@@ -302,16 +300,16 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
 
         Notification notification = Notification.builder()
-                .user(exhibitionWriter)
-                .type(Type.EXHIBITION_BOOKMARK)
+                .receiver(exhibitionWriter)
+                .type(NotificationType.EXHIBITION_BOOKMARK)
                 .targetId(exhibitionId)
                 .build();
 
-        // 알림 데이터 비동기 생성
-        notificationDomainService.createNotification(notification);
-
-        // 알림 비동기 처리
-        notificationDomainService.pushNewNotification(exhibitionWriterId);
+//        // 알림 데이터 비동기 생성
+//        notificationDomainService.createNotification(notification);
+//
+//        // 알림 비동기 처리
+//        notificationDomainService.pushNewNotification(exhibitionWriterId);
     }
 
     @Override

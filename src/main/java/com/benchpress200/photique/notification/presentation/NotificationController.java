@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA + URL.NOTIFICATION_DOMAIN)
@@ -25,10 +24,6 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    @GetMapping(URL.SUB)
-    public SseEmitter subscribe(@PathVariable("userId") Long userId) {
-        return notificationService.subscribe(userId);
-    }
 
     @GetMapping
     public ApiSuccessResponse<?> getNotifications(
@@ -64,7 +59,7 @@ public class NotificationController {
         notificationService.deleteNotification(userId, notificationId);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
-    
+
     @GetMapping(URL.UNREAD)
     public ApiSuccessResponse<?> countUnread(
             @PathVariable("userId") final Long userId

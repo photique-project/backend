@@ -11,30 +11,28 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface FollowRepository extends JpaRepository<Follow, Long> {
-    void deleteByFollowerAndFollowing(User Follower, User Following);
+    void deleteByFollowerAndFollowee(User Follower, User Followee);
 
-    Page<Follow> findByFollowingId(Long followingId, Pageable pageable);
+    Page<Follow> findByFolloweeId(Long followeeId, Pageable pageable);
 
-    List<Follow> findByFollowingId(Long followingId);
+    List<Follow> findByFolloweeId(Long followeeId);
 
     Page<Follow> findByFollowerId(Long followerId, Pageable pageable);
 
-    void deleteByFollowerOrFollowing(User follower, User following);
 
-    Long countByFollowing(User following);
+    Long countByFollowee(User followee);
 
     Long countByFollower(User follower);
 
-    boolean existsByFollowerIdAndFollowingId(Long followerId, Long followingId);
+    boolean existsByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
 
-    List<Follow> findByFollower(User follower);
 
-    @Query("SELECT f.following.id " +
+    @Query("SELECT f.followee.id " +
             "FROM Follow f " +
-            "WHERE f.follower.id = :currentUserId " +
-            "AND f.following.id IN :targetUserIds")
-    Set<Long> findFollowingIds(
-            @Param("currentUserId") Long currentUserId,
-            @Param("targetUserIds") List<Long> targetUserIds
+            "WHERE f.follower.id = :followerId " +
+            "AND f.followee.id IN :followeeIds")
+    Set<Long> findFolloweeIds(
+            @Param("followerId") Long followerId,
+            @Param("followeeIds") List<Long> followeeIds
     );
 }
