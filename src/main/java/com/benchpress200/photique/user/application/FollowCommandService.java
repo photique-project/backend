@@ -4,12 +4,13 @@ import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPor
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
 import com.benchpress200.photique.notification.domain.repository.NotificationRepository;
+import com.benchpress200.photique.user.application.exception.DuplicateFollowRequestException;
+import com.benchpress200.photique.user.application.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.repository.FollowRepository;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
-import com.benchpress200.photique.user.presentation.exception.InvalidFollowRequestException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,11 @@ public class FollowCommandService {
 
         if (followerId.equals(followeeId)) {
             throw new InvalidFollowRequestException();
+        }
+
+        // 이미 팔로우 관계 데이터가 있다면
+        if (followRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
+            throw new DuplicateFollowRequestException();
         }
 
         User follower = userRepository.findById(followerId)

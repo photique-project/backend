@@ -8,9 +8,10 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.image.domain.exception.ImageUploaderFileWriteException;
 import com.benchpress200.photique.image.domain.exception.S3DeleteException;
 import com.benchpress200.photique.image.domain.exception.S3UploadException;
+import com.benchpress200.photique.user.application.exception.DuplicateFollowRequestException;
+import com.benchpress200.photique.user.application.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.exception.DuplicatedUserException;
-import com.benchpress200.photique.user.presentation.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -175,12 +176,24 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // 본인 팔로우 요청 예외 처리 응답
     @ExceptionHandler(InvalidFollowRequestException.class)
     public ResponseEntity<?> handleInvalidFollowRequestException(final InvalidFollowRequestException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
                 HttpStatus.BAD_REQUEST,
+                errorMessage
+        );
+    }
+
+    // 중복 팔로우 요청 예외 처리 응답
+    @ExceptionHandler(DuplicateFollowRequestException.class)
+    public ResponseEntity<?> handleDuplicateFollowRequestException(final DuplicateFollowRequestException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.CONFLICT,
                 errorMessage
         );
     }

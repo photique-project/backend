@@ -3,6 +3,7 @@ package com.benchpress200.photique.user.domain.repository;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     Page<Follow> findByFollowerId(Long followerId, Pageable pageable);
 
+    Optional<Follow> findByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
 
     Long countByFollowee(User followee);
 
