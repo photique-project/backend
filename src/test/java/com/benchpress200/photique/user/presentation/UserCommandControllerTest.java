@@ -254,8 +254,7 @@ public class UserCommandControllerTest {
 
         // WHEN and THEN
         mockMvc.perform(request)
-                .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.status").value(204));
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -412,8 +411,7 @@ public class UserCommandControllerTest {
 
         // WHEN and THEN
         mockMvc.perform(request)
-                .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.status").value(204));
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -480,8 +478,7 @@ public class UserCommandControllerTest {
 
         // WHEN and THEN
         mockMvc.perform(request)
-                .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.status").value(204));
+                .andExpect(status().isNoContent());
     }
 
     @ParameterizedTest
@@ -547,8 +544,7 @@ public class UserCommandControllerTest {
 
         // WHEN and THEN
         mockMvc.perform(request)
-                .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.status").value(204));
+                .andExpect(status().isNoContent());
     }
 
     @Test

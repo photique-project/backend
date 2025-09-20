@@ -39,7 +39,8 @@ public class FollowCommandControllerTest {
     @BeforeEach
     void setUp() {
         // 컨트롤러 단위 테스트이므로 FollowCommandControllerTest 항상 정상 동작하도록 설정
-        Mockito.doReturn(true).when(followCommandService).follow(Mockito.any());
+        Mockito.doNothing().when(followCommandService).follow(Mockito.any());
+        Mockito.doNothing().when(followCommandService).unfollow(Mockito.any());
     }
 
     @Test
@@ -67,6 +68,39 @@ public class FollowCommandControllerTest {
 
         RequestBuilder request = MockMvcRequestBuilders
                 .post(URL.BASE_URL + URL.USER_DOMAIN + invalidUserId + URL.FOLLOW_DOMAIN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    @DisplayName("unfollow 성공 테스트")
+    void unfollow_성공_테스트() throws Exception {
+        // GIVEN
+        String userId = "/1";
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete(URL.BASE_URL + URL.USER_DOMAIN + userId + URL.FOLLOW_DOMAIN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("unfollow 실패 테스트 - 유효하지 않은 경로 변수")
+    void unfollow_실패_테스트_유효하지_않은_경로_변수() throws Exception {
+        // GIVEN
+        String invalidUserId = "/a";
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete(URL.BASE_URL + URL.USER_DOMAIN + invalidUserId + URL.FOLLOW_DOMAIN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
 
