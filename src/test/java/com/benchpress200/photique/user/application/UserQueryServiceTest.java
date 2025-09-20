@@ -3,14 +3,18 @@ package com.benchpress200.photique.user.application;
 import com.benchpress200.photique.AbstractTestContainerConfig;
 import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
+import com.benchpress200.photique.user.application.query.SearchUsersQuery;
 import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
+import com.benchpress200.photique.user.application.result.SearchUsersResult;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
+import java.util.ArrayList;
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +22,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -185,5 +192,66 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
 
         // WHEN and THEN
         Assertions.assertThatThrownBy(() -> userQueryService.getMyDetails()).isInstanceOf(UserNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("searchUsers 테스트 - 30명 유저 검색")
+    void searchUsers_테스트_30명_유저_검색() {
+        // GIVEN
+        String keyword = "ab";
+        int page = 0;
+        int size = 30;
+        Sort sort = Sort.by("nickname").ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        List<User> users = new ArrayList<>();
+
+        for (int i = 1; i <= 45; i++) { // ab로 시작하는 유저 45명
+            users.add(
+                    User.builder()
+                            .email("ab_user" + i + "@test.com")
+                            .password("password" + i)
+                            .nickname("ab_" + i)
+                            .profileImage("https://example.com/ab" + i + ".png")
+                            .provider(Provider.LOCAL)
+                            .role(Role.USER)
+                            .build()
+            );
+        }
+
+        for (int i = 1; i <= 15; i++) { // cd로 시작하는 유저 15명
+            users.add(
+                    User.builder()
+                            .email("cd_user" + i + "@test.com")
+                            .password("password" + i)
+                            .nickname("cd_" + i)
+                            .profileImage("https://example.com/cd" + i + ".png")
+                            .provider(Provider.LOCAL)
+                            .role(Role.USER)
+                            .build()
+            );
+        }
+
+        userRepository.saveAll(users);
+
+        Mockito.doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+
+        SearchUsersQuery searchUsersQuery = SearchUsersQuery.builder()
+                .keyword(keyword)
+                .pageable(pageable)
+                .build();
+
+        // WHEN
+        SearchUsersResult searchUsersResult = userQueryService.searchUsers(searchUsersQuery);
+
+        // THEN
+        Assertions.assertThat(searchUsersResult.getPage()).isEqualTo(page);
+        Assertions.assertThat(searchUsersResult.getSize()).isEqualTo(size);
+        Assertions.assertThat(searchUsersResult.getTotalElements()).isEqualTo(45);
+        Assertions.assertThat(searchUsersResult.isFirst()).isTrue();
+        Assertions.assertThat(searchUsersResult.isLast()).isFalse();
+        Assertions.assertThat(searchUsersResult.isHasNext()).isTrue();
+        Assertions.assertThat(searchUsersResult.isHasPrevious()).isFalse();
+        Assertions.assertThat(searchUsersResult.getUsers().size()).isEqualTo(size);
     }
 }
