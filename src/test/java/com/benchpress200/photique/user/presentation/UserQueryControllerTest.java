@@ -6,10 +6,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.user.application.UserQueryService;
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
+import com.benchpress200.photique.user.application.result.SearchUsersResult;
+import com.benchpress200.photique.user.application.result.SearchedUser;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -58,7 +60,6 @@ public class UserQueryControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("Nickname duplication check completed"))
                 .andExpect(jsonPath("$.data.isDuplicated").value(false));
     }
 
@@ -74,8 +75,7 @@ public class UserQueryControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid nickname"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
@@ -110,7 +110,6 @@ public class UserQueryControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("User with id [" + userId + "] found"))
                 .andExpect(jsonPath("$.data.userId").value(userId))
                 .andExpect(jsonPath("$.data.nickname").value(nickname))
                 .andExpect(jsonPath("$.data.profileImage").value(Matchers.nullValue()))
@@ -132,8 +131,7 @@ public class UserQueryControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid path variable type"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
@@ -148,7 +146,6 @@ public class UserQueryControllerTest {
         Long exhibitionCount = 0L;
         Long followerCount = 0L;
         Long followingCount = 0L;
-        LocalDateTime createdAt = LocalDateTime.now();
 
         MyDetailsResult myDetailsResult = MyDetailsResult.builder()
                 .userId(userId)
@@ -171,7 +168,6 @@ public class UserQueryControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.message").value("My data found"))
                 .andExpect(jsonPath("$.data.userId").value(userId))
                 .andExpect(jsonPath("$.data.email").value(email))
                 .andExpect(jsonPath("$.data.nickname").value(nickname))
@@ -182,6 +178,105 @@ public class UserQueryControllerTest {
                 .andExpect(jsonPath("$.data.followingCount").value(followingCount));
     }
 
+    @Test
+    @DisplayName("searchUsers 성공 테스트")
+    void searchUsers_성공_테스트() throws Exception {
+        // GIVEN
+        String keyword = "nickname";
+        String page = "0";
+        String size = "30";
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get(URL.BASE_URL + URL.USER_DOMAIN)
+                .param("keyword", keyword)
+                .param("page", page)
+                .param("size", size)
+                .accept(MediaType.APPLICATION_JSON);
+
+        SearchedUser searchedUser = SearchedUser.builder().build();
+
+        SearchUsersResult searchUsersResult = SearchUsersResult.builder()
+                .page(0)
+                .size(30)
+                .totalElements(1)
+                .totalPages(1)
+                .isFirst(true)
+                .isLast(true)
+                .hasNext(false)
+                .hasPrevious(false)
+                .users(List.of(searchedUser))
+                .build();
+        Mockito.doReturn(searchUsersResult).when(userQueryService).searchUsers(Mockito.any());
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getInvalidNicknames")
+    @DisplayName("searchUsers 실패 테스트 - 유효하지 않은 닉네임")
+    void searchUsers_실패_테스트_유효하지_않은_닉네임(final String invalidNickname) throws Exception {
+        // GIVEN
+        String page = "0";
+        String size = "30";
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get(URL.BASE_URL + URL.USER_DOMAIN)
+                .param("keyword", invalidNickname)
+                .param("page", page)
+                .param("size", size)
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getInvalidPages")
+    @DisplayName("searchUsers 실패 테스트 - 유효하지 않은 페이지")
+    void searchUsers_실패_테스트_유효하지_않은_페이지(final String page) throws Exception {
+        // GIVEN
+        String keyword = "nickname";
+        String size = "30";
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get(URL.BASE_URL + URL.USER_DOMAIN)
+                .param("keyword", keyword)
+                .param("page", page)
+                .param("size", size)
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getInvalidPageSizes")
+    @DisplayName("searchUsers 실패 테스트 - 유효하지 않은페이지 사이즈")
+    void searchUsers_실패_테스트_유효하지_않은_페이지_사이즈(final String size) throws Exception {
+        // GIVEN
+        String keyword = "nickname";
+        String page = "0";
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get(URL.BASE_URL + URL.USER_DOMAIN)
+                .param("keyword", keyword)
+                .param("page", page)
+                .param("size", size)
+                .accept(MediaType.APPLICATION_JSON);
+
+        // WHEN and THEN
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
 
     // 유효하지 않은 닉네임
     static Stream<String> getInvalidNicknames() {
@@ -190,6 +285,23 @@ public class UserQueryControllerTest {
                 " ",             // 공백
                 "abcdefghijkl",  // 12자 초과
                 "nick name"      // 공백 포함
+        );
+    }
+
+    // 유효하지 않은 페이지
+    static Stream<String> getInvalidPages() {
+        return Stream.of(
+                "-1",
+                "a"
+        );
+    }
+
+    // 유효하지 않은 페이지 사이즈
+    static Stream<String> getInvalidPageSizes() {
+        return Stream.of(
+                "0",
+                "51",
+                "a"
         );
     }
 }

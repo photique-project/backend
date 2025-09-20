@@ -133,7 +133,7 @@ public class GlobalExceptionHandler {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.BAD_REQUEST,
-                "Invalid path variable type"
+                "Invalid path or parameter variable type"
         );
     }
 

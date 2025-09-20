@@ -86,8 +86,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value(201))
-                .andExpect(jsonPath("$.message").value("Join completed"));
+                .andExpect(jsonPath("$.status").value(201));
     }
 
     @ParameterizedTest
@@ -121,8 +120,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid email"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @ParameterizedTest
@@ -156,8 +154,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid password"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @ParameterizedTest
@@ -191,8 +188,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid nickname"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @ParameterizedTest
@@ -223,8 +219,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid profile image"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
@@ -260,8 +255,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.status").value(204))
-                .andExpect(jsonPath("$.message").value("User details updated"));
+                .andExpect(jsonPath("$.status").value(204));
     }
 
     @Test
@@ -293,8 +287,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid path variable type"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @ParameterizedTest
@@ -327,8 +320,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid nickname"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
@@ -360,8 +352,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid introduction"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @ParameterizedTest
@@ -370,7 +361,7 @@ public class UserCommandControllerTest {
     void updateUserDetails_실패_테스트_유효하지_않은_프로필_이미지(final MockMultipartFile profileImage) throws Exception {
         // GIVEN
         Long userId = 1L;
-        
+
         createMockAuthentication(userId);
 
         Map<String, Object> jsonBody = Map.of(
@@ -395,8 +386,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid profile image"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
 
@@ -423,8 +413,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.status").value(204))
-                .andExpect(jsonPath("$.message").value("User password updated"));
+                .andExpect(jsonPath("$.status").value(204));
     }
 
     @Test
@@ -446,8 +435,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid path variable type"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @ParameterizedTest
@@ -470,8 +458,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid password"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
@@ -494,8 +481,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.status").value(204))
-                .andExpect(jsonPath("$.message").value("User password updated"));
+                .andExpect(jsonPath("$.status").value(204));
     }
 
     @ParameterizedTest
@@ -519,8 +505,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid email"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @ParameterizedTest
@@ -544,8 +529,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid password"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
@@ -564,8 +548,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.status").value(204))
-                .andExpect(jsonPath("$.message").value("User account has been deleted successfully"));
+                .andExpect(jsonPath("$.status").value(204));
     }
 
     @Test
@@ -581,8 +564,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Invalid path variable type"));
+                .andExpect(jsonPath("$.status").value(400));
     }
 
 

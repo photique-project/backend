@@ -23,7 +23,6 @@ public class SearchUsersResult {
             final List<SearchedUser> users,
             final Page<User> userPage
     ) {
-
         int page = userPage.getNumber();
         int size = userPage.getSize();
         long totalElements = userPage.getTotalElements();
