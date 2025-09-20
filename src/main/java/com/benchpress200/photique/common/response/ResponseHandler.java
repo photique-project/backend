@@ -41,4 +41,11 @@ public class ResponseHandler {
                         LocalDateTime.now()
                 ));
     }
+
+    public static ResponseEntity<?> handleResponse(
+            final HttpStatus status
+    ) {
+        return ResponseEntity
+                .status(status).build();
+    }
 }

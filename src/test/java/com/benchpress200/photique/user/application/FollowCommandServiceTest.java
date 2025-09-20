@@ -4,7 +4,8 @@ import com.benchpress200.photique.AbstractTestContainerConfig;
 import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.repository.NotificationRepository;
-import com.benchpress200.photique.user.application.exception.DuplicateFollowRequestException;
+import com.benchpress200.photique.user.application.exception.AlreadyUnfollowException;
+import com.benchpress200.photique.user.application.exception.DuplicatedFollowException;
 import com.benchpress200.photique.user.application.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.entity.Follow;
@@ -141,12 +142,10 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
 
         Mockito.doReturn(followerId).when(authenticationUserProviderPort).getCurrentUserId();
 
-        // WHEN
+        // WHEN and THEN
         followCommandService.follow(followeeId);
-
-        // THEN
         Assertions.assertThatThrownBy(() -> followCommandService.follow(followeeId))
-                .isInstanceOf(DuplicateFollowRequestException.class);
+                .isInstanceOf(DuplicatedFollowException.class);
     }
 
     @Test
@@ -293,5 +292,202 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
 
         Assertions.assertThat(follow.isPresent()).isFalse();
         Assertions.assertThat(notifications.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("unfollow 커밋 테스트")
+    void unfollow_커밋_테스트() {
+        // GIVEN
+        User follower = User.builder()
+                .email("example1@example.com")
+                .nickname("nickname1")
+                .password("password12!@")
+                .role(Role.USER)
+                .provider(Provider.LOCAL)
+                .build();
+
+        User followee = User.builder()
+                .email("example2@example.com")
+                .nickname("nickname2")
+                .password("password12!@")
+                .role(Role.USER)
+                .provider(Provider.LOCAL)
+                .build();
+
+        follower = userRepository.save(follower);
+        followee = userRepository.save(followee);
+
+        Long followerId = follower.getId();
+        Long followeeId = followee.getId();
+
+        Mockito.doReturn(followerId).when(authenticationUserProviderPort).getCurrentUserId();
+
+        followCommandService.follow(followeeId);
+
+        // WHEN
+        followCommandService.unfollow(followeeId);
+        Optional<Follow> optionalFollow = followRepository.findByFollowerIdAndFolloweeId(followerId, followeeId);
+
+        // THEN
+        Assertions.assertThat(optionalFollow.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("unfollow 롤백 테스트 - 이미 언팔로우")
+    void unfollow_롤백_테스트_이미_언팔로우() {
+        // GIVEN
+        User follower = User.builder()
+                .email("example1@example.com")
+                .nickname("nickname1")
+                .password("password12!@")
+                .role(Role.USER)
+                .provider(Provider.LOCAL)
+                .build();
+
+        User followee = User.builder()
+                .email("example2@example.com")
+                .nickname("nickname2")
+                .password("password12!@")
+                .role(Role.USER)
+                .provider(Provider.LOCAL)
+                .build();
+
+        follower = userRepository.save(follower);
+        followee = userRepository.save(followee);
+
+        Long followerId = follower.getId();
+        Long followeeId = followee.getId();
+
+        Mockito.doReturn(followerId).when(authenticationUserProviderPort).getCurrentUserId();
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> followCommandService.unfollow(followeeId))
+                .isInstanceOf(AlreadyUnfollowException.class);
+
+        Optional<Follow> optionalFollow = followRepository.findByFollowerIdAndFolloweeId(followerId, followeeId);
+        Assertions.assertThat(optionalFollow.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("unfollow 롤백 테스트 - 팔로워 조회 실패")
+    void unfollow_롤백_테스트_팔로워_조회_실패() {
+        // GIVEN
+        User follower = User.builder()
+                .email("example1@example.com")
+                .nickname("nickname1")
+                .password("password12!@")
+                .role(Role.USER)
+                .provider(Provider.LOCAL)
+                .build();
+
+        User followee = User.builder()
+                .email("example2@example.com")
+                .nickname("nickname2")
+                .password("password12!@")
+                .role(Role.USER)
+                .provider(Provider.LOCAL)
+                .build();
+
+        follower = userRepository.save(follower);
+        followee = userRepository.save(followee);
+
+        Long followerId = follower.getId();
+        Long followeeId = followee.getId();
+
+        Mockito.doReturn(followerId).when(authenticationUserProviderPort).getCurrentUserId();
+        followCommandService.follow(followeeId);
+
+        Follow follow = Follow.of(follower, followee);
+        Mockito.doReturn(Optional.of(follow)).when(followRepository)
+                .findByFollowerIdAndFolloweeId(Mockito.any(), Mockito.any());
+        Mockito.doReturn(followerId * -1).when(authenticationUserProviderPort).getCurrentUserId();
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> followCommandService.unfollow(followeeId))
+                .isInstanceOf(UserNotFoundException.class);
+
+        Optional<Follow> optionalFollow = followRepository.findByFollowerIdAndFolloweeId(followerId, followeeId);
+        Assertions.assertThat(optionalFollow.isPresent()).isTrue();
+    }
+
+    @Test
+    @DisplayName("unfollow 롤백 테스트 - 팔로이 조회 실패")
+    void unfollow_롤백_테스트_팔로이_조회_실패() {
+        // GIVEN
+        User follower = User.builder()
+                .email("example1@example.com")
+                .nickname("nickname1")
+                .password("password12!@")
+                .role(Role.USER)
+                .provider(Provider.LOCAL)
+                .build();
+
+        User followee = User.builder()
+                .email("example2@example.com")
+                .nickname("nickname2")
+                .password("password12!@")
+                .role(Role.USER)
+                .provider(Provider.LOCAL)
+                .build();
+
+        follower = userRepository.save(follower);
+        followee = userRepository.save(followee);
+
+        Long followerId = follower.getId();
+        Long followeeId = followee.getId();
+
+        Mockito.doReturn(followerId).when(authenticationUserProviderPort).getCurrentUserId();
+        followCommandService.follow(followeeId);
+
+        Follow follow = Follow.of(follower, followee);
+        Mockito.doReturn(Optional.of(follow)).when(followRepository)
+                .findByFollowerIdAndFolloweeId(Mockito.any(), Mockito.any());
+        Mockito.doReturn(followerId).when(authenticationUserProviderPort).getCurrentUserId();
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> followCommandService.unfollow(followeeId * -1))
+                .isInstanceOf(UserNotFoundException.class);
+
+        Optional<Follow> optionalFollow = followRepository.findByFollowerIdAndFolloweeId(followerId, followeeId);
+        Assertions.assertThat(optionalFollow.isPresent()).isTrue();
+    }
+
+    @Test
+    @DisplayName("unfollow 롤백 테스트 - 팔로우 삭제 실패")
+    void unfollow_롤백_테스트_팔로우_삭제_실패() {
+        // GIVEN
+        User follower = User.builder()
+                .email("example1@example.com")
+                .nickname("nickname1")
+                .password("password12!@")
+                .role(Role.USER)
+                .provider(Provider.LOCAL)
+                .build();
+
+        User followee = User.builder()
+                .email("example2@example.com")
+                .nickname("nickname2")
+                .password("password12!@")
+                .role(Role.USER)
+                .provider(Provider.LOCAL)
+                .build();
+
+        follower = userRepository.save(follower);
+        followee = userRepository.save(followee);
+
+        Long followerId = follower.getId();
+        Long followeeId = followee.getId();
+
+        Mockito.doReturn(followerId).when(authenticationUserProviderPort).getCurrentUserId();
+        Mockito.doThrow(RuntimeException.class).when(followRepository).delete(Mockito.any());
+
+        followCommandService.follow(followeeId);
+
+        // WHEN and THEN
+        Assertions.assertThatThrownBy(() -> followCommandService.unfollow(followeeId))
+                .isInstanceOf(RuntimeException.class);
+
+        Optional<Follow> optionalFollow = followRepository.findByFollowerIdAndFolloweeId(followerId, followeeId);
+        Assertions.assertThat(optionalFollow.isPresent()).isTrue();
     }
 }

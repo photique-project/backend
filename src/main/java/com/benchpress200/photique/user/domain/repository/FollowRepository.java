@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface FollowRepository extends JpaRepository<Follow, Long> {
-    void deleteByFollowerAndFollowee(User Follower, User Followee);
+    void deleteByFollowerAndFollowee(User follower, User followee);
 
     Page<Follow> findByFolloweeId(Long followeeId, Pageable pageable);
 
@@ -20,14 +20,14 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     Page<Follow> findByFollowerId(Long followerId, Pageable pageable);
 
-    Optional<Follow> findByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
 
     Long countByFollowee(User followee);
 
     Long countByFollower(User follower);
 
-    boolean existsByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
+    Optional<Follow> findByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
 
+    boolean existsByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
 
     @Query("SELECT f.followee.id " +
             "FROM Follow f " +

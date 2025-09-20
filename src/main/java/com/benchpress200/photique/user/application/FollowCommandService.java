@@ -4,7 +4,8 @@ import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPor
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
 import com.benchpress200.photique.notification.domain.repository.NotificationRepository;
-import com.benchpress200.photique.user.application.exception.DuplicateFollowRequestException;
+import com.benchpress200.photique.user.application.exception.AlreadyUnfollowException;
+import com.benchpress200.photique.user.application.exception.DuplicatedFollowException;
 import com.benchpress200.photique.user.application.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.entity.Follow;
@@ -28,15 +29,18 @@ public class FollowCommandService {
         // 팔로워 유저 조회
         Long followerId = authenticationUserProviderPort.getCurrentUserId();
 
+        // 본인을 팔로우 한다면
         if (followerId.equals(followeeId)) {
             throw new InvalidFollowRequestException();
         }
 
-        // 이미 팔로우 관계 데이터가 있다면
-        if (followRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            throw new DuplicateFollowRequestException();
-        }
+        // 이미 팔로우 관계 데이터가 있다면 바로 성공 응답줘서 멱등 처리
+        followRepository.findByFollowerIdAndFolloweeId(followerId, followeeId)
+                .ifPresent(follow -> {
+                    throw new DuplicatedFollowException();
+                });
 
+        // 팔로워 유저 조회
         User follower = userRepository.findById(followerId)
                 .orElseThrow(() -> new UserNotFoundException(followerId));
 
@@ -56,5 +60,32 @@ public class FollowCommandService {
         );
 
         notificationRepository.save(notification);
+    }
+
+
+    @Transactional
+    public void unfollow(final Long followeeId) {
+        // 팔로워 유저 조회
+        Long followerId = authenticationUserProviderPort.getCurrentUserId();
+
+        // 본인을 언팔로우 한다면
+        if (followerId.equals(followeeId)) {
+            throw new InvalidFollowRequestException();
+        }
+
+        // 이미 팔로우 관계 데이터가 없다면 바로 성공 응답줘서 멱등 처리
+        Follow follow = followRepository.findByFollowerIdAndFolloweeId(followerId, followeeId)
+                .orElseThrow(AlreadyUnfollowException::new);
+
+        // 팔로워 유저 조회
+        userRepository.findById(followerId)
+                .orElseThrow(() -> new UserNotFoundException(followerId));
+
+        // 팔로잉(팔로우 대상) 유저 조회
+        userRepository.findById(followeeId)
+                .orElseThrow(() -> new UserNotFoundException(followerId));
+
+        // 팔로우 데이터 삭제
+        followRepository.delete(follow);
     }
 }

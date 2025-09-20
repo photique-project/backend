@@ -7,6 +7,7 @@ import com.benchpress200.photique.user.presentation.constant.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +23,13 @@ public class FollowCommandController {
     public ResponseEntity<?> follow(@PathVariable("userId") final Long followeeId) {
         followCommandService.follow(followeeId);
 
-        return ResponseHandler.handleResponse(
-                HttpStatus.CREATED,
-                ResponseMessage.FOLLOWING_COMPLETED
-        );
+        return ResponseHandler.handleResponse(HttpStatus.CREATED, ResponseMessage.FOLLOWING_COMPLETED);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> unfollow(@PathVariable("userId") final Long followeeId) {
+        followCommandService.unfollow(followeeId);
+
+        return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);
     }
 }

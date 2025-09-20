@@ -7,4 +7,6 @@ public class ResponseMessage {
     public static final String WITHDRAW_COMPLETED = "User account has been deleted successfully";
     public static final String NICKNAME_VALIDATED = "Nickname duplication check completed";
     public static final String FOLLOWING_COMPLETED = "Following completed";
+    public static final String ALREADY_FOLLOWING = "Already following";
+    public static final String UNFOLLOWING_COMPLETED = "Unfollowing completed";
 }

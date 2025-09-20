@@ -8,7 +8,7 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.image.domain.exception.ImageUploaderFileWriteException;
 import com.benchpress200.photique.image.domain.exception.S3DeleteException;
 import com.benchpress200.photique.image.domain.exception.S3UploadException;
-import com.benchpress200.photique.user.application.exception.DuplicateFollowRequestException;
+import com.benchpress200.photique.user.application.exception.DuplicatedFollowException;
 import com.benchpress200.photique.user.application.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.exception.DuplicatedUserException;
@@ -187,14 +187,11 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 중복 팔로우 요청 예외 처리 응답
-    @ExceptionHandler(DuplicateFollowRequestException.class)
-    public ResponseEntity<?> handleDuplicateFollowRequestException(final DuplicateFollowRequestException e) {
-        String errorMessage = e.getMessage();
-
+    @ExceptionHandler(DuplicatedFollowException.class)
+    public ResponseEntity<?> handleDuplicatedFollowException(final DuplicatedFollowException e) {
         return ResponseHandler.handleResponse(
-                HttpStatus.CONFLICT,
-                errorMessage
+                HttpStatus.NO_CONTENT
         );
     }
+
 }

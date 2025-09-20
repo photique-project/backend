@@ -67,10 +67,7 @@ public class UserCommandController {
         UpdateUserDetailsCommand updateUserDetailsCommand = updateUserDetailsRequest.toCommand(userId, profileImage);
         userCommandService.updateUserDetails(updateUserDetailsCommand);
 
-        return ResponseHandler.handleResponse(
-                HttpStatus.NO_CONTENT,
-                ResponseMessage.USER_DETAILS_UPDATED
-        );
+        return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);
     }
 
 
@@ -87,10 +84,7 @@ public class UserCommandController {
         UpdateUserPasswordCommand updateUserPasswordCommand = updateUserPasswordRequest.toCommand(userId);
         userCommandService.updateUserPassword(updateUserPasswordCommand);
 
-        return ResponseHandler.handleResponse(
-                HttpStatus.NO_CONTENT,
-                ResponseMessage.USER_PASSWORD_UPDATED
-        );
+        return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);
     }
 
 
@@ -105,10 +99,7 @@ public class UserCommandController {
         ResetUserPasswordCommand resetUserPasswordCommand = resetUserPasswordRequest.toCommand();
         userCommandService.resetUserPassword(resetUserPasswordCommand);
 
-        return ResponseHandler.handleResponse(
-                HttpStatus.NO_CONTENT,
-                ResponseMessage.USER_PASSWORD_UPDATED
-        );
+        return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);
     }
 
 
@@ -120,9 +111,6 @@ public class UserCommandController {
     public ResponseEntity<?> withdraw(@PathVariable("userId") final Long userId) {
         userCommandService.withdraw(userId);
 
-        return ResponseHandler.handleResponse(
-                HttpStatus.NO_CONTENT,
-                ResponseMessage.WITHDRAW_COMPLETED
-        );
+        return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);
     }
 }

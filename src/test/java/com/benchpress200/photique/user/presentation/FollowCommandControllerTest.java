@@ -28,9 +28,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @EnableMethodSecurity(prePostEnabled = false)
 public class FollowCommandControllerTest {
     @Autowired
-    FollowCommandController followCommandController;
-
-    @Autowired
     MockMvc mockMvc;
 
     @Autowired
@@ -42,7 +39,7 @@ public class FollowCommandControllerTest {
     @BeforeEach
     void setUp() {
         // 컨트롤러 단위 테스트이므로 FollowCommandControllerTest 항상 정상 동작하도록 설정
-        Mockito.doNothing().when(followCommandService).follow(Mockito.any());
+        Mockito.doReturn(true).when(followCommandService).follow(Mockito.any());
     }
 
     @Test
