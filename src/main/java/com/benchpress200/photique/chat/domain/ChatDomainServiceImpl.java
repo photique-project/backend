@@ -1,6 +1,5 @@
 package com.benchpress200.photique.chat.domain;
 
-import com.benchpress200.photique.chat.ExhibitionSessionRepository;
 import com.benchpress200.photique.chat.domain.entity.ExhibitionSession;
 import com.benchpress200.photique.chat.exception.ChatException;
 import lombok.RequiredArgsConstructor;

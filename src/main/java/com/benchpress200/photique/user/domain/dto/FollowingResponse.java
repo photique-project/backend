@@ -17,10 +17,10 @@ public class FollowingResponse {
 
     public static FollowingResponse from(final Follow follow) {
         return FollowingResponse.builder()
-                .id(follow.getFollowing().getId())
-                .nickname(follow.getFollowing().getNickname())
-                .introduction(follow.getFollowing().getIntroduction())
-                .profileImage(follow.getFollowing().getProfileImage())
+                .id(follow.getFollowee().getId())
+                .nickname(follow.getFollowee().getNickname())
+                .introduction(follow.getFollowee().getIntroduction())
+                .profileImage(follow.getFollowee().getProfileImage())
                 .isFollowing(true)
                 .build();
     }

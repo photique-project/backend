@@ -3,7 +3,7 @@ package com.benchpress200.photique.tag.domain;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
 import com.benchpress200.photique.tag.domain.entity.Tag;
-import com.benchpress200.photique.tag.infrastructure.TagRepository;
+import com.benchpress200.photique.tag.domain.repository.TagRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

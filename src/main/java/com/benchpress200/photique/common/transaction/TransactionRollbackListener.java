@@ -2,12 +2,10 @@ package com.benchpress200.photique.common.transaction;
 
 import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchExhibitionRollbackContext;
 import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchSingleWorkRollbackContext;
-import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchUserRollbackContext;
 import com.benchpress200.photique.common.transaction.rollbackcontext.ImageRollbackContext;
-import com.benchpress200.photique.exhibition.infrastructure.ExhibitionSearchRepository;
-import com.benchpress200.photique.image.infrastructure.ImageUploader;
-import com.benchpress200.photique.singlework.infrastructure.SingleWorkSearchRepository;
-import com.benchpress200.photique.user.infrastructure.UserSearchRepository;
+import com.benchpress200.photique.exhibition.domain.repository.ExhibitionSearchRepository;
+import com.benchpress200.photique.image.domain.ImageUploaderPort;
+import com.benchpress200.photique.singlework.domain.repository.SingleWorkSearchRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -20,8 +18,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TransactionRollbackListener {
     // 롤백리스너에서는 인프라 롤백을 위해 인프라 바로 호출
-    private final ImageUploader imageUploader;
-    private final UserSearchRepository userSearchRepository;
+    private final ImageUploaderPort imageUploader;
     private final SingleWorkSearchRepository singleWorkSearchRepository;
     private final ExhibitionSearchRepository exhibitionSearchRepository;
 
@@ -39,7 +36,6 @@ public class TransactionRollbackListener {
 
         // 롤백 데이터 클리어
         ImageRollbackContext.clear();
-        ElasticsearchUserRollbackContext.clear();
         ElasticsearchSingleWorkRollbackContext.clear();
         ElasticsearchExhibitionRollbackContext.clear();
     }
@@ -48,30 +44,18 @@ public class TransactionRollbackListener {
     @AfterReturning(pointcut = "@annotation(jakarta.transaction.Transactional)")
     public void handleTransactionCommit() {
         ImageRollbackContext.clear(); // 이미지 클리어
-
-        // 엘라스틱서치 쿼리 flush
-        flushUserSearchQuery();
+        
         flushSingleWorkSearchQuery();
         flushExhibitionSearchQuery();
 
-        ElasticsearchUserRollbackContext.clear(); // 엘라스틱서치 컨텍스트 클리어
         ElasticsearchSingleWorkRollbackContext.clear();
         ElasticsearchExhibitionRollbackContext.clear();
     }
 
-    private void flushUserSearchQuery() {
-        if (ElasticsearchUserRollbackContext.hasDocumentToSave()) {
-            userSearchRepository.saveAll(ElasticsearchUserRollbackContext.getDocumentToSave());
-        }
-
-        if (ElasticsearchUserRollbackContext.hasDocumentToDelete()) {
-            userSearchRepository.deleteAll(ElasticsearchUserRollbackContext.getDocumentToDelete());
-        }
-    }
-
     private void flushSingleWorkSearchQuery() {
         if (ElasticsearchSingleWorkRollbackContext.hasDocumentToSave()) {
-            singleWorkSearchRepository.saveAll(ElasticsearchSingleWorkRollbackContext.getDocumentToSave());
+            throw new RuntimeException();
+//            singleWorkSearchRepository.saveAll(ElasticsearchSingleWorkRollbackContext.getDocumentToSave());
         }
 
         if (ElasticsearchSingleWorkRollbackContext.hasDocumentToDelete()) {

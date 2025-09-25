@@ -1,5 +1,6 @@
 package com.benchpress200.photique.auth.infrastructure;
 
+import com.benchpress200.photique.auth.domain.TokenManager;
 import com.benchpress200.photique.auth.domain.model.IssueTokenResult;
 import com.benchpress200.photique.auth.exception.AuthException;
 import io.jsonwebtoken.ExpiredJwtException;

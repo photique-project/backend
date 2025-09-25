@@ -5,7 +5,7 @@ import com.benchpress200.photique.common.dto.RestPage;
 import com.benchpress200.photique.image.domain.ImageDomainService;
 import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.entity.Notification;
-import com.benchpress200.photique.notification.domain.enumeration.Type;
+import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
 import com.benchpress200.photique.singlework.application.cache.SingleWorkCacheService;
 import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
 import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
@@ -98,17 +98,17 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         follows.forEach((follow) -> {
             User follower = follow.getFollower();
             Notification notification = Notification.builder()
-                    .user(follower)
-                    .type(Type.FOLLOWING_SINGLE_WORK)
+                    .receiver(follower)
+                    .type(NotificationType.FOLLOWING_SINGLE_WORK.FOLLOWING_SINGLE_WORK)
                     .targetId(singleWorkId)
                     .build();
 
-            // 알림 데이터 비동기 생성
-            notificationDomainService.createNotification(notification);
-
-            // 알림 비동기 처리
-            Long followerId = follow.getId();
-            notificationDomainService.pushNewNotification(followerId);
+//            // 알림 데이터 비동기 생성
+//            notificationDomainService.createNotification(notification);
+//
+//            // 알림 비동기 처리
+//            Long followerId = follow.getId();
+//            notificationDomainService.pushNewNotification(followerId);
         });
     }
 
@@ -291,19 +291,19 @@ public class SingleWorkServiceImpl implements SingleWorkService {
         User singleWorkWriter = userDomainService.findUser(singleWorkWriterId);
 
         Notification notification = Notification.builder()
-                .user(singleWorkWriter)
-                .type(Type.SINGLE_WORK_LIKE)
+                .receiver(singleWorkWriter)
+                .type(NotificationType.SINGLE_WORK_LIKE)
                 .targetId(singleWorkId)
                 .build();
 
-        // 알림 데이터 비동기 생성
-        notificationDomainService.createNotification(notification);
-
-        // 알림 비동기 처리
-        notificationDomainService.pushNewNotification(singleWorkWriterId);
-
-        // 업데이트 마킹
-        singleWorkDomainService.markAsUpdated(singleWork);
+//        // 알림 데이터 비동기 생성
+//        notificationDomainService.createNotification(notification);
+//
+//        // 알림 비동기 처리
+//        notificationDomainService.pushNewNotification(singleWorkWriterId);
+//
+//        // 업데이트 마킹
+//        singleWorkDomainService.markAsUpdated(singleWork);
     }
 
     @Override

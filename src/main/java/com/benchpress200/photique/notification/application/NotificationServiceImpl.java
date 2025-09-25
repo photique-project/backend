@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 @RequiredArgsConstructor
@@ -21,14 +20,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final UserDomainService userDomainService;
     private final NotificationDomainService notificationDomainService;
-
-    @Override
-    public SseEmitter subscribe(final Long userId) {
-        // 유저 조회
-        userDomainService.findUser(userId);
-
-        return notificationDomainService.subscribe(userId);
-    }
 
     @Override
     public Page<NotificationResponse> getNotifications(

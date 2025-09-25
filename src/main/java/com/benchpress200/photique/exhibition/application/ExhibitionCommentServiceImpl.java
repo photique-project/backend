@@ -8,9 +8,8 @@ import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentDetailR
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionCommentUpdateRequest;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
-import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.entity.Notification;
-import com.benchpress200.photique.notification.domain.enumeration.Type;
+import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
 import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
@@ -29,7 +28,6 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
     private final UserDomainService userDomainService;
     private final ExhibitionDomainService exhibitionDomainService;
     private final ExhibitionCommentDomainService exhibitionCommentDomainService;
-    private final NotificationDomainService notificationDomainService;
 
     @Override
     @Transactional
@@ -52,19 +50,19 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
         User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
 
         Notification notification = Notification.builder()
-                .user(exhibitionWriter)
-                .type(Type.EXHIBITION_COMMENT)
+                .receiver(exhibitionWriter)
+                .type(NotificationType.EXHIBITION_COMMENT)
                 .targetId(exhibitionId)
                 .build();
 
-        // 알림 데이터 비동기 생성
-        notificationDomainService.createNotification(notification);
-
-        // 알림 비동기 처리
-        notificationDomainService.pushNewNotification(exhibitionWriterId);
-
-        // 업데이트 마킹
-        exhibitionDomainService.markAsUpdated(exhibition);
+//        // 알림 데이터 비동기 생성
+//        notificationDomainService.createNotification(notification);
+//
+//        // 알림 비동기 처리
+//        notificationDomainService.pushNewNotification(exhibitionWriterId);
+//
+//        // 업데이트 마킹
+//        exhibitionDomainService.markAsUpdated(exhibition);
     }
 
     @Override

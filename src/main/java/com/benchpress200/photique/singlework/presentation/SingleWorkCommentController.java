@@ -1,8 +1,6 @@
 package com.benchpress200.photique.singlework.presentation;
 
 import com.benchpress200.photique.common.constant.URL;
-import com.benchpress200.photique.common.interceptor.Auth;
-import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkCommentService;
@@ -31,8 +29,6 @@ public class SingleWorkCommentController {
 
     private final SingleWorkCommentService singleWorkCommentService;
 
-    @Auth
-    @OwnResource
     @PostMapping
     public ApiSuccessResponse<?> addSingleWorkComment(
             @PathVariable("singleworkId") final Long singleWorkId,
@@ -54,8 +50,6 @@ public class SingleWorkCommentController {
         return ResponseHandler.handleSuccessResponse(singleWorkComments, HttpStatus.OK);
     }
 
-    @Auth
-    @OwnResource
     @PatchMapping(URL.SINGLE_WORK_COMMENT_DATA)
     public ApiSuccessResponse<?> updateSingleWorkComment(
             @PathVariable("singleworkId") final Long singleWorkId,
@@ -68,9 +62,7 @@ public class SingleWorkCommentController {
 
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
-
-    @Auth
-    @OwnResource
+    
     @DeleteMapping(URL.SINGLE_WORK_COMMENT_DATA)
     public ApiSuccessResponse<?> deleteSingleWorkComment(
             @PathVariable("singleworkId") final Long singleWorkId,

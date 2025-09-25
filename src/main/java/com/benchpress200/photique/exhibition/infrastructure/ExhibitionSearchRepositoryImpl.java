@@ -10,6 +10,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
+import com.benchpress200.photique.exhibition.domain.repository.ExhibitionSearchRepositoryCustom;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.stereotype.Repository;
 
+@Repository
 @RequiredArgsConstructor
 public class ExhibitionSearchRepositoryImpl implements ExhibitionSearchRepositoryCustom {
 

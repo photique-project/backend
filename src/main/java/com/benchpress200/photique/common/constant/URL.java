@@ -3,6 +3,8 @@ package com.benchpress200.photique.common.constant;
 public class URL {
     // BASE
     public static final String BASE_URL = "/api/v1";
+    public static final String ALL = "/*";
+    public static final String COMMENT_DOMAIN = "/comments";
 
     // AUTH
     public static final String AUTH_DOMAIN = "/auth";
@@ -16,7 +18,7 @@ public class URL {
     // USER
     public static final String USER_DOMAIN = "/users";
     public static final String USER_DATA = "/{userId}";
-    public static final String WHO_AM_I = "/me";
+    public static final String MY_DATA = "/me";
     public static final String PASSWORD = "/password";
 
     // FOLLOW
@@ -27,7 +29,6 @@ public class URL {
     // SINGLE WORK
     public static final String SINGLE_WORK_DOMAIN = "/singleworks";
     public static final String SINGLE_WORK_DATA = "/{singleworkId}";
-    public static final String POPULAR = "/popular";
     public static final String LIKE = "/like";
 
     // SINGLE WORK COMMENT

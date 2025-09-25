@@ -1,30 +1,107 @@
 package com.benchpress200.photique.exception;
 
 
-import com.benchpress200.photique.auth.exception.AuthException;
-import com.benchpress200.photique.chat.exception.ChatException;
-import com.benchpress200.photique.common.response.ApiFailureResponse;
+import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
+import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
+import com.benchpress200.photique.auth.exception.LoginRequestObjectReadException;
 import com.benchpress200.photique.common.response.ResponseHandler;
-import com.benchpress200.photique.exhibition.exception.ExhibitionException;
-import com.benchpress200.photique.image.exception.ImageUploaderException;
-import com.benchpress200.photique.singlework.exception.SingleWorkException;
-import com.benchpress200.photique.user.exception.UserException;
-import jakarta.servlet.http.HttpServletRequest;
+import com.benchpress200.photique.image.domain.exception.ImageUploaderFileWriteException;
+import com.benchpress200.photique.image.domain.exception.S3DeleteException;
+import com.benchpress200.photique.image.domain.exception.S3UploadException;
+import com.benchpress200.photique.user.application.exception.DuplicatedFollowException;
+import com.benchpress200.photique.user.application.exception.InvalidFollowRequestException;
+import com.benchpress200.photique.user.application.exception.UserNotFoundException;
+import com.benchpress200.photique.user.exception.DuplicatedUserException;
+import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final String SERVER_ERROR_MESSAGE = "Internal Server Error";
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ApiFailureResponse handleDTOException(
-            final MethodArgumentNotValidException e,
-            final HttpServletRequest request
+    // MySQL/ES/Redis 예외 처리 응답
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<?> handleDataAccessException(final DataAccessException e) {
+        String errorMessage = e.getMessage();
+        log.error(errorMessage);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                SERVER_ERROR_MESSAGE
+        );
+    }
+
+    // 유저 프로필 이미지 예외 처리 응답
+    @ExceptionHandler(InvalidProfileImageException.class)
+    public ResponseEntity<?> handleInvalidProfileImageException(final InvalidProfileImageException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
+                errorMessage
+        );
+    }
+
+    // 메일 인증 코드 만료 예외 처리 응답
+    @ExceptionHandler(MailAuthenticationCodeExpirationException.class)
+    public ResponseEntity<?> handleMailAuthenticationCodeExpirationException(
+            final MailAuthenticationCodeExpirationException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.GONE,
+                errorMessage
+        );
+    }
+
+    // 메일 인증 코드 미인증 예외 처리 응답
+    @ExceptionHandler(MailAuthenticationCodeNotVerifiedException.class)
+    public ResponseEntity<?> handleMailAuthenticationCodeNotVerifiedException(
+            final MailAuthenticationCodeNotVerifiedException e
     ) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.UNAUTHORIZED,
+                errorMessage
+        );
+    }
+
+    // 이미지 업로드 I/O 예외 처리 응답
+    @ExceptionHandler(ImageUploaderFileWriteException.class)
+    public ResponseEntity<?> handleImageUploaderFileWriteException(final ImageUploaderFileWriteException e) {
+        String errorMessage = e.getMessage();
+        log.error(errorMessage);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                SERVER_ERROR_MESSAGE
+        );
+    }
+
+    // S3 업로드 예외 처리 응답
+    @ExceptionHandler(S3UploadException.class)
+    public ResponseEntity<?> handleS3UploadException(final S3UploadException e) {
+        String errorMessage = e.getMessage();
+        log.error(errorMessage);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                SERVER_ERROR_MESSAGE
+        );
+    }
+
+    // 유효하지 않은 DTO 필드 예외 처리 응답
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleDTOIllegalArgumentException(final MethodArgumentNotValidException e) {
         StringBuilder sb = new StringBuilder();
 
         e.getBindingResult().getAllErrors().forEach((error) -> {
@@ -35,79 +112,86 @@ public class GlobalExceptionHandler {
             sb.setLength(sb.length() - 2);
         }
 
-        request.setAttribute("message", sb.toString());
-
-        return ResponseHandler.handleFailureResponse(sb.toString(), HttpStatus.BAD_REQUEST);
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
+                sb.toString()
+        );
     }
 
-    @ExceptionHandler(ImageUploaderException.class)
-    public ApiFailureResponse handleImageUploaderException(
-            final ImageUploaderException e,
-            final HttpServletRequest request
-    ) {
-        request.setAttribute("message", e.getOriginMessage());
+    // 전달받은 id를 가진 유저 찾지 못했을 때 예외 처리 응답
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<?> handleUserNotFoundException(final UserNotFoundException e) {
+        String errorMessage = e.getMessage();
 
-        return ResponseHandler.handleFailureResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseHandler.handleResponse(
+                HttpStatus.NOT_FOUND,
+                errorMessage
+        );
     }
 
-    @ExceptionHandler(UserException.class)
-    public ApiFailureResponse handleUserException(
-            final UserException e,
-            final HttpServletRequest request
-    ) {
-        request.setAttribute("message", e.getMessage() + ", " + e.getOriginMessage());
+    // 경로 변수로 전달한 값의 타입 오류 예외 처리 응답
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
 
-        return ResponseHandler.handleFailureResponse(e.getMessage(), e.getHttpStatus());
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
+                "Invalid path or parameter variable type"
+        );
     }
 
-    @ExceptionHandler(AuthException.class)
-    public ApiFailureResponse handleAuthException(
-            final AuthException e,
-            final HttpServletRequest request
-    ) {
-        if (e.getOriginMessage() != null) {
-            log.error(e.getOriginMessage());
-        }
+    // S3 이미지 삭제 예외 처리 응답
+    @ExceptionHandler(S3DeleteException.class)
+    public ResponseEntity<?> handleS3DeleteException(final S3DeleteException s3DeleteException) {
+        String errorMessage = s3DeleteException.getMessage();
+        String imageUrl = s3DeleteException.getImageUrl();
+        log.error(errorMessage);
+        log.error("[{}] delete failed", imageUrl);
 
-        request.setAttribute("message", e.getMessage() + ", " + e.getOriginMessage());
-
-        if (e.getHttpStatus() == HttpStatus.INTERNAL_SERVER_ERROR) {
-            return ResponseHandler.handleFailureResponse(e.getHttpStatus());
-        }
-
-        return ResponseHandler.handleFailureResponse(e.getMessage(), e.getHttpStatus());
+        return ResponseHandler.handleResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                SERVER_ERROR_MESSAGE
+        );
     }
 
-    @ExceptionHandler(SingleWorkException.class)
-    public ApiFailureResponse handleSingleWorkException(
-            final SingleWorkException e,
-            final HttpServletRequest request
-    ) {
-        request.setAttribute("message", e.getMessage() + ", " + e.getOriginMessage());
+    // 로그인 필터에 들어오 요청 객체 I/O 예외 처리 응답
+    @ExceptionHandler(LoginRequestObjectReadException.class)
+    public ResponseEntity<?> handleLoginRequestObjectReadException(final LoginRequestObjectReadException e) {
+        String errorMessage = e.getMessage();
+        log.error(errorMessage);
 
-        if (e.getHttpStatus() == HttpStatus.INTERNAL_SERVER_ERROR) {
-            return ResponseHandler.handleFailureResponse(e.getHttpStatus());
-        }
-
-        return ResponseHandler.handleFailureResponse(e.getMessage(), e.getHttpStatus());
+        return ResponseHandler.handleResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                SERVER_ERROR_MESSAGE
+        );
     }
 
-    @ExceptionHandler(ExhibitionException.class)
-    public ApiFailureResponse handleExhibitionException(
-            final ExhibitionException e,
-            final HttpServletRequest request
-    ) {
-        request.setAttribute("message", e.getMessage() + ", " + e.getOriginMessage());
+    // 새 유저 저장 중에 중복된 이메일 또는 닉네임 예외 처리 응답
+    @ExceptionHandler(DuplicatedUserException.class)
+    public ResponseEntity<?> handleDuplicatedUserException(final DuplicatedUserException e) {
+        String errorMessage = e.getMessage();
 
-        if (e.getHttpStatus() == HttpStatus.INTERNAL_SERVER_ERROR) {
-            return ResponseHandler.handleFailureResponse(e.getHttpStatus());
-        }
-
-        return ResponseHandler.handleFailureResponse(e.getMessage(), e.getHttpStatus());
+        return ResponseHandler.handleResponse(
+                HttpStatus.CONFLICT,
+                errorMessage
+        );
     }
 
-    @ExceptionHandler(ChatException.class)
-    public void handleChatException() {
-        // TODO: 채팅 에러처리 생각
+    // 본인 팔로우 요청 예외 처리 응답
+    @ExceptionHandler(InvalidFollowRequestException.class)
+    public ResponseEntity<?> handleInvalidFollowRequestException(final InvalidFollowRequestException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
+                errorMessage
+        );
     }
+
+    @ExceptionHandler(DuplicatedFollowException.class)
+    public ResponseEntity<?> handleDuplicatedFollowException(final DuplicatedFollowException e) {
+        return ResponseHandler.handleResponse(
+                HttpStatus.NO_CONTENT
+        );
+    }
+
 }

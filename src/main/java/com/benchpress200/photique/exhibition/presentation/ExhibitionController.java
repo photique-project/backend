@@ -1,8 +1,6 @@
 package com.benchpress200.photique.exhibition.presentation;
 
 import com.benchpress200.photique.common.constant.URL;
-import com.benchpress200.photique.common.interceptor.Auth;
-import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionService;
@@ -39,11 +37,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(URL.BASE_URL + URL.EXHIBITION_DOMAIN)
 @RequiredArgsConstructor
 public class ExhibitionController {
-
     private final ExhibitionService exhibitionService;
 
-    @Auth
-    @OwnResource
     @PostMapping
     public ApiSuccessResponse<?> holdNewExhibition(
             @ModelAttribute @Valid final ExhibitionCreateRequest exhibitionCreateRequest
@@ -52,7 +47,6 @@ public class ExhibitionController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 
-    @Auth
     @GetMapping(URL.EXHIBITION_DATA)
     public ApiSuccessResponse<?> getExhibitionDetails(
             @ModelAttribute final ExhibitionDetailsRequest exhibitionDetailsRequest,
@@ -77,8 +71,6 @@ public class ExhibitionController {
         return ResponseHandler.handleSuccessResponse(exhibitionSearchPage, HttpStatus.OK);
     }
 
-    @Auth
-    @OwnResource
     @DeleteMapping(URL.EXHIBITION_DATA)
     public ApiSuccessResponse<?> removeExhibition(
             @PathVariable final Long exhibitionId
@@ -87,8 +79,6 @@ public class ExhibitionController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @Auth
-    @OwnResource
     @PostMapping(URL.EXHIBITION_DATA + URL.LIKE)
     public ApiSuccessResponse<?> incrementLike(
             @PathVariable final Long exhibitionId,
@@ -99,8 +89,6 @@ public class ExhibitionController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 
-    @Auth
-    @OwnResource
     @DeleteMapping(URL.EXHIBITION_DATA + URL.LIKE)
     public ApiSuccessResponse<?> decrementLike(
             @PathVariable final Long exhibitionId,
@@ -111,8 +99,6 @@ public class ExhibitionController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @Auth
-    @OwnResource
     @PostMapping(URL.EXHIBITION_DATA + URL.BOOKMARK)
     public ApiSuccessResponse<?> addBookmark(
             @PathVariable final Long exhibitionId,
@@ -124,8 +110,6 @@ public class ExhibitionController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 
-    @Auth
-    @OwnResource
     @DeleteMapping(URL.EXHIBITION_DATA + URL.BOOKMARK)
     public ApiSuccessResponse<?> removeBookmark(
             @PathVariable final Long exhibitionId,
@@ -137,7 +121,6 @@ public class ExhibitionController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @Auth
     @GetMapping(URL.BOOKMARK)
     public ApiSuccessResponse<?> getBookmarkedExhibitions(
             @ModelAttribute final BookmarkedExhibitionRequest bookmarkedExhibitionRequest,
@@ -148,7 +131,6 @@ public class ExhibitionController {
         return ResponseHandler.handleSuccessResponse(bookmaredExhibitionPage, HttpStatus.OK);
     }
 
-    @Auth
     @GetMapping(URL.LIKE)
     public ApiSuccessResponse<?> getLikedExhibitions(
             @ModelAttribute final LikedExhibitionRequest likedExhibitionRequest,
@@ -160,8 +142,7 @@ public class ExhibitionController {
         return ResponseHandler.handleSuccessResponse(likedExhibitionRequestPage, HttpStatus.OK);
     }
 
-    @Auth
-    @GetMapping(URL.WHO_AM_I)
+    @GetMapping(URL.MY_DATA)
     public ApiSuccessResponse<?> getMyExhibitions(
             @ModelAttribute final MyExhibitionRequest myExhibitionRequest,
             final Pageable pageable

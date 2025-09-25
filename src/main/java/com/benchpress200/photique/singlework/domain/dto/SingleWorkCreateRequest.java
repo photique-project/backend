@@ -70,7 +70,7 @@ public class SingleWorkCreateRequest {
     private String title;
 
     @NotBlank(message = "Invalid description: description must not be blank.")
-    @Size(min = 1, max = 500, message = "Invalid description: 1 ~ 30 characters")
+    @Size(min = 1, max = 500, message = "Invalid description: 1 ~ 500 characters")
     private String description;
 
     public SingleWork toSingleWorkEntity(

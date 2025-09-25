@@ -1,11 +1,8 @@
 package com.benchpress200.photique.user.application;
 
 import com.benchpress200.photique.notification.domain.NotificationDomainService;
-import com.benchpress200.photique.notification.domain.entity.Notification;
-import com.benchpress200.photique.notification.domain.enumeration.Type;
 import com.benchpress200.photique.user.domain.FollowDomainService;
 import com.benchpress200.photique.user.domain.UserDomainService;
-import com.benchpress200.photique.user.domain.dto.FollowRequest;
 import com.benchpress200.photique.user.domain.dto.FollowerResponse;
 import com.benchpress200.photique.user.domain.dto.FollowingResponse;
 import com.benchpress200.photique.user.domain.dto.UnfollowRequest;
@@ -28,39 +25,6 @@ public class FollowServiceImpl implements FollowService {
     private final UserDomainService userDomainService;
     private final FollowDomainService followDomainService;
     private final NotificationDomainService notificationDomainService;
-
-    @Override
-    @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "userDetails", key = "#followRequest.followerId"),
-            @CacheEvict(value = "userDetails", key = "#followRequest.followingId"),
-    })
-    public void followUser(final FollowRequest followRequest) {
-        // 팔로워 유저 조회
-        Long followerId = followRequest.getFollowerId();
-        User follower = userDomainService.findUser(followerId);
-
-        // 팔로잉 유저 조회
-        Long followingId = followRequest.getFollowingId();
-        User following = userDomainService.findUser(followingId);
-
-        // 팔로우 저장
-        Follow follow = followRequest.toEntity(follower, following);
-        followDomainService.createFollow(follow);
-
-        // 알림 생성
-        Notification notification = Notification.builder()
-                .user(following)
-                .type(Type.FOLLOW)
-                .targetId(followerId)
-                .build();
-
-        // 알림 데이터 비동기 생성
-        notificationDomainService.createNotification(notification);
-
-        // 비동기처리
-        notificationDomainService.pushNewNotification(followingId);
-    }
 
     @Override
     @Transactional

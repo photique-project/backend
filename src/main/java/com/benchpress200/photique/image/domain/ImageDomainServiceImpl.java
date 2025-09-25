@@ -1,7 +1,6 @@
 package com.benchpress200.photique.image.domain;
 
 import com.benchpress200.photique.common.transaction.rollbackcontext.ImageRollbackContext;
-import com.benchpress200.photique.image.infrastructure.ImageUploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class ImageDomainServiceImpl implements ImageDomainService {
-    private final ImageUploader imageUploader;
+    private final ImageUploaderPort imageUploaderPort;
 
     @Override
     public String upload(final MultipartFile image, final String path) {
@@ -19,7 +18,7 @@ public class ImageDomainServiceImpl implements ImageDomainService {
             }
 
             // 업로드
-            String uploadedImageUrl = imageUploader.upload(image, path);
+            String uploadedImageUrl = imageUploaderPort.upload(image, path);
 
             // 예외발생 시 롤백을 위한 이미지 추가
             ImageRollbackContext.addUploadedImage(uploadedImageUrl);
@@ -53,7 +52,7 @@ public class ImageDomainServiceImpl implements ImageDomainService {
     @Override
     public void delete(final String path) {
         if (path != null) {
-            imageUploader.delete(path);
+            imageUploaderPort.delete(path);
         }
     }
 }

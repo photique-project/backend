@@ -21,7 +21,7 @@ public class NotificationResponse {
     public static NotificationResponse from(final Notification notification) {
         return NotificationResponse.builder()
                 .id(notification.getId())
-                .type(notification.getType().getValue())
+                .type(notification.getType().name())
                 .targetId(notification.getTargetId())
                 .isRead(notification.isRead())
                 .createdAt(notification.getCreatedAt())

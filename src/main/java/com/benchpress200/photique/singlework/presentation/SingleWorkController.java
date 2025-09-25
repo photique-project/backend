@@ -1,8 +1,6 @@
 package com.benchpress200.photique.singlework.presentation;
 
 import com.benchpress200.photique.common.constant.URL;
-import com.benchpress200.photique.common.interceptor.Auth;
-import com.benchpress200.photique.common.interceptor.OwnResource;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkService;
@@ -37,12 +35,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(URL.BASE_URL + URL.SINGLE_WORK_DOMAIN)
 @RequiredArgsConstructor
 public class SingleWorkController {
-
     private final SingleWorkService singleWorkService;
 
-
-    @Auth
-    @OwnResource
     @PostMapping
     public ApiSuccessResponse<?> postNewSingleWork(
             @ModelAttribute @Valid final SingleWorkCreateRequest singleWorkCreateRequest
@@ -76,9 +70,6 @@ public class SingleWorkController {
         return ResponseHandler.handleSuccessResponse(singleWorkSearchPage, HttpStatus.OK);
     }
 
-
-    @Auth
-    @OwnResource
     @PatchMapping(URL.SINGLE_WORK_DATA)
     public ApiSuccessResponse<?> updateSingleWorkDetails(
             @PathVariable final Long singleworkId,
@@ -89,8 +80,6 @@ public class SingleWorkController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @Auth
-    @OwnResource
     @DeleteMapping(URL.SINGLE_WORK_DATA)
     public ApiSuccessResponse<?> removeSingleWork(
             @PathVariable final Long singleworkId
@@ -99,8 +88,6 @@ public class SingleWorkController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @Auth
-    @OwnResource
     @PostMapping(URL.SINGLE_WORK_DATA + URL.LIKE)
     public ApiSuccessResponse<?> incrementLike(
             @PathVariable final Long singleworkId,
@@ -111,8 +98,6 @@ public class SingleWorkController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 
-    @Auth
-    @OwnResource
     @DeleteMapping(URL.SINGLE_WORK_DATA + URL.LIKE)
     public ApiSuccessResponse<?> decrementLike(
             @PathVariable final Long singleworkId,
@@ -123,7 +108,6 @@ public class SingleWorkController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @Auth
     @GetMapping(URL.LIKE)
     public ApiSuccessResponse<?> getLikedSingleWorks(
             @ModelAttribute final LikedSingleWorkRequest likedSingleWorkRequest,
@@ -137,8 +121,7 @@ public class SingleWorkController {
         return ResponseHandler.handleSuccessResponse(likedSingleWorkPage, HttpStatus.OK);
     }
 
-    @Auth
-    @GetMapping(URL.WHO_AM_I)
+    @GetMapping(URL.MY_DATA)
     public ApiSuccessResponse<?> getMySingleWorks(
             @ModelAttribute final MySingleWorkRequest mySingleWorkRequest,
             final Pageable pageable
