@@ -13,6 +13,7 @@ import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
+import com.benchpress200.photique.user.util.DummyGenerator;
 import java.util.ArrayList;
 import java.util.List;
 import org.assertj.core.api.Assertions;
@@ -69,9 +70,11 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
     @DisplayName("validateNickname 테스트 - 중복된 닉네임")
     void validateNickname_테스트_중복된_닉네임() {
         // GIVEN
+        String email = DummyGenerator.generateEmail();
         String nickname = "nickname";
+
         User user = User.builder()
-                .email("example@example.com")
+                .email(email)
                 .password("password12!@")
                 .nickname(nickname)
                 .provider(Provider.LOCAL)
@@ -97,7 +100,7 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
     void getUserDetails_테스트_저장한_유저_조회() {
         // GIVEN
         Long InvalidUserId = 0L;
-        String email = "example@example.com";
+        String email = DummyGenerator.generateEmail();
         String password = "password12!@";
         String nickname = "nickname";
 
@@ -133,7 +136,7 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
     @DisplayName("getMyDetails 테스트 - 인증된 유저 조회 성공")
     void getMyDetails_테스트_인증된_유저_조회_성공() {
         // GIVEN
-        String email = "example@example.com";
+        String email = DummyGenerator.generateEmail();
         String password = "password12!@";
         String nickname = "nickname";
         String profileImage = "profileImage";
@@ -171,7 +174,7 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
     @DisplayName("getMyDetails 테스트 - 인증된 유저 조회 실패")
     void getMyDetails_테스트_인증된_유저_조회_실패() {
         // GIVEN
-        String email = "example@example.com";
+        String email = DummyGenerator.generateEmail();
         String password = "password12!@";
         String nickname = "nickname";
         String profileImage = "profileImage";

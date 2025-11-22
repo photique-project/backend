@@ -16,6 +16,7 @@ import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.port.PasswordEncoderPort;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
+import com.benchpress200.photique.user.util.DummyGenerator;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -80,7 +81,7 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     void join_커밋_테스트() {
         // GIVEN
         userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        String email = "example@google.com";
+        String email = DummyGenerator.generateEmail();
         String password = "password12!@";
         String nickname = "nickname";
 
@@ -91,7 +92,7 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         Mockito
-                .doReturn(Optional.of(new AuthCode("email", "code", true, 1L)))
+                .doReturn(Optional.of(new AuthCode(email, "code", true, 1L)))
                 .when(authCodeRepository)
                 .findById(Mockito.any());
 
