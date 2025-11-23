@@ -5,7 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.user.application.FollowCommandService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.benchpress200.photique.user.util.DummyGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.test.context.ActiveProfiles;
@@ -30,9 +31,6 @@ public class FollowCommandControllerTest {
     @Autowired
     MockMvc mockMvc;
 
-    @Autowired
-    ObjectMapper objectMapper;
-
     @MockitoSpyBean
     FollowCommandService followCommandService;
 
@@ -47,44 +45,44 @@ public class FollowCommandControllerTest {
     @DisplayName("follow 성공 테스트")
     void follow_성공_테스트() throws Exception {
         // GIVEN
-        String userId = "/1";
+        long userId = DummyGenerator.generatePathVariable();
 
         RequestBuilder request = MockMvcRequestBuilders
-                .post(URL.BASE_URL + URL.USER_DOMAIN + userId + URL.FOLLOW_DOMAIN)
+                .post(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA + URL.FOLLOW_DOMAIN, userId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
 
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value(201));
+                .andExpect(jsonPath("$.status").value(HttpStatus.CREATED.value()));
     }
 
     @Test
     @DisplayName("follow 실패 테스트 - 유효하지 않은 경로 변수")
     void follow_실패_테스트_유효하지_않은_경로_변수() throws Exception {
         // GIVEN
-        String invalidUserId = "/a";
+        String invalidPathVariable = DummyGenerator.generateInvalidPathVariable();
 
         RequestBuilder request = MockMvcRequestBuilders
-                .post(URL.BASE_URL + URL.USER_DOMAIN + invalidUserId + URL.FOLLOW_DOMAIN)
+                .post(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA + URL.FOLLOW_DOMAIN, invalidPathVariable)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
 
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @Test
     @DisplayName("unfollow 성공 테스트")
     void unfollow_성공_테스트() throws Exception {
         // GIVEN
-        String userId = "/1";
+        long userId = DummyGenerator.generatePathVariable();
 
         RequestBuilder request = MockMvcRequestBuilders
-                .delete(URL.BASE_URL + URL.USER_DOMAIN + userId + URL.FOLLOW_DOMAIN)
+                .delete(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA + URL.FOLLOW_DOMAIN, userId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
 
@@ -97,16 +95,16 @@ public class FollowCommandControllerTest {
     @DisplayName("unfollow 실패 테스트 - 유효하지 않은 경로 변수")
     void unfollow_실패_테스트_유효하지_않은_경로_변수() throws Exception {
         // GIVEN
-        String invalidUserId = "/a";
+        String invalidUserId = DummyGenerator.generateInvalidIntroduction();
 
         RequestBuilder request = MockMvcRequestBuilders
-                .delete(URL.BASE_URL + URL.USER_DOMAIN + invalidUserId + URL.FOLLOW_DOMAIN)
+                .delete(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA + URL.FOLLOW_DOMAIN, invalidUserId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON);
 
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 }

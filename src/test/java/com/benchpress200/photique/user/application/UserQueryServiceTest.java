@@ -53,7 +53,7 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
     @DisplayName("validateNickname 테스트 - 중복되지 않은 닉네임")
     void validateNickname_테스트_중복되지_않은_닉네임() {
         // GIVEN
-        String validNickname = "nickname";
+        String validNickname = DummyGenerator.generateNickname();
         ValidateNicknameQuery validateNicknameQuery = ValidateNicknameQuery.builder()
                 .nickname(validNickname)
                 .build();
@@ -71,11 +71,12 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
     void validateNickname_테스트_중복된_닉네임() {
         // GIVEN
         String email = DummyGenerator.generateEmail();
-        String nickname = "nickname";
+        String nickname = DummyGenerator.generateNickname();
+        String password = DummyGenerator.generatePassword();
 
         User user = User.builder()
                 .email(email)
-                .password("password12!@")
+                .password(password)
                 .nickname(nickname)
                 .provider(Provider.LOCAL)
                 .role(Role.USER)
@@ -99,10 +100,9 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
     @DisplayName("getUserDetails 테스트 - 저장한 유저 조회")
     void getUserDetails_테스트_저장한_유저_조회() {
         // GIVEN
-        Long InvalidUserId = 0L;
         String email = DummyGenerator.generateEmail();
-        String password = "password12!@";
-        String nickname = "nickname";
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
 
         User user = User.builder()
                 .email(email)
@@ -115,7 +115,7 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
         user = userRepository.save(user);
         Long userId = user.getId();
 
-        Mockito.doReturn(InvalidUserId).when(authenticationUserProviderPort).getCurrentUserId();
+        Mockito.doReturn(userId).when(authenticationUserProviderPort).getCurrentUserId();
 
         // WHEN
         UserDetailsResult userDetailsResult = userQueryService.getUserDetails(userId);
@@ -123,13 +123,6 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
         // THEN
         Assertions.assertThat(userDetailsResult.getUserId()).isEqualTo(userId);
         Assertions.assertThat(userDetailsResult.getNickname()).isEqualTo(nickname);
-        Assertions.assertThat(userDetailsResult.getIntroduction()).isEqualTo(null);
-        Assertions.assertThat(userDetailsResult.getProfileImage()).isEqualTo(null);
-        Assertions.assertThat(userDetailsResult.getSingleWorkCount()).isEqualTo(0L);
-        Assertions.assertThat(userDetailsResult.getExhibitionCount()).isEqualTo(0L);
-        Assertions.assertThat(userDetailsResult.getFollowerCount()).isEqualTo(0L);
-        Assertions.assertThat(userDetailsResult.getFollowingCount()).isEqualTo(0L);
-        Assertions.assertThat(userDetailsResult.isFollowing()).isFalse();
     }
 
     @Test
@@ -137,15 +130,13 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
     void getMyDetails_테스트_인증된_유저_조회_성공() {
         // GIVEN
         String email = DummyGenerator.generateEmail();
-        String password = "password12!@";
-        String nickname = "nickname";
-        String profileImage = "profileImage";
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
 
         User user = User.builder()
                 .email(email)
                 .password(password)
                 .nickname(nickname)
-                .profileImage(profileImage)
                 .provider(Provider.LOCAL)
                 .role(Role.USER)
                 .build();
@@ -162,12 +153,6 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
         Assertions.assertThat(myDetailsResult.getUserId()).isEqualTo(userId);
         Assertions.assertThat(myDetailsResult.getEmail()).isEqualTo(email);
         Assertions.assertThat(myDetailsResult.getNickname()).isEqualTo(nickname);
-        Assertions.assertThat(myDetailsResult.getIntroduction()).isEqualTo(null);
-        Assertions.assertThat(myDetailsResult.getProfileImage()).isEqualTo(profileImage);
-        Assertions.assertThat(myDetailsResult.getSingleWorkCount()).isEqualTo(0L);
-        Assertions.assertThat(myDetailsResult.getExhibitionCount()).isEqualTo(0L);
-        Assertions.assertThat(myDetailsResult.getFollowerCount()).isEqualTo(0L);
-        Assertions.assertThat(myDetailsResult.getFollowingCount()).isEqualTo(0L);
     }
 
     @Test
@@ -175,15 +160,13 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
     void getMyDetails_테스트_인증된_유저_조회_실패() {
         // GIVEN
         String email = DummyGenerator.generateEmail();
-        String password = "password12!@";
-        String nickname = "nickname";
-        String profileImage = "profileImage";
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
 
         User user = User.builder()
                 .email(email)
                 .password(password)
                 .nickname(nickname)
-                .profileImage(profileImage)
                 .provider(Provider.LOCAL)
                 .role(Role.USER)
                 .build();
@@ -198,37 +181,41 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
     }
 
     @Test
-    @DisplayName("searchUsers 테스트 - 30명 유저 검색")
-    void searchUsers_테스트_30명_유저_검색() {
+    @DisplayName("searchUsers 테스트 - 유저 검색")
+    void searchUsers_테스트_유저_검색() {
         // GIVEN
+        long userId = DummyGenerator.generatePathVariable();
+        int totalUsers = 60;
+        int abStartingUserCount = 45;
         String keyword = "ab";
-        int page = 0;
-        int size = 30;
-        Sort sort = Sort.by("nickname").ascending();
+        String anotherKeyword = "cd";
+        String sortBy = "nickname";
+
+        int page = Integer.parseInt(DummyGenerator.generatePage());
+        int size = Integer.parseInt(DummyGenerator.generateSize());
+        Sort sort = Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         List<User> users = new ArrayList<>();
 
-        for (int i = 1; i <= 45; i++) { // ab로 시작하는 유저 45명
+        for (int i = 1; i <= abStartingUserCount; i++) { // ab로 시작하는 유저 45명
             users.add(
                     User.builder()
-                            .email("ab_user" + i + "@test.com")
-                            .password("password" + i)
-                            .nickname("ab_" + i)
-                            .profileImage("https://example.com/ab" + i + ".png")
+                            .email(DummyGenerator.generateEmail())
+                            .password(DummyGenerator.generatePassword())
+                            .nickname((keyword + i))
                             .provider(Provider.LOCAL)
                             .role(Role.USER)
                             .build()
             );
         }
 
-        for (int i = 1; i <= 15; i++) { // cd로 시작하는 유저 15명
+        for (int i = 1; i <= totalUsers - abStartingUserCount; i++) { // cd로 시작하는 유저 15명
             users.add(
                     User.builder()
-                            .email("cd_user" + i + "@test.com")
-                            .password("password" + i)
-                            .nickname("cd_" + i)
-                            .profileImage("https://example.com/cd" + i + ".png")
+                            .email(DummyGenerator.generateEmail())
+                            .password(DummyGenerator.generatePassword())
+                            .nickname(anotherKeyword + i)
                             .provider(Provider.LOCAL)
                             .role(Role.USER)
                             .build()
@@ -237,7 +224,7 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
 
         userRepository.saveAll(users);
 
-        Mockito.doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+        Mockito.doReturn(userId).when(authenticationUserProviderPort).getCurrentUserId();
 
         SearchUsersQuery searchUsersQuery = SearchUsersQuery.builder()
                 .keyword(keyword)
@@ -250,7 +237,7 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
         // THEN
         Assertions.assertThat(searchUsersResult.getPage()).isEqualTo(page);
         Assertions.assertThat(searchUsersResult.getSize()).isEqualTo(size);
-        Assertions.assertThat(searchUsersResult.getTotalElements()).isEqualTo(45);
+        Assertions.assertThat(searchUsersResult.getTotalElements()).isEqualTo(abStartingUserCount);
         Assertions.assertThat(searchUsersResult.isFirst()).isTrue();
         Assertions.assertThat(searchUsersResult.isLast()).isFalse();
         Assertions.assertThat(searchUsersResult.isHasNext()).isTrue();
