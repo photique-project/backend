@@ -16,10 +16,10 @@ import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.port.PasswordEncoderPort;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
+import com.benchpress200.photique.user.util.DummyGenerator;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -36,6 +36,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DisplayName("UserCommandService 테스트")
 @ActiveProfiles("test")
 public class UserCommandServiceTest extends AbstractTestContainerConfig {
+    private static final String DUMMY_STRING = "a";
+    private static final String MULTIPART_KEY_PROFILE_IMAGE = "profileImage";
+
     @MockitoSpyBean
     AuthCodeRepository authCodeRepository;
 
@@ -51,25 +54,6 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @Autowired
     PasswordEncoderPort passwordEncoderPort;
 
-    Long testUserId;
-
-    static final String testUserEmail = "test@google.com";
-
-    @BeforeEach
-    void setUp() {
-        User user = User.builder()
-                .email(testUserEmail)
-                .password("password")
-                .nickname("dummy")
-                .profileImage("profileImageUrl")
-                .provider(Provider.LOCAL)
-                .role(Role.USER)
-                .build();
-
-        User savedUser = userRepository.save(user);
-        testUserId = savedUser.getId();
-    }
-
     @AfterEach
     void cleanUp() {
         userRepository.deleteAll();
@@ -79,10 +63,9 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("join 커밋 테스트")
     void join_커밋_테스트() {
         // GIVEN
-        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        String email = "example@google.com";
-        String password = "password12!@";
-        String nickname = "nickname";
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
 
         JoinCommand joinCommand = JoinCommand.builder()
                 .email(email)
@@ -91,7 +74,7 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         Mockito
-                .doReturn(Optional.of(new AuthCode("email", "code", true, 1L)))
+                .doReturn(Optional.of(new AuthCode(email, "code", true, 1L)))
                 .when(authCodeRepository)
                 .findById(Mockito.any());
 
@@ -107,10 +90,9 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("join 롤백 테스트 - 이메일 인증 코드 조회 실패")
     void join_롤백_테스트_이메일_인증_코드_조회_실패() {
         // GIVEN
-        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        String email = "example@google.com";
-        String password = "password12!@";
-        String nickname = "nickname";
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
 
         JoinCommand joinCommand = JoinCommand.builder()
                 .email(email)
@@ -138,10 +120,9 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("join 롤백 테스트 - 이메일 인증 코드 미인증")
     void join_롤백_테스트_이메일_인증_코드_미인증() {
         // GIVEN
-        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        String email = "example@google.com";
-        String password = "password12!@";
-        String nickname = "nickname";
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
 
         JoinCommand joinCommand = JoinCommand.builder()
                 .email(email)
@@ -150,7 +131,7 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         Mockito
-                .doReturn(Optional.of(new AuthCode("email", "code", false, 1L)))
+                .doReturn(Optional.of(new AuthCode(email, "code", false, 1L)))
                 .when(authCodeRepository)
                 .findById(Mockito.any());
 
@@ -169,10 +150,9 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("join 롤백 테스트 - 이미지 업로드 실패")
     void join_롤백_테스트_이미지_업로드_실패() {
         // GIVEN
-        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        String email = "example@google.com";
-        String password = "password12!@";
-        String nickname = "nickname";
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
         MultipartFile profileImage = Mockito.mock(MultipartFile.class);
 
         JoinCommand joinCommand = JoinCommand.builder()
@@ -183,7 +163,7 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         Mockito
-                .doReturn(Optional.of(new AuthCode("email", "code", true, 1L)))
+                .doReturn(Optional.of(new AuthCode(email, "code", true, 1L)))
                 .when(authCodeRepository)
                 .findById(Mockito.any());
 
@@ -204,10 +184,9 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("join 롤백 테스트 - MySQL 저장 실패")
     void join_롤백_테스트_MySQL_저장_실패() {
         // GIVEN
-        userRepository.deleteAll(); // @BeforeEach로 저장된 데이터 정리
-        String email = "example@google.com";
-        String password = "password12!@";
-        String nickname = "nickname";
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
 
         JoinCommand joinCommand = JoinCommand.builder()
                 .email(email)
@@ -216,7 +195,7 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         Mockito
-                .doReturn(Optional.of(new AuthCode("email", "code", true, 1L)))
+                .doReturn(Optional.of(new AuthCode(email, "code", true, 1L)))
                 .when(authCodeRepository)
                 .findById(Mockito.any());
 
@@ -237,91 +216,119 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("updateUserDetails 커밋 테스트")
     void updateUserDetails_커밋_테스트() {
         // GIVEN
-        Optional<User> originalUser = userRepository.findById(testUserId);
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
 
-        String updateNickname = "updateNickname";
-        String updateIntroduction = "introduction";
-        String updateProfileImageUrl = "updateProfileImageUrl";
-        MockMultipartFile updateProfileImage = new MockMultipartFile("profileImage", "test.png",
-                "image/png", "dummy".getBytes());
-
-        UpdateUserDetailsCommand updateUserDetailsCommand = UpdateUserDetailsCommand.builder()
-                .userId(testUserId)
-                .nickname(updateNickname)
-                .introduction(updateIntroduction)
-                .profileImage(updateProfileImage)
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
                 .build();
 
-        Mockito.doReturn(updateProfileImageUrl).when(imageUploaderPort)
-                .upload(Mockito.any(), Mockito.any());
+        User savedUser = userRepository.save(user);
+        long savedUserId = savedUser.getId();
+
+        Optional<User> originalUser = userRepository.findById(savedUserId);
+
+        String nicknameToUpdate = DummyGenerator.generateNickname();
+        String introductionToUpdate = DummyGenerator.generateIntroduction();
+
+        UpdateUserDetailsCommand updateUserDetailsCommand = UpdateUserDetailsCommand.builder()
+                .userId(savedUserId)
+                .nickname(nicknameToUpdate)
+                .introduction(introductionToUpdate)
+                .build();
 
         // WHEN
         userCommandService.updateUserDetails(updateUserDetailsCommand);
-        Optional<User> updatedUser = userRepository.findById(testUserId);
+        Optional<User> updatedUser = userRepository.findById(savedUserId);
 
         // THEN
         Assertions.assertThat(originalUser.isPresent()).isTrue();
         Assertions.assertThat(updatedUser.isPresent()).isTrue();
         Assertions.assertThat(updatedUser.get().getNickname()).isNotEqualTo(originalUser.get().getNickname());
-        Assertions.assertThat(updatedUser.get().getNickname()).isEqualTo(updateNickname);
+        Assertions.assertThat(updatedUser.get().getNickname()).isEqualTo(nicknameToUpdate);
         Assertions.assertThat(updatedUser.get().getIntroduction()).isNotEqualTo(originalUser.get().getIntroduction());
-        Assertions.assertThat(updatedUser.get().getIntroduction()).isEqualTo(updateIntroduction);
-        Assertions.assertThat(updatedUser.get().getProfileImage()).isNotEqualTo(originalUser.get().getProfileImage());
-        Assertions.assertThat(updatedUser.get().getProfileImage()).isEqualTo(updateProfileImageUrl);
+        Assertions.assertThat(updatedUser.get().getIntroduction()).isEqualTo(introductionToUpdate);
     }
 
     @Test
     @DisplayName("updateUserDetails 롤벡 테스트 - 유저 조회 실패")
     void updateUserDetails_롤백_테스트_유저_조회_실패() {
         // GIVEN
-        Optional<User> originalUser = userRepository.findById(testUserId);
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
 
-        String updateNickname = "updateNickname";
-        String updateIntroduction = "introduction";
-        String updateProfileImageUrl = "updateProfileImageUrl";
-        MockMultipartFile updateProfileImage = new MockMultipartFile("profileImage", "test.png",
-                "image/png", "dummy".getBytes());
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
+
+        User savedUser = userRepository.save(user);
+        long savedUserId = savedUser.getId();
+
+        Optional<User> originalUser = userRepository.findById(savedUserId);
+
+        String nicknameToUpdate = DummyGenerator.generateNickname();
+        String introductionToUpdate = DummyGenerator.generateIntroduction();
 
         UpdateUserDetailsCommand updateUserDetailsCommand = UpdateUserDetailsCommand.builder()
-                .userId(-1 * testUserId) // 없는 id 가진 유저 데이터 조회하도록
-                .nickname(updateNickname)
-                .introduction(updateIntroduction)
-                .profileImage(updateProfileImage)
+                .userId(-1 * savedUserId) // 없는 id 가진 유저 데이터 조회하도록
+                .nickname(nicknameToUpdate)
+                .introduction(introductionToUpdate)
                 .build();
 
         // WHEN and THEN
         Assertions.assertThatThrownBy(() -> userCommandService.updateUserDetails(updateUserDetailsCommand))
                 .isInstanceOf(UserNotFoundException.class);
-        Optional<User> updatedUser = userRepository.findById(testUserId);
+        Optional<User> updatedUser = userRepository.findById(savedUserId);
 
         // THEN
         Assertions.assertThat(originalUser.isPresent()).isTrue();
         Assertions.assertThat(updatedUser.isPresent()).isTrue();
         Assertions.assertThat(updatedUser.get().getNickname()).isEqualTo(originalUser.get().getNickname());
-        Assertions.assertThat(updatedUser.get().getNickname()).isNotEqualTo(updateNickname);
+        Assertions.assertThat(updatedUser.get().getNickname()).isNotEqualTo(nicknameToUpdate);
         Assertions.assertThat(updatedUser.get().getIntroduction()).isEqualTo(originalUser.get().getIntroduction());
-        Assertions.assertThat(updatedUser.get().getIntroduction()).isNotEqualTo(updateIntroduction);
-        Assertions.assertThat(updatedUser.get().getProfileImage()).isEqualTo(originalUser.get().getProfileImage());
-        Assertions.assertThat(updatedUser.get().getProfileImage()).isNotEqualTo(updateProfileImageUrl);
+        Assertions.assertThat(updatedUser.get().getIntroduction()).isNotEqualTo(introductionToUpdate);
     }
 
     @Test
     @DisplayName("updateUserDetails 롤벡 테스트 - 프로필 이미지 업데이트 실패")
     void updateUserDetails_롤백_테스트_프로필_이미지_업데이트_실패() {
         // GIVEN
-        Optional<User> originalUser = userRepository.findById(testUserId);
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
 
-        String updateNickname = "updateNickname";
-        String updateIntroduction = "introduction";
-        String updateProfileImageUrl = "updateProfileImageUrl";
-        MockMultipartFile updateProfileImage = new MockMultipartFile("profileImage", "test.png",
-                "image/png", "dummy".getBytes());
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
+
+        User savedUser = userRepository.save(user);
+        long savedUserId = savedUser.getId();
+
+        Optional<User> originalUser = userRepository.findById(savedUserId);
+
+        String nicknameToUpdate = DummyGenerator.generateNickname();
+        String introductionToUpdate = DummyGenerator.generateIntroduction();
+        MockMultipartFile profileImageToUpdate = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
 
         UpdateUserDetailsCommand updateUserDetailsCommand = UpdateUserDetailsCommand.builder()
-                .userId(testUserId)
-                .nickname(updateNickname)
-                .introduction(updateIntroduction)
-                .profileImage(updateProfileImage)
+                .userId(savedUserId)
+                .nickname(nicknameToUpdate)
+                .introduction(introductionToUpdate)
+                .profileImage(profileImageToUpdate)
                 .build();
 
         Mockito.doThrow(RuntimeException.class).when(imageUploaderPort)
@@ -330,58 +337,89 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
         // WHEN and THEN
         Assertions.assertThatThrownBy(() -> userCommandService.updateUserDetails(updateUserDetailsCommand))
                 .isInstanceOf(RuntimeException.class);
-        Optional<User> updatedUser = userRepository.findById(testUserId);
+        Optional<User> updatedUser = userRepository.findById(savedUserId);
 
         // THEN
         Assertions.assertThat(originalUser.isPresent()).isTrue();
         Assertions.assertThat(updatedUser.isPresent()).isTrue();
         Assertions.assertThat(updatedUser.get().getNickname()).isEqualTo(originalUser.get().getNickname());
-        Assertions.assertThat(updatedUser.get().getNickname()).isNotEqualTo(updateNickname);
+        Assertions.assertThat(updatedUser.get().getNickname()).isNotEqualTo(nicknameToUpdate);
         Assertions.assertThat(updatedUser.get().getIntroduction()).isEqualTo(originalUser.get().getIntroduction());
-        Assertions.assertThat(updatedUser.get().getIntroduction()).isNotEqualTo(updateIntroduction);
+        Assertions.assertThat(updatedUser.get().getIntroduction()).isNotEqualTo(introductionToUpdate);
         Assertions.assertThat(updatedUser.get().getProfileImage()).isEqualTo(originalUser.get().getProfileImage());
-        Assertions.assertThat(updatedUser.get().getProfileImage()).isNotEqualTo(updateProfileImageUrl);
     }
 
     @Test
     @DisplayName("updateUserPassword 커밋 테스트")
     void updateUserPassword_커밋_테스트() {
         // GIVEN
-        Optional<User> originalUser = userRepository.findById(testUserId);
-        String updatePassword = "updatePassword";
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
+
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
+
+        User savedUser = userRepository.save(user);
+        long savedUserId = savedUser.getId();
+
+        Optional<User> originalUser = userRepository.findById(savedUserId);
+
+        String passwordToUpdate = DummyGenerator.generatePassword();
 
         UpdateUserPasswordCommand updateUserPasswordCommand = UpdateUserPasswordCommand.builder()
-                .userId(testUserId)
-                .password(updatePassword)
+                .userId(savedUserId)
+                .password(passwordToUpdate)
                 .build();
 
         // WHEN
         userCommandService.updateUserPassword(updateUserPasswordCommand);
-        Optional<User> updatedUser = userRepository.findById(testUserId);
+        Optional<User> updatedUser = userRepository.findById(savedUserId);
 
         // THEN
         Assertions.assertThat(originalUser.isPresent()).isTrue();
         Assertions.assertThat(updatedUser.isPresent()).isTrue();
         Assertions.assertThat(originalUser.get().getPassword()).isNotEqualTo(updatedUser.get().getPassword());
-        Assertions.assertThat(passwordEncoderPort.matches(updatePassword, updatedUser.get().getPassword())).isTrue();
+        Assertions.assertThat(passwordEncoderPort.matches(passwordToUpdate, updatedUser.get().getPassword())).isTrue();
     }
 
     @Test
     @DisplayName("updateUserPassword 롤백 테스트 - 유저 조회 실패")
     void updateUserPassword_롤백_테스트_유저_조회_실패() {
         // GIVEN
-        Optional<User> originalUser = userRepository.findById(testUserId);
-        String updatePassword = "updatePassword";
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
+
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
+
+        User savedUser = userRepository.save(user);
+        long savedUserId = savedUser.getId();
+
+        Optional<User> originalUser = userRepository.findById(savedUserId);
+
+        String passwordToUpdate = DummyGenerator.generatePassword();
 
         UpdateUserPasswordCommand updateUserPasswordCommand = UpdateUserPasswordCommand.builder()
-                .userId(-1 * testUserId) // 없는 id 가진 유저 데이터 조회하도록
-                .password(updatePassword)
+                .userId(-1 * savedUserId) // 없는 id 가진 유저 데이터 조회하도록
+                .password(passwordToUpdate)
                 .build();
 
         // WHEN and THEN
         Assertions.assertThatThrownBy(() -> userCommandService.updateUserPassword(updateUserPasswordCommand))
                 .isInstanceOf(UserNotFoundException.class);
-        Optional<User> updatedUser = userRepository.findById(testUserId);
+        Optional<User> updatedUser = userRepository.findById(savedUserId);
 
         // THEN
         Assertions.assertThat(originalUser.isPresent()).isTrue();
@@ -393,12 +431,28 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("resetUserPassword 커밋 테스트")
     void resetUserPassword_커밋_테스트() {
         // GIVEN
-        Optional<User> originalUser = userRepository.findByEmail(testUserEmail);
-        String updatePassword = "updatePassword";
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
+
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
+
+        User savedUser = userRepository.save(user);
+        long savedUserId = savedUser.getId();
+
+        Optional<User> originalUser = userRepository.findById(savedUserId);
+
+        String passwordToUpdate = DummyGenerator.generatePassword();
 
         ResetUserPasswordCommand resetUserPasswordCommand = ResetUserPasswordCommand.builder()
-                .email(testUserEmail)
-                .password(updatePassword)
+                .email(email)
+                .password(passwordToUpdate)
                 .build();
 
         AuthCode authCode = AuthCode.builder()
@@ -409,31 +463,47 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
         // WHEN
         userCommandService.resetUserPassword(resetUserPasswordCommand);
-        Optional<User> updatedUser = userRepository.findByEmail(testUserEmail);
+        Optional<User> updatedUser = userRepository.findByEmail(email);
 
         // THEN
         Assertions.assertThat(originalUser.isPresent()).isTrue();
         Assertions.assertThat(updatedUser.isPresent()).isTrue();
         Assertions.assertThat(originalUser.get().getPassword()).isNotEqualTo(updatedUser.get().getPassword());
-        Assertions.assertThat(passwordEncoderPort.matches(updatePassword, updatedUser.get().getPassword())).isTrue();
+        Assertions.assertThat(passwordEncoderPort.matches(passwordToUpdate, updatedUser.get().getPassword())).isTrue();
     }
 
     @Test
     @DisplayName("resetUserPassword 롤백 테스트 - 유저 조회 실패")
     void resetUserPassword_롤백_테스트_유저_조회_실패() {
         // GIVEN
-        Optional<User> originalUser = userRepository.findByEmail(testUserEmail);
-        String updatePassword = "updatePassword";
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
+
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
+
+        User savedUser = userRepository.save(user);
+        long savedUserId = savedUser.getId();
+
+        Optional<User> originalUser = userRepository.findById(savedUserId);
+
+        String passwordToUpdate = DummyGenerator.generatePassword();
 
         ResetUserPasswordCommand resetUserPasswordCommand = ResetUserPasswordCommand.builder()
-                .email(testUserEmail + "dummy")
-                .password(updatePassword)
+                .email(email.concat(DUMMY_STRING))
+                .password(passwordToUpdate)
                 .build();
 
         // WHEN and THEN
         Assertions.assertThatThrownBy(() -> userCommandService.resetUserPassword(resetUserPasswordCommand))
                 .isInstanceOf(UserNotFoundException.class);
-        Optional<User> updatedUser = userRepository.findByEmail(testUserEmail);
+        Optional<User> updatedUser = userRepository.findByEmail(email);
 
         // THEN
         Assertions.assertThat(originalUser.isPresent()).isTrue();
@@ -445,11 +515,24 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("withdraw 커밋 테스트")
     void withdraw_커밋_테스트() {
         // GIVEN
-        Long userId = testUserId;
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
+
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
+
+        User savedUser = userRepository.save(user);
+        long savedUserId = savedUser.getId();
 
         // WHEN
-        userCommandService.withdraw(userId);
-        Optional<User> deletedUser = userRepository.findById(userId);
+        userCommandService.withdraw(savedUserId);
+        Optional<User> deletedUser = userRepository.findById(savedUserId);
 
         // THEN
         Assertions.assertThat(deletedUser.isPresent()).isTrue();
@@ -460,15 +543,28 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("withdraw 롤백 테스트 - 유저 조회 실패")
     void withdraw_롤백_테스트_유저_조회_실패() {
         // GIVEN
-        Long userId = -1 * testUserId;
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
+
+        User user = User.builder()
+                .email(email)
+                .password(password)
+                .nickname(nickname)
+                .provider(Provider.LOCAL)
+                .role(Role.USER)
+                .build();
+
+        User savedUser = userRepository.save(user);
+        long savedUserId = savedUser.getId();
 
         // WHEN and THEN
-        Assertions.assertThatThrownBy(() -> userCommandService.withdraw(userId))
+        Assertions.assertThatThrownBy(() -> userCommandService.withdraw(savedUserId * -1))
                 .isInstanceOf(UserNotFoundException.class);
-        Optional<User> user = userRepository.findById(testUserId);
+        Optional<User> deletedUser = userRepository.findById(savedUserId);
 
         // THEN
-        Assertions.assertThat(user.isPresent()).isTrue();
-        Assertions.assertThat(user.get().getDeletedAt()).isNull();
+        Assertions.assertThat(deletedUser.isPresent()).isTrue();
+        Assertions.assertThat(deletedUser.get().getDeletedAt()).isNull();
     }
 }

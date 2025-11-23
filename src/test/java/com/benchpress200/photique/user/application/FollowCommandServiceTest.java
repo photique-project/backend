@@ -14,6 +14,7 @@ import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.repository.FollowRepository;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
+import com.benchpress200.photique.user.util.DummyGenerator;
 import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
@@ -58,18 +59,25 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("follow 커밋 테스트")
     void follow_커밋_테스트() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+        String followeeEmail = DummyGenerator.generateEmail();
+        String followeeNickname = DummyGenerator.generateNickname();
+        String followeePassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
 
         User followee = User.builder()
-                .email("example2@example.com")
-                .nickname("nickname2")
-                .password("password12!@")
+                .email(followeeEmail)
+                .nickname(followeeNickname)
+                .password(followeePassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
@@ -96,10 +104,14 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("follow 롤백 테스트 - 본인 팔로우")
     void follow_롤백_테스트_본인_팔로우() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
@@ -118,18 +130,25 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("follow 롤백 테스트 - 중복 팔로우")
     void follow_롤백_테스트_중복_팔로우() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+        String followeeEmail = DummyGenerator.generateEmail();
+        String followeeNickname = DummyGenerator.generateNickname();
+        String followeePassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
 
         User followee = User.builder()
-                .email("example2@example.com")
-                .nickname("nickname2")
-                .password("password12!@")
+                .email(followeeEmail)
+                .nickname(followeeNickname)
+                .password(followeePassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
@@ -152,18 +171,25 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("follow 롤백 테스트 - 존재하지 않는 팔로워")
     void follow_롤백_테스트_존재하지_않는_팔로워() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+        String followeeEmail = DummyGenerator.generateEmail();
+        String followeeNickname = DummyGenerator.generateNickname();
+        String followeePassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
 
         User followee = User.builder()
-                .email("example2@example.com")
-                .nickname("nickname2")
-                .password("password12!@")
+                .email(followeeEmail)
+                .nickname(followeeNickname)
+                .password(followeePassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
@@ -185,18 +211,25 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("follow 롤백 테스트 - 존재하지 않는 팔로이")
     void follow_롤백_테스트_존재하지_않는_팔로이() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+        String followeeEmail = DummyGenerator.generateEmail();
+        String followeeNickname = DummyGenerator.generateNickname();
+        String followeePassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
 
         User followee = User.builder()
-                .email("example2@example.com")
-                .nickname("nickname2")
-                .password("password12!@")
+                .email(followeeEmail)
+                .nickname(followeeNickname)
+                .password(followeePassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
@@ -218,18 +251,25 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("follow 롤백 테스트 - 팔로우 저장 실패")
     void follow_롤백_테스트_팔로우_저장_실패() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+        String followeeEmail = DummyGenerator.generateEmail();
+        String followeeNickname = DummyGenerator.generateNickname();
+        String followeePassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
 
         User followee = User.builder()
-                .email("example2@example.com")
-                .nickname("nickname2")
-                .password("password12!@")
+                .email(followeeEmail)
+                .nickname(followeeNickname)
+                .password(followeePassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
@@ -258,18 +298,25 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("follow 롤백 테스트 - 팔로우 알림 저장 실패")
     void follow_롤백_테스트_팔로우_알림_저장_실패() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+        String followeeEmail = DummyGenerator.generateEmail();
+        String followeeNickname = DummyGenerator.generateNickname();
+        String followeePassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
 
         User followee = User.builder()
-                .email("example2@example.com")
-                .nickname("nickname2")
-                .password("password12!@")
+                .email(followeeEmail)
+                .nickname(followeeNickname)
+                .password(followeePassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
@@ -298,18 +345,25 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("unfollow 커밋 테스트")
     void unfollow_커밋_테스트() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+        String followeeEmail = DummyGenerator.generateEmail();
+        String followeeNickname = DummyGenerator.generateNickname();
+        String followeePassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
 
         User followee = User.builder()
-                .email("example2@example.com")
-                .nickname("nickname2")
-                .password("password12!@")
+                .email(followeeEmail)
+                .nickname(followeeNickname)
+                .password(followeePassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
@@ -336,18 +390,25 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("unfollow 롤백 테스트 - 이미 언팔로우")
     void unfollow_롤백_테스트_이미_언팔로우() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+        String followeeEmail = DummyGenerator.generateEmail();
+        String followeeNickname = DummyGenerator.generateNickname();
+        String followeePassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
 
         User followee = User.builder()
-                .email("example2@example.com")
-                .nickname("nickname2")
-                .password("password12!@")
+                .email(followeeEmail)
+                .nickname(followeeNickname)
+                .password(followeePassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
@@ -372,18 +433,25 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("unfollow 롤백 테스트 - 팔로워 조회 실패")
     void unfollow_롤백_테스트_팔로워_조회_실패() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+        String followeeEmail = DummyGenerator.generateEmail();
+        String followeeNickname = DummyGenerator.generateNickname();
+        String followeePassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
 
         User followee = User.builder()
-                .email("example2@example.com")
-                .nickname("nickname2")
-                .password("password12!@")
+                .email(followeeEmail)
+                .nickname(followeeNickname)
+                .password(followeePassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
@@ -414,18 +482,25 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("unfollow 롤백 테스트 - 팔로이 조회 실패")
     void unfollow_롤백_테스트_팔로이_조회_실패() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+        String followeeEmail = DummyGenerator.generateEmail();
+        String followeeNickname = DummyGenerator.generateNickname();
+        String followeePassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
 
         User followee = User.builder()
-                .email("example2@example.com")
-                .nickname("nickname2")
-                .password("password12!@")
+                .email(followeeEmail)
+                .nickname(followeeNickname)
+                .password(followeePassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
@@ -456,18 +531,25 @@ public class FollowCommandServiceTest extends AbstractTestContainerConfig {
     @DisplayName("unfollow 롤백 테스트 - 팔로우 삭제 실패")
     void unfollow_롤백_테스트_팔로우_삭제_실패() {
         // GIVEN
+        String followerEmail = DummyGenerator.generateEmail();
+        String followerNickname = DummyGenerator.generateNickname();
+        String followerPassword = DummyGenerator.generatePassword();
+        String followeeEmail = DummyGenerator.generateEmail();
+        String followeeNickname = DummyGenerator.generateNickname();
+        String followeePassword = DummyGenerator.generatePassword();
+
         User follower = User.builder()
-                .email("example1@example.com")
-                .nickname("nickname1")
-                .password("password12!@")
+                .email(followerEmail)
+                .nickname(followerNickname)
+                .password(followerPassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();
 
         User followee = User.builder()
-                .email("example2@example.com")
-                .nickname("nickname2")
-                .password("password12!@")
+                .email(followeeEmail)
+                .nickname(followeeNickname)
+                .password(followeePassword)
                 .role(Role.USER)
                 .provider(Provider.LOCAL)
                 .build();

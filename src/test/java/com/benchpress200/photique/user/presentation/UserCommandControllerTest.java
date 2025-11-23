@@ -7,9 +7,9 @@ import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.user.application.UserCommandService;
 import com.benchpress200.photique.user.domain.enumeration.Role;
+import com.benchpress200.photique.user.util.DummyGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,10 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
@@ -36,8 +36,15 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @DisplayName("UserCommandController 테스트")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false) // Security Filter 비활성화
-@EnableMethodSecurity(prePostEnabled = false)
 public class UserCommandControllerTest {
+    private static final String JSON_KEY_EMAIL = "email";
+    private static final String JSON_KEY_PASSWORD = "password";
+    private static final String JSON_KEY_NICKNAME = "nickname";
+    private static final String JSON_KEY_INTRODUCTION = "introduction";
+    private static final String MULTIPART_KEY_USER = "user";
+    private static final String MULTIPART_KEY_PROFILE_IMAGE = "profileImage";
+
+
     @Autowired
     MockMvc mockMvc;
 
@@ -53,6 +60,9 @@ public class UserCommandControllerTest {
         // 컨트롤러 단위 테스트이므로 UserCommandService는 항상 정상 동작하도록 설정
         Mockito.doNothing().when(userCommandService).join(Mockito.any());
         Mockito.doNothing().when(userCommandService).updateUserDetails(Mockito.any());
+        Mockito.doNothing().when(userCommandService).updateUserPassword(Mockito.any());
+        Mockito.doNothing().when(userCommandService).resetUserPassword(Mockito.any());
+        Mockito.doNothing().when(userCommandService).withdraw(Mockito.any());
     }
 
 
@@ -60,21 +70,19 @@ public class UserCommandControllerTest {
     @DisplayName("join 성공 테스트")
     void join_성공_테스트() throws Exception {
         // GIVEN
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
+
         Map<String, Object> jsonBody = Map.of(
-                "email", "example@google.com",
-                "password", "password12!@",
-                "nickname", "nickname"
+                JSON_KEY_EMAIL, email,
+                JSON_KEY_PASSWORD, password,
+                JSON_KEY_NICKNAME, nickname
         );
 
-        MockMultipartFile userPart = new MockMultipartFile(
-                "user",
-                "",
-                "application/json",
-                (objectMapper.writeValueAsString(jsonBody)).getBytes()
-        );
-
-        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
-                "image/png", "dummy".getBytes());
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+                objectMapper.writeValueAsString(jsonBody));
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.POST, URL.BASE_URL + URL.USER_DOMAIN)
@@ -86,29 +94,26 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value(201));
+                .andExpect(jsonPath("$.status").value(HttpStatus.CREATED.value()));
     }
 
     @ParameterizedTest
-    @MethodSource("getInvalidEmails")
+    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidEmails")
     @DisplayName("join 실패 테스트 - 유효하지 않은 이메일")
     void join_실패_테스트_유효하지_않은_이메일(final String invalidEmail) throws Exception {
         // GIVEN
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
+
         Map<String, Object> jsonBody = Map.of(
-                "email", invalidEmail,
-                "password", "password12!@",
-                "nickname", "nickname"
+                JSON_KEY_EMAIL, invalidEmail,
+                JSON_KEY_PASSWORD, password,
+                JSON_KEY_NICKNAME, nickname
         );
 
-        MockMultipartFile userPart = new MockMultipartFile(
-                "user",
-                "",
-                "application/json",
-                (objectMapper.writeValueAsString(jsonBody)).getBytes()
-        );
-
-        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
-                "image/png", "dummy".getBytes());
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+                objectMapper.writeValueAsString(jsonBody));
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.POST, URL.BASE_URL + URL.USER_DOMAIN)
@@ -120,29 +125,26 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @ParameterizedTest
-    @MethodSource("getInvalidPasswords")
+    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidPasswords")
     @DisplayName("join 실패 테스트 - 유효하지 않은 비밀번호")
     void join_실패_테스트_유효하지_않은_비밀번호(final String invalidPassword) throws Exception {
         // GIVEN
+        String email = DummyGenerator.generateEmail();
+        String nickname = DummyGenerator.generateNickname();
+
         Map<String, Object> jsonBody = Map.of(
-                "email", "example@google.com",
-                "password", invalidPassword,
-                "nickname", "nickname"
+                JSON_KEY_EMAIL, email,
+                JSON_KEY_PASSWORD, invalidPassword,
+                JSON_KEY_NICKNAME, nickname
         );
 
-        MockMultipartFile userPart = new MockMultipartFile(
-                "user",
-                "",
-                "application/json",
-                (objectMapper.writeValueAsString(jsonBody)).getBytes()
-        );
-
-        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
-                "image/png", "dummy".getBytes());
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+                objectMapper.writeValueAsString(jsonBody));
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.POST, URL.BASE_URL + URL.USER_DOMAIN)
@@ -154,29 +156,26 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @ParameterizedTest
-    @MethodSource("getInvalidNicknames")
+    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidNicknames")
     @DisplayName("join 실패 테스트 - 유효하지 않은 닉네임")
     void join_실패_테스트_유효하지_않은_닉네임(final String invalidNickname) throws Exception {
         // GIVEN
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+
         Map<String, Object> jsonBody = Map.of(
-                "email", "example@google.com",
-                "password", "password12!@",
-                "nickname", invalidNickname
+                JSON_KEY_EMAIL, email,
+                JSON_KEY_PASSWORD, password,
+                JSON_KEY_NICKNAME, invalidNickname
         );
 
-        MockMultipartFile userPart = new MockMultipartFile(
-                "user",
-                "",
-                "application/json",
-                (objectMapper.writeValueAsString(jsonBody)).getBytes()
-        );
-
-        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
-                "image/png", "dummy".getBytes());
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+                objectMapper.writeValueAsString(jsonBody));
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.POST, URL.BASE_URL + URL.USER_DOMAIN)
@@ -188,26 +187,26 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @ParameterizedTest
-    @MethodSource("getInvalidProfileImages")
+    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidProfileImages")
     @DisplayName("join 실패 테스트 - 유효하지 않은 프로필 이미지")
     void join_실패_테스트_유효하지_않은_프로필_이미지(final MockMultipartFile profileImage) throws Exception {
         // GIVEN
+        String email = DummyGenerator.generateEmail();
+        String password = DummyGenerator.generatePassword();
+        String nickname = DummyGenerator.generateNickname();
+
         Map<String, Object> jsonBody = Map.of(
-                "email", "example@google.com",
-                "password", "password12!@",
-                "nickname", "nickname"
+                JSON_KEY_EMAIL, email,
+                JSON_KEY_PASSWORD, password,
+                JSON_KEY_NICKNAME, nickname
         );
 
-        MockMultipartFile userPart = new MockMultipartFile(
-                "user",
-                "",
-                "application/json",
-                (objectMapper.writeValueAsString(jsonBody)).getBytes()
-        );
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+                objectMapper.writeValueAsString(jsonBody));
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.POST, URL.BASE_URL + URL.USER_DOMAIN)
@@ -219,7 +218,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @Test
@@ -230,23 +229,21 @@ public class UserCommandControllerTest {
 
         createMockAuthentication(userId);
 
+        String nicknameToUpdate = DummyGenerator.generateNickname();
+        String introductionToUpdate = DummyGenerator.generateIntroduction();
+
         Map<String, Object> jsonBody = Map.of(
-                "nickname", "newNickname",
-                "introduction", "newIntroduction"
+                JSON_KEY_NICKNAME, nicknameToUpdate,
+                JSON_KEY_INTRODUCTION, introductionToUpdate
         );
 
-        MockMultipartFile userPart = new MockMultipartFile(
-                "user",
-                "",
-                "application/json",
-                (objectMapper.writeValueAsString(jsonBody)).getBytes()
-        );
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+                objectMapper.writeValueAsString(jsonBody));
 
-        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
-                "image/png", "dummy".getBytes());
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
-                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/" + userId)
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA, userId)
                 .file(userPart)
                 .file(profileImage)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -261,23 +258,22 @@ public class UserCommandControllerTest {
     @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 경로 변수")
     void updateUserDetails_실패_테스트_유효하지_않은_경로_변수() throws Exception {
         // GIVEN
+        String nicknameToUpdate = DummyGenerator.generateNickname();
+        String introductionToUpdate = DummyGenerator.generateIntroduction();
+        String invalidPathVariable = DummyGenerator.generateInvalidPathVariable();
+
         Map<String, Object> jsonBody = Map.of(
-                "nickname", "newNickname",
-                "introduction", "newIntroduction"
+                JSON_KEY_NICKNAME, nicknameToUpdate,
+                JSON_KEY_INTRODUCTION, introductionToUpdate
         );
 
-        MockMultipartFile userPart = new MockMultipartFile(
-                "user",
-                "",
-                "application/json",
-                (objectMapper.writeValueAsString(jsonBody)).getBytes()
-        );
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+                objectMapper.writeValueAsString(jsonBody));
 
-        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
-                "image/png", "dummy".getBytes());
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
-                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/a")
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA, invalidPathVariable)
                 .file(userPart)
                 .file(profileImage)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -286,31 +282,29 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @ParameterizedTest
-    @MethodSource("getInvalidNicknames")
+    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidNicknames")
     @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 닉네임")
-    void updateUserDetails_실패_테스트_유효하지_않은_닉네임(final String nickname) throws Exception {
+    void updateUserDetails_실패_테스트_유효하지_않은_닉네임(final String invalidNickname) throws Exception {
         // GIVEN
+        long userId = DummyGenerator.generatePathVariable();
+        String introductionToUpdate = DummyGenerator.generateIntroduction();
+
         Map<String, Object> jsonBody = Map.of(
-                "nickname", nickname,
-                "introduction", "newIntroduction"
+                JSON_KEY_NICKNAME, invalidNickname,
+                JSON_KEY_INTRODUCTION, introductionToUpdate
         );
 
-        MockMultipartFile userPart = new MockMultipartFile(
-                "user",
-                "",
-                "application/json",
-                (objectMapper.writeValueAsString(jsonBody)).getBytes()
-        );
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+                objectMapper.writeValueAsString(jsonBody));
 
-        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
-                "image/png", "dummy".getBytes());
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
-                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/1")
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA, userId)
                 .file(userPart)
                 .file(profileImage)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -319,30 +313,29 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @Test
     @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 소개")
     void updateUserDetails_실패_테스트_유효하지_않은_소개() throws Exception {
         // GIVEN
+        long userId = DummyGenerator.generatePathVariable();
+        String nicknameToUpdate = DummyGenerator.generateNickname();
+        String invalidIntroduction = DummyGenerator.generateInvalidIntroduction();
+
         Map<String, Object> jsonBody = Map.of(
-                "nickname", "newNickname",
-                "introduction", "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijz"
+                JSON_KEY_NICKNAME, nicknameToUpdate,
+                JSON_KEY_INTRODUCTION, invalidIntroduction
         );
 
-        MockMultipartFile userPart = new MockMultipartFile(
-                "user",
-                "",
-                "application/json",
-                (objectMapper.writeValueAsString(jsonBody)).getBytes()
-        );
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+                objectMapper.writeValueAsString(jsonBody));
 
-        MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.png",
-                "image/png", "dummy".getBytes());
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
-                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/1")
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA, userId)
                 .file(userPart)
                 .file(profileImage)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -351,32 +344,30 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @ParameterizedTest
-    @MethodSource("getInvalidProfileImagesWhenUpdate")
+    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidProfileImagesWhenUpdate")
     @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 프로필 이미지")
     void updateUserDetails_실패_테스트_유효하지_않은_프로필_이미지(final MockMultipartFile profileImage) throws Exception {
         // GIVEN
-        Long userId = 1L;
+        long userId = DummyGenerator.generatePathVariable();
+        String nicknameToUpdate = DummyGenerator.generateNickname();
+        String introductionToUpdate = DummyGenerator.generateIntroduction();
 
         createMockAuthentication(userId);
 
         Map<String, Object> jsonBody = Map.of(
-                "nickname", "newNickname",
-                "introduction", "newIntroduction"
+                JSON_KEY_NICKNAME, nicknameToUpdate,
+                JSON_KEY_INTRODUCTION, introductionToUpdate
         );
 
-        MockMultipartFile userPart = new MockMultipartFile(
-                "user",
-                "",
-                "application/json",
-                (objectMapper.writeValueAsString(jsonBody)).getBytes()
-        );
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+                objectMapper.writeValueAsString(jsonBody));
 
         RequestBuilder request = MockMvcRequestBuilders
-                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + "/" + userId)
+                .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA, userId)
                 .file(userPart)
                 .file(profileImage)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -385,7 +376,7 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
 
@@ -393,21 +384,20 @@ public class UserCommandControllerTest {
     @DisplayName("updateUserPassword 성공 테스트")
     void updateUserPassword_성공_테스트() throws Exception {
         // GIVEN
-        Long userId = 1L;
-
-        Map<String, Object> jsonBody = Map.of(
-                "password", "newPassword12!@"
-        );
-
-        RequestBuilder request = MockMvcRequestBuilders
-                .patch(URL.BASE_URL + URL.USER_DOMAIN + "/" + userId + URL.PASSWORD)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(jsonBody));
+        long userId = DummyGenerator.generatePathVariable();
+        String passwordToUpdate = DummyGenerator.generatePassword();
 
         createMockAuthentication(userId);
 
-        Mockito.doNothing().when(userCommandService).updateUserPassword(Mockito.any());
+        Map<String, Object> jsonBody = Map.of(
+                JSON_KEY_PASSWORD, passwordToUpdate
+        );
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .patch(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA + URL.PASSWORD, userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(jsonBody));
 
         // WHEN and THEN
         mockMvc.perform(request)
@@ -418,12 +408,15 @@ public class UserCommandControllerTest {
     @DisplayName("updateUserPassword 실패 테스트 - 유효하지 않은 경로 변수")
     void updateUserPassword_실패_테스트_유효하지_않은_경로_변수() throws Exception {
         // GIVEN
+        String invalidPathVariable = DummyGenerator.generateInvalidPathVariable();
+        String passwordToUpdate = DummyGenerator.generatePassword();
+
         Map<String, Object> jsonBody = Map.of(
-                "password", "newPassword12!@"
+                JSON_KEY_PASSWORD, passwordToUpdate
         );
 
         RequestBuilder request = MockMvcRequestBuilders
-                .patch(URL.BASE_URL + URL.USER_DOMAIN + "/a" + URL.PASSWORD)
+                .patch(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA + URL.PASSWORD, invalidPathVariable)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(jsonBody));
@@ -433,39 +426,42 @@ public class UserCommandControllerTest {
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @ParameterizedTest
-    @MethodSource("getInvalidPasswords")
+    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidPasswords")
     @DisplayName("updateUserPassword 실패 테스트 - 유효하지 않은 비밀번호")
     void updateUserPassword_실패_테스트_유효하지_않은_비밀번호(final String invalidPassword) throws Exception {
         // GIVEN
+        long userId = DummyGenerator.generatePathVariable();
+
         Map<String, Object> jsonBody = Map.of(
-                "password", invalidPassword
+                JSON_KEY_PASSWORD, invalidPassword
         );
 
         RequestBuilder request = MockMvcRequestBuilders
-                .patch(URL.BASE_URL + URL.USER_DOMAIN + "/1" + URL.PASSWORD)
+                .patch(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA + URL.PASSWORD, userId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(jsonBody));
 
-        Mockito.doNothing().when(userCommandService).updateUserPassword(Mockito.any());
-
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @Test
     @DisplayName("resetUserPassword 성공 테스트")
     void resetUserPassword_성공_테스트() throws Exception {
         // GIVEN
+        String email = DummyGenerator.generateEmail();
+        String passwordToReset = DummyGenerator.generatePassword();
+
         Map<String, Object> jsonBody = Map.of(
-                "email", "test@example.com",
-                "password", "newPassword12!@"
+                JSON_KEY_EMAIL, email,
+                JSON_KEY_PASSWORD, passwordToReset
         );
 
         RequestBuilder request = MockMvcRequestBuilders
@@ -473,8 +469,6 @@ public class UserCommandControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(jsonBody));
-
-        Mockito.doNothing().when(userCommandService).updateUserPassword(Mockito.any());
 
         // WHEN and THEN
         mockMvc.perform(request)
@@ -482,13 +476,15 @@ public class UserCommandControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getInvalidEmails")
+    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidEmails")
     @DisplayName("resetUserPassword 실패 테스트 - 유효하지 않은 이메일")
     void resetUserPassword_실패_테스트_유효하지_않은_이메일(final String invalidEmail) throws Exception {
         // GIVEN
+        String passwordToReset = DummyGenerator.generatePassword();
+
         Map<String, Object> jsonBody = Map.of(
-                "email", invalidEmail,
-                "password", "newPassword12!@"
+                JSON_KEY_EMAIL, invalidEmail,
+                JSON_KEY_PASSWORD, passwordToReset
         );
 
         RequestBuilder request = MockMvcRequestBuilders
@@ -497,22 +493,22 @@ public class UserCommandControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(jsonBody));
 
-        Mockito.doNothing().when(userCommandService).updateUserPassword(Mockito.any());
-
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @ParameterizedTest
-    @MethodSource("getInvalidPasswords")
+    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidPasswords")
     @DisplayName("resetUserPassword 실패 테스트 - 유효하지 않은 비밀번호")
     void resetUserPassword_실패_테스트_유효하지_않은_비밀번호(final String invalidPassword) throws Exception {
         // GIVEN
+        String email = DummyGenerator.generateEmail();
+
         Map<String, Object> jsonBody = Map.of(
-                "email", "test@example.com",
-                "password", invalidPassword
+                JSON_KEY_EMAIL, email,
+                JSON_KEY_PASSWORD, invalidPassword
         );
 
         RequestBuilder request = MockMvcRequestBuilders
@@ -521,26 +517,22 @@ public class UserCommandControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(jsonBody));
 
-        Mockito.doNothing().when(userCommandService).updateUserPassword(Mockito.any());
-
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @Test
     @DisplayName("withdraw 성공 테스트")
     void withdraw_성공_테스트() throws Exception {
         // GIVEN
-        Long userId = 1L;
-        RequestBuilder request = MockMvcRequestBuilders
-                .delete(URL.BASE_URL + URL.USER_DOMAIN + "/" + userId)
-                .accept(MediaType.APPLICATION_JSON);
-
-        Mockito.doNothing().when(userCommandService).withdraw(Mockito.any());
-
+        Long userId = DummyGenerator.generatePathVariable();
         createMockAuthentication(userId);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA, userId)
+                .accept(MediaType.APPLICATION_JSON);
 
         // WHEN and THEN
         mockMvc.perform(request)
@@ -551,73 +543,16 @@ public class UserCommandControllerTest {
     @DisplayName("withdraw 실패 테스트 - 유효하지 않은 경로 변수")
     void withdraw_실패_테스트_유효하지_않은_경로_변수() throws Exception {
         // GIVEN
-        RequestBuilder request = MockMvcRequestBuilders
-                .delete(URL.BASE_URL + URL.USER_DOMAIN + "/a")
-                .accept(MediaType.APPLICATION_JSON);
+        String invalidPathVariable = DummyGenerator.generateInvalidPathVariable();
 
-        Mockito.doNothing().when(userCommandService).withdraw(Mockito.any());
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA, invalidPathVariable)
+                .accept(MediaType.APPLICATION_JSON);
 
         // WHEN and THEN
         mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
-    }
-
-
-    // 유효하지 않은 비밀번호
-    static Stream<String> getInvalidPasswords() {
-        return Stream.of(
-                "",       // 빈 문자열
-                " ",               // 공백
-                "12345678",        // 숫자만 있고 문자/특수문자 없음
-                "password",        // 문자만 있고 숫자/특수문자 없음
-                "password1",       // 문자+숫자만 있고 특수문자 없음
-                "!!!!!!!!",        // 특수문자만 있고 숫자/문자 없음
-                "pass!@#$",        // 문자+특수문자만 있고 숫자 없음
-                "1234!@#$",        // 숫자+특수문자만 있고 문자 없음
-                "pa1!",            // 길이가 8 미만 (4자리)
-                "PasswordPassword" // 8자 이상이지만 숫자/특수문자 없음
-        );
-    }
-
-    // 유효하지 않은 이메일
-    static Stream<String> getInvalidEmails() {
-        return Stream.of(
-                "email",        // 단순 문자열
-                "missing-at.com",        // @ 없음
-                "missing-domain@",       // 도메인 없음
-                "user@.com",             // 잘못된 도메인
-                "user@domain",           // TLD 없음
-                "",                      // 빈 문자열
-                " "                      // 공백 문자열
-        );
-    }
-
-    // 유효하지 않은 닉네임
-    static Stream<String> getInvalidNicknames() {
-        return Stream.of(
-                "",     // 빈 문자열
-                " ",             // 공백
-                "abcdefghijkl",  // 12자 초과
-                "nick name"      // 공백 포함
-        );
-    }
-
-    // 유효하지 않은 프로필 이미지 파일
-    static Stream<MockMultipartFile> getInvalidProfileImages() {
-        return Stream.of(
-                new MockMultipartFile("profileImage", "empty.png", "image/png", new byte[0]), // 빈 파일
-                new MockMultipartFile("profileImage", "big.png", "image/png", new byte[5 * 1024 * 1024 + 1]), // 5MB 초과
-                new MockMultipartFile("profileImage", "file.txt", "text/plain", "dummy".getBytes()) // 확장자 틀림
-        );
-    }
-
-    // 유효하지 않은 프로필 이미지 파일 (유저 업데이트에서는 프로필 이미지를 빈 파일로 보내면 기본값 설정이므로 빈 파일 제외)
-    static Stream<MockMultipartFile> getInvalidProfileImagesWhenUpdate() {
-        return Stream.of(
-                new MockMultipartFile("profileImage", "big.png", "image/png", new byte[5 * 1024 * 1024 + 1]), // 5MB 초과
-                new MockMultipartFile("profileImage", "file.txt", "text/plain", "dummy".getBytes()) // 확장자 틀림
-        );
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     // @PreAuthorize 검증 통과를 위한 임시 인증 객체 생성
