@@ -31,7 +31,6 @@ public class JwtFilter extends OncePerRequestFilter {
             final HttpServletResponse response,
             final FilterChain filterChain
     ) throws ServletException, IOException {
-        // TODO: 필터코드 짜고 리프레쉬 토큰 갱신 API 만들차례
         String accessToken = extractToken(request);
 
         if (accessToken == null) {

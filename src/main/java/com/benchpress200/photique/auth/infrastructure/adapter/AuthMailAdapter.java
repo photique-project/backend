@@ -1,8 +1,8 @@
-package com.benchpress200.photique.auth.infrastructure;
+package com.benchpress200.photique.auth.infrastructure.adapter;
 
 import static java.lang.Boolean.TRUE;
 
-import com.benchpress200.photique.auth.domain.AuthMailManager;
+import com.benchpress200.photique.auth.domain.port.AuthMailPort;
 import com.benchpress200.photique.auth.exception.AuthException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class AuthMailManagerImpl implements AuthMailManager {
+public class AuthMailAdapter implements AuthMailPort {
     private final JavaMailSender javaMailSender;
 
     @Override

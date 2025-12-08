@@ -25,6 +25,7 @@ import org.springframework.util.MimeTypeUtils;
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private static final String REFRESH_TOKEN_KEY = "refreshToken";
+    private static final int MILLIS_PER_SECOND = 1000;
 
     private final AuthenticationManager authenticationManager;
     private final AuthenticationTokenManagerPort authenticationTokenManagerPort;
@@ -63,7 +64,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String accessToken = authenticationTokens.getAccessToken();
         String refreshToken = authenticationTokens.getRefreshToken();
-        int refreshTokenExpiredTime = (int) (authenticationTokens.getRefreshTokenExpiredTime() / 1_000); // 초 단위로 변환
+        int refreshTokenExpiredTime = (int) (authenticationTokens.getRefreshTokenExpiredTime()
+                / MILLIS_PER_SECOND); // 초 단위로 변환
 
         Cookie cookie = new Cookie(REFRESH_TOKEN_KEY, refreshToken);
         cookie.setHttpOnly(true);

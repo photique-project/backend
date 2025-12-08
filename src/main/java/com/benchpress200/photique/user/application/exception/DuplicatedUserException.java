@@ -1,4 +1,4 @@
-package com.benchpress200.photique.user.exception;
+package com.benchpress200.photique.user.application.exception;
 
 import lombok.Getter;
 
