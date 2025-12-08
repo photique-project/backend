@@ -1,9 +1,9 @@
 package com.benchpress200.photique.user.application;
 
-import com.benchpress200.photique.auth.domain.entity.AuthCode;
+import com.benchpress200.photique.auth.domain.entity.EmailAuthCode;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
-import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
+import com.benchpress200.photique.auth.domain.repository.EmailAuthCodeRepository;
 import com.benchpress200.photique.image.domain.ImageUploaderPort;
 import com.benchpress200.photique.image.domain.event.ImageDeleteCommitEvent;
 import com.benchpress200.photique.image.domain.event.ImageUploadRollbackEvent;
@@ -11,13 +11,13 @@ import com.benchpress200.photique.user.application.command.JoinCommand;
 import com.benchpress200.photique.user.application.command.ResetUserPasswordCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
+import com.benchpress200.photique.user.application.exception.DuplicatedUserException;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.port.PasswordEncoderPort;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
-import com.benchpress200.photique.user.exception.DuplicatedUserException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +33,7 @@ public class UserCommandService {
     private String profileImagePath;
 
     private final ApplicationEventPublisher eventPublisher;
-    private final AuthCodeRepository authCodeRepository;
+    private final EmailAuthCodeRepository emailAuthCodeRepository;
     private final PasswordEncoderPort passwordEncoderPort;
     private final ImageUploaderPort imageUploaderPort;
     private final UserRepository userRepository;
@@ -44,11 +44,11 @@ public class UserCommandService {
         String email = joinCommand.getEmail();
 
         // 인증 코드 있는지 확인
-        AuthCode authCode = authCodeRepository.findById(email)
+        EmailAuthCode emailAuthCode = emailAuthCodeRepository.findById(email)
                 .orElseThrow(MailAuthenticationCodeExpirationException::new);
 
         // 유저가 인증 완료한 코드인지 확인
-        if (!authCode.isVerified()) {
+        if (!emailAuthCode.isVerified()) {
             throw new MailAuthenticationCodeNotVerifiedException();
         }
 
@@ -146,11 +146,11 @@ public class UserCommandService {
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         // 인증 코드 있는지 확인
-        AuthCode authCode = authCodeRepository.findById(email)
+        EmailAuthCode emailAuthCode = emailAuthCodeRepository.findById(email)
                 .orElseThrow(MailAuthenticationCodeExpirationException::new);
 
         // 유저가 인증 완료한 코드인지 확인
-        if (!authCode.isVerified()) {
+        if (!emailAuthCode.isVerified()) {
             throw new MailAuthenticationCodeNotVerifiedException();
         }
 

@@ -1,10 +1,10 @@
 package com.benchpress200.photique.user.application;
 
 import com.benchpress200.photique.AbstractTestContainerConfig;
-import com.benchpress200.photique.auth.domain.entity.AuthCode;
+import com.benchpress200.photique.auth.domain.entity.EmailAuthCode;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
-import com.benchpress200.photique.auth.domain.repository.AuthCodeRepository;
+import com.benchpress200.photique.auth.domain.repository.EmailAuthCodeRepository;
 import com.benchpress200.photique.image.domain.ImageUploaderPort;
 import com.benchpress200.photique.user.application.command.JoinCommand;
 import com.benchpress200.photique.user.application.command.ResetUserPasswordCommand;
@@ -40,7 +40,7 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
     private static final String MULTIPART_KEY_PROFILE_IMAGE = "profileImage";
 
     @MockitoSpyBean
-    AuthCodeRepository authCodeRepository;
+    EmailAuthCodeRepository emailAuthCodeRepository;
 
     @MockitoSpyBean
     ImageUploaderPort imageUploaderPort;
@@ -74,8 +74,8 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         Mockito
-                .doReturn(Optional.of(new AuthCode(email, "code", true, 1L)))
-                .when(authCodeRepository)
+                .doReturn(Optional.of(new EmailAuthCode(email, "code", true, 1L)))
+                .when(emailAuthCodeRepository)
                 .findById(Mockito.any());
 
         // WHEN
@@ -102,7 +102,7 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
 
         Mockito
                 .doReturn(Optional.empty())
-                .when(authCodeRepository)
+                .when(emailAuthCodeRepository)
                 .findById(Mockito.any());
 
         // WHEN and THEN
@@ -131,8 +131,8 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         Mockito
-                .doReturn(Optional.of(new AuthCode(email, "code", false, 1L)))
-                .when(authCodeRepository)
+                .doReturn(Optional.of(new EmailAuthCode(email, "code", false, 1L)))
+                .when(emailAuthCodeRepository)
                 .findById(Mockito.any());
 
         // WHEN and THEN
@@ -163,8 +163,8 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         Mockito
-                .doReturn(Optional.of(new AuthCode(email, "code", true, 1L)))
-                .when(authCodeRepository)
+                .doReturn(Optional.of(new EmailAuthCode(email, "code", true, 1L)))
+                .when(emailAuthCodeRepository)
                 .findById(Mockito.any());
 
         Mockito.doThrow(RuntimeException.class).when(imageUploaderPort).upload(Mockito.any(), Mockito.any());
@@ -195,8 +195,8 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         Mockito
-                .doReturn(Optional.of(new AuthCode(email, "code", true, 1L)))
-                .when(authCodeRepository)
+                .doReturn(Optional.of(new EmailAuthCode(email, "code", true, 1L)))
+                .when(emailAuthCodeRepository)
                 .findById(Mockito.any());
 
         Mockito.doThrow(RuntimeException.class).when(userRepository).save(Mockito.any());
@@ -455,11 +455,11 @@ public class UserCommandServiceTest extends AbstractTestContainerConfig {
                 .password(passwordToUpdate)
                 .build();
 
-        AuthCode authCode = AuthCode.builder()
+        EmailAuthCode emailAuthCode = EmailAuthCode.builder()
                 .isVerified(true)
                 .build();
 
-        Mockito.doReturn(Optional.of(authCode)).when(authCodeRepository).findById(Mockito.any());
+        Mockito.doReturn(Optional.of(emailAuthCode)).when(emailAuthCodeRepository).findById(Mockito.any());
 
         // WHEN
         userCommandService.resetUserPassword(resetUserPasswordCommand);

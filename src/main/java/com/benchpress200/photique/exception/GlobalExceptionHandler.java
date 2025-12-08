@@ -1,6 +1,7 @@
 package com.benchpress200.photique.exception;
 
 
+import com.benchpress200.photique.auth.application.exception.EmailAlreadyInUseException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
 import com.benchpress200.photique.auth.exception.LoginRequestObjectReadException;
@@ -9,9 +10,9 @@ import com.benchpress200.photique.image.domain.exception.ImageUploaderFileWriteE
 import com.benchpress200.photique.image.domain.exception.S3DeleteException;
 import com.benchpress200.photique.image.domain.exception.S3UploadException;
 import com.benchpress200.photique.user.application.exception.DuplicatedFollowException;
+import com.benchpress200.photique.user.application.exception.DuplicatedUserException;
 import com.benchpress200.photique.user.application.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
-import com.benchpress200.photique.user.exception.DuplicatedUserException;
 import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -187,6 +188,7 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // 이미 팔로우한 요청 예외 처리 응답
     @ExceptionHandler(DuplicatedFollowException.class)
     public ResponseEntity<?> handleDuplicatedFollowException(final DuplicatedFollowException e) {
         return ResponseHandler.handleResponse(
@@ -194,4 +196,14 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // 인증 메일 요청 시, 이미 가입된 이메일 예외 처리 응답
+    @ExceptionHandler(EmailAlreadyInUseException.class)
+    public ResponseEntity<?> handleEmailAlreadyInUseException(final EmailAlreadyInUseException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.CONFLICT,
+                errorMessage
+        );
+    }
 }
