@@ -2,6 +2,7 @@ package com.benchpress200.photique.exception;
 
 
 import com.benchpress200.photique.auth.application.exception.EmailAlreadyInUseException;
+import com.benchpress200.photique.auth.application.exception.EmailNotFoundException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
 import com.benchpress200.photique.auth.exception.LoginRequestObjectReadException;
@@ -196,13 +197,24 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 인증 메일 요청 시, 이미 가입된 이메일 예외 처리 응답
+    // 회원가입 인증 메일 요청 시, 이미 가입된 이메일 예외 처리 응답
     @ExceptionHandler(EmailAlreadyInUseException.class)
     public ResponseEntity<?> handleEmailAlreadyInUseException(final EmailAlreadyInUseException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
                 HttpStatus.CONFLICT,
+                errorMessage
+        );
+    }
+
+    // 비밀번호 찾기 인증 메일 요청 시, 해당 이메일을 가진 유저가 존재하지 않을 때 예외 처리 응답
+    @ExceptionHandler(EmailNotFoundException.class)
+    public ResponseEntity<?> handleEmailNotFoundException(final EmailNotFoundException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NOT_FOUND,
                 errorMessage
         );
     }
