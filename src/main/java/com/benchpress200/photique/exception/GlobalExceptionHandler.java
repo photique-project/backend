@@ -3,6 +3,7 @@ package com.benchpress200.photique.exception;
 
 import com.benchpress200.photique.auth.application.exception.EmailAlreadyInUseException;
 import com.benchpress200.photique.auth.application.exception.EmailNotFoundException;
+import com.benchpress200.photique.auth.application.exception.VerificationCodeNotFoundException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
 import com.benchpress200.photique.auth.exception.LoginRequestObjectReadException;
@@ -215,6 +216,17 @@ public class GlobalExceptionHandler {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.NOT_FOUND,
+                errorMessage
+        );
+    }
+
+    // 메일 인증 코드 요청 시, 코드가 만료되었을 때 예외 처리 응답
+    @ExceptionHandler(VerificationCodeNotFoundException.class)
+    public ResponseEntity<?> handleVerificationCodeNotFoundException(final VerificationCodeNotFoundException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.GONE,
                 errorMessage
         );
     }

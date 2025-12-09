@@ -9,11 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class TokenValidationResult {
-    private final TokenValidationStatus status;
+    private TokenValidationStatus status;
     private Long userId;
     private String role;
-
-    public TokenValidationResult(TokenValidationStatus status) {
-        this.status = status;
-    }
 }

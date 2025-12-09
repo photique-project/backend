@@ -1,8 +1,11 @@
 package com.benchpress200.photique.auth.presentation;
 
 import com.benchpress200.photique.auth.application.AuthCommandService;
+import com.benchpress200.photique.auth.application.command.AuthMailCodeValidationCommand;
 import com.benchpress200.photique.auth.application.command.AuthMailCommand;
+import com.benchpress200.photique.auth.application.result.AuthMailCodeValidationResult;
 import com.benchpress200.photique.auth.presentation.constant.ResponseMessage;
+import com.benchpress200.photique.auth.presentation.request.AuthMailCodeValidationRequest;
 import com.benchpress200.photique.auth.presentation.request.AuthMailRequest;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
@@ -42,6 +45,21 @@ public class AuthCommandController {
         return ResponseHandler.handleResponse(
                 HttpStatus.CREATED,
                 ResponseMessage.AUTH_MAIL_SEND_COMPLETED
+        );
+    }
+
+    @PostMapping(URL.VALIDATE_CODE)
+    public ResponseEntity<?> validateAuthMailCode(
+            @RequestBody @Valid final AuthMailCodeValidationRequest authMailCodeValidationRequest
+    ) {
+        AuthMailCodeValidationCommand authMailCodeValidationCommand = authMailCodeValidationRequest.toCommand();
+        AuthMailCodeValidationResult authMailCodeValidationResult = authCommandService.validateAuthMailCode(
+                authMailCodeValidationCommand);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.OK,
+                ResponseMessage.AUTH_MAIL_CODE_VALIDATION_COMPLETED,
+                authMailCodeValidationResult
         );
     }
 }
