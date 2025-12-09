@@ -73,7 +73,8 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.LOGIN).permitAll()
                         .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.JOIN_MAIL).permitAll()
-                        .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.PASSWORD).permitAll()
+                        .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.PASSWORD_MAIL)
+                        .permitAll()
                         .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.VALIDATE_CODE)
                         .permitAll()
 

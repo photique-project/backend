@@ -32,4 +32,16 @@ public class AuthCommandController {
                 ResponseMessage.AUTH_MAIL_SEND_COMPLETED
         );
     }
+
+    @PostMapping(URL.PASSWORD_MAIL)
+    public ResponseEntity<?> sendPasswordAuthMail(
+            @RequestBody @Valid final AuthMailRequest authMailRequest
+    ) {
+        AuthMailCommand authMailCommand = authMailRequest.toCommand();
+        authCommandService.sendPasswordAuthMail(authMailCommand);
+        return ResponseHandler.handleResponse(
+                HttpStatus.CREATED,
+                ResponseMessage.AUTH_MAIL_SEND_COMPLETED
+        );
+    }
 }

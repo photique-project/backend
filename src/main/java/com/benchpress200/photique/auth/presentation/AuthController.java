@@ -2,7 +2,6 @@ package com.benchpress200.photique.auth.presentation;
 
 import com.benchpress200.photique.auth.application.AuthService;
 import com.benchpress200.photique.auth.domain.dto.CodeValidationRequest;
-import com.benchpress200.photique.auth.presentation.request.AuthMailRequest;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
@@ -19,14 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
-
-    @PostMapping(URL.PASSWORD_MAIL)
-    public ApiSuccessResponse<?> sendPasswordAuthMail(
-            @RequestBody @Valid final AuthMailRequest authMailRequest
-    ) {
-        authService.sendPasswordAuthMail(authMailRequest);
-        return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
-    }
 
     @PostMapping(URL.VALIDATE_CODE)
     public ApiSuccessResponse<?> validateAuthMailCode(
