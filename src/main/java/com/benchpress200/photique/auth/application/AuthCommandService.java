@@ -1,8 +1,11 @@
 package com.benchpress200.photique.auth.application;
 
+import com.benchpress200.photique.auth.application.command.AuthMailCodeValidationCommand;
 import com.benchpress200.photique.auth.application.command.AuthMailCommand;
 import com.benchpress200.photique.auth.application.exception.EmailAlreadyInUseException;
 import com.benchpress200.photique.auth.application.exception.EmailNotFoundException;
+import com.benchpress200.photique.auth.application.exception.VerificationCodeNotFoundException;
+import com.benchpress200.photique.auth.application.result.AuthMailCodeValidationResult;
 import com.benchpress200.photique.auth.domain.entity.EmailAuthCode;
 import com.benchpress200.photique.auth.domain.port.AuthMailPort;
 import com.benchpress200.photique.auth.domain.repository.EmailAuthCodeRepository;
@@ -39,6 +42,27 @@ public class AuthCommandService {
 
         // 메일전송
         sendMailTo(email);
+    }
+
+    public AuthMailCodeValidationResult validateAuthMailCode(
+            final AuthMailCodeValidationCommand authMailCodeValidationCommand
+    ) {
+        String email = authMailCodeValidationCommand.getEmail();
+
+        // 해당 이메일을 가진 코드 조회
+        EmailAuthCode emailAuthCode = emailAuthCodeRepository.findById(email)
+                .orElseThrow(VerificationCodeNotFoundException::new);
+
+        String code = emailAuthCode.getCode();
+        boolean result = authMailCodeValidationCommand.validate(code);
+
+        // 인증 코드가 유효하다면
+        if (result) {
+            emailAuthCode.verify();
+            emailAuthCodeRepository.save(emailAuthCode);
+        }
+
+        return AuthMailCodeValidationResult.of(result);
     }
 
     private void sendMailTo(final String email) {
