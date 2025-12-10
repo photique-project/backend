@@ -3,6 +3,7 @@ package com.benchpress200.photique.exception;
 
 import com.benchpress200.photique.auth.application.exception.EmailAlreadyInUseException;
 import com.benchpress200.photique.auth.application.exception.EmailNotFoundException;
+import com.benchpress200.photique.auth.application.exception.InvalidRefreshTokenException;
 import com.benchpress200.photique.auth.application.exception.VerificationCodeNotFoundException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
@@ -227,6 +228,17 @@ public class GlobalExceptionHandler {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.GONE,
+                errorMessage
+        );
+    }
+
+    // 유효하지 않은 리프레쉬 토큰 예외 처리 응답
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<?> handleInvalidRefreshTokenException(final InvalidRefreshTokenException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.UNAUTHORIZED,
                 errorMessage
         );
     }

@@ -2,13 +2,20 @@ package com.benchpress200.photique.auth.application;
 
 import com.benchpress200.photique.auth.application.command.AuthMailCodeValidationCommand;
 import com.benchpress200.photique.auth.application.command.AuthMailCommand;
+import com.benchpress200.photique.auth.application.command.AuthTokenRefreshCommand;
 import com.benchpress200.photique.auth.application.exception.EmailAlreadyInUseException;
 import com.benchpress200.photique.auth.application.exception.EmailNotFoundException;
+import com.benchpress200.photique.auth.application.exception.InvalidRefreshTokenException;
 import com.benchpress200.photique.auth.application.exception.VerificationCodeNotFoundException;
 import com.benchpress200.photique.auth.application.result.AuthMailCodeValidationResult;
+import com.benchpress200.photique.auth.application.result.AuthTokenResult;
 import com.benchpress200.photique.auth.domain.entity.EmailAuthCode;
+import com.benchpress200.photique.auth.domain.enumeration.TokenValidationStatus;
 import com.benchpress200.photique.auth.domain.port.AuthMailPort;
+import com.benchpress200.photique.auth.domain.port.AuthenticationTokenManagerPort;
 import com.benchpress200.photique.auth.domain.repository.EmailAuthCodeRepository;
+import com.benchpress200.photique.auth.domain.result.AuthenticationTokens;
+import com.benchpress200.photique.auth.domain.result.TokenValidationResult;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +25,7 @@ import org.springframework.stereotype.Service;
 public class AuthCommandService {
     private final UserRepository userRepository;
     private final EmailAuthCodeRepository emailAuthCodeRepository;
+    private final AuthenticationTokenManagerPort authenticationTokenManagerPort;
     private final AuthMailPort authMailPort;
 
     public void sendJoinAuthMail(final AuthMailCommand authMailCommand) {
@@ -63,6 +71,25 @@ public class AuthCommandService {
         }
 
         return AuthMailCodeValidationResult.of(result);
+    }
+
+    public AuthTokenResult refreshAuthToken(final AuthTokenRefreshCommand authTokenRefreshCommand) {
+        // 토큰 유효성 검사 및 만료 기간 확인
+        String refreshToken = authTokenRefreshCommand.getRefreshToken();
+        TokenValidationResult tokenValidationResult = authenticationTokenManagerPort.validateToken(refreshToken);
+        TokenValidationStatus status = tokenValidationResult.getStatus();
+
+        // 유효하지 않으면 401
+        if (status != TokenValidationStatus.VALID) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        // 유효하다면 인증 토큰 새로 발급
+        long userId = tokenValidationResult.getUserId();
+        String role = tokenValidationResult.getRole();
+        AuthenticationTokens authenticationTokens = authenticationTokenManagerPort.issueTokens(userId, role);
+
+        return AuthTokenResult.from(authenticationTokens);
     }
 
     private void sendMailTo(final String email) {

@@ -14,6 +14,7 @@ public class URL {
     public static final String PASSWORD_MAIL = "/mail/password";
     public static final String VALIDATE_CODE = "/code";
     public static final String VALIDATE_NICKNAME = "/nickname";
+    public static final String REFRESH_TOKEN = "/refresh";
 
     // USER
     public static final String USER_DOMAIN = "/users";

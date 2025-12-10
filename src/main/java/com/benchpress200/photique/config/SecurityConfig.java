@@ -77,6 +77,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.VALIDATE_CODE)
                         .permitAll()
+                        .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.REFRESH_TOKEN)
+                        .permitAll()
 
                         .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.USER_DOMAIN).permitAll()
                         .requestMatchers(HttpMethod.GET, URL.BASE_URL + URL.USER_DOMAIN + URL.VALIDATE_NICKNAME)

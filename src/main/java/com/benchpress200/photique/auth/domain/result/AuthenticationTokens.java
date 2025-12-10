@@ -1,14 +1,14 @@
 package com.benchpress200.photique.auth.domain.result;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 @Builder
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class AuthenticationTokens {
-    private final String accessToken;
-    private final String refreshToken;
-    private final Long refreshTokenExpiredTime;
+    private String accessToken;
+    private String refreshToken;
+    private Long refreshTokenExpiredTime;
 }
