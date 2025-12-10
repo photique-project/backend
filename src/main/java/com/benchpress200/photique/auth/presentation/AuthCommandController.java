@@ -3,16 +3,20 @@ package com.benchpress200.photique.auth.presentation;
 import com.benchpress200.photique.auth.application.AuthCommandService;
 import com.benchpress200.photique.auth.application.command.AuthMailCodeValidationCommand;
 import com.benchpress200.photique.auth.application.command.AuthMailCommand;
+import com.benchpress200.photique.auth.application.command.AuthTokenRefreshCommand;
 import com.benchpress200.photique.auth.application.result.AuthMailCodeValidationResult;
+import com.benchpress200.photique.auth.application.result.AuthTokenResult;
 import com.benchpress200.photique.auth.presentation.constant.ResponseMessage;
 import com.benchpress200.photique.auth.presentation.request.AuthMailCodeValidationRequest;
 import com.benchpress200.photique.auth.presentation.request.AuthMailRequest;
+import com.benchpress200.photique.auth.presentation.response.AuthTokenRefreshResponse;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,6 +64,22 @@ public class AuthCommandController {
                 HttpStatus.OK,
                 ResponseMessage.AUTH_MAIL_CODE_VALIDATION_COMPLETED,
                 authMailCodeValidationResult
+        );
+    }
+
+    @PostMapping(URL.REFRESH_TOKEN)
+    public ResponseEntity<?> refreshAuthToken(
+            @CookieValue(value = "refreshToken") final String refreshToken
+    ) {
+        AuthTokenRefreshCommand authTokenRefreshCommand = AuthTokenRefreshCommand.of(refreshToken);
+        AuthTokenResult authTokenResult = authCommandService.refreshAuthToken(authTokenRefreshCommand);
+        AuthTokenRefreshResponse authTokenRefreshResponse = AuthTokenRefreshResponse.from(authTokenResult);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.OK,
+                ResponseMessage.AUTHENTICATION_TOKEN_REFRESH_COMPLETED,
+                authTokenRefreshResponse.getAccessTokenResponse(),
+                authTokenRefreshResponse.getCookie()
         );
     }
 }
