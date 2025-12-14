@@ -43,8 +43,7 @@ public class UserCommandControllerTest {
     private static final String JSON_KEY_INTRODUCTION = "introduction";
     private static final String MULTIPART_KEY_USER = "user";
     private static final String MULTIPART_KEY_PROFILE_IMAGE = "profileImage";
-
-
+    
     @Autowired
     MockMvc mockMvc;
 
