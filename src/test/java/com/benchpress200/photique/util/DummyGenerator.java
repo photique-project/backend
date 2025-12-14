@@ -284,4 +284,10 @@ public class DummyGenerator {
     public static String generateRole() {
         return Role.USER.toString();
     }
+
+    public static List<String> generateInvalidAuthMailCodes() {
+        return List.of(
+                String.valueOf(new char[0]), // 빈 문자열
+                String.valueOf((char) 32));  // 공백 문자열
+    }
 }
