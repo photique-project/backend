@@ -9,7 +9,7 @@ import com.benchpress200.photique.user.application.result.MyDetailsResult;
 import com.benchpress200.photique.user.application.result.SearchUsersResult;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
-import com.benchpress200.photique.user.util.DummyGenerator;
+import com.benchpress200.photique.util.DummyGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -64,7 +64,7 @@ public class UserQueryControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidNicknames")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidNicknames")
     @DisplayName("validateNickname 실패 테스트 - 유효하지 않은 닉네임")
     void validateNickname_실패_테스트_유효하지_않은_닉네임(final String invalidNickname) throws Exception {
         // GIVEN
@@ -157,7 +157,7 @@ public class UserQueryControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidNicknames")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidNicknames")
     @DisplayName("searchUsers 실패 테스트 - 유효하지 않은 닉네임")
     void searchUsers_실패_테스트_유효하지_않은_닉네임(final String invalidNickname) throws Exception {
         // GIVEN
@@ -178,7 +178,7 @@ public class UserQueryControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidPages")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidPages")
     @DisplayName("searchUsers 실패 테스트 - 유효하지 않은 페이지")
     void searchUsers_실패_테스트_유효하지_않은_페이지(final String invalidPage) throws Exception {
         // GIVEN
@@ -199,7 +199,7 @@ public class UserQueryControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidSizes")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidSizes")
     @DisplayName("searchUsers 실패 테스트 - 유효하지 않은 페이지 사이즈")
     void searchUsers_실패_테스트_유효하지_않은_페이지_사이즈(final String size) throws Exception {
         // GIVEN

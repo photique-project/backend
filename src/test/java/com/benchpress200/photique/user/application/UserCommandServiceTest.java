@@ -16,7 +16,7 @@ import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.port.PasswordEncoderPort;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
-import com.benchpress200.photique.user.util.DummyGenerator;
+import com.benchpress200.photique.util.DummyGenerator;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
