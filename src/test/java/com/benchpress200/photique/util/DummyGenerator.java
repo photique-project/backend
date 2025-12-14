@@ -1,15 +1,18 @@
-package com.benchpress200.photique.user.util;
+package com.benchpress200.photique.util;
 
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
 import com.benchpress200.photique.user.application.result.SearchUsersResult;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
+import com.benchpress200.photique.user.domain.enumeration.Role;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import org.apache.http.entity.ContentType;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -261,5 +264,24 @@ public class DummyGenerator {
         SecureRandom random = new SecureRandom();
 
         return String.valueOf(CHARSET.charAt(random.nextInt(CHARSET.length()))).repeat(INTRODUCTION_MAX_LENGTH + 1);
+    }
+
+    public static String generateRandomNumberString(int length) {
+        if (length <= 0) {
+            throw new IllegalArgumentException("length must be positive");
+        }
+
+        return ThreadLocalRandom.current()
+                .ints(length, 0, 10)
+                .mapToObj(String::valueOf)
+                .collect(Collectors.joining());
+    }
+
+    public static Long generateResourceId() {
+        return ThreadLocalRandom.current().nextLong();
+    }
+
+    public static String generateRole() {
+        return Role.USER.toString();
     }
 }

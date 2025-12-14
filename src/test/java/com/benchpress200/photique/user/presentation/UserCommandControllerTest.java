@@ -7,7 +7,7 @@ import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.user.application.UserCommandService;
 import com.benchpress200.photique.user.domain.enumeration.Role;
-import com.benchpress200.photique.user.util.DummyGenerator;
+import com.benchpress200.photique.util.DummyGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,7 +98,7 @@ public class UserCommandControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidEmails")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidEmails")
     @DisplayName("join 실패 테스트 - 유효하지 않은 이메일")
     void join_실패_테스트_유효하지_않은_이메일(final String invalidEmail) throws Exception {
         // GIVEN
@@ -129,7 +129,7 @@ public class UserCommandControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidPasswords")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidPasswords")
     @DisplayName("join 실패 테스트 - 유효하지 않은 비밀번호")
     void join_실패_테스트_유효하지_않은_비밀번호(final String invalidPassword) throws Exception {
         // GIVEN
@@ -160,7 +160,7 @@ public class UserCommandControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidNicknames")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidNicknames")
     @DisplayName("join 실패 테스트 - 유효하지 않은 닉네임")
     void join_실패_테스트_유효하지_않은_닉네임(final String invalidNickname) throws Exception {
         // GIVEN
@@ -191,7 +191,7 @@ public class UserCommandControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidProfileImages")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidProfileImages")
     @DisplayName("join 실패 테스트 - 유효하지 않은 프로필 이미지")
     void join_실패_테스트_유효하지_않은_프로필_이미지(final MockMultipartFile profileImage) throws Exception {
         // GIVEN
@@ -286,7 +286,7 @@ public class UserCommandControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidNicknames")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidNicknames")
     @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 닉네임")
     void updateUserDetails_실패_테스트_유효하지_않은_닉네임(final String invalidNickname) throws Exception {
         // GIVEN
@@ -348,7 +348,7 @@ public class UserCommandControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidProfileImagesWhenUpdate")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidProfileImagesWhenUpdate")
     @DisplayName("updateUserDetails 실패 테스트 - 유효하지 않은 프로필 이미지")
     void updateUserDetails_실패_테스트_유효하지_않은_프로필_이미지(final MockMultipartFile profileImage) throws Exception {
         // GIVEN
@@ -430,7 +430,7 @@ public class UserCommandControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidPasswords")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidPasswords")
     @DisplayName("updateUserPassword 실패 테스트 - 유효하지 않은 비밀번호")
     void updateUserPassword_실패_테스트_유효하지_않은_비밀번호(final String invalidPassword) throws Exception {
         // GIVEN
@@ -476,7 +476,7 @@ public class UserCommandControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidEmails")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidEmails")
     @DisplayName("resetUserPassword 실패 테스트 - 유효하지 않은 이메일")
     void resetUserPassword_실패_테스트_유효하지_않은_이메일(final String invalidEmail) throws Exception {
         // GIVEN
@@ -500,7 +500,7 @@ public class UserCommandControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("com.benchpress200.photique.user.util.DummyGenerator#generateInvalidPasswords")
+    @MethodSource("com.benchpress200.photique.util.DummyGenerator#generateInvalidPasswords")
     @DisplayName("resetUserPassword 실패 테스트 - 유효하지 않은 비밀번호")
     void resetUserPassword_실패_테스트_유효하지_않은_비밀번호(final String invalidPassword) throws Exception {
         // GIVEN

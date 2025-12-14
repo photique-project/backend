@@ -14,7 +14,7 @@ import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.repository.FollowRepository;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
-import com.benchpress200.photique.user.util.DummyGenerator;
+import com.benchpress200.photique.util.DummyGenerator;
 import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
