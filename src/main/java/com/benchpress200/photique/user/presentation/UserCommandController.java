@@ -1,5 +1,7 @@
 package com.benchpress200.photique.user.presentation;
 
+import com.benchpress200.photique.common.constant.MultipartKey;
+import com.benchpress200.photique.common.constant.PathVariableName;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserCommandService;
@@ -7,7 +9,7 @@ import com.benchpress200.photique.user.application.command.JoinCommand;
 import com.benchpress200.photique.user.application.command.ResetUserPasswordCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
-import com.benchpress200.photique.user.presentation.constant.ResponseMessage;
+import com.benchpress200.photique.user.presentation.constant.UserResponseMessage;
 import com.benchpress200.photique.user.presentation.request.JoinRequest;
 import com.benchpress200.photique.user.presentation.request.ResetUserPasswordRequest;
 import com.benchpress200.photique.user.presentation.request.UpdateUserDetailsRequest;
@@ -40,15 +42,15 @@ public class UserCommandController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<?> join(
-            @RequestPart("user") @Valid final JoinRequest joinRequest,
-            @RequestPart(value = "profileImage", required = false) final MultipartFile profileImage
+            @RequestPart(MultipartKey.USER) @Valid final JoinRequest joinRequest,
+            @RequestPart(value = MultipartKey.PROFILE_IMAGE, required = false) final MultipartFile profileImage
     ) {
         JoinCommand joinCommand = joinRequest.toCommand(profileImage);
         userCommandService.join(joinCommand);
 
         return ResponseHandler.handleResponse(
                 HttpStatus.CREATED,
-                ResponseMessage.JOIN_COMPLETED
+                UserResponseMessage.JOIN_COMPLETED
         );
     }
 
@@ -60,9 +62,9 @@ public class UserCommandController {
     )
     @PreAuthorize("#userId == authentication.principal.userId")
     public ResponseEntity<?> updateUserDetails(
-            @PathVariable("userId") final Long userId,
-            @RequestPart("user") @Valid final UpdateUserDetailsRequest updateUserDetailsRequest,
-            @RequestPart(value = "profileImage", required = false) final MultipartFile profileImage
+            @PathVariable(PathVariableName.USER_ID) final Long userId,
+            @RequestPart(MultipartKey.USER) @Valid final UpdateUserDetailsRequest updateUserDetailsRequest,
+            @RequestPart(value = MultipartKey.PROFILE_IMAGE, required = false) final MultipartFile profileImage
     ) {
         UpdateUserDetailsCommand updateUserDetailsCommand = updateUserDetailsRequest.toCommand(userId, profileImage);
         userCommandService.updateUserDetails(updateUserDetailsCommand);
@@ -78,7 +80,7 @@ public class UserCommandController {
     )
     @PreAuthorize("#userId == authentication.principal.userId")
     public ResponseEntity<?> updateUserPassword(
-            @PathVariable("userId") final Long userId,
+            @PathVariable(PathVariableName.USER_ID) final Long userId,
             @RequestBody @Valid final UpdateUserPasswordRequest updateUserPasswordRequest
     ) {
         UpdateUserPasswordCommand updateUserPasswordCommand = updateUserPasswordRequest.toCommand(userId);
@@ -108,7 +110,7 @@ public class UserCommandController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @PreAuthorize("#userId == authentication.principal.userId")
-    public ResponseEntity<?> withdraw(@PathVariable("userId") final Long userId) {
+    public ResponseEntity<?> withdraw(@PathVariable(PathVariableName.USER_ID) final Long userId) {
         userCommandService.withdraw(userId);
 
         return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);
