@@ -1,9 +1,10 @@
 package com.benchpress200.photique.user.presentation;
 
+import com.benchpress200.photique.common.constant.PathVariableName;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.FollowCommandService;
-import com.benchpress200.photique.user.presentation.constant.ResponseMessage;
+import com.benchpress200.photique.user.presentation.constant.UserResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +21,17 @@ public class FollowCommandController {
     private final FollowCommandService followCommandService;
 
     @PostMapping
-    public ResponseEntity<?> follow(@PathVariable("userId") final Long followeeId) {
+    public ResponseEntity<?> follow(@PathVariable(PathVariableName.USER_ID) final Long followeeId) {
         followCommandService.follow(followeeId);
 
-        return ResponseHandler.handleResponse(HttpStatus.CREATED, ResponseMessage.FOLLOWING_COMPLETED);
+        return ResponseHandler.handleResponse(
+                HttpStatus.CREATED,
+                UserResponseMessage.FOLLOWING_COMPLETED
+        );
     }
 
     @DeleteMapping
-    public ResponseEntity<?> unfollow(@PathVariable("userId") final Long followeeId) {
+    public ResponseEntity<?> unfollow(@PathVariable(PathVariableName.USER_ID) final Long followeeId) {
         followCommandService.unfollow(followeeId);
 
         return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);

@@ -1,20 +1,21 @@
 package com.benchpress200.photique.user.presentation;
 
+import com.benchpress200.photique.common.constant.PathVariableName;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.application.UserQueryService;
-import com.benchpress200.photique.user.application.query.SearchUsersQuery;
+import com.benchpress200.photique.user.application.query.UserSearchQuery;
 import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
-import com.benchpress200.photique.user.application.result.SearchUsersResult;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
+import com.benchpress200.photique.user.application.result.UserSearchResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
-import com.benchpress200.photique.user.presentation.constant.ResponseMessage;
-import com.benchpress200.photique.user.presentation.request.SearchUsersRequest;
+import com.benchpress200.photique.user.presentation.constant.UserResponseMessage;
+import com.benchpress200.photique.user.presentation.request.UserSearchRequest;
 import com.benchpress200.photique.user.presentation.request.ValidateNicknameRequest;
 import com.benchpress200.photique.user.presentation.response.MyDetailsResponse;
-import com.benchpress200.photique.user.presentation.response.SearchUsersResponse;
 import com.benchpress200.photique.user.presentation.response.UserDetailsResponse;
+import com.benchpress200.photique.user.presentation.response.UserSearchResponse;
 import com.benchpress200.photique.user.presentation.response.ValidateNicknameResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class UserQueryController {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.OK,
-                ResponseMessage.NICKNAME_VALIDATED,
+                UserResponseMessage.NICKNAME_VALIDATED,
                 validateNicknameResponse
         );
     }
@@ -55,13 +56,13 @@ public class UserQueryController {
             path = URL.USER_DATA,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<?> getUserDetails(@PathVariable("userId") final Long userId) {
+    public ResponseEntity<?> getUserDetails(@PathVariable(PathVariableName.USER_ID) final Long userId) {
         UserDetailsResult userDetailsResult = userQueryService.getUserDetails(userId);
         UserDetailsResponse userDetailsResponse = UserDetailsResponse.from(userDetailsResult);
 
         return ResponseHandler.handleResponse(
                 HttpStatus.OK,
-                "User with id [" + userId + "] found",
+                UserResponseMessage.USER_FETCHED,
                 userDetailsResponse
         );
     }
@@ -76,23 +77,23 @@ public class UserQueryController {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.OK,
-                "My data found",
+                UserResponseMessage.MY_DATE_FETCHED,
                 myDetailsResponse
         );
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> searchUsers(
-            @ModelAttribute @Valid final SearchUsersRequest searchUsersRequest
+            @ModelAttribute @Valid final UserSearchRequest userSearchRequest
     ) {
-        SearchUsersQuery searchUsersQuery = searchUsersRequest.toQuery();
-        SearchUsersResult searchUsersResult = userQueryService.searchUsers(searchUsersQuery);
-        SearchUsersResponse searchUsersResponse = SearchUsersResponse.from(searchUsersResult);
+        UserSearchQuery userSearchQuery = userSearchRequest.toQuery();
+        UserSearchResult userSearchResult = userQueryService.searchUsers(userSearchQuery);
+        UserSearchResponse userSearchResponse = UserSearchResponse.from(userSearchResult);
 
         return ResponseHandler.handleResponse(
                 HttpStatus.OK,
-                "User search completed",
-                searchUsersResponse
+                UserResponseMessage.USER_SEARCH_COMPLETED,
+                userSearchResponse
         );
     }
 }

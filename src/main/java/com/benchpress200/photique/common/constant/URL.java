@@ -25,7 +25,7 @@ public class URL {
     // FOLLOW
     public static final String FOLLOW_DOMAIN = "/follows";
     public static final String FOLLOWER = "/follower";
-    public static final String FOLLOWING = "/following";
+    public static final String FOLLOWEE = "/followee";
 
     // SINGLE WORK
     public static final String SINGLE_WORK_DOMAIN = "/singleworks";
@@ -46,7 +46,6 @@ public class URL {
     public static final String EXHIBITION_COMMENT_DATA = "/{commentId}";
 
     // NOTIFICATION
-    public static final String SUB = "/subscribe";
     public static final String NOTIFICATION_DOMAIN = "/notifications";
     public static final String NOTIFICATION_DATA = "/{notificationId}";
     public static final String UNREAD = "/unread";

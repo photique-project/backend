@@ -20,7 +20,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     Page<Follow> findByFollowerId(Long followerId, Pageable pageable);
 
-
     Long countByFollowee(User followee);
 
     Long countByFollower(User follower);
@@ -29,12 +28,40 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     boolean existsByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
 
-    @Query("SELECT f.followee.id " +
-            "FROM Follow f " +
-            "WHERE f.follower.id = :followerId " +
-            "AND f.followee.id IN :followeeIds")
+    @Query(
+            "SELECT f.followee.id " +
+                    "FROM Follow f " +
+                    "WHERE f.follower.id = :followerId " +
+                    "AND f.followee.id IN :followeeIds"
+    )
     Set<Long> findFolloweeIds(
             @Param("followerId") Long followerId,
             @Param("followeeIds") List<Long> followeeIds
+    );
+
+    @Query(
+            "SELECT u " +
+                    "FROM User u " +
+                    "JOIN Follow f ON f.follower = u " +
+                    "WHERE f.followee.id = :userId " +
+                    "AND (:keyword IS NULL OR u.nickname LIKE CONCAT(:keyword, '%'))"
+    )
+    Page<User> searchFollower(
+            @Param("userId") Long userId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @Query(
+            "SELECT u " +
+                    "FROM User u " +
+                    "JOIN Follow f ON f.followee = u " +
+                    "WHERE f.follower.id = :userId " +
+                    "AND (:keyword IS NULL OR u.nickname LIKE CONCAT(:keyword, '%'))"
+    )
+    Page<User> searchFollowee(
+            @Param("userId") Long userId,
+            @Param("keyword") String keyword,
+            Pageable pageable
     );
 }

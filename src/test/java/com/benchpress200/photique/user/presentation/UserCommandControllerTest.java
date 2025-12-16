@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
+import com.benchpress200.photique.common.constant.MultipartKey;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.user.application.UserCommandService;
 import com.benchpress200.photique.user.domain.enumeration.Role;
@@ -41,9 +42,7 @@ public class UserCommandControllerTest {
     private static final String JSON_KEY_PASSWORD = "password";
     private static final String JSON_KEY_NICKNAME = "nickname";
     private static final String JSON_KEY_INTRODUCTION = "introduction";
-    private static final String MULTIPART_KEY_USER = "user";
-    private static final String MULTIPART_KEY_PROFILE_IMAGE = "profileImage";
-    
+
     @Autowired
     MockMvc mockMvc;
 
@@ -79,9 +78,9 @@ public class UserCommandControllerTest {
                 JSON_KEY_NICKNAME, nickname
         );
 
-        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MultipartKey.USER,
                 objectMapper.writeValueAsString(jsonBody));
-        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MultipartKey.PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.POST, URL.BASE_URL + URL.USER_DOMAIN)
@@ -110,9 +109,9 @@ public class UserCommandControllerTest {
                 JSON_KEY_NICKNAME, nickname
         );
 
-        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MultipartKey.USER,
                 objectMapper.writeValueAsString(jsonBody));
-        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MultipartKey.PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.POST, URL.BASE_URL + URL.USER_DOMAIN)
@@ -141,9 +140,9 @@ public class UserCommandControllerTest {
                 JSON_KEY_NICKNAME, nickname
         );
 
-        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MultipartKey.USER,
                 objectMapper.writeValueAsString(jsonBody));
-        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MultipartKey.PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.POST, URL.BASE_URL + URL.USER_DOMAIN)
@@ -172,9 +171,9 @@ public class UserCommandControllerTest {
                 JSON_KEY_NICKNAME, invalidNickname
         );
 
-        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MultipartKey.USER,
                 objectMapper.writeValueAsString(jsonBody));
-        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MultipartKey.PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.POST, URL.BASE_URL + URL.USER_DOMAIN)
@@ -204,7 +203,7 @@ public class UserCommandControllerTest {
                 JSON_KEY_NICKNAME, nickname
         );
 
-        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MultipartKey.USER,
                 objectMapper.writeValueAsString(jsonBody));
 
         RequestBuilder request = MockMvcRequestBuilders
@@ -236,10 +235,10 @@ public class UserCommandControllerTest {
                 JSON_KEY_INTRODUCTION, introductionToUpdate
         );
 
-        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MultipartKey.USER,
                 objectMapper.writeValueAsString(jsonBody));
 
-        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MultipartKey.PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA, userId)
@@ -266,10 +265,10 @@ public class UserCommandControllerTest {
                 JSON_KEY_INTRODUCTION, introductionToUpdate
         );
 
-        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MultipartKey.USER,
                 objectMapper.writeValueAsString(jsonBody));
 
-        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MultipartKey.PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA, invalidPathVariable)
@@ -297,10 +296,10 @@ public class UserCommandControllerTest {
                 JSON_KEY_INTRODUCTION, introductionToUpdate
         );
 
-        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MultipartKey.USER,
                 objectMapper.writeValueAsString(jsonBody));
 
-        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MultipartKey.PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA, userId)
@@ -328,10 +327,10 @@ public class UserCommandControllerTest {
                 JSON_KEY_INTRODUCTION, invalidIntroduction
         );
 
-        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MultipartKey.USER,
                 objectMapper.writeValueAsString(jsonBody));
 
-        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
+        MockMultipartFile profileImage = DummyGenerator.generateMockProfileImage(MultipartKey.PROFILE_IMAGE);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .multipart(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA, userId)
@@ -362,7 +361,7 @@ public class UserCommandControllerTest {
                 JSON_KEY_INTRODUCTION, introductionToUpdate
         );
 
-        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MULTIPART_KEY_USER,
+        MockMultipartFile userPart = DummyGenerator.generateMockUserJson(MultipartKey.USER,
                 objectMapper.writeValueAsString(jsonBody));
 
         RequestBuilder request = MockMvcRequestBuilders

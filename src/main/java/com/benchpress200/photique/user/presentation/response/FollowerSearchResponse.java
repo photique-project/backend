@@ -1,6 +1,6 @@
 package com.benchpress200.photique.user.presentation.response;
 
-import com.benchpress200.photique.user.application.result.SearchUsersResult;
+import com.benchpress200.photique.user.application.result.FollowerSearchResult;
 import com.benchpress200.photique.user.application.result.SearchedUser;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
@@ -10,7 +10,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class SearchUsersResponse {
+public class FollowerSearchResponse {
     private int page;
     private int size;
     private long totalElements;
@@ -25,18 +25,18 @@ public class SearchUsersResponse {
     private boolean hasPrevious;
     private List<SearchedUser> users;
 
-    public static SearchUsersResponse from(final SearchUsersResult searchUsersResult) {
-        int page = searchUsersResult.getPage();
-        int size = searchUsersResult.getSize();
-        long totalElements = searchUsersResult.getTotalElements();
-        int totalPages = searchUsersResult.getTotalPages();
-        boolean isFirst = searchUsersResult.isFirst();
-        boolean isLast = searchUsersResult.isLast();
-        boolean hasNext = searchUsersResult.isHasNext();
-        boolean hasPrevious = searchUsersResult.isHasPrevious();
-        List<SearchedUser> users = searchUsersResult.getUsers();
+    public static FollowerSearchResponse from(final FollowerSearchResult followerSearchResult) {
+        int page = followerSearchResult.getPage();
+        int size = followerSearchResult.getSize();
+        long totalElements = followerSearchResult.getTotalElements();
+        int totalPages = followerSearchResult.getTotalPages();
+        boolean isFirst = followerSearchResult.isFirst();
+        boolean isLast = followerSearchResult.isLast();
+        boolean hasNext = followerSearchResult.isHasNext();
+        boolean hasPrevious = followerSearchResult.isHasPrevious();
+        List<SearchedUser> users = followerSearchResult.getFollowers();
 
-        return SearchUsersResponse.builder()
+        return FollowerSearchResponse.builder()
                 .page(page)
                 .size(size)
                 .totalElements(totalElements)
