@@ -25,7 +25,7 @@ public class URL {
     // FOLLOW
     public static final String FOLLOW_DOMAIN = "/follows";
     public static final String FOLLOWER = "/follower";
-    public static final String FOLLOWING = "/following";
+    public static final String FOLLOWEE = "/followee";
 
     // SINGLE WORK
     public static final String SINGLE_WORK_DOMAIN = "/singleworks";

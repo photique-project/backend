@@ -3,7 +3,7 @@ package com.benchpress200.photique.user.application;
 import com.benchpress200.photique.AbstractTestContainerConfig;
 import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
-import com.benchpress200.photique.user.application.query.SearchUsersQuery;
+import com.benchpress200.photique.user.application.query.UserSearchQuery;
 import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
 import com.benchpress200.photique.user.application.result.SearchUsersResult;
@@ -226,7 +226,7 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
 
         Mockito.doReturn(userId).when(authenticationUserProviderPort).getCurrentUserId();
 
-        SearchUsersQuery searchUsersQuery = SearchUsersQuery.builder()
+        UserSearchQuery searchUsersQuery = UserSearchQuery.builder()
                 .keyword(keyword)
                 .pageable(pageable)
                 .build();

@@ -7,4 +7,6 @@ public class UserResponseMessage {
     public static final String JOIN_COMPLETED = "Join completed";
     public static final String NICKNAME_VALIDATED = "Nickname duplication check completed";
     public static final String FOLLOWING_COMPLETED = "Following completed";
+    public static final String FOLLOWER_SEARCH_COMPLETED = "Follower search completed";
+    public static final String FOLLOWEE_SEARCH_COMPLETED = "Followee search completed";
 }

@@ -1,6 +1,7 @@
 package com.benchpress200.photique.user.application.result;
 
 import com.benchpress200.photique.user.domain.entity.User;
+import com.benchpress200.photique.user.domain.vo.SearchedUsers;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +9,7 @@ import org.springframework.data.domain.Page;
 
 @Getter
 @Builder
-public class SearchUsersResult {
+public class FollowerSearchResult {
     private int page;
     private int size;
     private long totalElements;
@@ -17,22 +18,22 @@ public class SearchUsersResult {
     private boolean isLast;
     private boolean hasNext;
     private boolean hasPrevious;
-    private List<SearchedUser> users;
+    private List<SearchedUser> followers;
 
-    public static SearchUsersResult of(
-            final List<SearchedUser> users,
-            final Page<User> userPage
+    public static FollowerSearchResult of(
+            final SearchedUsers followers,
+            final Page<User> followerPage
     ) {
-        int page = userPage.getNumber();
-        int size = userPage.getSize();
-        long totalElements = userPage.getTotalElements();
-        int totalPages = userPage.getTotalPages();
-        boolean isFirst = userPage.isFirst();
-        boolean isLast = userPage.isLast();
-        boolean hasNext = userPage.hasNext();
-        boolean hasPrevious = userPage.hasPrevious();
+        int page = followerPage.getNumber();
+        int size = followerPage.getSize();
+        long totalElements = followerPage.getTotalElements();
+        int totalPages = followerPage.getTotalPages();
+        boolean isFirst = followerPage.isFirst();
+        boolean isLast = followerPage.isLast();
+        boolean hasNext = followerPage.hasNext();
+        boolean hasPrevious = followerPage.hasPrevious();
 
-        return SearchUsersResult.builder()
+        return FollowerSearchResult.builder()
                 .page(page)
                 .size(size)
                 .totalElements(totalElements)
@@ -41,7 +42,7 @@ public class SearchUsersResult {
                 .isLast(isLast)
                 .hasNext(hasNext)
                 .hasPrevious(hasPrevious)
-                .users(users)
+                .followers(followers.values())
                 .build();
     }
 }
