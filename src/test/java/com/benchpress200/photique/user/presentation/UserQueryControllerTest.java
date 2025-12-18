@@ -3,11 +3,12 @@ package com.benchpress200.photique.user.presentation;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.user.application.UserQueryService;
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
-import com.benchpress200.photique.user.application.result.SearchUsersResult;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
+import com.benchpress200.photique.user.application.result.UserSearchResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.benchpress200.photique.util.DummyGenerator;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +19,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -30,6 +32,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @DisplayName("UserQueryController 테스트")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false) // Security Filter 비활성화
+@Import(TestContainerConfiguration.class)
 public class UserQueryControllerTest {
     private final static String QUERY_PARAM_NICKNAME = "nickname";
     private final static String QUERY_PARAM_KEYWORD = "keyword";
@@ -140,8 +143,8 @@ public class UserQueryControllerTest {
         String keyword = DummyGenerator.generateNickname();
         String page = DummyGenerator.generatePage();
         String size = DummyGenerator.generateSize();
-        SearchUsersResult searchUsersResult = DummyGenerator.generateSearchUsersResult();
-        Mockito.doReturn(searchUsersResult).when(userQueryService).searchUsers(Mockito.any());
+        UserSearchResult userSearchResult = DummyGenerator.generateUserSearchResult();
+        Mockito.doReturn(userSearchResult).when(userQueryService).searchUsers(Mockito.any());
 
         RequestBuilder request = MockMvcRequestBuilders
                 .get(URL.BASE_URL + URL.USER_DOMAIN)

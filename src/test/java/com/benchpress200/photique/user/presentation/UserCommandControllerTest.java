@@ -3,6 +3,7 @@ package com.benchpress200.photique.user.presentation;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import com.benchpress200.photique.common.constant.MultipartKey;
 import com.benchpress200.photique.common.constant.URL;
@@ -20,6 +21,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -37,6 +39,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @DisplayName("UserCommandController 테스트")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false) // Security Filter 비활성화
+@Import(TestContainerConfiguration.class)
 public class UserCommandControllerTest {
     private static final String JSON_KEY_EMAIL = "email";
     private static final String JSON_KEY_PASSWORD = "password";

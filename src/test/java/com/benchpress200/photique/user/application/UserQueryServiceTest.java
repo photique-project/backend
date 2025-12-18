@@ -1,13 +1,13 @@
 package com.benchpress200.photique.user.application;
 
-import com.benchpress200.photique.AbstractTestContainerConfig;
+import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
 import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.application.query.UserSearchQuery;
 import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
-import com.benchpress200.photique.user.application.result.SearchUsersResult;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
+import com.benchpress200.photique.user.application.result.UserSearchResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
@@ -23,18 +23,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
 @SpringBootTest
 @DisplayName("UserQueryService 테스트")
 @ActiveProfiles("test")
-public class UserQueryServiceTest extends AbstractTestContainerConfig {
+@Import(TestContainerConfiguration.class)
+public class UserQueryServiceTest {
     @Autowired
     UserRepository userRepository;
 
@@ -232,16 +232,16 @@ public class UserQueryServiceTest extends AbstractTestContainerConfig {
                 .build();
 
         // WHEN
-        SearchUsersResult searchUsersResult = userQueryService.searchUsers(searchUsersQuery);
+        UserSearchResult userSearchResult = userQueryService.searchUsers(searchUsersQuery);
 
         // THEN
-        Assertions.assertThat(searchUsersResult.getPage()).isEqualTo(page);
-        Assertions.assertThat(searchUsersResult.getSize()).isEqualTo(size);
-        Assertions.assertThat(searchUsersResult.getTotalElements()).isEqualTo(abStartingUserCount);
-        Assertions.assertThat(searchUsersResult.isFirst()).isTrue();
-        Assertions.assertThat(searchUsersResult.isLast()).isFalse();
-        Assertions.assertThat(searchUsersResult.isHasNext()).isTrue();
-        Assertions.assertThat(searchUsersResult.isHasPrevious()).isFalse();
-        Assertions.assertThat(searchUsersResult.getUsers().size()).isEqualTo(size);
+        Assertions.assertThat(userSearchResult.getPage()).isEqualTo(page);
+        Assertions.assertThat(userSearchResult.getSize()).isEqualTo(size);
+        Assertions.assertThat(userSearchResult.getTotalElements()).isEqualTo(abStartingUserCount);
+        Assertions.assertThat(userSearchResult.isFirst()).isTrue();
+        Assertions.assertThat(userSearchResult.isLast()).isFalse();
+        Assertions.assertThat(userSearchResult.isHasNext()).isTrue();
+        Assertions.assertThat(userSearchResult.isHasPrevious()).isFalse();
+        Assertions.assertThat(userSearchResult.getUsers().size()).isEqualTo(size);
     }
 }
