@@ -10,11 +10,14 @@ import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class TestContainerConfiguration {
+    private static final String IMAGE_NAME_MYSQL = "mysql:8.0";
+    private static final String IMAGE_NAME_ELASTICSEARCH = "docker.elastic.co/elasticsearch/elasticsearch:7.17.9";
+    private static final String IMAGE_NAME_REDIS = "redis:7.4.1-alpine3.20";
 
     @Bean
     @ServiceConnection
     MySQLContainer<?> mySQLContainer() {
-        return new MySQLContainer<>("mysql:8.0")
+        return new MySQLContainer<>(IMAGE_NAME_MYSQL)
                 .withDatabaseName("testdb")
                 .withUsername("test")
                 .withPassword("test")
@@ -24,14 +27,14 @@ public class TestContainerConfiguration {
     @Bean
     @ServiceConnection
     ElasticsearchContainer elasticsearchContainer() {
-        return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.17.9")
+        return new ElasticsearchContainer(IMAGE_NAME_ELASTICSEARCH)
                 .withReuse(true);
     }
 
     @Bean
     @ServiceConnection(name = "redis")
     GenericContainer<?> redisContainer() {
-        return new GenericContainer<>(DockerImageName.parse("redis:7.4.1-alpine3.20"))
+        return new GenericContainer<>(DockerImageName.parse(IMAGE_NAME_REDIS))
                 .withReuse(true);
     }
 }
