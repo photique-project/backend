@@ -17,17 +17,17 @@ public class ExhibitionCommentDomainServiceImpl implements ExhibitionCommentDoma
     private final ExhibitionCommentRepository exhibitionCommentRepository;
 
     @Override
-    public void deleteComment(final User user) {
+    public void deleteComment(User user) {
         exhibitionCommentRepository.deleteByWriter(user);
     }
 
     @Override
-    public void deleteComment(final Exhibition exhibition) {
+    public void deleteComment(Exhibition exhibition) {
         exhibitionCommentRepository.deleteByExhibition(exhibition);
     }
 
     @Override
-    public void createComment(final ExhibitionComment exhibitionComment) {
+    public void createComment(ExhibitionComment exhibitionComment) {
         exhibitionCommentRepository.save(exhibitionComment);
     }
 
@@ -45,19 +45,19 @@ public class ExhibitionCommentDomainServiceImpl implements ExhibitionCommentDoma
 
     @Override
     public void updateContent(
-            final ExhibitionComment exhibitionComment,
-            final String newContent
+            ExhibitionComment exhibitionComment,
+            String newContent
     ) {
         exhibitionComment.updateContent(newContent);
     }
 
     @Override
-    public void deleteComment(final ExhibitionComment exhibitionComment) {
+    public void deleteComment(ExhibitionComment exhibitionComment) {
         exhibitionCommentRepository.delete(exhibitionComment);
     }
 
     @Override
-    public long countComments(final Exhibition exhibition) {
+    public long countComments(Exhibition exhibition) {
         return exhibitionCommentRepository.countByExhibition(exhibition);
     }
 }

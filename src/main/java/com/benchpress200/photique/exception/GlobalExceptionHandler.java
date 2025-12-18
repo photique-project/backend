@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
 
     // MySQL/ES/Redis 예외 처리 응답
     @ExceptionHandler(DataAccessException.class)
-    public ResponseEntity<?> handleDataAccessException(final DataAccessException e) {
+    public ResponseEntity<?> handleDataAccessException(DataAccessException e) {
         String errorMessage = e.getMessage();
         log.error(errorMessage);
 
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
 
     // 유저 프로필 이미지 예외 처리 응답
     @ExceptionHandler(InvalidProfileImageException.class)
-    public ResponseEntity<?> handleInvalidProfileImageException(final InvalidProfileImageException e) {
+    public ResponseEntity<?> handleInvalidProfileImageException(InvalidProfileImageException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
     // 메일 인증 코드 만료 예외 처리 응답
     @ExceptionHandler(MailAuthenticationCodeExpirationException.class)
     public ResponseEntity<?> handleMailAuthenticationCodeExpirationException(
-            final MailAuthenticationCodeExpirationException e) {
+            MailAuthenticationCodeExpirationException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
     // 메일 인증 코드 미인증 예외 처리 응답
     @ExceptionHandler(MailAuthenticationCodeNotVerifiedException.class)
     public ResponseEntity<?> handleMailAuthenticationCodeNotVerifiedException(
-            final MailAuthenticationCodeNotVerifiedException e
+            MailAuthenticationCodeNotVerifiedException e
     ) {
         String errorMessage = e.getMessage();
 
@@ -81,7 +81,7 @@ public class GlobalExceptionHandler {
 
     // 이미지 업로드 I/O 예외 처리 응답
     @ExceptionHandler(ImageUploaderFileWriteException.class)
-    public ResponseEntity<?> handleImageUploaderFileWriteException(final ImageUploaderFileWriteException e) {
+    public ResponseEntity<?> handleImageUploaderFileWriteException(ImageUploaderFileWriteException e) {
         String errorMessage = e.getMessage();
         log.error(errorMessage);
 
@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
 
     // S3 업로드 예외 처리 응답
     @ExceptionHandler(S3UploadException.class)
-    public ResponseEntity<?> handleS3UploadException(final S3UploadException e) {
+    public ResponseEntity<?> handleS3UploadException(S3UploadException e) {
         String errorMessage = e.getMessage();
         log.error(errorMessage);
 
@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
 
     // 유효하지 않은 DTO 필드 예외 처리 응답
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleDTOIllegalArgumentException(final MethodArgumentNotValidException e) {
+    public ResponseEntity<?> handleDTOIllegalArgumentException(MethodArgumentNotValidException e) {
         StringBuilder sb = new StringBuilder();
 
         e.getBindingResult().getAllErrors().forEach((error) -> {
@@ -124,7 +124,7 @@ public class GlobalExceptionHandler {
 
     // 전달받은 id를 가진 유저 찾지 못했을 때 예외 처리 응답
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<?> handleUserNotFoundException(final UserNotFoundException e) {
+    public ResponseEntity<?> handleUserNotFoundException(UserNotFoundException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
@@ -135,7 +135,7 @@ public class GlobalExceptionHandler {
 
     // 경로 변수로 전달한 값의 타입 오류 예외 처리 응답
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<?> handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
+    public ResponseEntity<?> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.BAD_REQUEST,
@@ -145,7 +145,7 @@ public class GlobalExceptionHandler {
 
     // S3 이미지 삭제 예외 처리 응답
     @ExceptionHandler(S3DeleteException.class)
-    public ResponseEntity<?> handleS3DeleteException(final S3DeleteException s3DeleteException) {
+    public ResponseEntity<?> handleS3DeleteException(S3DeleteException s3DeleteException) {
         String errorMessage = s3DeleteException.getMessage();
         String imageUrl = s3DeleteException.getImageUrl();
         log.error(errorMessage);
@@ -159,7 +159,7 @@ public class GlobalExceptionHandler {
 
     // 로그인 필터에 들어오 요청 객체 I/O 예외 처리 응답
     @ExceptionHandler(LoginRequestObjectReadException.class)
-    public ResponseEntity<?> handleLoginRequestObjectReadException(final LoginRequestObjectReadException e) {
+    public ResponseEntity<?> handleLoginRequestObjectReadException(LoginRequestObjectReadException e) {
         String errorMessage = e.getMessage();
         log.error(errorMessage);
 
@@ -171,7 +171,7 @@ public class GlobalExceptionHandler {
 
     // 새 유저 저장 중에 중복된 이메일 또는 닉네임 예외 처리 응답
     @ExceptionHandler(DuplicatedUserException.class)
-    public ResponseEntity<?> handleDuplicatedUserException(final DuplicatedUserException e) {
+    public ResponseEntity<?> handleDuplicatedUserException(DuplicatedUserException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
@@ -182,7 +182,7 @@ public class GlobalExceptionHandler {
 
     // 본인 팔로우 요청 예외 처리 응답
     @ExceptionHandler(InvalidFollowRequestException.class)
-    public ResponseEntity<?> handleInvalidFollowRequestException(final InvalidFollowRequestException e) {
+    public ResponseEntity<?> handleInvalidFollowRequestException(InvalidFollowRequestException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
@@ -193,7 +193,7 @@ public class GlobalExceptionHandler {
 
     // 이미 팔로우한 요청 예외 처리 응답
     @ExceptionHandler(DuplicatedFollowException.class)
-    public ResponseEntity<?> handleDuplicatedFollowException(final DuplicatedFollowException e) {
+    public ResponseEntity<?> handleDuplicatedFollowException(DuplicatedFollowException e) {
         return ResponseHandler.handleResponse(
                 HttpStatus.NO_CONTENT
         );
@@ -201,7 +201,7 @@ public class GlobalExceptionHandler {
 
     // 회원가입 인증 메일 요청 시, 이미 가입된 이메일 예외 처리 응답
     @ExceptionHandler(EmailAlreadyInUseException.class)
-    public ResponseEntity<?> handleEmailAlreadyInUseException(final EmailAlreadyInUseException e) {
+    public ResponseEntity<?> handleEmailAlreadyInUseException(EmailAlreadyInUseException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
@@ -212,7 +212,7 @@ public class GlobalExceptionHandler {
 
     // 비밀번호 찾기 인증 메일 요청 시, 해당 이메일을 가진 유저가 존재하지 않을 때 예외 처리 응답
     @ExceptionHandler(EmailNotFoundException.class)
-    public ResponseEntity<?> handleEmailNotFoundException(final EmailNotFoundException e) {
+    public ResponseEntity<?> handleEmailNotFoundException(EmailNotFoundException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
@@ -223,7 +223,7 @@ public class GlobalExceptionHandler {
 
     // 메일 인증 코드 요청 시, 코드가 만료되었을 때 예외 처리 응답
     @ExceptionHandler(VerificationCodeNotFoundException.class)
-    public ResponseEntity<?> handleVerificationCodeNotFoundException(final VerificationCodeNotFoundException e) {
+    public ResponseEntity<?> handleVerificationCodeNotFoundException(VerificationCodeNotFoundException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
@@ -234,7 +234,7 @@ public class GlobalExceptionHandler {
 
     // 유효하지 않은 리프레쉬 토큰 예외 처리 응답
     @ExceptionHandler(InvalidRefreshTokenException.class)
-    public ResponseEntity<?> handleInvalidRefreshTokenException(final InvalidRefreshTokenException e) {
+    public ResponseEntity<?> handleInvalidRefreshTokenException(InvalidRefreshTokenException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(

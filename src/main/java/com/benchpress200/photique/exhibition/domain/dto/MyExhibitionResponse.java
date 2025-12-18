@@ -35,10 +35,10 @@ public class MyExhibitionResponse {
             String introduction
     ) {
         public static Writer of(
-                final Long id,
-                final String nickname,
-                final String profileImage,
-                final String introduction
+                Long id,
+                String nickname,
+                String profileImage,
+                String introduction
         ) {
             return Writer.builder()
                     .id(id)
@@ -50,9 +50,9 @@ public class MyExhibitionResponse {
     }
 
     public static MyExhibitionResponse of(
-            final ExhibitionSearch exhibitionSearch,
-            final boolean isLiked,
-            final boolean isBookmarked
+            ExhibitionSearch exhibitionSearch,
+            boolean isLiked,
+            boolean isBookmarked
     ) {
 
         return MyExhibitionResponse.builder()

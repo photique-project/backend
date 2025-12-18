@@ -12,18 +12,18 @@ import org.springframework.stereotype.Service;
 public class UserDomainService {
     private final UserRepository userRepository;
 
-    public void isDuplicatedEmail(final String email) {
+    public void isDuplicatedEmail(String email) {
         if (userRepository.existsByEmail(email)) {
             throw new UserException("Email [" + email + "] is already in use.", HttpStatus.CONFLICT);
         }
     }
 
-    public User findUser(final Long userId) {
+    public User findUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> new UserException("User with id {" + userId + "} is not found", HttpStatus.NOT_FOUND));
     }
 
-    public User findUser(final String email) {
+    public User findUser(String email) {
         return userRepository.findByEmail(email).orElseThrow(
                 () -> new UserException("User with email {" + email + "} is not found", HttpStatus.NOT_FOUND)
         );

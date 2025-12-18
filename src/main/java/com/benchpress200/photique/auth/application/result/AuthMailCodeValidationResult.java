@@ -8,7 +8,7 @@ import lombok.Getter;
 public class AuthMailCodeValidationResult {
     private boolean success;
 
-    public static AuthMailCodeValidationResult of(final boolean success) {
+    public static AuthMailCodeValidationResult of(boolean success) {
         return new AuthMailCodeValidationResult(success);
     }
 }

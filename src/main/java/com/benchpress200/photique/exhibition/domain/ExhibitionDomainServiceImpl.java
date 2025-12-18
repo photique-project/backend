@@ -40,7 +40,7 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     private final ExhibitionSearchRepository exhibitionSearchRepository;
 
     @Override
-    public Exhibition findExhibitionWithWorksAndWriter(final @Param("id") Long id) {
+    public Exhibition findExhibitionWithWorksAndWriter(@Param("id") Long id) {
         return exhibitionRepository.findWithWorksAndWriter(id).orElseThrow(
                 () -> new ExhibitionException("Exhibition with id [" + id + "] is not found.",
                         HttpStatus.NOT_FOUND)
@@ -48,27 +48,27 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     }
 
     @Override
-    public List<Exhibition> findExhibition(final User user) {
+    public List<Exhibition> findExhibition(User user) {
         return exhibitionRepository.findByWriter(user);
     }
 
     @Override
-    public List<ExhibitionWork> findExhibitionWork(final Exhibition exhibition) {
+    public List<ExhibitionWork> findExhibitionWork(Exhibition exhibition) {
         return exhibitionWorkRepository.findByExhibition(exhibition);
     }
 
     @Override
-    public void deleteLike(final User user) {
+    public void deleteLike(User user) {
         exhibitionLikeRepository.deleteByUser(user);
     }
 
     @Override
-    public void deleteBookmark(final User user) {
+    public void deleteBookmark(User user) {
         exhibitionBookmarkRepository.deleteByUser(user);
     }
 
     @Override
-    public void deleteExhibition(final Exhibition exhibition) {
+    public void deleteExhibition(Exhibition exhibition) {
         exhibitionRepository.delete(exhibition);
 
         // 엘라스틱서치 데이터 삭제
@@ -78,47 +78,47 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     }
 
     @Override
-    public void deleteLike(final Exhibition exhibition) {
+    public void deleteLike(Exhibition exhibition) {
         exhibitionLikeRepository.deleteByExhibition(exhibition);
     }
 
     @Override
-    public void deleteBookmark(final Exhibition exhibition) {
+    public void deleteBookmark(Exhibition exhibition) {
         exhibitionBookmarkRepository.deleteByExhibition(exhibition);
     }
 
     @Override
-    public void deleteExhibitionWork(final Exhibition exhibition) {
+    public void deleteExhibitionWork(Exhibition exhibition) {
         exhibitionWorkRepository.deleteByExhibition(exhibition);
     }
 
     @Override
-    public void deleteExhibitionWork(final ExhibitionWork exhibitionWork) {
+    public void deleteExhibitionWork(ExhibitionWork exhibitionWork) {
         exhibitionWorkRepository.delete(exhibitionWork);
     }
 
     @Override
-    public Exhibition createNewExhibition(final Exhibition exhibition) {
+    public Exhibition createNewExhibition(Exhibition exhibition) {
         return exhibitionRepository.save(exhibition);
     }
 
     @Override
-    public void createNewExhibitionWorks(final List<ExhibitionWork> exhibitionWorks) {
+    public void createNewExhibitionWorks(List<ExhibitionWork> exhibitionWorks) {
         exhibitionWorkRepository.saveAll(exhibitionWorks);
     }
 
     @Override
-    public void createNewExhibitionTags(final List<ExhibitionTag> exhibitionTags) {
+    public void createNewExhibitionTags(List<ExhibitionTag> exhibitionTags) {
         exhibitionTagRepository.saveAll(exhibitionTags);
     }
 
     @Override
-    public void createNewExhibitionSearch(final ExhibitionSearch exhibitionSearch) {
+    public void createNewExhibitionSearch(ExhibitionSearch exhibitionSearch) {
         ElasticsearchExhibitionRollbackContext.addDocumentToSave(exhibitionSearch);
     }
 
     @Override
-    public Exhibition findExhibition(final Long exhibitionId) {
+    public Exhibition findExhibition(Long exhibitionId) {
         return exhibitionRepository.findById(exhibitionId).orElseThrow(
                 () -> new ExhibitionException("Exhibition with id [" + exhibitionId + "] is not found.",
                         HttpStatus.NOT_FOUND)
@@ -126,16 +126,16 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     }
 
     @Override
-    public List<ExhibitionWork> findExhibitionWorks(final Exhibition exhibition) {
+    public List<ExhibitionWork> findExhibitionWorks(Exhibition exhibition) {
         return exhibitionWorkRepository.findByExhibition(exhibition);
     }
 
     @Override
-    public void incrementView(final Exhibition exhibition) {
+    public void incrementView(Exhibition exhibition) {
         exhibition.incrementView();
     }
 
-    private ExhibitionSearch findExhibitionSearch(final Long exhibitionId) {
+    private ExhibitionSearch findExhibitionSearch(Long exhibitionId) {
         return exhibitionSearchRepository.findById(exhibitionId).orElseThrow(
                 () -> new ExhibitionException("Exhibition with ID " + exhibitionId + " is not found.",
                         HttpStatus.NOT_FOUND)
@@ -144,9 +144,9 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
 
     @Override
     public Page<ExhibitionSearch> searchExhibitions(
-            final Target target,
-            final List<String> keywords,
-            final Pageable pageable
+            Target target,
+            List<String> keywords,
+            Pageable pageable
     ) {
         Page<ExhibitionSearch> exhibitionSearchPage = exhibitionSearchRepository.searchExhibitions(
                 target,
@@ -162,24 +162,24 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     }
 
     @Override
-    public void deleteExhibitionLike(final Exhibition exhibition) {
+    public void deleteExhibitionLike(Exhibition exhibition) {
         exhibitionLikeRepository.deleteByExhibition(exhibition);
     }
 
     @Override
-    public void deleteExhibitionBookmark(final Exhibition exhibition) {
+    public void deleteExhibitionBookmark(Exhibition exhibition) {
         exhibitionBookmarkRepository.deleteByExhibition(exhibition);
     }
 
     @Override
-    public void deleteExhibitionTag(final Exhibition exhibition) {
+    public void deleteExhibitionTag(Exhibition exhibition) {
         exhibitionTagRepository.deleteByExhibition(exhibition);
     }
 
     @Override
     public void isAlreadyLiked(
-            final User user,
-            final Exhibition exhibition
+            User user,
+            Exhibition exhibition
     ) {
         if (exhibitionLikeRepository.existsByUserAndExhibition(user, exhibition)) {
             throw new ExhibitionException("User has already liked this exhibition", HttpStatus.CONFLICT);
@@ -187,22 +187,22 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     }
 
     @Override
-    public void incrementLike(final ExhibitionLike exhibitionLike) {
+    public void incrementLike(ExhibitionLike exhibitionLike) {
         exhibitionLikeRepository.save(exhibitionLike);
     }
 
     @Override
     public void decrementLike(
-            final User user,
-            final Exhibition exhibition
+            User user,
+            Exhibition exhibition
     ) {
         exhibitionLikeRepository.deleteByUserAndExhibition(user, exhibition);
     }
 
     @Override
     public void isAlreadyBookmarked(
-            final User user,
-            final Exhibition exhibition
+            User user,
+            Exhibition exhibition
     ) {
 
         if (exhibitionBookmarkRepository.existsByUserAndExhibition(user, exhibition)) {
@@ -211,27 +211,27 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     }
 
     @Override
-    public void addBookmark(final ExhibitionBookmark exhibitionBookmark) {
+    public void addBookmark(ExhibitionBookmark exhibitionBookmark) {
         exhibitionBookmarkRepository.save(exhibitionBookmark);
     }
 
     @Override
     public void removeBookmark(
-            final User user,
-            final Exhibition exhibition
+            User user,
+            Exhibition exhibition
     ) {
         exhibitionBookmarkRepository.deleteByUserAndExhibition(user, exhibition);
     }
 
     @Override
-    public Long countExhibition(final User user) {
+    public Long countExhibition(User user) {
         return exhibitionRepository.countByWriter(user);
     }
 
     @Override
     public boolean isLiked(
-            final Long userId,
-            final Long exhibitionId
+            Long userId,
+            Long exhibitionId
     ) {
         if (userId == 0) {
             return false;
@@ -242,8 +242,8 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
 
     @Override
     public boolean isBookmarked(
-            final Long userId,
-            final Long exhibitionId
+            Long userId,
+            Long exhibitionId
     ) {
         if (userId == null) {
             return false;
@@ -254,8 +254,8 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
 
     @Override
     public Page<ExhibitionSearch> findBookmarkedExhibitionsByUser(
-            final Long userId,
-            final Pageable pageable
+            Long userId,
+            Pageable pageable
     ) {
         // 유저가 북마크한 전시회 페이지 조회
         Page<ExhibitionBookmark> exhibitionBookmarkPage = exhibitionBookmarkRepository.findByUserId(userId, pageable);
@@ -273,8 +273,8 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
 
     @Override
     public Page<ExhibitionSearch> findLikedExhibitionsByUser(
-            final Long userId,
-            final Pageable pageable
+            Long userId,
+            Pageable pageable
     ) {
         // 유저가 좋아요한 전시회 페이지 조회
         Page<ExhibitionLike> exhibitionLikePage = exhibitionLikeRepository.findByUserId(userId, pageable);
@@ -292,8 +292,8 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
 
     @Override
     public Page<ExhibitionSearch> findMyExhibitions(
-            final Long userId,
-            final Pageable pageable
+            Long userId,
+            Pageable pageable
     ) {
         Page<ExhibitionSearch> exhibitionSearchPage = exhibitionSearchRepository.findByWriterId(userId, pageable);
 
@@ -305,39 +305,39 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     }
 
     @Override
-    public List<ExhibitionSearch> findExhibitionSearchesByWriterId(final long id) {
+    public List<ExhibitionSearch> findExhibitionSearchesByWriterId(long id) {
         return exhibitionSearchRepository.findAllByWriterId(id);
     }
 
     @Override
-    public void updateAllExhibitionSearch(final List<ExhibitionSearch> exhibitionSearches) {
+    public void updateAllExhibitionSearch(List<ExhibitionSearch> exhibitionSearches) {
         exhibitionSearchRepository.saveAll(exhibitionSearches);
     }
 
     @Override
-    public void markAsUpdated(final Exhibition exhibition) {
+    public void markAsUpdated(Exhibition exhibition) {
         exhibition.markAsUpdated();
     }
 
     @Override
-    public List<Exhibition> findExhibitionsModifiedSince(final LocalDateTime time) {
+    public List<Exhibition> findExhibitionsModifiedSince(LocalDateTime time) {
         return exhibitionRepository.findAllByUpdatedAtAfter(time);
     }
 
     @Override
-    public List<ExhibitionTag> findExhibitionTag(final Exhibition exhibition) {
+    public List<ExhibitionTag> findExhibitionTag(Exhibition exhibition) {
         return exhibitionTagRepository.findByExhibition(exhibition);
     }
 
     @Override
-    public long countLike(final Exhibition exhibition) {
+    public long countLike(Exhibition exhibition) {
         return exhibitionLikeRepository.countByExhibition(exhibition);
     }
 
     @Override
     public Set<Long> findLikedExhibitionIds(
             long userId,
-            final List<Long> exhibitionIds
+            List<Long> exhibitionIds
     ) {
         if (userId == 0) {
             return new HashSet<>();
@@ -354,7 +354,7 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
     @Override
     public Set<Long> findBookmarkedExhibitionIds(
             long userId,
-            final List<Long> exhibitionIds
+            List<Long> exhibitionIds
     ) {
         if (userId == 0) {
             return new HashSet<>();

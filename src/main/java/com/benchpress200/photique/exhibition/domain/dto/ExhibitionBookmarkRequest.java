@@ -17,15 +17,13 @@ public class ExhibitionBookmarkRequest {
     private Long userId;
     private Long exhibitionId;
 
-    public void withExhibitionId(
-            final Long exhibitionId
-    ) {
+    public void withExhibitionId(Long exhibitionId) {
         this.exhibitionId = exhibitionId;
     }
 
     public ExhibitionBookmark toEntity(
-            final User user,
-            final Exhibition exhibition
+            User user,
+            Exhibition exhibition
     ) {
         return ExhibitionBookmark.builder()
                 .exhibition(exhibition)

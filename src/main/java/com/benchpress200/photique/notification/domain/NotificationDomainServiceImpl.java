@@ -18,8 +18,8 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 
     @Override
     public Page<Notification> findNotifications(
-            final User user,
-            final Pageable pageable
+            User user,
+            Pageable pageable
     ) {
         Page<Notification> notificationPage = notificationRepository.findByReceiverOrderByCreatedAtDesc(user, pageable);
 
@@ -38,22 +38,22 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     }
 
     @Override
-    public void readNotification(final Notification notification) {
+    public void readNotification(Notification notification) {
         notification.read();
     }
 
     @Override
-    public List<Notification> findNotifications(final User user) {
+    public List<Notification> findNotifications(User user) {
         return notificationRepository.findByReceiver(user);
     }
 
     @Override
-    public void deleteNotification(final Notification notification) {
+    public void deleteNotification(Notification notification) {
         notificationRepository.delete(notification);
     }
 
     @Override
-    public long countUnread(final User user) {
+    public long countUnread(User user) {
         return notificationRepository.countByReceiverAndIsReadFalse(user);
     }
 }

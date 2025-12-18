@@ -47,8 +47,8 @@ public class ExhibitionBookmark {
 
     @Builder
     public ExhibitionBookmark(
-            final User user,
-            final Exhibition exhibition
+            User user,
+            Exhibition exhibition
     ) {
         this.user = user;
         this.exhibition = exhibition;

@@ -52,8 +52,8 @@ public class ExhibitionLike {
 
     @Builder
     public ExhibitionLike(
-            final User user,
-            final Exhibition exhibition
+            User user,
+            Exhibition exhibition
     ) {
         this.user = user;
         this.exhibition = exhibition;

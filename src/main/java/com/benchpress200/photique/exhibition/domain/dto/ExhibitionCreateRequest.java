@@ -46,7 +46,7 @@ public class ExhibitionCreateRequest {
     }
 
     public Exhibition toEntity(
-            final User writer
+            User writer
     ) {
         return Exhibition.builder()
                 .writer(writer)
@@ -57,8 +57,8 @@ public class ExhibitionCreateRequest {
     }
 
     public List<ExhibitionTag> toExhibitionTagEntities(
-            final Exhibition exhibition,
-            final List<Tag> tags
+            Exhibition exhibition,
+            List<Tag> tags
     ) {
         return tags.stream()
                 .map(tag -> ExhibitionTag.builder()

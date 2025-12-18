@@ -41,10 +41,10 @@ public class ExhibitionWork {
 
     @Builder
     public ExhibitionWork(
-            final Exhibition exhibition,
-            final String image,
-            final String title,
-            final String description
+            Exhibition exhibition,
+            String image,
+            String title,
+            String description
     ) {
         this.exhibition = exhibition;
         this.image = image;

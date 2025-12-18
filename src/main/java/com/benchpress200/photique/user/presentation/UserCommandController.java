@@ -42,8 +42,8 @@ public class UserCommandController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<?> join(
-            @RequestPart(MultipartKey.USER) @Valid final JoinRequest joinRequest,
-            @RequestPart(value = MultipartKey.PROFILE_IMAGE, required = false) final MultipartFile profileImage
+            @RequestPart(MultipartKey.USER) @Valid JoinRequest joinRequest,
+            @RequestPart(value = MultipartKey.PROFILE_IMAGE, required = false) MultipartFile profileImage
     ) {
         JoinCommand joinCommand = joinRequest.toCommand(profileImage);
         userCommandService.join(joinCommand);
@@ -62,9 +62,9 @@ public class UserCommandController {
     )
     @PreAuthorize("#userId == authentication.principal.userId")
     public ResponseEntity<?> updateUserDetails(
-            @PathVariable(PathVariableName.USER_ID) final Long userId,
-            @RequestPart(MultipartKey.USER) @Valid final UpdateUserDetailsRequest updateUserDetailsRequest,
-            @RequestPart(value = MultipartKey.PROFILE_IMAGE, required = false) final MultipartFile profileImage
+            @PathVariable(PathVariableName.USER_ID) Long userId,
+            @RequestPart(MultipartKey.USER) @Valid UpdateUserDetailsRequest updateUserDetailsRequest,
+            @RequestPart(value = MultipartKey.PROFILE_IMAGE, required = false) MultipartFile profileImage
     ) {
         UpdateUserDetailsCommand updateUserDetailsCommand = updateUserDetailsRequest.toCommand(userId, profileImage);
         userCommandService.updateUserDetails(updateUserDetailsCommand);
@@ -80,8 +80,8 @@ public class UserCommandController {
     )
     @PreAuthorize("#userId == authentication.principal.userId")
     public ResponseEntity<?> updateUserPassword(
-            @PathVariable(PathVariableName.USER_ID) final Long userId,
-            @RequestBody @Valid final UpdateUserPasswordRequest updateUserPasswordRequest
+            @PathVariable(PathVariableName.USER_ID) Long userId,
+            @RequestBody @Valid UpdateUserPasswordRequest updateUserPasswordRequest
     ) {
         UpdateUserPasswordCommand updateUserPasswordCommand = updateUserPasswordRequest.toCommand(userId);
         userCommandService.updateUserPassword(updateUserPasswordCommand);
@@ -96,7 +96,7 @@ public class UserCommandController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<?> resetUserPassword(
-            @RequestBody @Valid final ResetUserPasswordRequest resetUserPasswordRequest
+            @RequestBody @Valid ResetUserPasswordRequest resetUserPasswordRequest
     ) {
         ResetUserPasswordCommand resetUserPasswordCommand = resetUserPasswordRequest.toCommand();
         userCommandService.resetUserPassword(resetUserPasswordCommand);
@@ -110,7 +110,7 @@ public class UserCommandController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @PreAuthorize("#userId == authentication.principal.userId")
-    public ResponseEntity<?> withdraw(@PathVariable(PathVariableName.USER_ID) final Long userId) {
+    public ResponseEntity<?> withdraw(@PathVariable(PathVariableName.USER_ID) Long userId) {
         userCommandService.withdraw(userId);
 
         return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);

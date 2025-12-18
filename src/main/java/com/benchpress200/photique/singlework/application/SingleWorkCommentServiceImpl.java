@@ -32,7 +32,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
     @Override
     @Transactional
-    public void addSingleWorkComment(final SingleWorkCommentCreateRequest singleWorkCommentCreateRequest) {
+    public void addSingleWorkComment(SingleWorkCommentCreateRequest singleWorkCommentCreateRequest) {
         // 작성자 조회
         Long writerId = singleWorkCommentCreateRequest.getWriterId();
         User writer = userDomainService.findUser(writerId);
@@ -68,8 +68,8 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
     @Override
     @Transactional
     public Page<SingleWorkCommentDetailResponse> getSingleWorkComments(
-            final Long singleWorkId,
-            final Pageable pageable
+            Long singleWorkId,
+            Pageable pageable
     ) {
         // 단일작품 조회
         SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
@@ -86,7 +86,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
     @Override
     @Transactional
-    public void updateSingleWorkComment(final SingleWorkCommentUpdateRequest singleWorkCommentUpdateRequest) {
+    public void updateSingleWorkComment(SingleWorkCommentUpdateRequest singleWorkCommentUpdateRequest) {
         // 작성자 조회
         Long writerId = singleWorkCommentUpdateRequest.getWriterId();
         userDomainService.findUser(writerId);
@@ -106,7 +106,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
     @Override
     @Transactional
-    public void deleteSingleWorkComment(final SingleWorkCommentDeleteRequest singleWorkCommentDeleteRequest) {
+    public void deleteSingleWorkComment(SingleWorkCommentDeleteRequest singleWorkCommentDeleteRequest) {
         // 작성자 조회
         Long writerId = singleWorkCommentDeleteRequest.getWriterId();
         userDomainService.findUser(writerId);

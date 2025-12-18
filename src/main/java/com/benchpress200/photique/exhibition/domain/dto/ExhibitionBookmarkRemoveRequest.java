@@ -13,9 +13,7 @@ public class ExhibitionBookmarkRemoveRequest {
     private Long userId;
     private Long exhibitionId;
 
-    public void withExhibitionId(
-            final Long exhibitionId
-    ) {
+    public void withExhibitionId(Long exhibitionId) {
         this.exhibitionId = exhibitionId;
     }
 }

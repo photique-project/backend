@@ -9,13 +9,13 @@ import org.springframework.data.domain.Page;
 public class SearchedUsers {
     private final List<SearchedUser> searchedUsers;
 
-    private SearchedUsers(final List<SearchedUser> searchedUsers) {
+    private SearchedUsers(List<SearchedUser> searchedUsers) {
         this.searchedUsers = searchedUsers;
     }
 
     public static SearchedUsers of(
-            final Page<User> userPage,
-            final FolloweeIds followeeIds
+            Page<User> userPage,
+            FolloweeIds followeeIds
     ) {
         List<SearchedUser> searchedUsers = userPage.stream()
                 .map(user -> {

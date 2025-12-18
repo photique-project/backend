@@ -14,7 +14,7 @@ public class ExhibitionJoinRequest {
     private Long exhibitionId;
     private Long userId;
 
-    public static ExhibitionJoinRequest from(final SessionSubscribeEvent sessionSubscribeEvent) {
+    public static ExhibitionJoinRequest from(SessionSubscribeEvent sessionSubscribeEvent) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(sessionSubscribeEvent.getMessage());
 
         return ExhibitionJoinRequest.builder()

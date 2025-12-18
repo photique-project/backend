@@ -31,8 +31,8 @@ public class ExhibitionCommentController {
 
     @PostMapping
     public ApiSuccessResponse<?> createExhibitionComment(
-            @PathVariable("exhibitionId") final Long exhibitionId,
-            @RequestBody @Valid final ExhibitionCommentCreateRequest exhibitionCommentCreateRequest
+            @PathVariable("exhibitionId") Long exhibitionId,
+            @RequestBody @Valid ExhibitionCommentCreateRequest exhibitionCommentCreateRequest
     ) {
         exhibitionCommentCreateRequest.withExhibitionId(exhibitionId);
         exhibitionCommentService.addExhibitionComment(exhibitionCommentCreateRequest);
@@ -42,8 +42,8 @@ public class ExhibitionCommentController {
 
     @GetMapping
     public ApiSuccessResponse<?> getExhibitionComments(
-            @PathVariable("exhibitionId") final Long exhibitionId,
-            final Pageable pageable
+            @PathVariable("exhibitionId") Long exhibitionId,
+            Pageable pageable
     ) {
         Page<ExhibitionCommentDetailResponse> exhibitionCommentPage = exhibitionCommentService.getExhibitionComments(
                 exhibitionId, pageable);
@@ -53,9 +53,9 @@ public class ExhibitionCommentController {
 
     @PatchMapping(URL.EXHIBITION_COMMENT_DATA)
     public ApiSuccessResponse<?> updateExhibitionComment(
-            @PathVariable("exhibitionId") final Long exhibitionId,
-            @PathVariable("commentId") final Long commentId,
-            @RequestBody @Valid final ExhibitionCommentUpdateRequest exhibitionCommentUpdateRequest
+            @PathVariable("exhibitionId") Long exhibitionId,
+            @PathVariable("commentId") Long commentId,
+            @RequestBody @Valid ExhibitionCommentUpdateRequest exhibitionCommentUpdateRequest
     ) {
         exhibitionCommentUpdateRequest.withExhibitionId(exhibitionId);
         exhibitionCommentUpdateRequest.withCommentId(commentId);
@@ -66,9 +66,9 @@ public class ExhibitionCommentController {
     
     @DeleteMapping(URL.EXHIBITION_COMMENT_DATA)
     public ApiSuccessResponse<?> deleteExhibitionComment(
-            @PathVariable("exhibitionId") final Long exhibitionId,
-            @PathVariable("commentId") final Long commentId,
-            @RequestBody @Valid final ExhibitionCommentDeleteRequest exhibitionCommentDeleteRequest
+            @PathVariable("exhibitionId") Long exhibitionId,
+            @PathVariable("commentId") Long commentId,
+            @RequestBody @Valid ExhibitionCommentDeleteRequest exhibitionCommentDeleteRequest
     ) {
         exhibitionCommentDeleteRequest.withExhibitionId(exhibitionId);
         exhibitionCommentDeleteRequest.withCommentId(commentId);

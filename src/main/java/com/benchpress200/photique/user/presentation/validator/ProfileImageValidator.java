@@ -11,7 +11,7 @@ public class ProfileImageValidator {
     private ProfileImageValidator() {
     }
 
-    public static boolean isValid(final MultipartFile file) {
+    public static boolean isValid(MultipartFile file) {
         // null 가능
         if (file == null) {
             return true;

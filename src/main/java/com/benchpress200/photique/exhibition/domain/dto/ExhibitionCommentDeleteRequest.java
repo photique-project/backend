@@ -12,13 +12,13 @@ public class ExhibitionCommentDeleteRequest {
     private Long writerId;
 
     public void withExhibitionId(
-            final Long exhibitionId
+            Long exhibitionId
     ) {
         this.exhibitionId = exhibitionId;
     }
 
     public void withCommentId(
-            final Long commentId
+            Long commentId
     ) {
         this.commentId = commentId;
     }

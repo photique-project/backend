@@ -50,9 +50,9 @@ public class Notification {
 
     @Builder
     public Notification(
-            final User receiver,
-            final NotificationType type,
-            final Long targetId
+            User receiver,
+            NotificationType type,
+            Long targetId
     ) {
         this.receiver = receiver;
         this.type = type;
@@ -64,9 +64,9 @@ public class Notification {
     }
 
     public static Notification of(
-            final User receiver,
-            final NotificationType type,
-            final Long targetId
+            User receiver,
+            NotificationType type,
+            Long targetId
     ) {
         return Notification.builder()
                 .receiver(receiver)

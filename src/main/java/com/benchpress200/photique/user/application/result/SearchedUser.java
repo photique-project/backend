@@ -18,8 +18,8 @@ public class SearchedUser {
     private boolean isFollowing;
 
     public static SearchedUser of(
-            final User user,
-            final boolean isFollowing
+            User user,
+            boolean isFollowing
     ) {
         Long id = user.getId();
         String profileImage = user.getProfileImage();

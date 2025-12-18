@@ -30,9 +30,9 @@ public class ExhibitionSearchRepositoryImpl implements ExhibitionSearchRepositor
 
     @Override
     public Page<ExhibitionSearch> searchExhibitions(
-            final Target target,
-            final List<String> keywords,
-            final Pageable pageable
+            Target target,
+            List<String> keywords,
+            Pageable pageable
     ) {
         try {
             // Bool Query 빌드

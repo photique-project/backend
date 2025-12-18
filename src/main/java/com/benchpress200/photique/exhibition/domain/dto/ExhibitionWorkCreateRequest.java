@@ -28,8 +28,8 @@ public class ExhibitionWorkCreateRequest {
     private String description;
 
     public ExhibitionWork toEntity(
-            final Exhibition exhibition,
-            final String imageUrl
+            Exhibition exhibition,
+            String imageUrl
     ) {
         return ExhibitionWork.builder()
                 .exhibition(exhibition)

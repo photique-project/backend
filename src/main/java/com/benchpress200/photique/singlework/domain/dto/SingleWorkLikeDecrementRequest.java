@@ -13,9 +13,7 @@ public class SingleWorkLikeDecrementRequest {
     private Long userId;
     private Long singleWorkId;
 
-    public void withSingleWorkId(
-            final Long singleWorkId
-    ) {
+    public void withSingleWorkId(Long singleWorkId) {
         this.singleWorkId = singleWorkId;
     }
 }

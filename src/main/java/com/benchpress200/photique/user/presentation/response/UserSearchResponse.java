@@ -25,7 +25,7 @@ public class UserSearchResponse {
     private boolean hasPrevious;
     private List<SearchedUser> users;
 
-    public static UserSearchResponse from(final UserSearchResult userSearchResult) {
+    public static UserSearchResponse from(UserSearchResult userSearchResult) {
         int page = userSearchResult.getPage();
         int size = userSearchResult.getSize();
         long totalElements = userSearchResult.getTotalElements();

@@ -24,8 +24,8 @@ public class ExhibitionRedisCacheService implements ExhibitionCacheService {
             condition = "#pageable.sort.getOrderFor('createdAt') != null and #pageable.sort.getOrderFor('createdAt').direction.name() == 'DESC' and #pageable.pageNumber <= 10 and #exhibitionSearchRequest.target.value.equals('work') and #exhibitionSearchRequest.keywords.isEmpty()" // 키워드 없을 때 초반 페이지만 캐싱
     )
     public Page<ExhibitionSearch> searchExhibitions(
-            final ExhibitionSearchRequest exhibitionSearchRequest,
-            final Pageable pageable
+            ExhibitionSearchRequest exhibitionSearchRequest,
+            Pageable pageable
     ) {
         Target target = exhibitionSearchRequest.getTarget();
         List<String> keywords = exhibitionSearchRequest.getKeywords();

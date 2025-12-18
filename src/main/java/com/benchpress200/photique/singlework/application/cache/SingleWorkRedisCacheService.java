@@ -25,8 +25,8 @@ public class SingleWorkRedisCacheService implements SingleWorkCacheService {
             condition = "#pageable.sort.getOrderFor('createdAt') != null and #pageable.sort.getOrderFor('createdAt').direction.name() == 'DESC' and #pageable.pageNumber <= 10 and #singleWorkSearchRequest.target.value.equals('work') and #singleWorkSearchRequest.keywords.isEmpty() and #singleWorkSearchRequest.categories.isEmpty()" // 키워드 없을 때 초반 페이지만 캐싱
     )
     public Page<SingleWorkSearch> searchSingleWorks(
-            final SingleWorkSearchRequest singleWorkSearchRequest,
-            final Pageable pageable
+            SingleWorkSearchRequest singleWorkSearchRequest,
+            Pageable pageable
     ) {
         // 검색조건
         Target target = singleWorkSearchRequest.getTarget();

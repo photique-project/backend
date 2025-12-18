@@ -50,16 +50,16 @@ public class ExhibitionComment {
 
     @Builder
     public ExhibitionComment(
-            final Exhibition exhibition,
-            final User writer,
-            final String content
+            Exhibition exhibition,
+            User writer,
+            String content
     ) {
         this.exhibition = exhibition;
         this.writer = writer;
         this.content = content;
     }
 
-    public void updateContent(final String content) {
+    public void updateContent(String content) {
         this.content = content;
     }
 }

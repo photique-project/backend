@@ -20,7 +20,7 @@ public class SingleWorkCommentDomainServiceImpl implements SingleWorkCommentDoma
     private final SingleWorkSearchRepository singleWorkSearchRepository;
 
     @Override
-    public void deleteComment(final User writer) {
+    public void deleteComment(User writer) {
         singleWorkCommentRepository.deleteByWriter(writer);
     }
 
@@ -30,12 +30,12 @@ public class SingleWorkCommentDomainServiceImpl implements SingleWorkCommentDoma
     }
 
     @Override
-    public void addComment(final SingleWorkComment singleWorkComment) {
+    public void addComment(SingleWorkComment singleWorkComment) {
         singleWorkCommentRepository.save(singleWorkComment);
     }
 
     @Override
-    public Page<SingleWorkComment> findComments(final SingleWork singleWork, final Pageable pageable) {
+    public Page<SingleWorkComment> findComments(SingleWork singleWork, Pageable pageable) {
         Page<SingleWorkComment> singleWorkCommentPage = singleWorkCommentRepository.findBySingleWork(singleWork,
                 pageable);
         if (singleWorkCommentPage.getTotalElements() == 0) {
@@ -54,19 +54,19 @@ public class SingleWorkCommentDomainServiceImpl implements SingleWorkCommentDoma
 
     @Override
     public void updateContent(
-            final SingleWorkComment singleWorkComment,
-            final String newContent
+            SingleWorkComment singleWorkComment,
+            String newContent
     ) {
         singleWorkComment.updateContent(newContent);
     }
 
     @Override
-    public void deleteComment(final SingleWorkComment singleWorkComment) {
+    public void deleteComment(SingleWorkComment singleWorkComment) {
         singleWorkCommentRepository.delete(singleWorkComment);
     }
 
     @Override
-    public long countComments(final SingleWork singleWork) {
+    public long countComments(SingleWork singleWork) {
         return singleWorkCommentRepository.countBySingleWork(singleWork);
     }
 }

@@ -23,7 +23,7 @@ public class UserDetailsResponse {
     @Getter(AccessLevel.NONE)
     private boolean isFollowing;
 
-    public static UserDetailsResponse from(final UserDetailsResult userDetailsResult) {
+    public static UserDetailsResponse from(UserDetailsResult userDetailsResult) {
         return UserDetailsResponse.builder()
                 .userId(userDetailsResult.getUserId())
                 .nickname(userDetailsResult.getNickname())

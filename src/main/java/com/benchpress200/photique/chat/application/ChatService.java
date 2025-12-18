@@ -10,7 +10,6 @@ import com.benchpress200.photique.chat.domain.dto.ExhibitionLeaveResponse;
 public interface ChatService {
     ChatSendResponse sendMessage(ChatSendRequest chatSendRequest);
 
-
     ExhibitionJoinResponse joinExhibition(ExhibitionJoinRequest exhibitionJoinRequest);
 
     ExhibitionLeaveResponse leaveExhibition(ExhibitionLeaveRequest exhibitionLeaveRequest);

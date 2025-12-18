@@ -13,7 +13,7 @@ public class UpdateUserPasswordRequest {
     @Schema(description = "최소 8글자, 최소 하나의 문자, 최소 하나의 숫자, 최소 하나의 특수문자를 포함해야합니다.", example = "pasword12!@")
     private String password;
 
-    public UpdateUserPasswordCommand toCommand(final Long userId) {
+    public UpdateUserPasswordCommand toCommand(Long userId) {
         return UpdateUserPasswordCommand.builder()
                 .userId(userId)
                 .password(password)

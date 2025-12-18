@@ -34,7 +34,7 @@ public class Tag {
 
     @Builder
     public Tag(
-            final String name
+            String name
     ) {
         this.name = name;
     }

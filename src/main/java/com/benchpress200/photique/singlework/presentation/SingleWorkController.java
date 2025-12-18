@@ -39,7 +39,7 @@ public class SingleWorkController {
 
     @PostMapping
     public ApiSuccessResponse<?> postNewSingleWork(
-            @ModelAttribute @Valid final SingleWorkCreateRequest singleWorkCreateRequest
+            @ModelAttribute @Valid SingleWorkCreateRequest singleWorkCreateRequest
     ) {
         singleWorkService.postNewSingleWork(singleWorkCreateRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
@@ -48,8 +48,8 @@ public class SingleWorkController {
 
     @GetMapping(URL.SINGLE_WORK_DATA)
     public ApiSuccessResponse<?> getSingleWorkDetails(
-            @ModelAttribute final SingleWorkDetailRequest singleWorkDetailRequest,
-            @PathVariable final Long singleworkId
+            @ModelAttribute SingleWorkDetailRequest singleWorkDetailRequest,
+            @PathVariable Long singleworkId
     ) {
         singleWorkDetailRequest.withSingleWorkId(singleworkId);
         SingleWorkDetailResponse singleWorkDetailResponse = singleWorkService.getSingleWorkDetails(
@@ -60,8 +60,8 @@ public class SingleWorkController {
 
     @GetMapping
     public ApiSuccessResponse<?> searchSingleWorks(
-            @ModelAttribute @Valid final SingleWorkSearchRequest singleWorkSearchRequest,
-            final Pageable pageable
+            @ModelAttribute @Valid SingleWorkSearchRequest singleWorkSearchRequest,
+            Pageable pageable
     ) {
         Page<SingleWorkSearchResponse> singleWorkSearchPage = singleWorkService.searchSingleWorks(
                 singleWorkSearchRequest,
@@ -72,8 +72,8 @@ public class SingleWorkController {
 
     @PatchMapping(URL.SINGLE_WORK_DATA)
     public ApiSuccessResponse<?> updateSingleWorkDetails(
-            @PathVariable final Long singleworkId,
-            @RequestBody @Valid final SingleWorkUpdateRequest singleWorkUpdateRequest
+            @PathVariable Long singleworkId,
+            @RequestBody @Valid SingleWorkUpdateRequest singleWorkUpdateRequest
     ) {
         singleWorkUpdateRequest.withSingleWorkId(singleworkId);
         singleWorkService.updateSingleWorkDetails(singleWorkUpdateRequest);
@@ -82,7 +82,7 @@ public class SingleWorkController {
 
     @DeleteMapping(URL.SINGLE_WORK_DATA)
     public ApiSuccessResponse<?> removeSingleWork(
-            @PathVariable final Long singleworkId
+            @PathVariable Long singleworkId
     ) {
         singleWorkService.removeSingleWork(singleworkId);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
@@ -90,8 +90,8 @@ public class SingleWorkController {
 
     @PostMapping(URL.SINGLE_WORK_DATA + URL.LIKE)
     public ApiSuccessResponse<?> incrementLike(
-            @PathVariable final Long singleworkId,
-            @RequestBody final SingleWorkLikeIncrementRequest singleWorkLikeIncrementRequest
+            @PathVariable Long singleworkId,
+            @RequestBody SingleWorkLikeIncrementRequest singleWorkLikeIncrementRequest
     ) {
         singleWorkLikeIncrementRequest.withSingleWorkId(singleworkId);
         singleWorkService.incrementLike(singleWorkLikeIncrementRequest);
@@ -100,8 +100,8 @@ public class SingleWorkController {
 
     @DeleteMapping(URL.SINGLE_WORK_DATA + URL.LIKE)
     public ApiSuccessResponse<?> decrementLike(
-            @PathVariable final Long singleworkId,
-            @RequestBody final SingleWorkLikeDecrementRequest singleWorkLikeDecrementRequest
+            @PathVariable Long singleworkId,
+            @RequestBody SingleWorkLikeDecrementRequest singleWorkLikeDecrementRequest
     ) {
         singleWorkLikeDecrementRequest.withSingleWorkId(singleworkId);
         singleWorkService.decrementLike(singleWorkLikeDecrementRequest);
@@ -110,8 +110,8 @@ public class SingleWorkController {
 
     @GetMapping(URL.LIKE)
     public ApiSuccessResponse<?> getLikedSingleWorks(
-            @ModelAttribute final LikedSingleWorkRequest likedSingleWorkRequest,
-            final Pageable pageable
+            @ModelAttribute LikedSingleWorkRequest likedSingleWorkRequest,
+            Pageable pageable
     ) {
         Page<LikedSingleWorkResponse> likedSingleWorkPage = singleWorkService.getLikedSingleWorks(
                 likedSingleWorkRequest,
@@ -123,8 +123,8 @@ public class SingleWorkController {
 
     @GetMapping(URL.MY_DATA)
     public ApiSuccessResponse<?> getMySingleWorks(
-            @ModelAttribute final MySingleWorkRequest mySingleWorkRequest,
-            final Pageable pageable
+            @ModelAttribute MySingleWorkRequest mySingleWorkRequest,
+            Pageable pageable
     ) {
         Page<MySingleWorkResponse> mySingleWorkResponsePage = singleWorkService.getMySingleWorks(mySingleWorkRequest,
                 pageable);

@@ -8,7 +8,7 @@ import lombok.Getter;
 public class AuthTokenRefreshCommand {
     private String refreshToken;
 
-    public static AuthTokenRefreshCommand of(final String refreshToken) {
+    public static AuthTokenRefreshCommand of(String refreshToken) {
         return AuthTokenRefreshCommand.builder()
                 .refreshToken(refreshToken)
                 .build();

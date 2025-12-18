@@ -21,7 +21,7 @@ public class FollowCommandController {
     private final FollowCommandService followCommandService;
 
     @PostMapping
-    public ResponseEntity<?> follow(@PathVariable(PathVariableName.USER_ID) final Long followeeId) {
+    public ResponseEntity<?> follow(@PathVariable(PathVariableName.USER_ID) Long followeeId) {
         followCommandService.follow(followeeId);
 
         return ResponseHandler.handleResponse(
@@ -31,7 +31,7 @@ public class FollowCommandController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> unfollow(@PathVariable(PathVariableName.USER_ID) final Long followeeId) {
+    public ResponseEntity<?> unfollow(@PathVariable(PathVariableName.USER_ID) Long followeeId) {
         followCommandService.unfollow(followeeId);
 
         return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);

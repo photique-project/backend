@@ -19,16 +19,16 @@ public class FollowDomainServiceImpl implements FollowDomainService {
 
     @Override
     public void deleteFollow(
-            final User follower,
-            final User following
+            User follower,
+            User following
     ) {
         followRepository.deleteByFollowerAndFollowee(follower, following);
     }
 
     @Override
     public Page<Follow> getFollowers(
-            final User user,
-            final Pageable pageable
+            User user,
+            Pageable pageable
     ) {
         Page<Follow> followers = followRepository.findByFolloweeId(user.getId(), pageable);
 
@@ -40,15 +40,15 @@ public class FollowDomainServiceImpl implements FollowDomainService {
     }
 
     @Override
-    public List<Follow> getFollowers(final User user) {
+    public List<Follow> getFollowers(User user) {
         Long userId = user.getId();
         return followRepository.findByFolloweeId(userId);
     }
 
     @Override
     public Page<Follow> getFollowings(
-            final User user,
-            final Pageable pageable
+            User user,
+            Pageable pageable
     ) {
         Page<Follow> followings = followRepository.findByFollowerId(user.getId(), pageable);
 
@@ -62,8 +62,8 @@ public class FollowDomainServiceImpl implements FollowDomainService {
 
     @Override
     public boolean isFollowing(
-            final Long followerId,
-            final Long followingId
+            Long followerId,
+            Long followingId
     ) {
         if (followerId == 0) {
             return false;

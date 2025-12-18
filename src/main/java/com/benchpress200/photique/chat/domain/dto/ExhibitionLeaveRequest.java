@@ -10,7 +10,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 public class ExhibitionLeaveRequest {
     private String sessionId;
 
-    public static ExhibitionLeaveRequest from(final SessionDisconnectEvent sessionSubscribeEvent) {
+    public static ExhibitionLeaveRequest from(SessionDisconnectEvent sessionSubscribeEvent) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(sessionSubscribeEvent.getMessage());
 
         return ExhibitionLeaveRequest.builder()

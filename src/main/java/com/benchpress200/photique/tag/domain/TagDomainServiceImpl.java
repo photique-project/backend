@@ -15,7 +15,7 @@ public class TagDomainServiceImpl implements TagDomainService {
     private final TagRepository tagRepository;
 
     @Override
-    public List<Tag> createNewTags(final List<String> tagNames) {
+    public List<Tag> createNewTags(List<String> tagNames) {
         // 순회하면서 존재하는 태그는 조회, 존재하지 않는 태그는 저장하고 리스트로 반환
         if (tagNames == null) {
             return null;
@@ -36,14 +36,14 @@ public class TagDomainServiceImpl implements TagDomainService {
     }
 
     @Override
-    public List<Tag> findTags(final List<SingleWorkTag> singleWorkTags) {
+    public List<Tag> findTags(List<SingleWorkTag> singleWorkTags) {
         return singleWorkTags.stream()
                 .map(SingleWorkTag::getTag)
                 .toList();
     }
 
     @Override
-    public List<Tag> findExhibitionTags(final List<ExhibitionTag> exhibitionTags) {
+    public List<Tag> findExhibitionTags(List<ExhibitionTag> exhibitionTags) {
         return exhibitionTags.stream()
                 .map(ExhibitionTag::getTag)
                 .toList();

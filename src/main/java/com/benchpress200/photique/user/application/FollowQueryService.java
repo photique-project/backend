@@ -22,7 +22,7 @@ public class FollowQueryService {
     private final FollowRepository followRepository;
     private final AuthenticationUserProviderPort authenticationUserProviderPort;
 
-    public FollowerSearchResult searchFollowers(final FollowerSearchQuery followerSearchQuery) {
+    public FollowerSearchResult searchFollowers(FollowerSearchQuery followerSearchQuery) {
         Long userId = followerSearchQuery.getUserId();
         String keyword = followerSearchQuery.getKeyword();
         Pageable pageable = followerSearchQuery.getPageable();
@@ -47,7 +47,7 @@ public class FollowQueryService {
         return FollowerSearchResult.of(searchedUsers, followerPage);
     }
 
-    public FolloweeSearchResult searchFollowees(final FolloweeSearchQuery followeeSearchQuery) {
+    public FolloweeSearchResult searchFollowees(FolloweeSearchQuery followeeSearchQuery) {
         Long userId = followeeSearchQuery.getUserId();
         String keyword = followeeSearchQuery.getKeyword();
         Pageable pageable = followeeSearchQuery.getPageable();

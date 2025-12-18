@@ -36,8 +36,8 @@ public class SingleWorkTag {
 
     @Builder
     public SingleWorkTag(
-            final SingleWork singleWork,
-            final Tag tag
+            SingleWork singleWork,
+            Tag tag
     ) {
         this.singleWork = singleWork;
         this.tag = tag;

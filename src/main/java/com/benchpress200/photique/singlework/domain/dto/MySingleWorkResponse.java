@@ -23,9 +23,9 @@ public class MySingleWorkResponse {
             String profileImage
     ) {
         public static Writer of(
-                final Long id,
-                final String nickname,
-                final String profileImage
+                Long id,
+                String nickname,
+                String profileImage
         ) {
             return Writer.builder()
                     .id(id)
@@ -36,8 +36,8 @@ public class MySingleWorkResponse {
     }
 
     public static MySingleWorkResponse of(
-            final SingleWorkSearch singleWorkSearch,
-            final boolean isLiked
+            SingleWorkSearch singleWorkSearch,
+            boolean isLiked
     ) {
         return MySingleWorkResponse.builder()
                 .id(singleWorkSearch.getId())

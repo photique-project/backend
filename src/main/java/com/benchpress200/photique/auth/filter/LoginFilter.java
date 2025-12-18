@@ -34,8 +34,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     // 로그인 엔드 포인터 요청 시 인증 시도
     @Override
     public Authentication attemptAuthentication(
-            final HttpServletRequest request,
-            final HttpServletResponse response
+            HttpServletRequest request,
+            HttpServletResponse response
     ) throws AuthenticationException {
         try {
             LoginRequest loginRequest = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
@@ -51,10 +51,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void successfulAuthentication(
-            final HttpServletRequest request,
-            final HttpServletResponse response,
-            final FilterChain chain,
-            final Authentication authentication
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain chain,
+            Authentication authentication
     ) throws IOException {
         AuthenticationUserResult authenticationUserResult = (AuthenticationUserResult) authentication.getPrincipal();
         Long userId = authenticationUserResult.getUserId();
@@ -91,9 +91,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void unsuccessfulAuthentication(
-            final HttpServletRequest request,
-            final HttpServletResponse response,
-            final AuthenticationException failed
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException failed
     ) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MimeTypeUtils.APPLICATION_JSON_VALUE);

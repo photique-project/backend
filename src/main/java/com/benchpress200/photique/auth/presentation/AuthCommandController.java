@@ -30,7 +30,7 @@ public class AuthCommandController {
 
     @PostMapping(URL.JOIN_MAIL)
     public ResponseEntity<?> sendJoinAuthMail(
-            @RequestBody @Valid final AuthMailRequest authMailRequest
+            @RequestBody @Valid AuthMailRequest authMailRequest
     ) {
         AuthMailCommand authMailCommand = authMailRequest.toCommand();
         authCommandService.sendJoinAuthMail(authMailCommand);
@@ -42,7 +42,7 @@ public class AuthCommandController {
 
     @PostMapping(URL.PASSWORD_MAIL)
     public ResponseEntity<?> sendPasswordAuthMail(
-            @RequestBody @Valid final AuthMailRequest authMailRequest
+            @RequestBody @Valid AuthMailRequest authMailRequest
     ) {
         AuthMailCommand authMailCommand = authMailRequest.toCommand();
         authCommandService.sendPasswordAuthMail(authMailCommand);
@@ -54,7 +54,7 @@ public class AuthCommandController {
 
     @PostMapping(URL.VALIDATE_CODE)
     public ResponseEntity<?> validateAuthMailCode(
-            @RequestBody @Valid final AuthMailCodeValidationRequest authMailCodeValidationRequest
+            @RequestBody @Valid AuthMailCodeValidationRequest authMailCodeValidationRequest
     ) {
         AuthMailCodeValidationCommand authMailCodeValidationCommand = authMailCodeValidationRequest.toCommand();
         AuthMailCodeValidationResult authMailCodeValidationResult = authCommandService.validateAuthMailCode(
@@ -69,7 +69,7 @@ public class AuthCommandController {
 
     @PostMapping(URL.REFRESH_TOKEN)
     public ResponseEntity<?> refreshAuthToken(
-            @CookieValue(value = "refreshToken") final String refreshToken
+            @CookieValue(value = "refreshToken") String refreshToken
     ) {
         AuthTokenRefreshCommand authTokenRefreshCommand = AuthTokenRefreshCommand.of(refreshToken);
         AuthTokenResult authTokenResult = authCommandService.refreshAuthToken(authTokenRefreshCommand);

@@ -17,15 +17,11 @@ public class ExhibitionCommentUpdateRequest {
     @Size(max = 300, message = "Content must not exceed 300 characters")
     private String content;
 
-    public void withExhibitionId(
-            final Long exhibitionId
-    ) {
+    public void withExhibitionId(Long exhibitionId) {
         this.exhibitionId = exhibitionId;
     }
 
-    public void withCommentId(
-            final Long commentId
-    ) {
+    public void withCommentId(Long commentId) {
         this.commentId = commentId;
     }
 }

@@ -14,10 +14,10 @@ public class ExhibitionLeaveResponse {
     private int activeUsers;
 
     public static ExhibitionLeaveResponse of(
-            final String id,
-            final Long exhibitionId,
-            final User user,
-            final int activeUsers
+            String id,
+            Long exhibitionId,
+            User user,
+            int activeUsers
     ) {
         return ExhibitionLeaveResponse.builder()
                 .id(id)

@@ -11,15 +11,11 @@ public class SingleWorkCommentDeleteRequest {
     @NotNull(message = "Id must not be null")
     private Long writerId;
 
-    public void withSingleWorkId(
-            final Long singleWorkId
-    ) {
+    public void withSingleWorkId(Long singleWorkId) {
         this.singleWorkId = singleWorkId;
     }
 
-    public void withCommentId(
-            final Long commentId
-    ) {
+    public void withCommentId(Long commentId) {
         this.commentId = commentId;
     }
 }

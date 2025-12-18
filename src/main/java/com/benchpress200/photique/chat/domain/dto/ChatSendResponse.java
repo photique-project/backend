@@ -18,9 +18,9 @@ public class ChatSendResponse {
     private LocalDateTime createdAt;
 
     public static ChatSendResponse of(
-            final String id,
-            final User user,
-            final String content
+            String id,
+            User user,
+            String content
     ) {
         return ChatSendResponse.builder()
                 .id(id)

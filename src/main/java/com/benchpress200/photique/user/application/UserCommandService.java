@@ -39,7 +39,7 @@ public class UserCommandService {
     private final UserRepository userRepository;
 
     @Transactional
-    public void join(final JoinCommand joinCommand) {
+    public void join(JoinCommand joinCommand) {
         // 이메일 인증 완료 여부 확인
         String email = joinCommand.getEmail();
 
@@ -85,7 +85,7 @@ public class UserCommandService {
     }
 
     @Transactional
-    public void updateUserDetails(final UpdateUserDetailsCommand updateUserDetailsCommand) {
+    public void updateUserDetails(UpdateUserDetailsCommand updateUserDetailsCommand) {
         // 유저 조회
         Long userId = updateUserDetailsCommand.getUserId();
         User user = userRepository.findById(userId)
@@ -126,7 +126,7 @@ public class UserCommandService {
     // 여기서 @Transactional이 없다면, 유저 엔티티를 조회한 후 엔티티 매니저를 close하기 떄문에
     // 변경 감지가 동작하지 않고 update 쿼리가 나가지 않음
     @Transactional
-    public void updateUserPassword(final UpdateUserPasswordCommand updateUserPasswordCommand) {
+    public void updateUserPassword(UpdateUserPasswordCommand updateUserPasswordCommand) {
         // 유저 조회
         Long userId = updateUserPasswordCommand.getUserId();
         User user = userRepository.findById(userId)
@@ -139,7 +139,7 @@ public class UserCommandService {
     }
 
     @Transactional
-    public void resetUserPassword(final ResetUserPasswordCommand resetUserPasswordCommand) {
+    public void resetUserPassword(ResetUserPasswordCommand resetUserPasswordCommand) {
         // 유저 조회
         String email = resetUserPasswordCommand.getEmail();
         User user = userRepository.findByEmail(email)
@@ -161,7 +161,7 @@ public class UserCommandService {
     }
 
     @Transactional
-    public void withdraw(final Long userId) {
+    public void withdraw(Long userId) {
         // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));

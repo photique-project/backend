@@ -39,7 +39,7 @@ public class UserQueryController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<?> validateNickname(
-            @ModelAttribute @Valid final ValidateNicknameRequest validateNicknameRequest
+            @ModelAttribute @Valid ValidateNicknameRequest validateNicknameRequest
     ) {
         ValidateNicknameQuery validateNicknameQuery = validateNicknameRequest.toQuery();
         ValidateNicknameResult validateNicknameResult = userQueryService.validateNickname(validateNicknameQuery);
@@ -56,7 +56,7 @@ public class UserQueryController {
             path = URL.USER_DATA,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<?> getUserDetails(@PathVariable(PathVariableName.USER_ID) final Long userId) {
+    public ResponseEntity<?> getUserDetails(@PathVariable(PathVariableName.USER_ID) Long userId) {
         UserDetailsResult userDetailsResult = userQueryService.getUserDetails(userId);
         UserDetailsResponse userDetailsResponse = UserDetailsResponse.from(userDetailsResult);
 
@@ -84,7 +84,7 @@ public class UserQueryController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> searchUsers(
-            @ModelAttribute @Valid final UserSearchRequest userSearchRequest
+            @ModelAttribute @Valid UserSearchRequest userSearchRequest
     ) {
         UserSearchQuery userSearchQuery = userSearchRequest.toQuery();
         UserSearchResult userSearchResult = userQueryService.searchUsers(userSearchQuery);

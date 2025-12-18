@@ -21,8 +21,8 @@ public class FollowerSearchResult {
     private List<SearchedUser> followers;
 
     public static FollowerSearchResult of(
-            final SearchedUsers followers,
-            final Page<User> followerPage
+            SearchedUsers followers,
+            Page<User> followerPage
     ) {
         int page = followerPage.getNumber();
         int size = followerPage.getSize();

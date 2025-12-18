@@ -31,10 +31,10 @@ public class SingleWorkSearchRepositoryImpl implements SingleWorkSearchRepositor
 
     @Override
     public Page<SingleWorkSearch> search(
-            final Target target,
-            final List<String> keywords,
-            final List<Category> categories,
-            final Pageable pageable
+            Target target,
+            List<String> keywords,
+            List<Category> categories,
+            Pageable pageable
     ) {
         try {
             // Bool Query 빌드

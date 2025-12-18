@@ -36,7 +36,7 @@ public class AuthenticationUserResult implements UserDetails {
         return this.username;
     }
 
-    public static AuthenticationUserResult from(final User user) {
+    public static AuthenticationUserResult from(User user) {
         return AuthenticationUserResult.builder()
                 .userId(user.getId())
                 .username(user.getEmail())

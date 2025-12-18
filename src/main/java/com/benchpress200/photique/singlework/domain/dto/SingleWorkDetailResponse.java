@@ -46,7 +46,7 @@ public class SingleWorkDetailResponse {
             String profileImage,
             String introduction
     ) {
-        public static Writer from(final User writer) {
+        public static Writer from(User writer) {
             return Writer.builder()
                     .id(writer.getId())
                     .nickname(writer.getNickname())
@@ -57,11 +57,11 @@ public class SingleWorkDetailResponse {
     }
 
     public static SingleWorkDetailResponse of(
-            final SingleWork singleWork,
-            final List<Tag> tags,
-            final Long likeCount,
-            final boolean isLiked,
-            final boolean isFollowing
+            SingleWork singleWork,
+            List<Tag> tags,
+            Long likeCount,
+            boolean isLiked,
+            boolean isFollowing
     ) {
         List<TagResponse> tagsResponse = tags.stream()
                 .map(TagResponse::from)

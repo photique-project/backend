@@ -10,7 +10,7 @@ public class ValidateNicknameResponse {
     @JsonProperty("isDuplicated")
     private boolean isDuplicated;
 
-    public static ValidateNicknameResponse from(final ValidateNicknameResult validateNicknameResult) {
+    public static ValidateNicknameResponse from(ValidateNicknameResult validateNicknameResult) {
         boolean isDuplicated = validateNicknameResult.isDuplicated();
         return new ValidateNicknameResponse(isDuplicated);
     }
