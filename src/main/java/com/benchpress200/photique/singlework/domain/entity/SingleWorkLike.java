@@ -52,8 +52,8 @@ public class SingleWorkLike {
 
     @Builder
     public SingleWorkLike(
-            final User user,
-            final SingleWork singleWork
+            User user,
+            SingleWork singleWork
     ) {
         this.user = user;
         this.singleWork = singleWork;

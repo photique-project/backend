@@ -31,7 +31,7 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
     @Override
     @Transactional
-    public void addExhibitionComment(final ExhibitionCommentCreateRequest exhibitionCommentCreateRequest) {
+    public void addExhibitionComment(ExhibitionCommentCreateRequest exhibitionCommentCreateRequest) {
 
         // 작성자 조회
         Long writerId = exhibitionCommentCreateRequest.getWriterId();
@@ -67,8 +67,8 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
     @Override
     public Page<ExhibitionCommentDetailResponse> getExhibitionComments(
-            final Long exhibitionId,
-            final Pageable pageable
+            Long exhibitionId,
+            Pageable pageable
     ) {
         // 전시회 조회
         Exhibition exhibition = exhibitionDomainService.findExhibition(exhibitionId);
@@ -86,7 +86,7 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
     @Override
     @Transactional
-    public void updateExhibitionComment(final ExhibitionCommentUpdateRequest exhibitionCommentUpdateRequest) {
+    public void updateExhibitionComment(ExhibitionCommentUpdateRequest exhibitionCommentUpdateRequest) {
         // 작성자 조회
         Long writerId = exhibitionCommentUpdateRequest.getWriterId();
         userDomainService.findUser(writerId);
@@ -106,7 +106,7 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
     @Override
     @Transactional
-    public void deleteExhibitionComment(final ExhibitionCommentDeleteRequest exhibitionCommentDeleteRequest) {
+    public void deleteExhibitionComment(ExhibitionCommentDeleteRequest exhibitionCommentDeleteRequest) {
         // 작성자 조회
         Long writerId = exhibitionCommentDeleteRequest.getWriterId();
         userDomainService.findUser(writerId);

@@ -20,11 +20,11 @@ public class MyDetailsResult {
     private LocalDateTime createdAt;
 
     public static MyDetailsResult of(
-            final User user,
-            final Long singleWorkCount,
-            final Long exhibitionCount,
-            final Long followerCount,
-            final Long followingCount
+            User user,
+            Long singleWorkCount,
+            Long exhibitionCount,
+            Long followerCount,
+            Long followingCount
     ) {
         Long userId = user.getId();
         String email = user.getEmail();

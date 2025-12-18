@@ -7,11 +7,11 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 
 public class ResponseHandler {
-    public static <T> ApiSuccessResponse<T> handleSuccessResponse(final T data, final HttpStatus status) {
+    public static <T> ApiSuccessResponse<T> handleSuccessResponse(T data, HttpStatus status) {
         return new ApiSuccessResponse<>(data, status);
     }
 
-    public static <T> ApiSuccessResponse<T> handleSuccessResponse(final HttpStatus status) {
+    public static <T> ApiSuccessResponse<T> handleSuccessResponse(HttpStatus status) {
         return new ApiSuccessResponse<>(status);
     }
 

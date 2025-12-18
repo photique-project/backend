@@ -11,7 +11,7 @@ public class AuthTokenResult {
     private String refreshToken;
     private Long refreshTokenExpiredTime;
 
-    public static AuthTokenResult from(final AuthenticationTokens authenticationTokens) {
+    public static AuthTokenResult from(AuthenticationTokens authenticationTokens) {
         return AuthTokenResult.builder()
                 .accessToken(authenticationTokens.getAccessToken())
                 .refreshToken(authenticationTokens.getRefreshToken())

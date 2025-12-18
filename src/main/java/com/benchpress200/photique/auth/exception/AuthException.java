@@ -9,9 +9,8 @@ public class AuthException extends RuntimeException {
     private String originMessage;
 
     public AuthException(
-            final String message,
-            final HttpStatus httpStatus
-
+            String message,
+            HttpStatus httpStatus
     ) {
         super(message);
         this.httpStatus = httpStatus;

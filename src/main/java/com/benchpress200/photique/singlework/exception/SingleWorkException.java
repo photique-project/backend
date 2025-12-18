@@ -9,17 +9,17 @@ public class SingleWorkException extends RuntimeException {
     private final HttpStatus httpStatus;
 
     public SingleWorkException(
-            final String message,
-            final HttpStatus httpStatus
+            String message,
+            HttpStatus httpStatus
     ) {
         super(message);
         this.httpStatus = httpStatus;
     }
 
     public SingleWorkException(
-            final String message,
-            final String originMessage,
-            final HttpStatus httpStatus
+            String message,
+            String originMessage,
+            HttpStatus httpStatus
     ) {
         super(message);
         this.originMessage = originMessage;

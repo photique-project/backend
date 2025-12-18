@@ -20,12 +20,12 @@ public class UserDetailsResult {
     private boolean isFollowing;
 
     public static UserDetailsResult of(
-            final User user,
-            final Long singleWorkCount,
-            final Long exhibitionCount,
-            final Long followerCount,
-            final Long followingCount,
-            final boolean isFollowing
+            User user,
+            Long singleWorkCount,
+            Long exhibitionCount,
+            Long followerCount,
+            Long followingCount,
+            boolean isFollowing
     ) {
         Long userId = user.getId();
         String nickname = user.getNickname();

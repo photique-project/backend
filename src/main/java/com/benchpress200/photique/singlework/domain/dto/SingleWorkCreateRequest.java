@@ -74,8 +74,8 @@ public class SingleWorkCreateRequest {
     private String description;
 
     public SingleWork toSingleWorkEntity(
-            final User writer,
-            final String imageUrl
+            User writer,
+            String imageUrl
     ) {
         return SingleWork.builder()
                 .writer(writer)
@@ -94,8 +94,8 @@ public class SingleWorkCreateRequest {
     }
 
     public List<SingleWorkTag> toSingleWorkTagEntities(
-            final SingleWork singleWork,
-            final List<Tag> tags
+            SingleWork singleWork,
+            List<Tag> tags
     ) {
         return tags.stream()
                 .map(tag -> SingleWorkTag.builder()

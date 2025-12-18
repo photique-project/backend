@@ -31,8 +31,8 @@ public class EmailAuthCode {
     }
 
     public static EmailAuthCode of(
-            final String email,
-            final String code
+            String email,
+            String code
     ) {
         return EmailAuthCode.builder()
                 .email(email)

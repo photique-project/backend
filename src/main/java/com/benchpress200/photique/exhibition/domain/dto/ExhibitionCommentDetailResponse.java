@@ -22,7 +22,7 @@ public class ExhibitionCommentDetailResponse {
             String nickname,
             String profileImage
     ) {
-        public static Writer from(final User writer) {
+        public static Writer from(User writer) {
             return Writer.builder()
                     .id(writer.getId())
                     .nickname(writer.getNickname())
@@ -31,7 +31,7 @@ public class ExhibitionCommentDetailResponse {
         }
     }
 
-    public static ExhibitionCommentDetailResponse from(final ExhibitionComment exhibitionComment) {
+    public static ExhibitionCommentDetailResponse from(ExhibitionComment exhibitionComment) {
         return ExhibitionCommentDetailResponse.builder()
                 .id(exhibitionComment.getId())
                 .writer(Writer.from(exhibitionComment.getWriter()))

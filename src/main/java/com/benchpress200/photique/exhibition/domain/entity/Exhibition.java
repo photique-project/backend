@@ -64,10 +64,10 @@ public class Exhibition {
 
     @Builder
     public Exhibition(
-            final User writer,
-            final String title,
-            final String description,
-            final String cardColor
+            User writer,
+            String title,
+            String description,
+            String cardColor
     ) {
         this.writer = writer;
         this.title = title;

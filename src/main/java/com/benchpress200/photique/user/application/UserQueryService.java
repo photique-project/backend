@@ -37,14 +37,14 @@ public class UserQueryService implements UserDetailsService {
 
     // @Transactional이 없기 때문에 조회 쿼리가 나갈 때 커넥션을 얻고 MySQL 오토커밋
     // 결과셋이 애플리케이션으로 반환되면 바로 커넥션 반납
-    public ValidateNicknameResult validateNickname(final ValidateNicknameQuery validateNicknameQuery) {
+    public ValidateNicknameResult validateNickname(ValidateNicknameQuery validateNicknameQuery) {
         String nickname = validateNicknameQuery.getNickname();
         boolean isDuplicated = userRepository.existsByNickname(nickname);
 
         return ValidateNicknameResult.of(isDuplicated);
     }
 
-    public UserDetailsResult getUserDetails(final Long userId) {
+    public UserDetailsResult getUserDetails(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -104,7 +104,7 @@ public class UserQueryService implements UserDetailsService {
         );
     }
 
-    public UserSearchResult searchUsers(final UserSearchQuery userSearchQuery) {
+    public UserSearchResult searchUsers(UserSearchQuery userSearchQuery) {
         String keyword = userSearchQuery.getKeyword();
         Pageable pageable = userSearchQuery.getPageable();
 
@@ -130,7 +130,7 @@ public class UserQueryService implements UserDetailsService {
 
     // 스프링 시큐리티를 위한 오버라이딩 메서드
     @Override
-    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
 

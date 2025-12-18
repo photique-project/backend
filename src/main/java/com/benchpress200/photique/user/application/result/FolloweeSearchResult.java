@@ -21,8 +21,8 @@ public class FolloweeSearchResult {
     private List<SearchedUser> followees;
 
     public static FolloweeSearchResult of(
-            final SearchedUsers followees,
-            final Page<User> followeePage
+            SearchedUsers followees,
+            Page<User> followeePage
     ) {
         int page = followeePage.getNumber();
         int size = followeePage.getSize();

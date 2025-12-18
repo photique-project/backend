@@ -5,13 +5,13 @@ import lombok.Builder;
 
 @Builder
 public record TagResponse(String name) {
-    public static TagResponse from(final Tag tag) {
+    public static TagResponse from(Tag tag) {
         return TagResponse.builder()
                 .name(tag.getName())
                 .build();
     }
 
-    public static TagResponse from(final String tag) {
+    public static TagResponse from(String tag) {
         return TagResponse.builder()
                 .name(tag)
                 .build();

@@ -31,8 +31,8 @@ public class SingleWorkCommentController {
 
     @PostMapping
     public ApiSuccessResponse<?> addSingleWorkComment(
-            @PathVariable("singleworkId") final Long singleWorkId,
-            @RequestBody @Valid final SingleWorkCommentCreateRequest singleWorkCommentCreateRequest
+            @PathVariable("singleworkId") Long singleWorkId,
+            @RequestBody @Valid SingleWorkCommentCreateRequest singleWorkCommentCreateRequest
     ) {
         singleWorkCommentCreateRequest.withSingleWorkId(singleWorkId);
         singleWorkCommentService.addSingleWorkComment(singleWorkCommentCreateRequest);
@@ -42,8 +42,8 @@ public class SingleWorkCommentController {
 
     @GetMapping
     public ApiSuccessResponse<?> getSingleWorkComments(
-            @PathVariable("singleworkId") final Long singleWorkId,
-            final Pageable pageable
+            @PathVariable("singleworkId") Long singleWorkId,
+            Pageable pageable
     ) {
         Page<SingleWorkCommentDetailResponse> singleWorkComments = singleWorkCommentService.getSingleWorkComments(
                 singleWorkId, pageable);
@@ -52,9 +52,9 @@ public class SingleWorkCommentController {
 
     @PatchMapping(URL.SINGLE_WORK_COMMENT_DATA)
     public ApiSuccessResponse<?> updateSingleWorkComment(
-            @PathVariable("singleworkId") final Long singleWorkId,
-            @PathVariable("commentId") final Long commentId,
-            @RequestBody @Valid final SingleWorkCommentUpdateRequest singleWorkCommentUpdateRequest
+            @PathVariable("singleworkId") Long singleWorkId,
+            @PathVariable("commentId") Long commentId,
+            @RequestBody @Valid SingleWorkCommentUpdateRequest singleWorkCommentUpdateRequest
     ) {
         singleWorkCommentUpdateRequest.withSingleWorkId(singleWorkId);
         singleWorkCommentUpdateRequest.withCommentId(commentId);
@@ -65,9 +65,9 @@ public class SingleWorkCommentController {
     
     @DeleteMapping(URL.SINGLE_WORK_COMMENT_DATA)
     public ApiSuccessResponse<?> deleteSingleWorkComment(
-            @PathVariable("singleworkId") final Long singleWorkId,
-            @PathVariable("commentId") final Long commentId,
-            @RequestBody @Valid final SingleWorkCommentDeleteRequest singleWorkCommentDeleteRequest
+            @PathVariable("singleworkId") Long singleWorkId,
+            @PathVariable("commentId") Long commentId,
+            @RequestBody @Valid SingleWorkCommentDeleteRequest singleWorkCommentDeleteRequest
     ) {
         singleWorkCommentDeleteRequest.withSingleWorkId(singleWorkId);
         singleWorkCommentDeleteRequest.withCommentId(commentId);

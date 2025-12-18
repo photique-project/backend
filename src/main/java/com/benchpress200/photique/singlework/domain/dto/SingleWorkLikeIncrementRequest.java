@@ -17,14 +17,14 @@ public class SingleWorkLikeIncrementRequest {
     private Long singleWorkId;
 
     public void withSingleWorkId(
-            final Long singleWorkId
+            Long singleWorkId
     ) {
         this.singleWorkId = singleWorkId;
     }
 
     public SingleWorkLike toEntity(
-            final User user,
-            final SingleWork singleWork
+            User user,
+            SingleWork singleWork
     ) {
         return SingleWorkLike.builder()
                 .singleWork(singleWork)

@@ -28,7 +28,7 @@ public class AuthCommandService {
     private final AuthenticationTokenManagerPort authenticationTokenManagerPort;
     private final AuthMailPort authMailPort;
 
-    public void sendJoinAuthMail(final AuthMailCommand authMailCommand) {
+    public void sendJoinAuthMail(AuthMailCommand authMailCommand) {
         String email = authMailCommand.getEmail();
 
         // 해당 이메일로 가입한 유저가 있는지 확인
@@ -40,7 +40,7 @@ public class AuthCommandService {
         sendMailTo(email);
     }
 
-    public void sendPasswordAuthMail(final AuthMailCommand authMailCommand) {
+    public void sendPasswordAuthMail(AuthMailCommand authMailCommand) {
         String email = authMailCommand.getEmail();
 
         // 해당 이메일을 가진 유저가 존재하지 않는다면
@@ -53,8 +53,7 @@ public class AuthCommandService {
     }
 
     public AuthMailCodeValidationResult validateAuthMailCode(
-            final AuthMailCodeValidationCommand authMailCodeValidationCommand
-    ) {
+            AuthMailCodeValidationCommand authMailCodeValidationCommand) {
         String email = authMailCodeValidationCommand.getEmail();
 
         // 해당 이메일을 가진 코드 조회
@@ -73,7 +72,7 @@ public class AuthCommandService {
         return AuthMailCodeValidationResult.of(result);
     }
 
-    public AuthTokenResult refreshAuthToken(final AuthTokenRefreshCommand authTokenRefreshCommand) {
+    public AuthTokenResult refreshAuthToken(AuthTokenRefreshCommand authTokenRefreshCommand) {
         // 토큰 유효성 검사 및 만료 기간 확인
         String refreshToken = authTokenRefreshCommand.getRefreshToken();
         TokenValidationResult tokenValidationResult = authenticationTokenManagerPort.validateToken(refreshToken);
@@ -92,7 +91,7 @@ public class AuthCommandService {
         return AuthTokenResult.from(authenticationTokens);
     }
 
-    private void sendMailTo(final String email) {
+    private void sendMailTo(String email) {
         // TODO: 이후 비동기 처리 고려
         String code = authMailPort.sendMail(email);
 

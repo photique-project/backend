@@ -11,7 +11,10 @@ public class ImageDomainServiceImpl implements ImageDomainService {
     private final ImageUploaderPort imageUploaderPort;
 
     @Override
-    public String upload(final MultipartFile image, final String path) {
+    public String upload(
+            MultipartFile image,
+            String path
+    ) {
         if (image != null) {
             if (image.isEmpty()) { // 빈 객체일 경우 기본값 설정 요청
                 return null;
@@ -31,9 +34,9 @@ public class ImageDomainServiceImpl implements ImageDomainService {
 
     @Override
     public String update(
-            final MultipartFile newImage,
-            final String oldPath,
-            final String newPath
+            MultipartFile newImage,
+            String oldPath,
+            String newPath
     ) {
         // 새 이미지가 null 이라면 수정 X
         if (newImage == null) {
@@ -50,7 +53,7 @@ public class ImageDomainServiceImpl implements ImageDomainService {
     }
 
     @Override
-    public void delete(final String path) {
+    public void delete(String path) {
         if (path != null) {
             imageUploaderPort.delete(path);
         }

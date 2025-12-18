@@ -22,7 +22,7 @@ public class SingleWorkCommentDetailResponse {
             String nickname,
             String profileImage
     ) {
-        public static Writer from(final User writer) {
+        public static Writer from(User writer) {
             return Writer.builder()
                     .id(writer.getId())
                     .nickname(writer.getNickname())
@@ -31,7 +31,7 @@ public class SingleWorkCommentDetailResponse {
         }
     }
 
-    public static SingleWorkCommentDetailResponse from(final SingleWorkComment singleWorkComment) {
+    public static SingleWorkCommentDetailResponse from(SingleWorkComment singleWorkComment) {
         return SingleWorkCommentDetailResponse.builder()
                 .id(singleWorkComment.getId())
                 .writer(Writer.from(singleWorkComment.getWriter()))

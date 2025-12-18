@@ -19,9 +19,9 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(
-            final HttpServletRequest request,
-            final HttpServletResponse response,
-            final AccessDeniedException accessDeniedException
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AccessDeniedException accessDeniedException
     ) throws IOException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(MimeTypeUtils.APPLICATION_JSON_VALUE);

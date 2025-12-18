@@ -8,7 +8,7 @@ import lombok.Getter;
 public class CountUnreadResponse {
     private long unreadCount;
 
-    public static CountUnreadResponse from(final long count) {
+    public static CountUnreadResponse from(long count) {
         return CountUnreadResponse.builder()
                 .unreadCount(count)
                 .build();

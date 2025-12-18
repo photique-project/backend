@@ -29,7 +29,7 @@ public class ExhibitionDetailsResponse {
             String introduction
     ) {
         public static Writer from(
-                final User user
+                User user
         ) {
             return Writer.builder()
                     .id(user.getId())
@@ -47,7 +47,7 @@ public class ExhibitionDetailsResponse {
             String description
     ) {
         public static Work from(
-                final ExhibitionWork exhibitionWork
+                ExhibitionWork exhibitionWork
         ) {
             return Work.builder()
                     .image(exhibitionWork.getImage())
@@ -59,10 +59,10 @@ public class ExhibitionDetailsResponse {
     }
 
     public static ExhibitionDetailsResponse of(
-            final Exhibition exhibition,
-            final List<ExhibitionWork> exhibitionWorks,
-            final boolean isLiked,
-            final boolean isBookmarked
+            Exhibition exhibition,
+            List<ExhibitionWork> exhibitionWorks,
+            boolean isLiked,
+            boolean isBookmarked
     ) {
         List<Work> works = exhibitionWorks.stream()
                 .map(Work::from)

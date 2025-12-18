@@ -36,8 +36,8 @@ public class ExhibitionTag {
 
     @Builder
     public ExhibitionTag(
-            final Exhibition exhibition,
-            final Tag tag
+            Exhibition exhibition,
+            Tag tag
     ) {
         this.exhibition = exhibition;
         this.tag = tag;

@@ -28,7 +28,7 @@ public class SingleWorkSearchResponse {
             String nickname,
             String profileImage
     ) {
-        public static Writer from(final User user) {
+        public static Writer from(User user) {
             return Writer.builder()
                     .id(user.getId())
                     .nickname(user.getNickname())
@@ -37,9 +37,9 @@ public class SingleWorkSearchResponse {
         }
 
         public static Writer of(
-                final Long id,
-                final String nickname,
-                final String profileImage
+                Long id,
+                String nickname,
+                String profileImage
         ) {
             return Writer.builder()
                     .id(id)
@@ -49,7 +49,7 @@ public class SingleWorkSearchResponse {
         }
     }
 
-    public static SingleWorkSearchResponse from(final SingleWork singleWork, final Long likeCount) {
+    public static SingleWorkSearchResponse from(SingleWork singleWork, Long likeCount) {
         return SingleWorkSearchResponse.builder()
                 .id(singleWork.getId())
                 .writer(Writer.from(singleWork.getWriter()))
@@ -60,8 +60,8 @@ public class SingleWorkSearchResponse {
     }
 
     public static SingleWorkSearchResponse of(
-            final SingleWorkSearch singleWorkSearch,
-            final boolean isLiked
+            SingleWorkSearch singleWorkSearch,
+            boolean isLiked
     ) {
         return SingleWorkSearchResponse.builder()
                 .id(singleWorkSearch.getId())

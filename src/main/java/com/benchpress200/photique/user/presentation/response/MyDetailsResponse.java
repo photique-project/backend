@@ -19,7 +19,7 @@ public class MyDetailsResponse {
     private Long followingCount;
     private LocalDateTime createdAt;
 
-    public static MyDetailsResponse from(final MyDetailsResult myDetailsResult) {
+    public static MyDetailsResponse from(MyDetailsResult myDetailsResult) {
         return MyDetailsResponse.builder()
                 .userId(myDetailsResult.getUserId())
                 .email(myDetailsResult.getEmail())

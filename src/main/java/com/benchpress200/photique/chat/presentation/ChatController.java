@@ -25,8 +25,8 @@ public class ChatController {
 
     @MessageMapping("/{exhibitionId}")  // pub/~~ 으로 메시지 발행
     public void sendMessage(
-            @DestinationVariable final Long exhibitionId,
-            final ChatSendRequest chatSendRequest
+            @DestinationVariable Long exhibitionId,
+            ChatSendRequest chatSendRequest
     ) {
         chatSendRequest.withExhibitionId(exhibitionId);
         ChatSendResponse chatSendResponse = chatService.sendMessage(chatSendRequest);
@@ -37,7 +37,7 @@ public class ChatController {
 
     // 구독 요청 시 해당 세선 id에 매핑되는 유저정보와 구독정보 레디스에 저장하고 입장 메시지 브로드캐스트
     @EventListener
-    public void joinExhibition(final SessionSubscribeEvent event) {
+    public void joinExhibition(SessionSubscribeEvent event) {
         ExhibitionJoinRequest exhibitionJoinRequest = ExhibitionJoinRequest.from(event);
         ExhibitionJoinResponse exhibitionJoinResponse = chatService.joinExhibition(exhibitionJoinRequest);
         Long exhibitionId = exhibitionJoinRequest.getExhibitionId();
@@ -47,7 +47,7 @@ public class ChatController {
 
     // 전시회를 떠난다면 레디스에 저장했던 세선 정보 제거하고 퇴장 메시지 브로드 캐스트
     @EventListener
-    public void leaveExhibition(final SessionDisconnectEvent event) {
+    public void leaveExhibition(SessionDisconnectEvent event) {
         ExhibitionLeaveRequest exhibitionLeaveRequest = ExhibitionLeaveRequest.from(event);
         ExhibitionLeaveResponse exhibitionLeaveResponse = chatService.leaveExhibition(exhibitionLeaveRequest);
         Long exhibitionId = exhibitionLeaveResponse.getExhibitionId();

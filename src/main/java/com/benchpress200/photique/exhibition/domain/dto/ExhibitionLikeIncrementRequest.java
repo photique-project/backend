@@ -16,15 +16,13 @@ public class ExhibitionLikeIncrementRequest {
     private Long userId;
     private Long exhibitionId;
 
-    public void withExhibitionId(
-            final Long exhibitionId
-    ) {
+    public void withExhibitionId(Long exhibitionId) {
         this.exhibitionId = exhibitionId;
     }
 
     public ExhibitionLike toEntity(
-            final User user,
-            final Exhibition exhibition
+            User user,
+            Exhibition exhibition
     ) {
         return ExhibitionLike.builder()
                 .exhibition(exhibition)

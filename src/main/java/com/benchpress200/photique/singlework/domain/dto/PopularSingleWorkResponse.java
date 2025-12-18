@@ -23,7 +23,7 @@ public class PopularSingleWorkResponse {
             String nickname,
             String profileImage
     ) {
-        public static Writer from(final User user) {
+        public static Writer from(User user) {
             return Writer.builder()
                     .id(user.getId())
                     .nickname(user.getNickname())
@@ -33,9 +33,9 @@ public class PopularSingleWorkResponse {
     }
 
     public static PopularSingleWorkResponse of(
-            final SingleWork singleWork,
-            final Long likeCount,
-            final boolean isLiked
+            SingleWork singleWork,
+            Long likeCount,
+            boolean isLiked
     ) {
         return PopularSingleWorkResponse.builder()
                 .id(singleWork.getId())

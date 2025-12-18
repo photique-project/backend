@@ -26,8 +26,8 @@ public class S3ImageUploaderAdapter implements ImageUploaderPort {
 
     @Override
     public String upload(
-            final MultipartFile image,
-            final String path
+            MultipartFile image,
+            String path
     ) {
         String uniqueImageName = createS3ImageName(image);
         String uniqueImagePath = path + "/" + uniqueImageName;
@@ -42,9 +42,9 @@ public class S3ImageUploaderAdapter implements ImageUploaderPort {
 
     @Override
     public String update(
-            final MultipartFile newImage,
-            final String oldPath,
-            final String newPath
+            MultipartFile newImage,
+            String oldPath,
+            String newPath
     ) {
         delete(oldPath);
 
@@ -52,7 +52,7 @@ public class S3ImageUploaderAdapter implements ImageUploaderPort {
     }
 
     @Override
-    public void delete(final String path) {
+    public void delete(String path) {
         if (path != null) {
             String imagePath = path.substring(path.indexOf("com/") + 4);
 
@@ -66,8 +66,8 @@ public class S3ImageUploaderAdapter implements ImageUploaderPort {
     }
 
     private File convert(
-            final MultipartFile image,
-            final String uniqueImageName
+            MultipartFile image,
+            String uniqueImageName
     ) {
         File convertFile = new File(uniqueImageName); // 빈 파일 만들기
 
@@ -90,8 +90,8 @@ public class S3ImageUploaderAdapter implements ImageUploaderPort {
     }
 
     private String putS3(
-            final File uploadImage,
-            final String imageName
+            File uploadImage,
+            String imageName
     ) {
         PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, imageName, uploadImage);
         try {
@@ -103,7 +103,7 @@ public class S3ImageUploaderAdapter implements ImageUploaderPort {
         }
     }
 
-    private void removeNewFile(final File image) {
+    private void removeNewFile(File image) {
         int count = 0;
 
         // 로컬환경에 임시로 저장된 이미지 삭제에 실패하면 5번까지 재시도
@@ -115,7 +115,7 @@ public class S3ImageUploaderAdapter implements ImageUploaderPort {
         log.error("Image cleanup failed");
     }
 
-    private String createS3ImageName(final MultipartFile image) {
+    private String createS3ImageName(MultipartFile image) {
         String originalFileName = image.getOriginalFilename();
         String uuid = UUID.randomUUID().toString();
 

@@ -31,8 +31,8 @@ public class FollowQueryController {
 
     @GetMapping(URL.FOLLOWER)
     public ResponseEntity<?> searchFollowers(
-            @PathVariable(PathVariableName.USER_ID) final Long userId,
-            @ModelAttribute @Valid final FollowerSearchRequest followerSearchRequest
+            @PathVariable(PathVariableName.USER_ID) Long userId,
+            @ModelAttribute @Valid FollowerSearchRequest followerSearchRequest
     ) {
         FollowerSearchQuery followerSearchQuery = followerSearchRequest.toQuery(userId);
         FollowerSearchResult followerSearchResult = followQueryService.searchFollowers(followerSearchQuery);
@@ -47,8 +47,8 @@ public class FollowQueryController {
 
     @GetMapping(URL.FOLLOWEE)
     public ResponseEntity<?> searchFollowees(
-            @PathVariable(PathVariableName.USER_ID) final Long userId,
-            @ModelAttribute @Valid final FolloweeSearchRequest followeeSearchRequest
+            @PathVariable(PathVariableName.USER_ID) Long userId,
+            @ModelAttribute @Valid FolloweeSearchRequest followeeSearchRequest
     ) {
         FolloweeSearchQuery followeeSearchQuery = followeeSearchRequest.toQuery(userId);
         FolloweeSearchResult followeeSearchResult = followQueryService.searchFollowees(followeeSearchQuery);

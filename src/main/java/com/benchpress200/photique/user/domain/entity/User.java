@@ -72,12 +72,12 @@ public class User {
 
     @Builder
     public User(
-            final String email,
-            final String password,
-            final String nickname,
-            final String profileImage,
-            final Provider provider,
-            final Role role
+            String email,
+            String password,
+            String nickname,
+            String profileImage,
+            Provider provider,
+            Role role
     ) {
         this.email = email;
         this.password = password;

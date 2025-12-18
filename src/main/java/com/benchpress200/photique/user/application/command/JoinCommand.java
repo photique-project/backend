@@ -16,10 +16,10 @@ public class JoinCommand {
     private MultipartFile profileImage;
 
     public User toEntity(
-            final String password,
-            final String profileImage,
-            final Provider provider,
-            final Role role
+            String password,
+            String profileImage,
+            Provider provider,
+            Role role
     ) {
         return User.builder()
                 .email(email)

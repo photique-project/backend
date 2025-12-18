@@ -23,8 +23,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Page<NotificationResponse> getNotifications(
-            final Long userId,
-            final Pageable pageable
+            Long userId,
+            Pageable pageable
     ) {
         // 유저 조회
         User user = userDomainService.findUser(userId);
@@ -42,8 +42,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void markAsRead(
-            final Long userId,
-            final Long notificationId
+            Long userId,
+            Long notificationId
     ) {
         // 유저 조회
         userDomainService.findUser(userId);
@@ -83,7 +83,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public CountUnreadResponse countUnread(final Long userId) {
+    public CountUnreadResponse countUnread(Long userId) {
         // 유저 조회
         User user = userDomainService.findUser(userId);
 

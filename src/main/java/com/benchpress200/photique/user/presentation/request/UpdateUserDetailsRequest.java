@@ -21,8 +21,8 @@ public class UpdateUserDetailsRequest {
     private String introduction;
 
     public UpdateUserDetailsCommand toCommand(
-            final Long userId,
-            final MultipartFile profileImage
+            Long userId,
+            MultipartFile profileImage
     ) {
         // 이미지 파일 검증 로직
         // 유저 업데이트에서는 빈 파일이라면 기본값 설정을 취급

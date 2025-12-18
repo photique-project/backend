@@ -21,8 +21,8 @@ public class UserSearchResult {
     private List<SearchedUser> users;
 
     public static UserSearchResult of(
-            final SearchedUsers searchedUsers,
-            final Page<User> userPage
+            SearchedUsers searchedUsers,
+            Page<User> userPage
     ) {
         int page = userPage.getNumber();
         int size = userPage.getSize();

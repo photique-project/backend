@@ -41,7 +41,7 @@ public class ExhibitionController {
 
     @PostMapping
     public ApiSuccessResponse<?> holdNewExhibition(
-            @ModelAttribute @Valid final ExhibitionCreateRequest exhibitionCreateRequest
+            @ModelAttribute @Valid ExhibitionCreateRequest exhibitionCreateRequest
     ) {
         exhibitionService.holdNewExhibition(exhibitionCreateRequest);
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
@@ -49,8 +49,8 @@ public class ExhibitionController {
 
     @GetMapping(URL.EXHIBITION_DATA)
     public ApiSuccessResponse<?> getExhibitionDetails(
-            @ModelAttribute final ExhibitionDetailsRequest exhibitionDetailsRequest,
-            @PathVariable final Long exhibitionId
+            @ModelAttribute ExhibitionDetailsRequest exhibitionDetailsRequest,
+            @PathVariable Long exhibitionId
     ) {
         exhibitionDetailsRequest.withExhibitionId(exhibitionId);
         ExhibitionDetailsResponse exhibitionDetailsResponse = exhibitionService.getExhibitionDetails(
@@ -60,8 +60,8 @@ public class ExhibitionController {
 
     @GetMapping
     public ApiSuccessResponse<?> searchExhibitions(
-            @ModelAttribute @Valid final ExhibitionSearchRequest exhibitionSearchRequest,
-            final Pageable pageable
+            @ModelAttribute @Valid ExhibitionSearchRequest exhibitionSearchRequest,
+            Pageable pageable
     ) {
         Page<ExhibitionSearchResponse> exhibitionSearchPage = exhibitionService.searchExhibitions(
                 exhibitionSearchRequest,
@@ -73,7 +73,7 @@ public class ExhibitionController {
 
     @DeleteMapping(URL.EXHIBITION_DATA)
     public ApiSuccessResponse<?> removeExhibition(
-            @PathVariable final Long exhibitionId
+            @PathVariable Long exhibitionId
     ) {
         exhibitionService.removeExhibition(exhibitionId);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
@@ -81,8 +81,8 @@ public class ExhibitionController {
 
     @PostMapping(URL.EXHIBITION_DATA + URL.LIKE)
     public ApiSuccessResponse<?> incrementLike(
-            @PathVariable final Long exhibitionId,
-            @RequestBody final ExhibitionLikeIncrementRequest exhibitionLikeIncrementRequest
+            @PathVariable Long exhibitionId,
+            @RequestBody ExhibitionLikeIncrementRequest exhibitionLikeIncrementRequest
     ) {
         exhibitionLikeIncrementRequest.withExhibitionId(exhibitionId);
         exhibitionService.incrementLike(exhibitionLikeIncrementRequest);
@@ -91,8 +91,8 @@ public class ExhibitionController {
 
     @DeleteMapping(URL.EXHIBITION_DATA + URL.LIKE)
     public ApiSuccessResponse<?> decrementLike(
-            @PathVariable final Long exhibitionId,
-            @RequestBody final ExhibitionLikeDecrementRequest exhibitionLikeDecrementRequest
+            @PathVariable Long exhibitionId,
+            @RequestBody ExhibitionLikeDecrementRequest exhibitionLikeDecrementRequest
     ) {
         exhibitionLikeDecrementRequest.withExhibitionId(exhibitionId);
         exhibitionService.decrementLike(exhibitionLikeDecrementRequest);
@@ -101,8 +101,8 @@ public class ExhibitionController {
 
     @PostMapping(URL.EXHIBITION_DATA + URL.BOOKMARK)
     public ApiSuccessResponse<?> addBookmark(
-            @PathVariable final Long exhibitionId,
-            @RequestBody final ExhibitionBookmarkRequest exhibitionBookmarkRequest
+            @PathVariable Long exhibitionId,
+            @RequestBody ExhibitionBookmarkRequest exhibitionBookmarkRequest
 
     ) {
         exhibitionBookmarkRequest.withExhibitionId(exhibitionId);
@@ -112,8 +112,8 @@ public class ExhibitionController {
 
     @DeleteMapping(URL.EXHIBITION_DATA + URL.BOOKMARK)
     public ApiSuccessResponse<?> removeBookmark(
-            @PathVariable final Long exhibitionId,
-            @RequestBody final ExhibitionBookmarkRemoveRequest exhibitionBookmarkRemoveRequest
+            @PathVariable Long exhibitionId,
+            @RequestBody ExhibitionBookmarkRemoveRequest exhibitionBookmarkRemoveRequest
     ) {
         exhibitionBookmarkRemoveRequest.withExhibitionId(exhibitionId);
         exhibitionService.removeBookmark(exhibitionBookmarkRemoveRequest);
@@ -123,8 +123,8 @@ public class ExhibitionController {
 
     @GetMapping(URL.BOOKMARK)
     public ApiSuccessResponse<?> getBookmarkedExhibitions(
-            @ModelAttribute final BookmarkedExhibitionRequest bookmarkedExhibitionRequest,
-            final Pageable pageable
+            @ModelAttribute BookmarkedExhibitionRequest bookmarkedExhibitionRequest,
+            Pageable pageable
     ) {
         Page<BookmarkedExhibitionResponse> bookmaredExhibitionPage = exhibitionService.getBookmarkedExhibitions(
                 bookmarkedExhibitionRequest, pageable);
@@ -133,8 +133,8 @@ public class ExhibitionController {
 
     @GetMapping(URL.LIKE)
     public ApiSuccessResponse<?> getLikedExhibitions(
-            @ModelAttribute final LikedExhibitionRequest likedExhibitionRequest,
-            final Pageable pageable
+            @ModelAttribute LikedExhibitionRequest likedExhibitionRequest,
+            Pageable pageable
     ) {
         Page<LikedExhibitionResponse> likedExhibitionRequestPage = exhibitionService.getLikedExhibitions(
                 likedExhibitionRequest, pageable);
@@ -144,8 +144,8 @@ public class ExhibitionController {
 
     @GetMapping(URL.MY_DATA)
     public ApiSuccessResponse<?> getMyExhibitions(
-            @ModelAttribute final MyExhibitionRequest myExhibitionRequest,
-            final Pageable pageable
+            @ModelAttribute MyExhibitionRequest myExhibitionRequest,
+            Pageable pageable
     ) {
         Page<MyExhibitionResponse> myExhibitionResponsePage = exhibitionService.getMyExhibitions(
                 myExhibitionRequest,

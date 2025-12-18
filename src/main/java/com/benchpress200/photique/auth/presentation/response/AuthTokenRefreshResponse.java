@@ -14,7 +14,7 @@ public class AuthTokenRefreshResponse {
     private AccessTokenResponse accessTokenResponse;
     private ResponseCookie cookie;
 
-    public static AuthTokenRefreshResponse from(final AuthTokenResult authTokenResult) {
+    public static AuthTokenRefreshResponse from(AuthTokenResult authTokenResult) {
         String accessToken = authTokenResult.getAccessToken();
         String refreshToken = authTokenResult.getRefreshToken();
         int refreshTokenExpiredTime = (int) (authTokenResult.getRefreshTokenExpiredTime()

@@ -19,13 +19,13 @@ public class ExhibitionCommentCreateRequest {
     @Size(max = 200, message = "Content must not exceed 200 characters")
     private String content;
 
-    public void withExhibitionId(final Long exhibitionId) {
+    public void withExhibitionId(Long exhibitionId) {
         this.exhibitionId = exhibitionId;
     }
 
     public ExhibitionComment toEntity(
-            final Exhibition exhibition,
-            final User user
+            Exhibition exhibition,
+            User user
     ) {
         return ExhibitionComment.builder()
                 .exhibition(exhibition)

@@ -25,7 +25,7 @@ public class FollowerSearchResponse {
     private boolean hasPrevious;
     private List<SearchedUser> users;
 
-    public static FollowerSearchResponse from(final FollowerSearchResult followerSearchResult) {
+    public static FollowerSearchResponse from(FollowerSearchResult followerSearchResult) {
         int page = followerSearchResult.getPage();
         int size = followerSearchResult.getSize();
         long totalElements = followerSearchResult.getTotalElements();

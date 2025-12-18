@@ -11,7 +11,7 @@ public class ChatSendRequest {
     private Long exhibitionId;
     private String content;
 
-    public void withExhibitionId(final Long exhibitionId) {
+    public void withExhibitionId(Long exhibitionId) {
         this.exhibitionId = exhibitionId;
     }
 }

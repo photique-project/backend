@@ -71,10 +71,10 @@ public class SingleWorkRepositoryImpl implements SingleWorkRepositoryCustom {
 
     @Override
     public Page<SingleWork> searchSingleWorks(
-            final Target target,
-            final List<String> keywords,
-            final List<Category> categories,
-            final Pageable pageable
+            Target target,
+            List<String> keywords,
+            List<Category> categories,
+            Pageable pageable
     ) {
 
         QSingleWork sw = QSingleWork.singleWork;

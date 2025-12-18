@@ -11,7 +11,7 @@ public enum Provider {
 
     private final String provider;
 
-    Provider(final String provider) {
+    Provider(String provider) {
         this.provider = provider;
     }
 }

@@ -91,18 +91,18 @@ public class SingleWork {
 
     @Builder
     public SingleWork(
-            final User writer,
-            final String image,
-            final String camera,
-            final String lens,
-            final Aperture aperture,
-            final ShutterSpeed shutterSpeed,
-            final ISO iso,
-            final String location,
-            final Category category,
-            final LocalDate date,
-            final String title,
-            final String description
+            User writer,
+            String image,
+            String camera,
+            String lens,
+            Aperture aperture,
+            ShutterSpeed shutterSpeed,
+            ISO iso,
+            String location,
+            Category category,
+            LocalDate date,
+            String title,
+            String description
     ) {
         this.writer = writer;
         this.image = image;
@@ -118,47 +118,47 @@ public class SingleWork {
         this.description = description;
     }
 
-    public void updateImage(final String image) {
+    public void updateImage(String image) {
         this.image = image;
     }
 
-    public void updateCamera(final String camera) {
+    public void updateCamera(String camera) {
         this.camera = camera;
     }
 
-    public void updateLens(final String lens) {
+    public void updateLens(String lens) {
         this.lens = lens;
     }
 
-    public void updateAperture(final Aperture aperture) {
+    public void updateAperture(Aperture aperture) {
         this.aperture = aperture;
     }
 
-    public void updateShutterSpeed(final ShutterSpeed shutterSpeed) {
+    public void updateShutterSpeed(ShutterSpeed shutterSpeed) {
         this.shutterSpeed = shutterSpeed;
     }
 
-    public void updateIso(final ISO iso) {
+    public void updateIso(ISO iso) {
         this.iso = iso;
     }
 
-    public void updateLocation(final String location) {
+    public void updateLocation(String location) {
         this.location = location;
     }
 
-    public void updateCategory(final Category category) {
+    public void updateCategory(Category category) {
         this.category = category;
     }
 
-    public void updateDate(final LocalDate date) {
+    public void updateDate(LocalDate date) {
         this.date = date;
     }
 
-    public void updateTitle(final String title) {
+    public void updateTitle(String title) {
         this.title = title;
     }
 
-    public void updateDescription(final String description) {
+    public void updateDescription(String description) {
         this.description = description;
     }
 

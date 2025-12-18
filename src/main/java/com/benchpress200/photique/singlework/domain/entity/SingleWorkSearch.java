@@ -67,7 +67,7 @@ public class SingleWorkSearch {
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
     private LocalDateTime createdAt;
 
-    public void updateWriterDetails(final User writer) {
+    public void updateWriterDetails(User writer) {
         writerId = writer.getId();
         writerNickname = writer.getNickname();
         writerProfileImage = writer.getProfileImage();
@@ -76,9 +76,9 @@ public class SingleWorkSearch {
 
     // SingleWorkSearch는 JPA가 관리하는 영속성 객체가 아니기 때문에 엔티티 클래스 내부에 변환메서드 작성했음
     public static SingleWorkSearch of(
-            final SingleWork singleWork,
-            final User writer,
-            final List<String> tags
+            SingleWork singleWork,
+            User writer,
+            List<String> tags
     ) {
         return SingleWorkSearch.builder()
                 .id(singleWork.getId())

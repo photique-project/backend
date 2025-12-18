@@ -50,16 +50,16 @@ public class SingleWorkComment {
 
     @Builder
     public SingleWorkComment(
-            final User writer,
-            final SingleWork singleWork,
-            final String content
+            User writer,
+            SingleWork singleWork,
+            String content
     ) {
         this.writer = writer;
         this.singleWork = singleWork;
         this.content = content;
     }
 
-    public void updateContent(final String content) {
+    public void updateContent(String content) {
         this.content = content;
     }
 }

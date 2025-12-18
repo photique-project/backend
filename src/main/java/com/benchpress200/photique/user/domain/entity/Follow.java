@@ -48,16 +48,16 @@ public class Follow {
 
     @Builder
     public Follow(
-            final User follower,
-            final User followee
+            User follower,
+            User followee
     ) {
         this.follower = follower;
         this.followee = followee;
     }
 
     public static Follow of(
-            final User follower,
-            final User followee
+            User follower,
+            User followee
     ) {
         return Follow.builder()
                 .follower(follower)

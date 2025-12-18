@@ -31,7 +31,7 @@ public class JoinRequest {
     private String nickname;
 
     public JoinCommand toCommand(
-            final MultipartFile profileImage
+            MultipartFile profileImage
     ) {
         // 이미지 파일 검증 로직
         if (!ProfileImageValidator.isValid(profileImage)) {

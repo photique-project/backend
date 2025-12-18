@@ -22,7 +22,7 @@ public class FollowerSearchRequest {
     @Max(value = 50, message = "Invalid size")
     private Integer size;
 
-    public FollowerSearchQuery toQuery(final Long userId) {
+    public FollowerSearchQuery toQuery(Long userId) {
         if (page == null) {
             page = 0;
         }

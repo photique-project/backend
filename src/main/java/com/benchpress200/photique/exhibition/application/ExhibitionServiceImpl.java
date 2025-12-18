@@ -69,7 +69,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             @CacheEvict(value = "userDetails", key = "#exhibitionCreateRequest.writerId"),
             @CacheEvict(value = "searchExhibitionPage", allEntries = true),
     })
-    public void holdNewExhibition(final ExhibitionCreateRequest exhibitionCreateRequest) {
+    public void holdNewExhibition(ExhibitionCreateRequest exhibitionCreateRequest) {
         // 작가 조회
         Long writerId = exhibitionCreateRequest.getWriterId();
         User writer = userDomainService.findUser(writerId);
@@ -123,7 +123,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
-    public ExhibitionDetailsResponse getExhibitionDetails(final ExhibitionDetailsRequest exhibitionDetailsRequest) {
+    public ExhibitionDetailsResponse getExhibitionDetails(ExhibitionDetailsRequest exhibitionDetailsRequest) {
         // 전시회 조회
         Long exhibitionId = exhibitionDetailsRequest.getExhibitionId();
         Exhibition exhibition = exhibitionDomainService.findExhibitionWithWorksAndWriter(exhibitionId);
@@ -153,8 +153,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     @Override
     @Transactional
     public Page<ExhibitionSearchResponse> searchExhibitions(
-            final ExhibitionSearchRequest exhibitionSearchRequest,
-            final Pageable pageable
+            ExhibitionSearchRequest exhibitionSearchRequest,
+            Pageable pageable
     ) {
         // 검색조건
         Page<ExhibitionSearch> exhibitionSearchPage = exhibitionCacheService.searchExhibitions(exhibitionSearchRequest,
@@ -191,7 +191,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
             @CacheEvict(value = "userDetails", allEntries = true),
             @CacheEvict(value = "searchExhibitionPage", allEntries = true),
     })
-    public void removeExhibition(final Long exhibitionId) {
+    public void removeExhibition(Long exhibitionId) {
         // 전시회 조회
         Exhibition exhibition = exhibitionDomainService.findExhibition(exhibitionId);
 
@@ -223,7 +223,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
-    public void incrementLike(final ExhibitionLikeIncrementRequest exhibitionLikeIncrementRequest) {
+    public void incrementLike(ExhibitionLikeIncrementRequest exhibitionLikeIncrementRequest) {
         // 유저존재확인
         Long userId = exhibitionLikeIncrementRequest.getUserId();
         User user = userDomainService.findUser(userId);
@@ -261,7 +261,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
-    public void decrementLike(final ExhibitionLikeDecrementRequest exhibitionLikeDecrementRequest) {
+    public void decrementLike(ExhibitionLikeDecrementRequest exhibitionLikeDecrementRequest) {
         // 유저존재확인
         Long userId = exhibitionLikeDecrementRequest.getUserId();
         User user = userDomainService.findUser(userId);
@@ -279,7 +279,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
-    public void addBookmark(final ExhibitionBookmarkRequest exhibitionBookmarkRequest) {
+    public void addBookmark(ExhibitionBookmarkRequest exhibitionBookmarkRequest) {
         // 유저존재확인
         Long userId = exhibitionBookmarkRequest.getUserId();
         User user = userDomainService.findUser(userId);
@@ -314,7 +314,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
     @Override
     @Transactional
-    public void removeBookmark(final ExhibitionBookmarkRemoveRequest exhibitionBookmarkRemoveRequest) {
+    public void removeBookmark(ExhibitionBookmarkRemoveRequest exhibitionBookmarkRemoveRequest) {
         // 유저존재확인
         Long userId = exhibitionBookmarkRemoveRequest.getUserId();
         User user = userDomainService.findUser(userId);
@@ -330,8 +330,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     @Override
     @Transactional
     public Page<BookmarkedExhibitionResponse> getBookmarkedExhibitions(
-            final BookmarkedExhibitionRequest bookmarkedExhibitionRequest,
-            final Pageable pageable
+            BookmarkedExhibitionRequest bookmarkedExhibitionRequest,
+            Pageable pageable
     ) {
         // 요청 유저 조회
         Long userId = bookmarkedExhibitionRequest.getUserId();
@@ -356,8 +356,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     @Override
     @Transactional
     public Page<LikedExhibitionResponse> getLikedExhibitions(
-            final LikedExhibitionRequest likedExhibitionRequest,
-            final Pageable pageable
+            LikedExhibitionRequest likedExhibitionRequest,
+            Pageable pageable
     ) {
         // 요청 유저 조회
         Long userId = likedExhibitionRequest.getUserId();
@@ -382,8 +382,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     @Override
     @Transactional
     public Page<MyExhibitionResponse> getMyExhibitions(
-            final MyExhibitionRequest myExhibitionRequest,
-            final Pageable pageable
+            MyExhibitionRequest myExhibitionRequest,
+            Pageable pageable
     ) {
         Long userId = myExhibitionRequest.getUserId();
 

@@ -19,9 +19,9 @@ public class CustomAuthenticationFailedHandler implements AuthenticationEntryPoi
 
     @Override
     public void commence(
-            final HttpServletRequest request,
-            final HttpServletResponse response,
-            final AuthenticationException authException
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException authException
     ) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MimeTypeUtils.APPLICATION_JSON_VALUE);

@@ -22,7 +22,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatDomainService chatDomainService;
 
     @Override
-    public ChatSendResponse sendMessage(final ChatSendRequest chatSendRequest) {
+    public ChatSendResponse sendMessage(ChatSendRequest chatSendRequest) {
         // 메시지 종류확인
         String id = chatSendRequest.getId();
 
@@ -39,7 +39,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ExhibitionJoinResponse joinExhibition(final ExhibitionJoinRequest exhibitionJoinRequest) {
+    public ExhibitionJoinResponse joinExhibition(ExhibitionJoinRequest exhibitionJoinRequest) {
         // 유저 존재확인
         Long userId = exhibitionJoinRequest.getUserId();
         User user = userDomainService.findUser(userId);
@@ -62,7 +62,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ExhibitionLeaveResponse leaveExhibition(final ExhibitionLeaveRequest exhibitionLeaveRequest) {
+    public ExhibitionLeaveResponse leaveExhibition(ExhibitionLeaveRequest exhibitionLeaveRequest) {
         // 세션에 해당하는 레디스 엔티티 조회
         String sessionId = exhibitionLeaveRequest.getSessionId();
         ExhibitionSession exhibitionSession = chatDomainService.findExhibitionSession(sessionId);

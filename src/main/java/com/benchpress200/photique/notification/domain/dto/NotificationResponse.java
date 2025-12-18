@@ -18,7 +18,7 @@ public class NotificationResponse {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
 
-    public static NotificationResponse from(final Notification notification) {
+    public static NotificationResponse from(Notification notification) {
         return NotificationResponse.builder()
                 .id(notification.getId())
                 .type(notification.getType().name())

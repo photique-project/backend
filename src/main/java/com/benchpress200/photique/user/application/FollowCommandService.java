@@ -25,7 +25,7 @@ public class FollowCommandService {
     private final AuthenticationUserProviderPort authenticationUserProviderPort;
 
     @Transactional
-    public void follow(final Long followeeId) {
+    public void follow(Long followeeId) {
         // 팔로워 유저 조회
         Long followerId = authenticationUserProviderPort.getCurrentUserId();
 
@@ -64,7 +64,7 @@ public class FollowCommandService {
 
 
     @Transactional
-    public void unfollow(final Long followeeId) {
+    public void unfollow(Long followeeId) {
         // 팔로워 유저 조회
         Long followerId = authenticationUserProviderPort.getCurrentUserId();
 
