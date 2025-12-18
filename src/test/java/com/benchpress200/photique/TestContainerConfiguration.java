@@ -26,7 +26,6 @@ public class TestContainerConfiguration {
     ElasticsearchContainer elasticsearchContainer() {
         return new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.17.9")
                 .withReuse(true);
-
     }
 
     @Bean
