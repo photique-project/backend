@@ -1,6 +1,6 @@
 package com.benchpress200.photique.auth.application;
 
-import com.benchpress200.photique.AbstractTestContainerConfig;
+import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.auth.application.command.AuthMailCodeValidationCommand;
 import com.benchpress200.photique.auth.application.command.AuthMailCommand;
 import com.benchpress200.photique.auth.application.command.AuthTokenRefreshCommand;
@@ -26,16 +26,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
 @SpringBootTest
 @DisplayName("AuthCommandService 테스트")
 @ActiveProfiles("test")
-public class AuthCommandServiceTest extends AbstractTestContainerConfig {
+@Import(TestContainerConfiguration.class)
+public class AuthCommandServiceTest {
     private static final int AUTH_MAIL_CODE_LENGTH = 6;
 
     @Autowired

@@ -2,6 +2,7 @@ package com.benchpress200.photique.auth.presentation;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.auth.application.AuthCommandService;
 import com.benchpress200.photique.auth.application.command.AuthTokenRefreshCommand;
 import com.benchpress200.photique.auth.application.result.AuthMailCodeValidationResult;
@@ -21,6 +22,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -32,6 +34,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @DisplayName("AuthCommandController 테스트")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
+@Import(TestContainerConfiguration.class)
 public class AuthCommandControllerTest {
     private static final String JSON_KEY_EMAIL = "email";
     private static final String JSON_KEY_CODE = "code";

@@ -3,6 +3,7 @@ package com.benchpress200.photique.user.presentation;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.user.application.FollowCommandService;
 import com.benchpress200.photique.util.DummyGenerator;
@@ -13,6 +14,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -27,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false) // Security Filter 비활성화
 @EnableMethodSecurity(prePostEnabled = false)
+@Import(TestContainerConfiguration.class)
 public class FollowCommandControllerTest {
     @Autowired
     MockMvc mockMvc;

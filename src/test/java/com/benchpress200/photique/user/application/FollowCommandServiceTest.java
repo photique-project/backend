@@ -1,6 +1,6 @@
 package com.benchpress200.photique.user.application;
 
-import com.benchpress200.photique.AbstractTestContainerConfig;
+import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.repository.NotificationRepository;
@@ -24,15 +24,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
 @SpringBootTest
 @DisplayName("FollowCommandService 테스트")
 @ActiveProfiles("test")
-public class FollowCommandServiceTest extends AbstractTestContainerConfig {
+@Import(TestContainerConfiguration.class)
+public class FollowCommandServiceTest {
     @MockitoSpyBean
     AuthenticationUserProviderPort authenticationUserProviderPort;
 

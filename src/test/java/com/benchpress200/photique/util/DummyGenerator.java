@@ -1,8 +1,8 @@
 package com.benchpress200.photique.util;
 
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
-import com.benchpress200.photique.user.application.result.SearchUsersResult;
 import com.benchpress200.photique.user.application.result.UserDetailsResult;
+import com.benchpress200.photique.user.application.result.UserSearchResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import java.security.SecureRandom;
@@ -115,8 +115,8 @@ public class DummyGenerator {
                 .build();
     }
 
-    public static SearchUsersResult generateSearchUsersResult() {
-        return SearchUsersResult.builder().build();
+    public static UserSearchResult generateUserSearchResult() {
+        return UserSearchResult.builder().build();
     }
 
     public static List<String> generateInvalidPages() {

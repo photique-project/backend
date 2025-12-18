@@ -1,6 +1,6 @@
 package com.benchpress200.photique.user.application;
 
-import com.benchpress200.photique.AbstractTestContainerConfig;
+import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.auth.domain.entity.EmailAuthCode;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
@@ -25,17 +25,17 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.multipart.MultipartFile;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
 @SpringBootTest
 @DisplayName("UserCommandService 테스트")
 @ActiveProfiles("test")
-public class UserCommandServiceTest extends AbstractTestContainerConfig {
+@Import(TestContainerConfiguration.class)
+public class UserCommandServiceTest {
     private static final String DUMMY_STRING = "a";
     private static final String MULTIPART_KEY_PROFILE_IMAGE = "profileImage";
 
