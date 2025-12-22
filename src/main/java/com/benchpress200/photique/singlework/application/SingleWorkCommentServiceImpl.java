@@ -1,6 +1,5 @@
 package com.benchpress200.photique.singlework.application;
 
-import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
 import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
@@ -23,7 +22,6 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
     private final UserDomainService userDomainService;
     private final SingleWorkCommentDomainService singleWorkCommentDomainService;
-    private final NotificationDomainService notificationDomainService;
 
     @Override
     @Transactional

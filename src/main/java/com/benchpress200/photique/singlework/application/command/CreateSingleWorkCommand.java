@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Builder
-public class NewSingleWorkCommand {
+public class CreateSingleWorkCommand {
     private String title;
     private String description;
     private MultipartFile image;
