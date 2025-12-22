@@ -14,7 +14,9 @@ import com.benchpress200.photique.image.domain.exception.S3DeleteException;
 import com.benchpress200.photique.image.domain.exception.S3UploadException;
 import com.benchpress200.photique.notification.domain.exception.NotificationTargetSingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotOwnedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkWriterNotFoundException;
+import com.benchpress200.photique.singlework.presentation.exception.InvalidFieldToUpdateException;
 import com.benchpress200.photique.singlework.presentation.exception.InvalidImageException;
 import com.benchpress200.photique.user.domain.exception.DuplicatedFollowException;
 import com.benchpress200.photique.user.domain.exception.DuplicatedUserException;
@@ -288,6 +290,27 @@ public class GlobalExceptionHandler {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.NOT_FOUND,
+                errorMessage
+        );
+    }
+
+    // 단일작품 업데이트 요청 시, 유효하지 않은 필드 예외 처리 응답
+    @ExceptionHandler(InvalidFieldToUpdateException.class)
+    public ResponseEntity<?> handleInvalidFieldToUpdateException(InvalidFieldToUpdateException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
+                errorMessage
+        );
+    }
+
+    @ExceptionHandler(SingleWorkNotOwnedException.class)
+    public ResponseEntity<?> handleSingleWorkNotOwnedException(SingleWorkNotOwnedException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.FORBIDDEN,
                 errorMessage
         );
     }

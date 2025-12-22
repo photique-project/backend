@@ -1,7 +1,7 @@
 package com.benchpress200.photique.singlework.presentation.request;
 
 import com.benchpress200.photique.image.presentation.validator.ImageValidator;
-import com.benchpress200.photique.singlework.application.command.NewSingleWorkCommand;
+import com.benchpress200.photique.singlework.application.command.CreateSingleWorkCommand;
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
@@ -12,6 +12,7 @@ import com.benchpress200.photique.tag.presentation.validator.annotation.Tag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 @NoArgsConstructor
-public class NewSingleWorkRequest {
+public class CreateSingleWorkRequest {
     @NotBlank(message = "Title must not be null")
     @Size(min = 1, max = 30, message = "Invalid title")
     private String title;
@@ -32,10 +33,10 @@ public class NewSingleWorkRequest {
     private String description;
 
     @NotBlank(message = "Camera must not be null")
-    @Size(min = 1, max = 30, message = "Invalid length of camera's name")
+    @Size(min = 1, max = 30, message = "Invalid camera")
     private String camera;
 
-    @Size(max = 30, message = "Invalid length of lens's name")
+    @Size(max = 30, message = "Invalid lens")
     private String lens;
 
     @Enum(enumClass = Aperture.class, message = "Invalid aperture")
@@ -54,19 +55,24 @@ public class NewSingleWorkRequest {
     @Size(max = 30, message = "Invalid location")
     private String location;
 
-    @DateTimeFormat(pattern = "yyyy-mm-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
     @Tag
     private List<String> tags;
 
-    public NewSingleWorkCommand toCommand(MultipartFile image) {
+    public CreateSingleWorkCommand toCommand(MultipartFile image) {
         // 이미지 파일 검증 로직
         if (!ImageValidator.isValid(image)) {
             throw new InvalidImageException();
         }
 
-        return NewSingleWorkCommand.builder()
+        // null 값이라면 NPE 방지를 위한 빈 리스트 할당
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+
+        return CreateSingleWorkCommand.builder()
                 .title(title)
                 .description(description)
                 .image(image)
