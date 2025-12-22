@@ -69,4 +69,10 @@ public class SingleWorkSearchEventListener {
 
         singleWorkSearchRepository.save(singleWorkSearch);
     }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleRemoveSingleWorkSearchEventIfCommit(RemoveSingleWorkSearchEvent event) {
+        Long singleWorkId = event.getSingleWorkId();
+        singleWorkSearchRepository.deleteById(singleWorkId);
+    }
 }

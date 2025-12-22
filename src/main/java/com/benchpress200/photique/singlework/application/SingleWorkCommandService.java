@@ -169,6 +169,24 @@ public class SingleWorkCommandService {
         }
     }
 
+    public void removeSingleWork(Long singleWorkId) {
+        // 작품 조회
+        SingleWork singleWork = singleWorkRepository.findWithWriter(singleWorkId)
+                .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
+
+        Long writerId = authenticationUserProviderPort.getCurrentUserId();
+
+        // 요청한 유저가 해당 단일작품의 주인이 아닐 때
+        if (!singleWork.isOwnedBy(writerId)) {
+            throw new SingleWorkNotOwnedException();
+        }
+
+        singleWork.remove();
+
+        // 단일작품 MySQL-ES 동기화 이벤트 발행
+        singleWorkSearchEventPublisher.publishRemoveSingleWorkSearchEvent(singleWorkId);
+    }
+
     private void attachTags(SingleWork singleWork, List<String> tagNames) {
         List<Tag> tags = tagRepository.findByNameIn(tagNames);
         ExistingTags existingTags = ExistingTags.of(tags); // 존재하는 태그 일급 컬렉션

@@ -18,4 +18,9 @@ public class SingleWorkSearchEventPublisher {
         UpdateSingleWorkSearchEvent event = new UpdateSingleWorkSearchEvent(singleWorkId);
         publisher.publishEvent(event);
     }
+
+    public void publishRemoveSingleWorkSearchEvent(Long singleWorkId) {
+        RemoveSingleWorkSearchEvent event = new RemoveSingleWorkSearchEvent(singleWorkId);
+        publisher.publishEvent(event);
+    }
 }
