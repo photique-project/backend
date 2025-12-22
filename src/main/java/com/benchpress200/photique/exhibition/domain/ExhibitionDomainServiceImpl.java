@@ -1,19 +1,18 @@
 package com.benchpress200.photique.exhibition.domain;
 
-import com.benchpress200.photique.common.transaction.rollbackcontext.ElasticsearchExhibitionRollbackContext;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
-import com.benchpress200.photique.exhibition.exception.ExhibitionException;
 import com.benchpress200.photique.exhibition.domain.repository.ExhibitionBookmarkRepository;
 import com.benchpress200.photique.exhibition.domain.repository.ExhibitionLikeRepository;
 import com.benchpress200.photique.exhibition.domain.repository.ExhibitionRepository;
 import com.benchpress200.photique.exhibition.domain.repository.ExhibitionSearchRepository;
 import com.benchpress200.photique.exhibition.domain.repository.ExhibitionTagRepository;
 import com.benchpress200.photique.exhibition.domain.repository.ExhibitionWorkRepository;
+import com.benchpress200.photique.exhibition.exception.ExhibitionException;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.time.LocalDateTime;
@@ -74,7 +73,6 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
         // 엘라스틱서치 데이터 삭제
         Long exhibitionId = exhibition.getId();
         ExhibitionSearch exhibitionSearch = findExhibitionSearch(exhibitionId);
-        ElasticsearchExhibitionRollbackContext.addDocumentToDelete(exhibitionSearch);
     }
 
     @Override
@@ -114,7 +112,7 @@ public class ExhibitionDomainServiceImpl implements ExhibitionDomainService {
 
     @Override
     public void createNewExhibitionSearch(ExhibitionSearch exhibitionSearch) {
-        ElasticsearchExhibitionRollbackContext.addDocumentToSave(exhibitionSearch);
+        
     }
 
     @Override

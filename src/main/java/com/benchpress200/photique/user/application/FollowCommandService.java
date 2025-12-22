@@ -4,12 +4,12 @@ import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPor
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
 import com.benchpress200.photique.notification.domain.repository.NotificationRepository;
-import com.benchpress200.photique.user.application.exception.AlreadyUnfollowException;
-import com.benchpress200.photique.user.application.exception.DuplicatedFollowException;
-import com.benchpress200.photique.user.application.exception.InvalidFollowRequestException;
-import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
+import com.benchpress200.photique.user.domain.exception.AlreadyUnfollowException;
+import com.benchpress200.photique.user.domain.exception.DuplicatedFollowException;
+import com.benchpress200.photique.user.domain.exception.InvalidFollowRequestException;
+import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.repository.FollowRepository;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;

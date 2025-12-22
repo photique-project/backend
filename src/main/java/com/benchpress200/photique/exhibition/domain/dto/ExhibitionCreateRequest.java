@@ -2,7 +2,6 @@ package com.benchpress200.photique.exhibition.domain.dto;
 
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
-import com.benchpress200.photique.tag.domain.dto.NewTagRequest;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.validation.Valid;
@@ -31,7 +30,7 @@ public class ExhibitionCreateRequest {
 
     @Size(max = 5, message = "Tag list size must be between 0 and 5")
     @Valid
-    private List<NewTagRequest> tags;
+//    private List<NewTagRequest> tags;
 
     @NotBlank(message = "Card color must not be blank")
     @Size(max = 30)
@@ -41,9 +40,9 @@ public class ExhibitionCreateRequest {
     @Valid
     private List<ExhibitionWorkCreateRequest> works;
 
-    public boolean hasTags() {
-        return tags != null && !tags.isEmpty();
-    }
+//    public boolean hasTags() {
+//        return tags != null && !tags.isEmpty();
+//    }
 
     public Exhibition toEntity(
             User writer
@@ -69,7 +68,7 @@ public class ExhibitionCreateRequest {
                 .toList();
     }
 
-    public List<String> getTags() {
-        return tags.stream().map(NewTagRequest::getName).toList();
-    }
+//    public List<String> getTags() {
+//        return tags.stream().map(NewTagRequest::getName).toList();
+//    }
 }

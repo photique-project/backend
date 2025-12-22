@@ -1,8 +1,8 @@
 package com.benchpress200.photique.user.presentation.request;
 
+import com.benchpress200.photique.image.presentation.validator.ProfileImageValidator;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
 import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
-import com.benchpress200.photique.user.presentation.validator.ProfileImageValidator;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

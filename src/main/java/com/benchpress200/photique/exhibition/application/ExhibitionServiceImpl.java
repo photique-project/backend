@@ -15,7 +15,6 @@ import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeDecrementR
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionLikeIncrementRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchRequest;
 import com.benchpress200.photique.exhibition.domain.dto.ExhibitionSearchResponse;
-import com.benchpress200.photique.exhibition.domain.dto.ExhibitionWorkCreateRequest;
 import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionRequest;
 import com.benchpress200.photique.exhibition.domain.dto.LikedExhibitionResponse;
 import com.benchpress200.photique.exhibition.domain.dto.MyExhibitionRequest;
@@ -24,13 +23,9 @@ import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
-import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
-import com.benchpress200.photique.image.domain.ImageDomainService;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
-import com.benchpress200.photique.tag.domain.TagDomainService;
-import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.FollowDomainService;
 import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.Follow;
@@ -46,7 +41,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -55,11 +49,9 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     @Value("${cloud.aws.s3.path.exhibition}")
     private String imagePath;
 
-    private final ImageDomainService imageDomainService;
     private final UserDomainService userDomainService;
     private final ExhibitionDomainService exhibitionDomainService;
     private final ExhibitionCommentDomainService exhibitionCommentDomainService;
-    private final TagDomainService tagDomainService;
     private final FollowDomainService followDomainService;
     private final ExhibitionCacheService exhibitionCacheService;
 
@@ -78,27 +70,27 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         Exhibition exhibition = exhibitionCreateRequest.toEntity(writer);
         Exhibition savedExhibition = exhibitionDomainService.createNewExhibition(exhibition);
 
-        // 전시회 개별 작품 저장
-        List<ExhibitionWorkCreateRequest> works = exhibitionCreateRequest.getWorks();
-        List<ExhibitionWork> exhibitionWorks = works.stream()
-                .map(work -> {
-                    MultipartFile image = work.getImage();
-                    String imageUrl = imageDomainService.upload(image, imagePath);
-                    return work.toEntity(savedExhibition, imageUrl);
-                })
-                .toList();
+//        // 전시회 개별 작품 저장
+//        List<ExhibitionWorkCreateRequest> works = exhibitionCreateRequest.getWorks();
+//        List<ExhibitionWork> exhibitionWorks = works.stream()
+//                .map(work -> {
+//                    MultipartFile image = work.getImage();
+//                    String imageUrl = imageDomainService.upload(image, imagePath);
+//                    return work.toEntity(savedExhibition, imageUrl);
+//                })
+//                .toList();
 
-        exhibitionDomainService.createNewExhibitionWorks(exhibitionWorks);
+//        exhibitionDomainService.createNewExhibitionWorks(exhibitionWorks);
 
         // 태그 저장
-        List<String> tagNames = exhibitionCreateRequest.getTags();
-        List<Tag> tags = tagDomainService.createNewTags(tagNames);
-        List<ExhibitionTag> exhibitionTags = exhibitionCreateRequest.toExhibitionTagEntities(savedExhibition, tags);
-        exhibitionDomainService.createNewExhibitionTags(exhibitionTags);
+//        List<String> tagNames = exhibitionCreateRequest.getTags();
+//        List<Tag> tags = tagDomainService.createNewTags(tagNames);
+//        List<ExhibitionTag> exhibitionTags = exhibitionCreateRequest.toExhibitionTagEntities(savedExhibition, tags);
+//        exhibitionDomainService.createNewExhibitionTags(exhibitionTags);
 
         // 엘라스틱 서치 저장
-        ExhibitionSearch exhibitionSearch = ExhibitionSearch.of(exhibition, writer, tagNames);
-        exhibitionDomainService.createNewExhibitionSearch(exhibitionSearch);
+//        ExhibitionSearch exhibitionSearch = ExhibitionSearch.of(exhibition, writer, tagNames);
+//        exhibitionDomainService.createNewExhibitionSearch(exhibitionSearch);
 
         // 알림생성
         Long exhibitionId = exhibition.getId();
@@ -201,7 +193,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
         // s3 이미지 & 전시회 개별작품 데이터 삭제
         exhibitionWorks.forEach(exhibitionWork -> {
             String imageUrl = exhibitionWork.getImage();
-            imageDomainService.delete(imageUrl);
+//            imageDomainService.delete(imageUrl);
             exhibitionDomainService.deleteExhibitionWork(exhibitionWork);
         });
 

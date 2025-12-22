@@ -23,6 +23,11 @@ public class CustomAuthenticationFailedHandler implements AuthenticationEntryPoi
             HttpServletResponse response,
             AuthenticationException authException
     ) throws IOException {
+        // 컨트롤러 DTO 바인딩에서 이미 응답을 세팅했다면
+        if (response.getStatus() == HttpServletResponse.SC_BAD_REQUEST) {
+            return;
+        }
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MimeTypeUtils.APPLICATION_JSON_VALUE);
 

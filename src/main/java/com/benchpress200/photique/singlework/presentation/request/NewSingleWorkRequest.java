@@ -1,0 +1,89 @@
+package com.benchpress200.photique.singlework.presentation.request;
+
+import com.benchpress200.photique.image.presentation.validator.ImageValidator;
+import com.benchpress200.photique.singlework.application.command.NewSingleWorkCommand;
+import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
+import com.benchpress200.photique.singlework.domain.enumeration.Category;
+import com.benchpress200.photique.singlework.domain.enumeration.ISO;
+import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
+import com.benchpress200.photique.singlework.presentation.exception.InvalidImageException;
+import com.benchpress200.photique.singlework.presentation.validator.annotation.Enum;
+import com.benchpress200.photique.tag.presentation.validator.annotation.Tag;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
+import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
+
+@Getter
+@Setter
+@NoArgsConstructor
+public class NewSingleWorkRequest {
+    @NotBlank(message = "Title must not be null")
+    @Size(min = 1, max = 30, message = "Invalid title")
+    private String title;
+
+    @NotBlank(message = "Description must not be null")
+    @Size(min = 1, max = 500, message = "Invalid description")
+    private String description;
+
+    @NotNull(message = "Id must not be null")
+    private Long writerId;
+
+    @NotBlank(message = "Camera must not be null")
+    @Size(min = 1, max = 30, message = "Invalid length of camera's name")
+    private String camera;
+
+    @Size(max = 30, message = "Invalid length of lens's name")
+    private String lens;
+
+    @Enum(enumClass = Aperture.class, message = "Invalid aperture")
+    private String aperture;
+
+    @Enum(enumClass = ShutterSpeed.class, message = "Invalid shutter speed")
+    private String shutterSpeed;
+
+    @Enum(enumClass = ISO.class, message = "Invalid ISO")
+    private String iso;
+
+    @NotBlank(message = "Invalid category")
+    @Enum(enumClass = Category.class, message = "Invalid category")
+    private String category;
+
+    @Size(max = 30, message = "Invalid location")
+    private String location;
+
+    @DateTimeFormat(pattern = "yyyy-mm-dd")
+    private LocalDate date;
+
+    @Tag
+    private List<String> tags;
+
+    public NewSingleWorkCommand toCommand(MultipartFile image) {
+        // 이미지 파일 검증 로직
+        if (!ImageValidator.isValid(image)) {
+            throw new InvalidImageException();
+        }
+
+        return NewSingleWorkCommand.builder()
+                .title(title)
+                .description(description)
+                .writerId(writerId)
+                .image(image)
+                .camera(camera)
+                .lens(lens)
+                .aperture(Aperture.from(aperture))
+                .shutterSpeed(ShutterSpeed.from(shutterSpeed))
+                .iso(ISO.from(iso))
+                .category(Category.from(category))
+                .location(location)
+                .date(date)
+                .tags(tags)
+                .build();
+    }
+}

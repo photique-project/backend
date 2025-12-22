@@ -59,9 +59,6 @@ public class SingleWorkSearch {
     @Field(type = FieldType.Long)
     private Long viewCount;
 
-    @Field(type = FieldType.Long)
-    private Long commentCount;
-
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
@@ -72,14 +69,13 @@ public class SingleWorkSearch {
         writerNickname = writer.getNickname();
         writerProfileImage = writer.getProfileImage();
     }
-
-
-    // SingleWorkSearch는 JPA가 관리하는 영속성 객체가 아니기 때문에 엔티티 클래스 내부에 변환메서드 작성했음
+    
     public static SingleWorkSearch of(
             SingleWork singleWork,
-            User writer,
             List<String> tags
     ) {
+        User writer = singleWork.getWriter();
+
         return SingleWorkSearch.builder()
                 .id(singleWork.getId())
                 .image(singleWork.getImage())
@@ -91,7 +87,6 @@ public class SingleWorkSearch {
                 .category(singleWork.getCategory().getValue())
                 .likeCount(0L)
                 .viewCount(singleWork.getViewCount())
-                .commentCount(0L)
                 .createdAt(singleWork.getCreatedAt())
                 .build();
     }

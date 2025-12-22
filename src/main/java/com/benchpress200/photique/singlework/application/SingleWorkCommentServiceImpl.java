@@ -4,20 +4,16 @@ import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
 import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
-import com.benchpress200.photique.singlework.domain.SingleWorkDomainService;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentCreateRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDeleteRequest;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDetailResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentUpdateRequest;
-import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
 import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +22,6 @@ import org.springframework.stereotype.Service;
 public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
     private final UserDomainService userDomainService;
-    private final SingleWorkDomainService singleWorkDomainService;
     private final SingleWorkCommentDomainService singleWorkCommentDomainService;
     private final NotificationDomainService notificationDomainService;
 
@@ -39,18 +34,18 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
         // 작품 조회
         Long singleWorkId = singleWorkCommentCreateRequest.getSingleWorkId();
-        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
+//        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
 
         // 단일작품 댓글 저장
-        SingleWorkComment singleWorkComment = singleWorkCommentCreateRequest.toEntity(writer, singleWork);
-        singleWorkCommentDomainService.addComment(singleWorkComment);
+//        SingleWorkComment singleWorkComment = singleWorkCommentCreateRequest.toEntity(writer, singleWork);
+//        singleWorkCommentDomainService.addComment(singleWorkComment);
 
         // 알림 생성
-        Long singleWorkWriterId = singleWork.getWriter().getId();
-        User singleWorkWriter = userDomainService.findUser(singleWorkWriterId);
+//        Long singleWorkWriterId = singleWork.getWriter().getId();
+//        User singleWorkWriter = userDomainService.findUser(singleWorkWriterId);
 
         Notification notification = Notification.builder()
-                .receiver(singleWorkWriter)
+//                .receiver(singleWorkWriter)
                 .type(NotificationType.SINGLE_WORK_COMMENT)
                 .targetId(singleWorkId)
                 .build();
@@ -62,7 +57,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 //        notificationDomainService.pushNewNotification(singleWorkWriterId);
 
         // 업데이트 마킹
-        singleWorkDomainService.markAsUpdated(singleWork);
+//        singleWorkDomainService.markAsUpdated(singleWork);
     }
 
     @Override
@@ -72,16 +67,18 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
             Pageable pageable
     ) {
         // 단일작품 조회
-        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
+//        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
 
         // 댓글 조회
-        Page<SingleWorkComment> singleWorkComments = singleWorkCommentDomainService.findComments(singleWork, pageable);
+//        Page<SingleWorkComment> singleWorkComments = singleWorkCommentDomainService.findComments(singleWork, pageable);
 
-        List<SingleWorkCommentDetailResponse> singleWorkCommentDetailResponsePage = singleWorkComments.stream()
-                .map(SingleWorkCommentDetailResponse::from)
-                .toList();
+//        List<SingleWorkCommentDetailResponse> singleWorkCommentDetailResponsePage = singleWorkComments.stream()
+//                .map(SingleWorkCommentDetailResponse::from)
+//                .toList();
+//
+//        return new PageImpl<>(singleWorkCommentDetailResponsePage, pageable, singleWorkComments.getTotalElements());
 
-        return new PageImpl<>(singleWorkCommentDetailResponsePage, pageable, singleWorkComments.getTotalElements());
+        return null;
     }
 
     @Override
@@ -93,7 +90,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
         // 작품 조회
         Long singleWorkId = singleWorkCommentUpdateRequest.getSingleWorkId();
-        singleWorkDomainService.findSingleWork(singleWorkId);
+//        singleWorkDomainService.findSingleWork(singleWorkId);
 
         // 댓글 조회
         Long commentId = singleWorkCommentUpdateRequest.getCommentId();
@@ -113,7 +110,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
         // 작품 조회
         Long singleWorkId = singleWorkCommentDeleteRequest.getSingleWorkId();
-        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
+//        SingleWork singleWork = singleWorkDomainService.findSingleWork(singleWorkId);
 
         // 댓글 조회
         Long commentId = singleWorkCommentDeleteRequest.getCommentId();
@@ -123,6 +120,6 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
         singleWorkCommentDomainService.deleteComment(singleWorkComment);
 
         // 업데이트 마킹
-        singleWorkDomainService.markAsUpdated(singleWork);
+//        singleWorkDomainService.markAsUpdated(singleWork);
     }
 }

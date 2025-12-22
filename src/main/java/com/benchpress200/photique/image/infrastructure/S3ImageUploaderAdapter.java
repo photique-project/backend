@@ -2,10 +2,10 @@ package com.benchpress200.photique.image.infrastructure;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.benchpress200.photique.image.domain.ImageUploaderPort;
 import com.benchpress200.photique.image.domain.exception.ImageUploaderFileWriteException;
 import com.benchpress200.photique.image.domain.exception.S3DeleteException;
 import com.benchpress200.photique.image.domain.exception.S3UploadException;
+import com.benchpress200.photique.image.domain.port.ImageUploaderPort;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -104,15 +104,9 @@ public class S3ImageUploaderAdapter implements ImageUploaderPort {
     }
 
     private void removeNewFile(File image) {
-        int count = 0;
-
-        // 로컬환경에 임시로 저장된 이미지 삭제에 실패하면 5번까지 재시도
-        while (!image.delete() && count < 5) {
-            count++;
+        if (!image.delete()) {
+            log.error("Image cleanup failed");
         }
-
-        // 5번의 재시도도 실패한다면 로깅
-        log.error("Image cleanup failed");
     }
 
     private String createS3ImageName(MultipartFile image) {

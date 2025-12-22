@@ -6,7 +6,7 @@ import com.benchpress200.photique.auth.application.command.AuthMailCommand;
 import com.benchpress200.photique.auth.application.command.AuthTokenRefreshCommand;
 import com.benchpress200.photique.auth.application.result.AuthMailCodeValidationResult;
 import com.benchpress200.photique.auth.application.result.AuthTokenResult;
-import com.benchpress200.photique.auth.presentation.constant.ResponseMessage;
+import com.benchpress200.photique.auth.presentation.constant.AuthResponseMessage;
 import com.benchpress200.photique.auth.presentation.request.AuthMailCodeValidationRequest;
 import com.benchpress200.photique.auth.presentation.request.AuthMailRequest;
 import com.benchpress200.photique.auth.presentation.response.AuthTokenRefreshResponse;
@@ -36,7 +36,7 @@ public class AuthCommandController {
         authCommandService.sendJoinAuthMail(authMailCommand);
         return ResponseHandler.handleResponse(
                 HttpStatus.CREATED,
-                ResponseMessage.AUTH_MAIL_SEND_COMPLETED
+                AuthResponseMessage.AUTH_MAIL_SEND_COMPLETED
         );
     }
 
@@ -48,7 +48,7 @@ public class AuthCommandController {
         authCommandService.sendPasswordAuthMail(authMailCommand);
         return ResponseHandler.handleResponse(
                 HttpStatus.CREATED,
-                ResponseMessage.AUTH_MAIL_SEND_COMPLETED
+                AuthResponseMessage.AUTH_MAIL_SEND_COMPLETED
         );
     }
 
@@ -62,7 +62,7 @@ public class AuthCommandController {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.OK,
-                ResponseMessage.AUTH_MAIL_CODE_VALIDATION_COMPLETED,
+                AuthResponseMessage.AUTH_MAIL_CODE_VALIDATION_COMPLETED,
                 authMailCodeValidationResult
         );
     }
@@ -77,7 +77,7 @@ public class AuthCommandController {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.OK,
-                ResponseMessage.AUTHENTICATION_TOKEN_REFRESH_COMPLETED,
+                AuthResponseMessage.AUTHENTICATION_TOKEN_REFRESH_COMPLETED,
                 authTokenRefreshResponse.getAccessTokenResponse(),
                 authTokenRefreshResponse.getCookie()
         );

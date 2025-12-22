@@ -1,45 +1,52 @@
 package com.benchpress200.photique.singlework.domain.entity;
 
+import com.benchpress200.photique.singlework.domain.entity.id.SingleWorkTagId;
 import com.benchpress200.photique.tag.domain.entity.Tag;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name = "singlework_tags")
 public class SingleWorkTag {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private SingleWorkTagId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("singleWorkId")
     @JoinColumn(name = "singlework_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private SingleWork singleWork;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("tagId")
     @JoinColumn(name = "tag_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Tag tag;
 
-    @Builder
     public SingleWorkTag(
             SingleWork singleWork,
             Tag tag
     ) {
         this.singleWork = singleWork;
         this.tag = tag;
+
+        this.id = new SingleWorkTagId(
+                singleWork.getId(),
+                tag.getId()
+        );
+    }
+
+    public static SingleWorkTag of(
+            SingleWork singleWork,
+            Tag tag
+    ) {
+        return new SingleWorkTag(singleWork, tag);
     }
 }

@@ -6,8 +6,4 @@ public class InvalidProfileImageException extends RuntimeException {
     public InvalidProfileImageException() {
         super(DEFAULT_MESSAGE);
     }
-
-    public InvalidProfileImageException(String message) {
-        super(message);
-    }
 }

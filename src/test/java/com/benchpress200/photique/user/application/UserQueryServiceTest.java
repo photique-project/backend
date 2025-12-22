@@ -2,7 +2,6 @@ package com.benchpress200.photique.user.application;
 
 import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
-import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.application.query.UserSearchQuery;
 import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
@@ -12,6 +11,7 @@ import com.benchpress200.photique.user.application.result.ValidateNicknameResult
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
+import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
 import com.benchpress200.photique.util.DummyGenerator;
 import java.util.ArrayList;

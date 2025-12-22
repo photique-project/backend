@@ -1,7 +1,7 @@
 package com.benchpress200.photique.exhibition.domain.dto;
 
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
-import com.benchpress200.photique.singlework.validation.annotation.Enum;
+import com.benchpress200.photique.singlework.presentation.validator.annotation.Enum;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -18,7 +18,7 @@ public class ExhibitionSearchRequest {
     private Long userId;
 
     public Target getTarget() {
-        return Target.fromValue(target);
+        return Target.from(target);
     }
 
     public List<String> getKeywords() {

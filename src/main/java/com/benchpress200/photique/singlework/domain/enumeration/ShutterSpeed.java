@@ -5,7 +5,6 @@ import lombok.Getter;
 
 @Getter
 public enum ShutterSpeed {
-    NONE("미입력"),
     S_1_8000("1/8000"),
     S_1_4000("1/4000"),
     S_1_2000("1/2000"),
@@ -37,11 +36,11 @@ public enum ShutterSpeed {
                 .anyMatch(shutterSpeed -> shutterSpeed.value.equals(input));
     }
 
-    public static ShutterSpeed fromValue(String input) {
+    public static ShutterSpeed from(String input) {
 
         return Arrays.stream(ShutterSpeed.values())
                 .filter(shutterSpeed -> shutterSpeed.value.equals(input))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid shutterSpeed value: " + input));
+                .orElse(null);
     }
 }

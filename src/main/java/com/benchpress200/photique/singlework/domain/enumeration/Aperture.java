@@ -5,7 +5,6 @@ import lombok.Getter;
 
 @Getter
 public enum Aperture {
-    NONE("미입력"),
     F_0_7("f/0.7"),
     F_0_8("f/0.8"),
     F_0_85("f/0.85"),
@@ -48,11 +47,10 @@ public enum Aperture {
                 .anyMatch(aperture -> aperture.value.equals(input));
     }
 
-    public static Aperture fromValue(String input) {
-
+    public static Aperture from(String input) {
         return Arrays.stream(Aperture.values())
                 .filter(aperture -> aperture.value.equals(input))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid aperture value: " + input));
+                .orElse(null);
     }
 }
