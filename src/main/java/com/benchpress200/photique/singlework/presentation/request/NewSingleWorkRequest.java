@@ -10,7 +10,6 @@ import com.benchpress200.photique.singlework.presentation.exception.InvalidImage
 import com.benchpress200.photique.singlework.presentation.validator.annotation.Enum;
 import com.benchpress200.photique.tag.presentation.validator.annotation.Tag;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
@@ -31,9 +30,6 @@ public class NewSingleWorkRequest {
     @NotBlank(message = "Description must not be null")
     @Size(min = 1, max = 500, message = "Invalid description")
     private String description;
-
-    @NotNull(message = "Id must not be null")
-    private Long writerId;
 
     @NotBlank(message = "Camera must not be null")
     @Size(min = 1, max = 30, message = "Invalid length of camera's name")
@@ -73,7 +69,6 @@ public class NewSingleWorkRequest {
         return NewSingleWorkCommand.builder()
                 .title(title)
                 .description(description)
-                .writerId(writerId)
                 .image(image)
                 .camera(camera)
                 .lens(lens)

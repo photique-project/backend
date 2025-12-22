@@ -60,7 +60,7 @@ public class UserCommandController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("#userId == authentication.principal.userId")
+    @PreAuthorize("authentication.principal.userId.equals(#userId)")
     public ResponseEntity<?> updateUserDetails(
             @PathVariable(PathVariableName.USER_ID) Long userId,
             @RequestPart(MultipartKey.USER) @Valid UpdateUserDetailsRequest updateUserDetailsRequest,
@@ -78,7 +78,7 @@ public class UserCommandController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("#userId == authentication.principal.userId")
+    @PreAuthorize("authentication.principal.userId.equals(#userId)")
     public ResponseEntity<?> updateUserPassword(
             @PathVariable(PathVariableName.USER_ID) Long userId,
             @RequestBody @Valid UpdateUserPasswordRequest updateUserPasswordRequest
@@ -109,7 +109,7 @@ public class UserCommandController {
             path = URL.USER_DATA,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("#userId == authentication.principal.userId")
+    @PreAuthorize("authentication.principal.userId.equals(#userId)")
     public ResponseEntity<?> withdraw(@PathVariable(PathVariableName.USER_ID) Long userId) {
         userCommandService.withdraw(userId);
 
