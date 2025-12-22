@@ -73,10 +73,10 @@ public class SingleWorkCommandService {
 
         // ES 저장
         Long singleWorkId = singleWork.getId();
-        singleWorkSearchEventPublisher.publishSingleWorkSearchCreationEventIfCommit(singleWorkId);
+        singleWorkSearchEventPublisher.publishCreateSingleWorkSearchEvent(singleWorkId);
 
         // 알림 생성
-        notificationEventPublisher.publishNewSingleWorkNotificationEventIfCommit(singleWorkId);
+        notificationEventPublisher.publishCreateSingleWorkNotificationEvent(singleWorkId);
     }
 
     public void updateSingleWorkDetails(UpdateSingleWorkCommand updateSingleWorkCommand) {
@@ -161,6 +161,11 @@ public class SingleWorkCommandService {
 
             // 업데이트 태그 등록
             attachTags(singleWork, tagNamesToUpdate);
+        }
+
+        // 단일작품 MySQL-ES 동기화 이벤트 발행
+        if (updateSingleWorkCommand.isUpdate()) {
+            singleWorkSearchEventPublisher.publishUpdateSingleWorkSearchEvent(singleWorkId);
         }
     }
 

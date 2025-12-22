@@ -120,6 +120,8 @@ public class UserCommandService {
                 user.updateProfileImage(newProfileImageUrl);
             }
         }
+
+        // TODO: 해당 유저가 게시한 단일 작품, 전시회 검색 데이터(ES) 비동기 업데이트 메시징 필요
     }
 
     // 여기서 @Transactional이 없다면, 유저 엔티티를 조회한 후 엔티티 매니저를 close하기 떄문에

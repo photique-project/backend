@@ -69,7 +69,7 @@ public class SingleWorkSearch {
         writerNickname = writer.getNickname();
         writerProfileImage = writer.getProfileImage();
     }
-    
+
     public static SingleWorkSearch of(
             SingleWork singleWork,
             List<String> tags
@@ -86,6 +86,28 @@ public class SingleWorkSearch {
                 .tags(tags)
                 .category(singleWork.getCategory().getValue())
                 .likeCount(0L)
+                .viewCount(singleWork.getViewCount())
+                .createdAt(singleWork.getCreatedAt())
+                .build();
+    }
+
+    public static SingleWorkSearch of(
+            SingleWork singleWork,
+            List<String> tags,
+            Long likeCount
+    ) {
+        User writer = singleWork.getWriter();
+
+        return SingleWorkSearch.builder()
+                .id(singleWork.getId())
+                .image(singleWork.getImage())
+                .writerId(writer.getId())
+                .writerNickname(writer.getNickname())
+                .writerProfileImage(writer.getProfileImage())
+                .title(singleWork.getTitle())
+                .tags(tags)
+                .category(singleWork.getCategory().getValue())
+                .likeCount(likeCount)
                 .viewCount(singleWork.getViewCount())
                 .createdAt(singleWork.getCreatedAt())
                 .build();

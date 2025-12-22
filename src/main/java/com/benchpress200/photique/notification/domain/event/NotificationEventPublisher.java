@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 public class NotificationEventPublisher {
     private final ApplicationEventPublisher publisher;
 
-    public void publishNewSingleWorkNotificationEventIfCommit(Long singleWorkId) {
-        NewSingleWorkNotificationCommitEvent event = new NewSingleWorkNotificationCommitEvent(singleWorkId);
+    public void publishCreateSingleWorkNotificationEvent(Long singleWorkId) {
+        CreateSingleWorkNotificationEvent event = new CreateSingleWorkNotificationEvent(singleWorkId);
         publisher.publishEvent(event);
     }
 }

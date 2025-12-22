@@ -38,7 +38,7 @@ public class NotificationEventListener {
     // TODO: 이후 메시지 큐 도입한다면 메시지 발행 & 실패 재시도 & 컨슈머 비동기 처리 고려
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleNewSingleWorkNotificationEventIfCommit(NewSingleWorkNotificationCommitEvent event) {
+    public void handleCreateSingleWorkNotificationEventIfCommit(CreateSingleWorkNotificationEvent event) {
         Long singleWorkId = event.getSingleWorkId();
         SingleWork singleWork = singleWorkRepository.findWithWriter(singleWorkId)
                 .orElseThrow(() -> new NotificationTargetSingleWorkNotFoundException(singleWorkId));
