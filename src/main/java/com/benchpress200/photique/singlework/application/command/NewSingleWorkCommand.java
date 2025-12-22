@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class NewSingleWorkCommand {
     private String title;
     private String description;
-    private Long writerId;
     private MultipartFile image;
     private String camera;
     private String lens;

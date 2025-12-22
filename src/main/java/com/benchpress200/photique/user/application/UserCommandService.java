@@ -3,6 +3,7 @@ package com.benchpress200.photique.user.application;
 import com.benchpress200.photique.auth.domain.entity.EmailAuthCode;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
+import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
 import com.benchpress200.photique.auth.domain.repository.EmailAuthCodeRepository;
 import com.benchpress200.photique.image.domain.event.ImageEventPublisher;
 import com.benchpress200.photique.image.domain.port.ImageUploaderPort;
@@ -31,6 +32,7 @@ public class UserCommandService {
     @Value("${cloud.aws.s3.path.profile}")
     private String profileImagePath;
 
+    private final AuthenticationUserProviderPort authenticationUserProviderPort;
     private final ImageEventPublisher imageEventPublisher;
     private final EmailAuthCodeRepository emailAuthCodeRepository;
     private final PasswordEncoderPort passwordEncoderPort;

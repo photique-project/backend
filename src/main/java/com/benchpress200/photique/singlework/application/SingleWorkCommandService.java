@@ -1,5 +1,6 @@
 package com.benchpress200.photique.singlework.application;
 
+import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
 import com.benchpress200.photique.image.domain.event.ImageEventPublisher;
 import com.benchpress200.photique.image.domain.port.ImageUploaderPort;
 import com.benchpress200.photique.notification.domain.event.NotificationEventPublisher;
@@ -31,6 +32,7 @@ public class SingleWorkCommandService {
     @Value("${cloud.aws.s3.path.single-work}")
     private String imagePath;
 
+    private final AuthenticationUserProviderPort authenticationUserProviderPort;
     private final ImageUploaderPort imageUploaderPort;
     private final UserRepository userRepository;
     private final SingleWorkRepository singleWorkRepository;
@@ -42,7 +44,7 @@ public class SingleWorkCommandService {
 
     public void postSingleWork(NewSingleWorkCommand newSingleWorkCommand) {
         // 작성자 조회
-        Long writerId = newSingleWorkCommand.getWriterId();
+        Long writerId = authenticationUserProviderPort.getCurrentUserId();
         User writer = userRepository.findById(writerId)
                 .orElseThrow(() -> new SingleWorkWriterNotFoundException(writerId));
 
