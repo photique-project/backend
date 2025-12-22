@@ -1,8 +1,8 @@
 package com.benchpress200.photique.user.presentation.request;
 
+import com.benchpress200.photique.image.presentation.validator.ProfileImageValidator;
 import com.benchpress200.photique.user.application.command.JoinCommand;
 import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
-import com.benchpress200.photique.user.presentation.validator.ProfileImageValidator;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -33,7 +33,7 @@ public class JoinRequest {
     public JoinCommand toCommand(
             MultipartFile profileImage
     ) {
-        // 이미지 파일 검증 로직
+        // 프로파일 이미지 파일 검증 로직
         if (!ProfileImageValidator.isValid(profileImage)) {
             throw new InvalidProfileImageException();
         }

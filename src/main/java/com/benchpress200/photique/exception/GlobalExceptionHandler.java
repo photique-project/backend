@@ -12,10 +12,14 @@ import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.image.domain.exception.ImageUploaderFileWriteException;
 import com.benchpress200.photique.image.domain.exception.S3DeleteException;
 import com.benchpress200.photique.image.domain.exception.S3UploadException;
-import com.benchpress200.photique.user.application.exception.DuplicatedFollowException;
-import com.benchpress200.photique.user.application.exception.DuplicatedUserException;
-import com.benchpress200.photique.user.application.exception.InvalidFollowRequestException;
-import com.benchpress200.photique.user.application.exception.UserNotFoundException;
+import com.benchpress200.photique.notification.domain.exception.NotificationTargetSingleWorkNotFoundException;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkWriterNotFoundException;
+import com.benchpress200.photique.singlework.presentation.exception.InvalidImageException;
+import com.benchpress200.photique.user.domain.exception.DuplicatedFollowException;
+import com.benchpress200.photique.user.domain.exception.DuplicatedUserException;
+import com.benchpress200.photique.user.domain.exception.InvalidFollowRequestException;
+import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
 import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -239,6 +243,51 @@ public class GlobalExceptionHandler {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.UNAUTHORIZED,
+                errorMessage
+        );
+    }
+
+    // 게시글 유효하지 않은 이미지 예외 처리 응답
+    @ExceptionHandler(InvalidImageException.class)
+    public ResponseEntity<?> handleInvalidImageException(InvalidImageException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
+                errorMessage
+        );
+    }
+
+    // 존재하지 않는 단일작품의 작가 예외 처리 응답
+    @ExceptionHandler(SingleWorkWriterNotFoundException.class)
+    public ResponseEntity<?> handleWriterNotFoundException(SingleWorkWriterNotFoundException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NOT_FOUND,
+                errorMessage
+        );
+    }
+
+    // 존재하지 않는 단일작품 예외 처리 응답
+    @ExceptionHandler(SingleWorkNotFoundException.class)
+    public ResponseEntity<?> handleSingleWorkNotFoundException(SingleWorkNotFoundException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NOT_FOUND,
+                errorMessage
+        );
+    }
+
+    // 존재하지 않는 알림 대상 단일작품 예외 처리 응답
+    @ExceptionHandler(NotificationTargetSingleWorkNotFoundException.class)
+    public ResponseEntity<?> handleNotificationTargetSingleWorkNotFoundException(
+            NotificationTargetSingleWorkNotFoundException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NOT_FOUND,
                 errorMessage
         );
     }

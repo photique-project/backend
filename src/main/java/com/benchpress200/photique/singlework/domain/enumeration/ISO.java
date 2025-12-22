@@ -5,7 +5,6 @@ import lombok.Getter;
 
 @Getter
 public enum ISO {
-    NONE("미입력"),
     ISO_50("50"),
     ISO_100("100"),
     ISO_200("200"),
@@ -31,11 +30,11 @@ public enum ISO {
                 .anyMatch(iso -> iso.value.equals(input));
     }
 
-    public static ISO fromValue(String input) {
+    public static ISO from(String input) {
 
         return Arrays.stream(ISO.values())
                 .filter(iso -> iso.value.equals(input))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid iso value: " + input));
+                .orElse(null);
     }
 }

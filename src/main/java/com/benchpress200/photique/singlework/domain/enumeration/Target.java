@@ -19,7 +19,7 @@ public enum Target {
                 .anyMatch(target -> target.value.equals(input));
     }
 
-    public static Target fromValue(String input) {
+    public static Target from(String input) {
         return Arrays.stream(Target.values())
                 .filter(target -> target.value.equals(input))
                 .findFirst()

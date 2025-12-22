@@ -1,7 +1,6 @@
 package com.benchpress200.photique.singlework.domain.dto;
 
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
-import com.benchpress200.photique.tag.domain.dto.TagResponse;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -26,7 +25,7 @@ public class SingleWorkDetailResponse {
     private String location;
     private String category;
     private LocalDate date;
-    private List<TagResponse> tags;
+    //    private List<TagResponse> tags;
     private String title;
     private String description;
     private Long likeCount;
@@ -63,9 +62,9 @@ public class SingleWorkDetailResponse {
             boolean isLiked,
             boolean isFollowing
     ) {
-        List<TagResponse> tagsResponse = tags.stream()
-                .map(TagResponse::from)
-                .toList();
+//        List<TagResponse> tagsResponse = tags.stream()
+//                .map(TagResponse::from)
+//                .toList();
 
         return SingleWorkDetailResponse.builder()
                 .id(singleWork.getId())
@@ -79,7 +78,7 @@ public class SingleWorkDetailResponse {
                 .location(singleWork.getLocation())
                 .category(singleWork.getCategory().getValue())
                 .date(singleWork.getDate())
-                .tags(tagsResponse)
+//                .tags(tagsResponse)
                 .title(singleWork.getTitle())
                 .description(singleWork.getDescription())
                 .likeCount(likeCount)

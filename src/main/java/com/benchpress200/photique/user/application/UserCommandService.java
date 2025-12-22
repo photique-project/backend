@@ -4,41 +4,39 @@ import com.benchpress200.photique.auth.domain.entity.EmailAuthCode;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
 import com.benchpress200.photique.auth.domain.repository.EmailAuthCodeRepository;
-import com.benchpress200.photique.image.domain.ImageUploaderPort;
-import com.benchpress200.photique.image.domain.event.ImageDeleteCommitEvent;
-import com.benchpress200.photique.image.domain.event.ImageUploadRollbackEvent;
+import com.benchpress200.photique.image.domain.event.ImageEventPublisher;
+import com.benchpress200.photique.image.domain.port.ImageUploaderPort;
 import com.benchpress200.photique.user.application.command.JoinCommand;
 import com.benchpress200.photique.user.application.command.ResetUserPasswordCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
 import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
-import com.benchpress200.photique.user.application.exception.DuplicatedUserException;
-import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
+import com.benchpress200.photique.user.domain.exception.DuplicatedUserException;
+import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.port.PasswordEncoderPort;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserCommandService {
     @Value("${cloud.aws.s3.path.profile}")
     private String profileImagePath;
 
-    private final ApplicationEventPublisher eventPublisher;
+    private final ImageEventPublisher imageEventPublisher;
     private final EmailAuthCodeRepository emailAuthCodeRepository;
     private final PasswordEncoderPort passwordEncoderPort;
     private final ImageUploaderPort imageUploaderPort;
     private final UserRepository userRepository;
 
-    @Transactional
     public void join(JoinCommand joinCommand) {
         // 이메일 인증 완료 여부 확인
         String email = joinCommand.getEmail();
@@ -65,7 +63,7 @@ public class UserCommandService {
             uploadedImageUrl = imageUploaderPort.upload(profileImage, profileImagePath);
 
             // 이미 이미지는 S3에 올라갔으니 롤백감지하면 S3 이미지 삭제처리하도록 이벤트 발행
-            eventPublisher.publishEvent(new ImageUploadRollbackEvent(uploadedImageUrl));
+            imageEventPublisher.publishImageDeleteEventIfRollback(uploadedImageUrl);
         }
 
         // 새 유저 엔티티 변환 및 저장
@@ -84,7 +82,6 @@ public class UserCommandService {
         }
     }
 
-    @Transactional
     public void updateUserDetails(UpdateUserDetailsCommand updateUserDetailsCommand) {
         // 유저 조회
         Long userId = updateUserDetailsCommand.getUserId();
@@ -110,14 +107,14 @@ public class UserCommandService {
 
         if (newProfileImage != null) { // null이면 프로필 이미지 유지
             String oldProfileImageUrl = user.getProfileImage();
-            eventPublisher.publishEvent(new ImageDeleteCommitEvent(oldProfileImageUrl));
+            imageEventPublisher.publishImageDeleteEventIfCommit(oldProfileImageUrl);
 
             if (newProfileImage.isEmpty()) { // 기본값으로 업데이트
                 user.updateProfileImage(null);
             } else {
                 String newProfileImageUrl = imageUploaderPort.upload(newProfileImage, profileImagePath);
                 // 이미 이미지는 S3에 올라갔으니 롤백감지하면 S3 이미지 삭제처리하도록 이벤트 발행
-                eventPublisher.publishEvent(new ImageUploadRollbackEvent(newProfileImageUrl));
+                imageEventPublisher.publishImageDeleteEventIfRollback(newProfileImageUrl);
                 user.updateProfileImage(newProfileImageUrl);
             }
         }
@@ -125,7 +122,6 @@ public class UserCommandService {
 
     // 여기서 @Transactional이 없다면, 유저 엔티티를 조회한 후 엔티티 매니저를 close하기 떄문에
     // 변경 감지가 동작하지 않고 update 쿼리가 나가지 않음
-    @Transactional
     public void updateUserPassword(UpdateUserPasswordCommand updateUserPasswordCommand) {
         // 유저 조회
         Long userId = updateUserPasswordCommand.getUserId();
@@ -138,7 +134,6 @@ public class UserCommandService {
         user.updatePassword(encodedPassword);
     }
 
-    @Transactional
     public void resetUserPassword(ResetUserPasswordCommand resetUserPasswordCommand) {
         // 유저 조회
         String email = resetUserPasswordCommand.getEmail();
@@ -160,7 +155,6 @@ public class UserCommandService {
         user.updatePassword(encodedPassword);
     }
 
-    @Transactional
     public void withdraw(Long userId) {
         // 유저 조회
         User user = userRepository.findById(userId)

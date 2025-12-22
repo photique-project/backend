@@ -4,7 +4,6 @@ import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPor
 import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import com.benchpress200.photique.exhibition.domain.repository.ExhibitionRepository;
 import com.benchpress200.photique.singlework.domain.repository.SingleWorkRepository;
-import com.benchpress200.photique.user.application.exception.UserNotFoundException;
 import com.benchpress200.photique.user.application.query.UserSearchQuery;
 import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
 import com.benchpress200.photique.user.application.result.MyDetailsResult;
@@ -12,6 +11,7 @@ import com.benchpress200.photique.user.application.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.result.UserSearchResult;
 import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
 import com.benchpress200.photique.user.domain.entity.User;
+import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
 import com.benchpress200.photique.user.domain.repository.FollowRepository;
 import com.benchpress200.photique.user.domain.repository.UserRepository;
 import com.benchpress200.photique.user.domain.vo.FolloweeIds;

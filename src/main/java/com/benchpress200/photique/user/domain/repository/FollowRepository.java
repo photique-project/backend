@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,6 +28,17 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     Optional<Follow> findByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
 
     boolean existsByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
+
+    @Query(
+            "SELECT f " +
+                    "FROM Follow f " +
+                    "JOIN FETCH f.follower " +
+                    "WHERE f.followee = :followee"
+    )
+    Slice<Follow> findByFollowee(
+            @Param("followee") User followee,
+            Pageable pageable
+    );
 
     @Query(
             "SELECT f.followee.id " +

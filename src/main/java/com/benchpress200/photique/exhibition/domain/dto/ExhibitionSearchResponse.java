@@ -1,11 +1,9 @@
 package com.benchpress200.photique.exhibition.domain.dto;
 
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
-import com.benchpress200.photique.tag.domain.dto.TagResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +21,7 @@ public class ExhibitionSearchResponse {
     private String cardColor;
     private Long likeCount;
     private Long viewCount;
-    private List<TagResponse> tags;
+    //    private List<TagResponse> tags;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate createdAt;
     @JsonProperty("isLiked")
@@ -73,8 +71,8 @@ public class ExhibitionSearchResponse {
                 .cardColor(exhibitionSearch.getCardColor())
                 .likeCount(exhibitionSearch.getLikeCount())
                 .viewCount(exhibitionSearch.getViewCount())
-                .tags(exhibitionSearch.getTags().stream()
-                        .map(TagResponse::from).toList())
+//                .tags(exhibitionSearch.getTags().stream()
+//                        .map(TagResponse::from).toList())
 
                 .createdAt(exhibitionSearch.getCreatedAt().toLocalDate())
                 .liked(isLiked)

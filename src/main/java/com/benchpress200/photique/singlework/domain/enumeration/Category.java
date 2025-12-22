@@ -18,7 +18,8 @@ public enum Category {
     STREET("street"),
     ABSTRACT("abstract"),
     EVENT("event"),
-    FASHION("fashion");
+    FASHION("fashion"),
+    ETC("etc.");
 
 
     private final String value;
@@ -32,11 +33,10 @@ public enum Category {
                 .anyMatch(category -> category.value.equals(input));
     }
 
-    public static Category fromValue(String input) {
-
+    public static Category from(String input) {
         return Arrays.stream(Category.values())
                 .filter(category -> category.value.equals(input))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid category value: " + input));
+                .orElse(null);
     }
 }

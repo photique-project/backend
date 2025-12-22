@@ -4,14 +4,12 @@ import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
-import com.benchpress200.photique.singlework.validation.annotation.Enum;
-import com.benchpress200.photique.tag.domain.dto.NewTagRequest;
+import com.benchpress200.photique.singlework.presentation.validator.annotation.Enum;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -51,7 +49,7 @@ public class SingleWorkUpdateRequest {
 
     @Size(max = 5, message = "Invalid Tags: the number of tag must be between 0 and 5")
     @Valid
-    private List<NewTagRequest> tags;
+//    private List<NewTagRequest> tags;
 
     @NotBlank(message = "Invalid title: title must not be blank")
     @Size(min = 1, max = 30, message = "Invalid title: 1 ~ 30 characters")
@@ -61,9 +59,9 @@ public class SingleWorkUpdateRequest {
     @Size(min = 1, max = 500, message = "Invalid description: 1 ~ 30 characters")
     private String description;
 
-    public List<String> getTags() {
-        return tags.stream().map(NewTagRequest::getName).toList();
-    }
+//    public List<String> getTags() {
+//        return tags.stream().map(NewTagRequest::getName).toList();
+//    }
 
     public void withSingleWorkId(Long id) {
         this.id = id;
