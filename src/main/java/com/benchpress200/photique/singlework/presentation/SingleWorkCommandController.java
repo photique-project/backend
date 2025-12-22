@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,6 +55,15 @@ public class SingleWorkCommandController {
     ) {
         UpdateSingleWorkCommand updateSingleWorkCommand = updateSingleWorkRequest.toCommand(singleWorkId);
         singleWorkCommandService.updateSingleWorkDetails(updateSingleWorkCommand);
+
+        return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping(URL.SINGLE_WORK_DATA)
+    public ResponseEntity<?> removeSingleWork(
+            @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId
+    ) {
+        singleWorkCommandService.removeSingleWork(singleWorkId);
         
         return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);
     }
