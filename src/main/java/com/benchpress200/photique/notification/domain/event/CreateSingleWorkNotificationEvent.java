@@ -1,10 +1,10 @@
-package com.benchpress200.photique.singlework.domain.event;
+package com.benchpress200.photique.notification.domain.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SingleWorkSearchCreationCommitEvent {
+public class CreateSingleWorkNotificationEvent {
     private Long singleWorkId;
 }

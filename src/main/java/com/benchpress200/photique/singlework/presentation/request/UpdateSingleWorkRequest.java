@@ -103,6 +103,11 @@ public class UpdateSingleWorkRequest {
             throw new InvalidFieldToUpdateException(INVALID_DATE);
         }
 
+        // 검색데이터(ES 저장) 업데이트 플래그
+        boolean update = updateTitle ||
+                updateCategory ||
+                updateTags;
+
         return UpdateSingleWorkCommand.builder()
                 .singleWorkId(singleWorkId)
                 .updateTitle(updateTitle)
@@ -127,6 +132,7 @@ public class UpdateSingleWorkRequest {
                 .date(date)
                 .updateTags(updateTags)
                 .tags(tags)
+                .update(update)
                 .build();
     }
 }

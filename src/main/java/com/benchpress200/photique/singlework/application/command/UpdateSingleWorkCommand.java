@@ -46,4 +46,6 @@ public class UpdateSingleWorkCommand {
 
     private boolean updateTags;
     private List<String> tags;
+
+    private boolean update;
 }

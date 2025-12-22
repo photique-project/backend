@@ -8,9 +8,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SingleWorkSearchEventPublisher {
     private final ApplicationEventPublisher publisher;
-    
-    public void publishSingleWorkSearchCreationEventIfCommit(Long singleWorkId) {
-        SingleWorkSearchCreationCommitEvent event = new SingleWorkSearchCreationCommitEvent(singleWorkId);
+
+    public void publishCreateSingleWorkSearchEvent(Long singleWorkId) {
+        CreateSingleWorkSearchEvent event = new CreateSingleWorkSearchEvent(singleWorkId);
+        publisher.publishEvent(event);
+    }
+
+    public void publishUpdateSingleWorkSearchEvent(Long singleWorkId) {
+        UpdateSingleWorkSearchEvent event = new UpdateSingleWorkSearchEvent(singleWorkId);
         publisher.publishEvent(event);
     }
 }
