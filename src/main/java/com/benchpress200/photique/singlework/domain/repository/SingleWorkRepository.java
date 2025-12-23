@@ -17,4 +17,13 @@ public interface SingleWorkRepository extends JpaRepository<SingleWork, Long>, S
                     "WHERE sw.id = :id"
     )
     Optional<SingleWork> findWithWriter(@Param("id") Long id);
+
+    @Query(
+            "SELECT sw " +
+                    "FROM SingleWork sw " +
+                    "JOIN FETCH sw.writer " +
+                    "WHERE sw.id = :id " +
+                    "AND sw.deletedAt IS NULL"
+    )
+    Optional<SingleWork> findActiveWithWriter(@Param("id") Long id);
 }

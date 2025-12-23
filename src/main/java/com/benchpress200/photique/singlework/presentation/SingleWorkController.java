@@ -35,16 +35,6 @@
 //public class SingleWorkController {
 //    private final SingleWorkService singleWorkService;
 //
-//    @GetMapping(URL.SINGLE_WORK_DATA)
-//    public ApiSuccessResponse<?> getSingleWorkDetails(
-//            @ModelAttribute SingleWorkDetailRequest singleWorkDetailRequest,
-//            @PathVariable Long singleworkId
-//    ) {
-//        singleWorkDetailRequest.withSingleWorkId(singleworkId);
-//        SingleWorkDetailResponse singleWorkDetailResponse = singleWorkService.getSingleWorkDetails(
-//                singleWorkDetailRequest);
-//        return ResponseHandler.handleSuccessResponse(singleWorkDetailResponse, HttpStatus.OK);
-//    }
 //
 //
 //    @GetMapping
@@ -57,24 +47,6 @@
 //                pageable
 //        );
 //        return ResponseHandler.handleSuccessResponse(singleWorkSearchPage, HttpStatus.OK);
-//    }
-//
-//    @PatchMapping(URL.SINGLE_WORK_DATA)
-//    public ApiSuccessResponse<?> updateSingleWorkDetails(
-//            @PathVariable Long singleworkId,
-//            @RequestBody @Valid SingleWorkUpdateRequest singleWorkUpdateRequest
-//    ) {
-//        singleWorkUpdateRequest.withSingleWorkId(singleworkId);
-//        singleWorkService.updateSingleWorkDetails(singleWorkUpdateRequest);
-//        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
-//    }
-//
-//    @DeleteMapping(URL.SINGLE_WORK_DATA)
-//    public ApiSuccessResponse<?> removeSingleWork(
-//            @PathVariable Long singleworkId
-//    ) {
-//        singleWorkService.removeSingleWork(singleworkId);
-//        return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
 //    }
 //
 //    @PostMapping(URL.SINGLE_WORK_DATA + URL.LIKE)
