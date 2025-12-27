@@ -1,7 +1,7 @@
 {
   "analysis": {
     "analyzer": {
-      "korean": {
+      "nori": {
         "type": "nori"
       }
     }

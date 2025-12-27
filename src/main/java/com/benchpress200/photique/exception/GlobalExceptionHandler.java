@@ -16,6 +16,9 @@ import com.benchpress200.photique.notification.domain.exception.NotificationTarg
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotOwnedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkWriterNotFoundException;
+import com.benchpress200.photique.singlework.infrastructure.exception.ElasticsearchMaxResultWindowException;
+import com.benchpress200.photique.singlework.infrastructure.exception.ElasticsearchSearchException;
+import com.benchpress200.photique.singlework.presentation.exception.InvalidFieldToSearch;
 import com.benchpress200.photique.singlework.presentation.exception.InvalidFieldToUpdateException;
 import com.benchpress200.photique.singlework.presentation.exception.InvalidImageException;
 import com.benchpress200.photique.user.domain.exception.DuplicatedFollowException;
@@ -305,6 +308,7 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // 단일작품 업데이트 요청 시, 단알직품의 주인이 아닌 유저가 요청했을 때 예외 처리 응답
     @ExceptionHandler(SingleWorkNotOwnedException.class)
     public ResponseEntity<?> handleSingleWorkNotOwnedException(SingleWorkNotOwnedException e) {
         String errorMessage = e.getMessage();
@@ -312,6 +316,41 @@ public class GlobalExceptionHandler {
         return ResponseHandler.handleResponse(
                 HttpStatus.FORBIDDEN,
                 errorMessage
+        );
+    }
+
+    // 단일작품 검색 요청 시, 유효하지 않은 필드 예외 처리 응답
+    @ExceptionHandler(InvalidFieldToSearch.class)
+    public ResponseEntity<?> handleInvalidFieldToSearchException(InvalidFieldToSearch e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
+                errorMessage
+        );
+    }
+
+    // ES 검색 API 동작 예외 처리 응답
+    @ExceptionHandler(ElasticsearchSearchException.class)
+    public ResponseEntity<?> handleElasticsearchSearchException(ElasticsearchSearchException e) {
+        String errorMessage = e.getMessage();
+        log.error(errorMessage);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                SERVER_ERROR_MESSAGE
+        );
+    }
+
+    // ES 검색 페이지 초과 예외 처리 응답
+    @ExceptionHandler(ElasticsearchMaxResultWindowException.class)
+    public ResponseEntity<?> handleElasticsearchMaxResultWindowException(ElasticsearchMaxResultWindowException e) {
+        String errorMessage = e.getMessage();
+        log.error(errorMessage);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                SERVER_ERROR_MESSAGE
         );
     }
 }

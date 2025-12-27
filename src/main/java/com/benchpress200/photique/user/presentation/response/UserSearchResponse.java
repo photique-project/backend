@@ -26,26 +26,16 @@ public class UserSearchResponse {
     private List<SearchedUser> users;
 
     public static UserSearchResponse from(UserSearchResult userSearchResult) {
-        int page = userSearchResult.getPage();
-        int size = userSearchResult.getSize();
-        long totalElements = userSearchResult.getTotalElements();
-        int totalPages = userSearchResult.getTotalPages();
-        boolean isFirst = userSearchResult.isFirst();
-        boolean isLast = userSearchResult.isLast();
-        boolean hasNext = userSearchResult.isHasNext();
-        boolean hasPrevious = userSearchResult.isHasPrevious();
-        List<SearchedUser> users = userSearchResult.getUsers();
-
         return UserSearchResponse.builder()
-                .page(page)
-                .size(size)
-                .totalElements(totalElements)
-                .totalPages(totalPages)
-                .isFirst(isFirst)
-                .isLast(isLast)
-                .hasNext(hasNext)
-                .hasPrevious(hasPrevious)
-                .users(users)
+                .page(userSearchResult.getPage())
+                .size(userSearchResult.getSize())
+                .totalElements(userSearchResult.getTotalElements())
+                .totalPages(userSearchResult.getTotalPages())
+                .isFirst(userSearchResult.isFirst())
+                .isLast(userSearchResult.isLast())
+                .hasNext(userSearchResult.isHasNext())
+                .hasPrevious(userSearchResult.isHasPrevious())
+                .users(userSearchResult.getUsers())
                 .build();
     }
 }

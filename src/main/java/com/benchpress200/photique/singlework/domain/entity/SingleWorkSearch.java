@@ -16,20 +16,34 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Mapping;
+import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Builder
-@Document(indexName = "singleworks", writeTypeHint = WriteTypeHint.FALSE)
+@Document(
+        indexName = "singleworks",
+        writeTypeHint = WriteTypeHint.FALSE
+)
+@Setting(settingPath = "elasticsearch/settings.json")
+@Mapping(mappingPath = "elasticsearch/singleworks-mappings.json")
 public class SingleWorkSearch {
-    // 필드타입
-    // Text => 분석 + 텍스트 전체 검색
-    // Keyword => 분석되지 않고 정확한 일치 검색
+    /*
+     * === 필드 타입 ===
+     * Text: 분석 + 텍스트 전체 검색
+     * Keyword: 분석되지 않고 정확한 일치 검색
+     */
+
+    private static final String DOCUMENT_ID_FIELD = "id";
 
     @Id
-    @Field(name = "id", type = FieldType.Long)
+    @Field(
+            name = DOCUMENT_ID_FIELD,
+            type = FieldType.Long
+    )
     private Long id;
 
     @Field(type = FieldType.Keyword, index = false)
@@ -48,9 +62,12 @@ public class SingleWorkSearch {
     private String title;
 
     @Field(type = FieldType.Text)
-    private List<String> tags;
+    private String description;
 
     @Field(type = FieldType.Text)
+    private List<String> tags;
+
+    @Field(type = FieldType.Keyword)
     private String category;
 
     @Field(type = FieldType.Long)
@@ -83,6 +100,7 @@ public class SingleWorkSearch {
                 .writerNickname(writer.getNickname())
                 .writerProfileImage(writer.getProfileImage())
                 .title(singleWork.getTitle())
+                .description(singleWork.getDescription())
                 .tags(tags)
                 .category(singleWork.getCategory().getValue())
                 .likeCount(0L)
@@ -105,6 +123,7 @@ public class SingleWorkSearch {
                 .writerNickname(writer.getNickname())
                 .writerProfileImage(writer.getProfileImage())
                 .title(singleWork.getTitle())
+                .description(singleWork.getDescription())
                 .tags(tags)
                 .category(singleWork.getCategory().getValue())
                 .likeCount(likeCount)

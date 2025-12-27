@@ -1,4 +1,4 @@
-package com.benchpress200.photique.user.domain.vo;
+package com.benchpress200.photique.user.application.vo;
 
 import com.benchpress200.photique.user.domain.entity.User;
 import java.util.ArrayList;

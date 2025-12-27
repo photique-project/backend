@@ -18,4 +18,16 @@ public record Writer(
                 .introduction(writer.getIntroduction())
                 .build();
     }
+
+    public static Writer of(
+            Long writerId,
+            String nickname,
+            String profileImage
+    ) {
+        return Writer.builder()
+                .id(writerId)
+                .nickname(nickname)
+                .profileImage(profileImage)
+                .build();
+    }
 }

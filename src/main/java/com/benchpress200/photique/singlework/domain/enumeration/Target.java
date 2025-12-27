@@ -23,6 +23,6 @@ public enum Target {
         return Arrays.stream(Target.values())
                 .filter(target -> target.value.equals(input))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid target value: " + input));
+                .orElse(WORK);
     }
 }
