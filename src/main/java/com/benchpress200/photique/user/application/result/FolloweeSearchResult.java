@@ -1,7 +1,7 @@
 package com.benchpress200.photique.user.application.result;
 
+import com.benchpress200.photique.user.application.vo.SearchedUsers;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.domain.vo.SearchedUsers;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;

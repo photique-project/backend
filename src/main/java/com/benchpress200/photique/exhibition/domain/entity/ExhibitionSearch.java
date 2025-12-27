@@ -16,13 +16,20 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Mapping;
+import org.springframework.data.elasticsearch.annotations.Setting;
 import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Builder
-@Document(indexName = "exhibitions", writeTypeHint = WriteTypeHint.FALSE)
+@Document(
+        indexName = "exhibitions",
+        writeTypeHint = WriteTypeHint.FALSE
+)
+@Setting(settingPath = "elasticsearch/settings.json")
+@Mapping(mappingPath = "elasticsearch/exhibitions-mappings.json")
 public class ExhibitionSearch {
     @Id
     @Field(name = "id", type = FieldType.Long)
@@ -58,9 +65,6 @@ public class ExhibitionSearch {
     @Field(type = FieldType.Long)
     private Long viewCount;
 
-    @Field(type = FieldType.Long)
-    private Long commentCount;
-
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
@@ -91,7 +95,6 @@ public class ExhibitionSearch {
                 .tags(tags)
                 .likeCount(0L)
                 .viewCount(0L)
-                .commentCount(0L)
                 .createdAt(exhibition.getCreatedAt())
                 .build();
     }

@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "id": {
+      "type": "long"
+    },
+    "writerId": {
+      "type": "long"
+    },
+    "writerNickname": {
+      "type": "keyword"
+    },
+    "writerProfileImage": {
+      "type": "keyword",
+      "index": false
+    },
+    "writerIntroduction": {
+      "type": "keyword",
+      "index": false
+    },
+    "cardColor": {
+      "type": "keyword",
+      "index": false
+    },
+    "title": {
+      "type": "text",
+      "analyzer": "nori"
+    },
+    "description": {
+      "type": "text",
+      "analyzer": "nori"
+    },
+    "tags": {
+      "type": "text",
+      "analyzer": "nori"
+    },
+    "likeCount": {
+      "type": "long"
+    },
+    "viewCount": {
+      "type": "long"
+    },
+    "createdAt": {
+      "type": "date",
+      "format": "yyyy-MM-dd'T'HH:mm:ss"
+    }
+  }
+}

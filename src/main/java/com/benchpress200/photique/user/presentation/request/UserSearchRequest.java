@@ -15,6 +15,8 @@ import org.springframework.data.domain.Sort;
 @Getter
 @Setter
 public class UserSearchRequest {
+    private static final String SORT_BY_COLUMN = "nickname";
+
     @NotNull(message = "Invalid keyword")
     @Pattern(regexp = "^[^\\s]{1,11}$", message = "Invalid keyword")
     private String keyword;
@@ -35,7 +37,7 @@ public class UserSearchRequest {
             size = 30;
         }
 
-        Sort sort = Sort.by("nickname").ascending();
+        Sort sort = Sort.by(SORT_BY_COLUMN).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return UserSearchQuery.builder()

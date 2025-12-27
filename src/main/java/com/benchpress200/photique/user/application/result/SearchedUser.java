@@ -6,8 +6,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
-@Builder
 @Getter
+@Builder
 public class SearchedUser {
     private Long id;
     private String profileImage;

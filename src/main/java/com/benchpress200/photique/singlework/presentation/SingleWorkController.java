@@ -37,17 +37,6 @@
 //
 //
 //
-//    @GetMapping
-//    public ApiSuccessResponse<?> searchSingleWorks(
-//            @ModelAttribute @Valid SingleWorkSearchRequest singleWorkSearchRequest,
-//            Pageable pageable
-//    ) {
-//        Page<SingleWorkSearchResponse> singleWorkSearchPage = singleWorkService.searchSingleWorks(
-//                singleWorkSearchRequest,
-//                pageable
-//        );
-//        return ResponseHandler.handleSuccessResponse(singleWorkSearchPage, HttpStatus.OK);
-//    }
 //
 //    @PostMapping(URL.SINGLE_WORK_DATA + URL.LIKE)
 //    public ApiSuccessResponse<?> incrementLike(
