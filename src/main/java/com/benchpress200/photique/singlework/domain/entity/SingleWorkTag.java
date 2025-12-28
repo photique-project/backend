@@ -20,13 +20,13 @@ public class SingleWorkTag {
     @EmbeddedId
     private SingleWorkTagId id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("singleWorkId")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "singlework_id", nullable = false)
     private SingleWork singleWork;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("tagId")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id", nullable = false)
     private Tag tag;
 

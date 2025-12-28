@@ -1,6 +1,6 @@
 package com.benchpress200.photique.singlework.application;
 
-import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
+import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.singlework.application.query.SearchSingleWorksQuery;
 import com.benchpress200.photique.singlework.application.result.SearchSingleWorkResult;
 import com.benchpress200.photique.singlework.application.result.SingleWorkDetailsResult;
@@ -18,7 +18,7 @@ import com.benchpress200.photique.singlework.domain.repository.SingleWorkReposit
 import com.benchpress200.photique.singlework.domain.repository.SingleWorkSearchRepository;
 import com.benchpress200.photique.singlework.domain.repository.SingleWorkTagRepository;
 import com.benchpress200.photique.tag.domain.entity.Tag;
-import com.benchpress200.photique.user.domain.repository.FollowRepository;
+import com.benchpress200.photique.user.infrastructure.persistence.jpa.FollowRepository;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;

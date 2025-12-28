@@ -1,17 +1,18 @@
 package com.benchpress200.photique.exception;
 
 
-import com.benchpress200.photique.auth.application.exception.EmailAlreadyInUseException;
-import com.benchpress200.photique.auth.application.exception.EmailNotFoundException;
-import com.benchpress200.photique.auth.application.exception.InvalidRefreshTokenException;
-import com.benchpress200.photique.auth.application.exception.VerificationCodeNotFoundException;
+import com.benchpress200.photique.auth.domain.exception.EmailAlreadyInUseException;
+import com.benchpress200.photique.auth.domain.exception.EmailNotFoundException;
+import com.benchpress200.photique.auth.domain.exception.InvalidRefreshTokenException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
-import com.benchpress200.photique.auth.exception.LoginRequestObjectReadException;
+import com.benchpress200.photique.auth.domain.exception.VerificationCodeNotFoundException;
+import com.benchpress200.photique.auth.infrastructure.exception.LoginRequestObjectReadException;
+import com.benchpress200.photique.auth.infrastructure.exception.MailSendException;
 import com.benchpress200.photique.common.response.ResponseHandler;
-import com.benchpress200.photique.image.domain.exception.ImageUploaderFileWriteException;
-import com.benchpress200.photique.image.domain.exception.S3DeleteException;
-import com.benchpress200.photique.image.domain.exception.S3UploadException;
+import com.benchpress200.photique.image.infrastructure.exception.ImageUploaderFileWriteException;
+import com.benchpress200.photique.image.infrastructure.exception.S3DeleteException;
+import com.benchpress200.photique.image.infrastructure.exception.S3UploadException;
 import com.benchpress200.photique.notification.domain.exception.NotificationTargetSingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotOwnedException;
@@ -25,7 +26,7 @@ import com.benchpress200.photique.user.domain.exception.DuplicatedFollowExceptio
 import com.benchpress200.photique.user.domain.exception.DuplicatedUserException;
 import com.benchpress200.photique.user.domain.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
-import com.benchpress200.photique.user.presentation.exception.InvalidProfileImageException;
+import com.benchpress200.photique.user.presentation.command.exception.InvalidProfileImageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -345,6 +346,18 @@ public class GlobalExceptionHandler {
     // ES 검색 페이지 초과 예외 처리 응답
     @ExceptionHandler(ElasticsearchMaxResultWindowException.class)
     public ResponseEntity<?> handleElasticsearchMaxResultWindowException(ElasticsearchMaxResultWindowException e) {
+        String errorMessage = e.getMessage();
+        log.error(errorMessage);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                SERVER_ERROR_MESSAGE
+        );
+    }
+
+    // 메일 전송 예외 처리 응답
+    @ExceptionHandler(MailSendException.class)
+    public ResponseEntity<?> handleMailSendException(MailSendException e) {
         String errorMessage = e.getMessage();
         log.error(errorMessage);
 

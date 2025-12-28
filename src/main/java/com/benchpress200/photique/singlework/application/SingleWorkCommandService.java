@@ -1,8 +1,9 @@
 package com.benchpress200.photique.singlework.application;
 
-import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
-import com.benchpress200.photique.image.domain.event.ImageEventPublisher;
-import com.benchpress200.photique.image.domain.port.ImageUploaderPort;
+import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.image.domain.event.UploadImageEvent;
+import com.benchpress200.photique.image.domain.port.event.ImageEventPublishPort;
+import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
 import com.benchpress200.photique.notification.domain.event.NotificationEventPublisher;
 import com.benchpress200.photique.singlework.application.command.CreateSingleWorkCommand;
 import com.benchpress200.photique.singlework.application.command.UpdateSingleWorkCommand;
@@ -18,12 +19,13 @@ import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotOwned
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkWriterNotFoundException;
 import com.benchpress200.photique.singlework.domain.repository.SingleWorkRepository;
 import com.benchpress200.photique.singlework.domain.repository.SingleWorkTagRepository;
+import com.benchpress200.photique.tag.application.query.support.AbsentTags;
+import com.benchpress200.photique.tag.application.query.support.ExistingTags;
 import com.benchpress200.photique.tag.domain.entity.Tag;
-import com.benchpress200.photique.tag.domain.repository.TagRepository;
-import com.benchpress200.photique.tag.domain.vo.AbsentTags;
-import com.benchpress200.photique.tag.domain.vo.ExistingTags;
+import com.benchpress200.photique.tag.domain.port.TagCommandPort;
+import com.benchpress200.photique.tag.domain.port.TagQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.domain.repository.UserRepository;
+import com.benchpress200.photique.user.infrastructure.persistence.jpa.UserRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
@@ -45,9 +47,11 @@ public class SingleWorkCommandService {
     private final UserRepository userRepository;
     private final SingleWorkRepository singleWorkRepository;
     private final SingleWorkTagRepository singleWorkTagRepository;
-    private final TagRepository tagRepository;
 
-    private final ImageEventPublisher imageEventPublisher;
+    private final TagCommandPort tagCommandPort;
+    private final TagQueryPort tagQueryPort;
+
+    private final ImageEventPublishPort imageEventPublishPort;
     private final SingleWorkSearchEventPublisher singleWorkSearchEventPublisher;
 
     public void postSingleWork(CreateSingleWorkCommand createSingleWorkCommand) {
@@ -61,7 +65,8 @@ public class SingleWorkCommandService {
         String imageUrl = imageUploaderPort.upload(image, imagePath);
 
         // 트랜잭션 롤백 시, S3 업로드한 이미지 삭제 이벤트 수행
-        imageEventPublisher.publishImageDeleteEventIfRollback(imageUrl);
+        UploadImageEvent uploadImageEvent = UploadImageEvent.of(imageUrl);
+        imageEventPublishPort.publishUploadImageEvent(uploadImageEvent);
 
         // 단일작품 엔티티 저장
         SingleWork singleWork = createSingleWorkCommand.toEntity(writer, imageUrl);
@@ -188,12 +193,12 @@ public class SingleWorkCommandService {
     }
 
     private void attachTags(SingleWork singleWork, List<String> tagNames) {
-        List<Tag> tags = tagRepository.findByNameIn(tagNames);
+        List<Tag> tags = tagQueryPort.findByNameIn(tagNames);
         ExistingTags existingTags = ExistingTags.of(tags); // 존재하는 태그 일급 컬렉션
 
         List<String> absentTagNames = existingTags.findAbsent(tagNames); // 존재하지 않는 태그 이름 추출
         AbsentTags absentTags = AbsentTags.of(absentTagNames); // 존재하지 않는 태그 일급 컬렉션
-        List<Tag> savedTags = tagRepository.saveAll(absentTags.values()); // 영속화
+        List<Tag> savedTags = tagCommandPort.saveAll(absentTags.values()); // 영속화
 
         existingTags = existingTags.merge(savedTags); // 기존에 조회했던 태그와 병합
         List<Tag> allTags = existingTags.values();

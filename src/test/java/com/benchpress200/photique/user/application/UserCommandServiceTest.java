@@ -5,17 +5,18 @@ import com.benchpress200.photique.auth.domain.entity.EmailAuthCode;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
 import com.benchpress200.photique.auth.domain.repository.EmailAuthCodeRepository;
-import com.benchpress200.photique.image.domain.port.ImageUploaderPort;
-import com.benchpress200.photique.user.application.command.JoinCommand;
-import com.benchpress200.photique.user.application.command.ResetUserPasswordCommand;
-import com.benchpress200.photique.user.application.command.UpdateUserDetailsCommand;
-import com.benchpress200.photique.user.application.command.UpdateUserPasswordCommand;
+import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
+import com.benchpress200.photique.user.application.command.model.JoinCommand;
+import com.benchpress200.photique.user.application.command.model.UserDetailsUpdateCommand;
+import com.benchpress200.photique.user.application.command.model.UserPasswordResetCommand;
+import com.benchpress200.photique.user.application.command.model.UserPasswordUpdateCommand;
+import com.benchpress200.photique.user.application.command.service.UserCommandService;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
-import com.benchpress200.photique.user.domain.port.PasswordEncoderPort;
-import com.benchpress200.photique.user.domain.repository.UserRepository;
+import com.benchpress200.photique.user.domain.port.security.PasswordEncoderPort;
+import com.benchpress200.photique.user.infrastructure.persistence.jpa.UserRepository;
 import com.benchpress200.photique.util.DummyGenerator;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
@@ -236,14 +237,14 @@ public class UserCommandServiceTest {
         String nicknameToUpdate = DummyGenerator.generateNickname();
         String introductionToUpdate = DummyGenerator.generateIntroduction();
 
-        UpdateUserDetailsCommand updateUserDetailsCommand = UpdateUserDetailsCommand.builder()
+        UserDetailsUpdateCommand userDetailsUpdateCommand = UserDetailsUpdateCommand.builder()
                 .userId(savedUserId)
                 .nickname(nicknameToUpdate)
                 .introduction(introductionToUpdate)
                 .build();
 
         // WHEN
-        userCommandService.updateUserDetails(updateUserDetailsCommand);
+        userCommandService.updateUserDetails(userDetailsUpdateCommand);
         Optional<User> updatedUser = userRepository.findById(savedUserId);
 
         // THEN
@@ -279,14 +280,14 @@ public class UserCommandServiceTest {
         String nicknameToUpdate = DummyGenerator.generateNickname();
         String introductionToUpdate = DummyGenerator.generateIntroduction();
 
-        UpdateUserDetailsCommand updateUserDetailsCommand = UpdateUserDetailsCommand.builder()
+        UserDetailsUpdateCommand userDetailsUpdateCommand = UserDetailsUpdateCommand.builder()
                 .userId(-1 * savedUserId) // 없는 id 가진 유저 데이터 조회하도록
                 .nickname(nicknameToUpdate)
                 .introduction(introductionToUpdate)
                 .build();
 
         // WHEN and THEN
-        Assertions.assertThatThrownBy(() -> userCommandService.updateUserDetails(updateUserDetailsCommand))
+        Assertions.assertThatThrownBy(() -> userCommandService.updateUserDetails(userDetailsUpdateCommand))
                 .isInstanceOf(UserNotFoundException.class);
         Optional<User> updatedUser = userRepository.findById(savedUserId);
 
@@ -324,7 +325,7 @@ public class UserCommandServiceTest {
         String introductionToUpdate = DummyGenerator.generateIntroduction();
         MockMultipartFile profileImageToUpdate = DummyGenerator.generateMockProfileImage(MULTIPART_KEY_PROFILE_IMAGE);
 
-        UpdateUserDetailsCommand updateUserDetailsCommand = UpdateUserDetailsCommand.builder()
+        UserDetailsUpdateCommand userDetailsUpdateCommand = UserDetailsUpdateCommand.builder()
                 .userId(savedUserId)
                 .nickname(nicknameToUpdate)
                 .introduction(introductionToUpdate)
@@ -335,7 +336,7 @@ public class UserCommandServiceTest {
                 .upload(Mockito.any(), Mockito.any());
 
         // WHEN and THEN
-        Assertions.assertThatThrownBy(() -> userCommandService.updateUserDetails(updateUserDetailsCommand))
+        Assertions.assertThatThrownBy(() -> userCommandService.updateUserDetails(userDetailsUpdateCommand))
                 .isInstanceOf(RuntimeException.class);
         Optional<User> updatedUser = userRepository.findById(savedUserId);
 
@@ -372,13 +373,13 @@ public class UserCommandServiceTest {
 
         String passwordToUpdate = DummyGenerator.generatePassword();
 
-        UpdateUserPasswordCommand updateUserPasswordCommand = UpdateUserPasswordCommand.builder()
+        UserPasswordUpdateCommand userPasswordUpdateCommand = UserPasswordUpdateCommand.builder()
                 .userId(savedUserId)
                 .password(passwordToUpdate)
                 .build();
 
         // WHEN
-        userCommandService.updateUserPassword(updateUserPasswordCommand);
+        userCommandService.updateUserPassword(userPasswordUpdateCommand);
         Optional<User> updatedUser = userRepository.findById(savedUserId);
 
         // THEN
@@ -411,13 +412,13 @@ public class UserCommandServiceTest {
 
         String passwordToUpdate = DummyGenerator.generatePassword();
 
-        UpdateUserPasswordCommand updateUserPasswordCommand = UpdateUserPasswordCommand.builder()
+        UserPasswordUpdateCommand userPasswordUpdateCommand = UserPasswordUpdateCommand.builder()
                 .userId(-1 * savedUserId) // 없는 id 가진 유저 데이터 조회하도록
                 .password(passwordToUpdate)
                 .build();
 
         // WHEN and THEN
-        Assertions.assertThatThrownBy(() -> userCommandService.updateUserPassword(updateUserPasswordCommand))
+        Assertions.assertThatThrownBy(() -> userCommandService.updateUserPassword(userPasswordUpdateCommand))
                 .isInstanceOf(UserNotFoundException.class);
         Optional<User> updatedUser = userRepository.findById(savedUserId);
 
@@ -450,7 +451,7 @@ public class UserCommandServiceTest {
 
         String passwordToUpdate = DummyGenerator.generatePassword();
 
-        ResetUserPasswordCommand resetUserPasswordCommand = ResetUserPasswordCommand.builder()
+        UserPasswordResetCommand userPasswordResetCommand = UserPasswordResetCommand.builder()
                 .email(email)
                 .password(passwordToUpdate)
                 .build();
@@ -462,7 +463,7 @@ public class UserCommandServiceTest {
         Mockito.doReturn(Optional.of(emailAuthCode)).when(emailAuthCodeRepository).findById(Mockito.any());
 
         // WHEN
-        userCommandService.resetUserPassword(resetUserPasswordCommand);
+        userCommandService.resetUserPassword(userPasswordResetCommand);
         Optional<User> updatedUser = userRepository.findByEmail(email);
 
         // THEN
@@ -495,13 +496,13 @@ public class UserCommandServiceTest {
 
         String passwordToUpdate = DummyGenerator.generatePassword();
 
-        ResetUserPasswordCommand resetUserPasswordCommand = ResetUserPasswordCommand.builder()
+        UserPasswordResetCommand userPasswordResetCommand = UserPasswordResetCommand.builder()
                 .email(email.concat(DUMMY_STRING))
                 .password(passwordToUpdate)
                 .build();
 
         // WHEN and THEN
-        Assertions.assertThatThrownBy(() -> userCommandService.resetUserPassword(resetUserPasswordCommand))
+        Assertions.assertThatThrownBy(() -> userCommandService.resetUserPassword(userPasswordResetCommand))
                 .isInstanceOf(UserNotFoundException.class);
         Optional<User> updatedUser = userRepository.findByEmail(email);
 

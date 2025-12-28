@@ -8,7 +8,7 @@ import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.repository.SingleWorkRepository;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.domain.repository.FollowRepository;
+import com.benchpress200.photique.user.infrastructure.persistence.jpa.FollowRepository;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;

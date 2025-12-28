@@ -5,7 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.common.constant.URL;
-import com.benchpress200.photique.user.application.FollowCommandService;
+import com.benchpress200.photique.user.application.command.service.FollowCommandService;
 import com.benchpress200.photique.util.DummyGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

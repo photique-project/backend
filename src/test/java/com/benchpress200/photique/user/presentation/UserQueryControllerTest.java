@@ -5,11 +5,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.common.constant.URL;
-import com.benchpress200.photique.user.application.UserQueryService;
-import com.benchpress200.photique.user.application.result.MyDetailsResult;
-import com.benchpress200.photique.user.application.result.UserDetailsResult;
-import com.benchpress200.photique.user.application.result.UserSearchResult;
-import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
+import com.benchpress200.photique.user.application.query.result.MyDetailsResult;
+import com.benchpress200.photique.user.application.query.result.NicknameValidateResult;
+import com.benchpress200.photique.user.application.query.result.UserDetailsResult;
+import com.benchpress200.photique.user.application.query.result.UserSearchResult;
+import com.benchpress200.photique.user.application.query.service.UserQueryService;
 import com.benchpress200.photique.util.DummyGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ public class UserQueryControllerTest {
         // GIVEN
         String validNickname = DummyGenerator.generateNickname();
         boolean result = false;
-        ValidateNicknameResult validateNicknameResult = DummyGenerator.generateValidateNicknameResult(result);
+        NicknameValidateResult validateNicknameResult = DummyGenerator.generateValidateNicknameResult(result);
         Mockito.doReturn(validateNicknameResult).when(userQueryService).validateNickname(Mockito.any());
 
         RequestBuilder request = MockMvcRequestBuilders
@@ -144,7 +144,7 @@ public class UserQueryControllerTest {
         String page = DummyGenerator.generatePage();
         String size = DummyGenerator.generateSize();
         UserSearchResult userSearchResult = DummyGenerator.generateUserSearchResult();
-        Mockito.doReturn(userSearchResult).when(userQueryService).searchUsers(Mockito.any());
+        Mockito.doReturn(userSearchResult).when(userQueryService).searchUser(Mockito.any());
 
         RequestBuilder request = MockMvcRequestBuilders
                 .get(URL.BASE_URL + URL.USER_DOMAIN)

@@ -1,7 +1,7 @@
 package com.benchpress200.photique.user.performance;
 
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.domain.repository.UserRepository;
+import com.benchpress200.photique.user.infrastructure.persistence.jpa.UserRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

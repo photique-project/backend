@@ -1,18 +1,19 @@
 package com.benchpress200.photique.user.application;
 
 import com.benchpress200.photique.TestContainerConfiguration;
-import com.benchpress200.photique.auth.domain.port.AuthenticationUserProviderPort;
-import com.benchpress200.photique.user.application.query.UserSearchQuery;
-import com.benchpress200.photique.user.application.query.ValidateNicknameQuery;
-import com.benchpress200.photique.user.application.result.MyDetailsResult;
-import com.benchpress200.photique.user.application.result.UserDetailsResult;
-import com.benchpress200.photique.user.application.result.UserSearchResult;
-import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
+import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.user.application.query.model.NicknameValidateQuery;
+import com.benchpress200.photique.user.application.query.model.UserSearchQuery;
+import com.benchpress200.photique.user.application.query.result.MyDetailsResult;
+import com.benchpress200.photique.user.application.query.result.NicknameValidateResult;
+import com.benchpress200.photique.user.application.query.result.UserDetailsResult;
+import com.benchpress200.photique.user.application.query.result.UserSearchResult;
+import com.benchpress200.photique.user.application.query.service.UserQueryService;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
-import com.benchpress200.photique.user.domain.repository.UserRepository;
+import com.benchpress200.photique.user.infrastructure.persistence.jpa.UserRepository;
 import com.benchpress200.photique.util.DummyGenerator;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,12 +55,12 @@ public class UserQueryServiceTest {
     void validateNickname_테스트_중복되지_않은_닉네임() {
         // GIVEN
         String validNickname = DummyGenerator.generateNickname();
-        ValidateNicknameQuery validateNicknameQuery = ValidateNicknameQuery.builder()
+        NicknameValidateQuery nicknameValidateQuery = NicknameValidateQuery.builder()
                 .nickname(validNickname)
                 .build();
 
         // WHEN
-        ValidateNicknameResult validateNicknameResult = userQueryService.validateNickname(validateNicknameQuery);
+        NicknameValidateResult validateNicknameResult = userQueryService.validateNickname(nicknameValidateQuery);
         boolean result = validateNicknameResult.isDuplicated();
 
         // THEN
@@ -84,12 +85,12 @@ public class UserQueryServiceTest {
 
         userRepository.save(user);
 
-        ValidateNicknameQuery validateNicknameQuery = ValidateNicknameQuery.builder()
+        NicknameValidateQuery nicknameValidateQuery = NicknameValidateQuery.builder()
                 .nickname(nickname)
                 .build();
 
         // WHEN
-        ValidateNicknameResult validateNicknameResult = userQueryService.validateNickname(validateNicknameQuery);
+        NicknameValidateResult validateNicknameResult = userQueryService.validateNickname(nicknameValidateQuery);
         boolean result = validateNicknameResult.isDuplicated();
 
         // THEN
@@ -226,13 +227,13 @@ public class UserQueryServiceTest {
 
         Mockito.doReturn(userId).when(authenticationUserProviderPort).getCurrentUserId();
 
-        UserSearchQuery searchUsersQuery = UserSearchQuery.builder()
+        UserSearchQuery userSearchQuery = UserSearchQuery.builder()
                 .keyword(keyword)
                 .pageable(pageable)
                 .build();
 
         // WHEN
-        UserSearchResult userSearchResult = userQueryService.searchUsers(searchUsersQuery);
+        UserSearchResult userSearchResult = userQueryService.searchUser(userSearchQuery);
 
         // THEN
         Assertions.assertThat(userSearchResult.getPage()).isEqualTo(page);

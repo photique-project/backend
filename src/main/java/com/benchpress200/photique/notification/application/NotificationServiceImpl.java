@@ -4,7 +4,6 @@ import com.benchpress200.photique.notification.domain.NotificationDomainService;
 import com.benchpress200.photique.notification.domain.dto.CountUnreadResponse;
 import com.benchpress200.photique.notification.domain.dto.NotificationResponse;
 import com.benchpress200.photique.notification.domain.entity.Notification;
-import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -17,8 +16,6 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
-
-    private final UserDomainService userDomainService;
     private final NotificationDomainService notificationDomainService;
 
     @Override
@@ -27,7 +24,7 @@ public class NotificationServiceImpl implements NotificationService {
             Pageable pageable
     ) {
         // 유저 조회
-        User user = userDomainService.findUser(userId);
+        User user = null;
 
         // 알림 리스트 조회
         Page<Notification> notificationPage = notificationDomainService.findNotifications(user, pageable);
@@ -46,7 +43,7 @@ public class NotificationServiceImpl implements NotificationService {
             Long notificationId
     ) {
         // 유저 조회
-        userDomainService.findUser(userId);
+//        userDomainService.findUser(userId);
 
         // 노티 조회
         Notification notification = notificationDomainService.findNotification(notificationId);
@@ -59,7 +56,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void markAllAsRead(Long userId) {
         // 유저 조회
-        User user = userDomainService.findUser(userId);
+        User user = null;
 
         // 노티 조회
         List<Notification> notifications = notificationDomainService.findNotifications(user);
@@ -72,7 +69,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void deleteNotification(Long userId, Long notificationId) {
         // 유저 조회
-        User user = userDomainService.findUser(userId);
+        User user = null;
 
         // 노티 조회
         Notification notification = notificationDomainService.findNotification(notificationId);
@@ -85,7 +82,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public CountUnreadResponse countUnread(Long userId) {
         // 유저 조회
-        User user = userDomainService.findUser(userId);
+        User user = null;
 
         // 카운트횟수 반환해서 DTO만들기
         long count = notificationDomainService.countUnread(user);

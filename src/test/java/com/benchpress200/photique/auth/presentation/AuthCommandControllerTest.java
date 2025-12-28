@@ -3,12 +3,12 @@ package com.benchpress200.photique.auth.presentation;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.TestContainerConfiguration;
-import com.benchpress200.photique.auth.application.AuthCommandService;
-import com.benchpress200.photique.auth.application.command.AuthTokenRefreshCommand;
-import com.benchpress200.photique.auth.application.result.AuthMailCodeValidationResult;
-import com.benchpress200.photique.auth.application.result.AuthTokenResult;
-import com.benchpress200.photique.auth.domain.port.AuthenticationTokenManagerPort;
-import com.benchpress200.photique.auth.domain.result.AuthenticationTokens;
+import com.benchpress200.photique.auth.application.command.model.AuthTokenRefreshCommand;
+import com.benchpress200.photique.auth.application.command.result.AuthMailCodeValidateResult;
+import com.benchpress200.photique.auth.application.command.result.AuthTokenResult;
+import com.benchpress200.photique.auth.application.command.service.AuthCommandService;
+import com.benchpress200.photique.auth.domain.port.security.AuthenticationTokenManagerPort;
+import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.util.DummyGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -143,7 +143,7 @@ public class AuthCommandControllerTest {
         );
 
         boolean success = true;
-        AuthMailCodeValidationResult authMailCodeValidationResult = AuthMailCodeValidationResult.of(success);
+        AuthMailCodeValidateResult authMailCodeValidationResult = AuthMailCodeValidateResult.of(success);
 
         Mockito
                 .when(authCommandService.validateAuthMailCode(Mockito.any()))
@@ -194,7 +194,7 @@ public class AuthCommandControllerTest {
         );
 
         boolean success = true;
-        AuthMailCodeValidationResult authMailCodeValidationResult = AuthMailCodeValidationResult.of(success);
+        AuthMailCodeValidateResult authMailCodeValidationResult = AuthMailCodeValidateResult.of(success);
 
         Mockito
                 .when(authCommandService.validateAuthMailCode(Mockito.any()))

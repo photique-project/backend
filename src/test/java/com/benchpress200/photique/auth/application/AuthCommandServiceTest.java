@@ -1,23 +1,24 @@
 package com.benchpress200.photique.auth.application;
 
 import com.benchpress200.photique.TestContainerConfiguration;
-import com.benchpress200.photique.auth.application.command.AuthMailCodeValidationCommand;
-import com.benchpress200.photique.auth.application.command.AuthMailCommand;
-import com.benchpress200.photique.auth.application.command.AuthTokenRefreshCommand;
-import com.benchpress200.photique.auth.application.exception.EmailAlreadyInUseException;
-import com.benchpress200.photique.auth.application.exception.EmailNotFoundException;
-import com.benchpress200.photique.auth.application.exception.InvalidRefreshTokenException;
-import com.benchpress200.photique.auth.application.exception.VerificationCodeNotFoundException;
-import com.benchpress200.photique.auth.application.result.AuthMailCodeValidationResult;
-import com.benchpress200.photique.auth.application.result.AuthTokenResult;
-import com.benchpress200.photique.auth.domain.entity.EmailAuthCode;
+import com.benchpress200.photique.auth.application.command.model.AuthMailCodeValidateCommand;
+import com.benchpress200.photique.auth.application.command.model.AuthMailCommand;
+import com.benchpress200.photique.auth.application.command.model.AuthTokenRefreshCommand;
+import com.benchpress200.photique.auth.application.command.result.AuthMailCodeValidateResult;
+import com.benchpress200.photique.auth.application.command.result.AuthTokenResult;
+import com.benchpress200.photique.auth.application.command.service.AuthCommandService;
+import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
 import com.benchpress200.photique.auth.domain.enumeration.TokenValidationStatus;
-import com.benchpress200.photique.auth.domain.port.AuthMailPort;
-import com.benchpress200.photique.auth.domain.port.AuthenticationTokenManagerPort;
-import com.benchpress200.photique.auth.domain.repository.EmailAuthCodeRepository;
-import com.benchpress200.photique.auth.domain.result.AuthenticationTokens;
-import com.benchpress200.photique.auth.domain.result.TokenValidationResult;
-import com.benchpress200.photique.user.domain.repository.UserRepository;
+import com.benchpress200.photique.auth.domain.exception.EmailAlreadyInUseException;
+import com.benchpress200.photique.auth.domain.exception.EmailNotFoundException;
+import com.benchpress200.photique.auth.domain.exception.InvalidRefreshTokenException;
+import com.benchpress200.photique.auth.domain.exception.VerificationCodeNotFoundException;
+import com.benchpress200.photique.auth.domain.port.mail.MailSenderPort;
+import com.benchpress200.photique.auth.domain.port.persistence.AuthMailCodeCommandPort;
+import com.benchpress200.photique.auth.domain.port.security.AuthenticationTokenManagerPort;
+import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
+import com.benchpress200.photique.auth.domain.vo.TokenValidationResult;
+import com.benchpress200.photique.user.infrastructure.persistence.jpa.UserRepository;
 import com.benchpress200.photique.util.DummyGenerator;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
@@ -45,10 +46,10 @@ public class AuthCommandServiceTest {
     UserRepository userRepository;
 
     @MockitoBean
-    EmailAuthCodeRepository emailAuthCodeRepository;
+    AuthMailCodeCommandPort authMailCodeCommandPort;
 
     @MockitoBean
-    AuthMailPort authMailPort;
+    MailSenderPort mailSenderPort;
 
     @MockitoSpyBean
     AuthenticationTokenManagerPort authenticationTokenManagerPort;
@@ -67,17 +68,13 @@ public class AuthCommandServiceTest {
                 .thenReturn(Boolean.FALSE);
 
         String dummyCode = DummyGenerator.generateRandomNumberString(AUTH_MAIL_CODE_LENGTH);
-        Mockito.when(authMailPort.sendMail(email))
-                .thenReturn(dummyCode);
 
         // WHEN
         authCommandService.sendJoinAuthMail(authMailCommand);
 
         // THEN
-        Mockito.verify(authMailPort, Mockito.times(1))
-                .sendMail(email);
-        Mockito.verify(emailAuthCodeRepository, Mockito.times(1))
-                .save(Mockito.any(EmailAuthCode.class));
+        Mockito.verify(authMailCodeCommandPort, Mockito.times(1))
+                .save(Mockito.any(AuthMailCode.class));
     }
 
     @Test
@@ -97,10 +94,8 @@ public class AuthCommandServiceTest {
                 .isInstanceOf(EmailAlreadyInUseException.class);
 
         // THEN
-        Mockito.verify(authMailPort, Mockito.never())
-                .sendMail(email);
-        Mockito.verify(emailAuthCodeRepository, Mockito.never())
-                .save(Mockito.any(EmailAuthCode.class));
+        Mockito.verify(authMailCodeCommandPort, Mockito.never())
+                .save(Mockito.any(AuthMailCode.class));
     }
 
     @Test
@@ -116,17 +111,13 @@ public class AuthCommandServiceTest {
                 .thenReturn(Boolean.TRUE);
 
         String dummyCode = DummyGenerator.generateRandomNumberString(AUTH_MAIL_CODE_LENGTH);
-        Mockito.when(authMailPort.sendMail(email))
-                .thenReturn(dummyCode);
 
         // WHEN
         authCommandService.sendPasswordAuthMail(authMailCommand);
 
         // THEN
-        Mockito.verify(authMailPort, Mockito.times(1))
-                .sendMail(email);
-        Mockito.verify(emailAuthCodeRepository, Mockito.times(1))
-                .save(Mockito.any(EmailAuthCode.class));
+        Mockito.verify(authMailCodeCommandPort, Mockito.times(1))
+                .save(Mockito.any(AuthMailCode.class));
     }
 
     @Test
@@ -146,10 +137,8 @@ public class AuthCommandServiceTest {
                 .isInstanceOf(EmailNotFoundException.class);
 
         // THEN
-        Mockito.verify(authMailPort, Mockito.never())
-                .sendMail(email);
-        Mockito.verify(emailAuthCodeRepository, Mockito.never())
-                .save(Mockito.any(EmailAuthCode.class));
+        Mockito.verify(authMailCodeCommandPort, Mockito.never())
+                .save(Mockito.any(AuthMailCode.class));
     }
 
     @Test
@@ -158,22 +147,22 @@ public class AuthCommandServiceTest {
         // GIVEN
         String email = DummyGenerator.generateEmail();
         String code = DummyGenerator.generateRandomNumberString(AUTH_MAIL_CODE_LENGTH);
-        AuthMailCodeValidationCommand authMailCodeValidationCommand = AuthMailCodeValidationCommand.builder()
+        AuthMailCodeValidateCommand authMailCodeValidationCommand = AuthMailCodeValidateCommand.builder()
                 .email(email)
                 .code(code)
                 .build();
 
-        EmailAuthCode emailAuthCode = EmailAuthCode.of(email, code);
-        Mockito.when(emailAuthCodeRepository.findById(email))
+        AuthMailCode emailAuthCode = AuthMailCode.of(email, code);
+        Mockito.when(authMailCodeCommandPort.findById(email))
                 .thenReturn(Optional.of(emailAuthCode));
 
         // WHEN
-        AuthMailCodeValidationResult authMailCodeValidationResult = authCommandService.validateAuthMailCode(
+        AuthMailCodeValidateResult authMailCodeValidationResult = authCommandService.validateAuthMailCode(
                 authMailCodeValidationCommand);
 
         // THEN
-        Mockito.verify(emailAuthCodeRepository, Mockito.times(1))
-                .save(Mockito.any(EmailAuthCode.class));
+        Mockito.verify(authMailCodeCommandPort, Mockito.times(1))
+                .save(Mockito.any(AuthMailCode.class));
         Assertions.assertThat(authMailCodeValidationResult.isSuccess()).isTrue();
     }
 
@@ -184,22 +173,22 @@ public class AuthCommandServiceTest {
         String email = DummyGenerator.generateEmail();
         String code = DummyGenerator.generateRandomNumberString(AUTH_MAIL_CODE_LENGTH);
         String anotherCode = DummyGenerator.generateRandomNumberString(AUTH_MAIL_CODE_LENGTH);
-        AuthMailCodeValidationCommand authMailCodeValidationCommand = AuthMailCodeValidationCommand.builder()
+        AuthMailCodeValidateCommand authMailCodeValidateCommand = AuthMailCodeValidateCommand.builder()
                 .email(email)
                 .code(code)
                 .build();
 
-        EmailAuthCode emailAuthCode = EmailAuthCode.of(email, anotherCode);
-        Mockito.when(emailAuthCodeRepository.findById(email))
+        AuthMailCode emailAuthCode = AuthMailCode.of(email, anotherCode);
+        Mockito.when(authMailCodeCommandPort.findById(email))
                 .thenReturn(Optional.of(emailAuthCode));
 
         // WHEN
-        AuthMailCodeValidationResult authMailCodeValidationResult = authCommandService.validateAuthMailCode(
-                authMailCodeValidationCommand);
+        AuthMailCodeValidateResult authMailCodeValidationResult = authCommandService.validateAuthMailCode(
+                authMailCodeValidateCommand);
 
         // THEN
-        Mockito.verify(emailAuthCodeRepository, Mockito.never())
-                .save(Mockito.any(EmailAuthCode.class));
+        Mockito.verify(authMailCodeCommandPort, Mockito.never())
+                .save(Mockito.any(AuthMailCode.class));
         Assertions.assertThat(authMailCodeValidationResult.isSuccess()).isFalse();
     }
 
@@ -209,20 +198,20 @@ public class AuthCommandServiceTest {
         // GIVEN
         String email = DummyGenerator.generateEmail();
         String code = DummyGenerator.generateRandomNumberString(AUTH_MAIL_CODE_LENGTH);
-        AuthMailCodeValidationCommand authMailCodeValidationCommand = AuthMailCodeValidationCommand.builder()
+        AuthMailCodeValidateCommand authMailCodeValidateCommand = AuthMailCodeValidateCommand.builder()
                 .email(email)
                 .code(code)
                 .build();
 
-        Mockito.when(emailAuthCodeRepository.findById(email))
+        Mockito.when(authMailCodeCommandPort.findById(email))
                 .thenThrow(new VerificationCodeNotFoundException());
 
         // WHEN and THEN
-        Assertions.assertThatThrownBy(() -> authCommandService.validateAuthMailCode(authMailCodeValidationCommand))
+        Assertions.assertThatThrownBy(() -> authCommandService.validateAuthMailCode(authMailCodeValidateCommand))
                 .isInstanceOf(VerificationCodeNotFoundException.class);
 
-        Mockito.verify(emailAuthCodeRepository, Mockito.never())
-                .save(Mockito.any(EmailAuthCode.class));
+        Mockito.verify(authMailCodeCommandPort, Mockito.never())
+                .save(Mockito.any(AuthMailCode.class));
     }
 
     @Test

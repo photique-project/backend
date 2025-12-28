@@ -7,7 +7,7 @@ import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import com.benchpress200.photique.common.constant.MultipartKey;
 import com.benchpress200.photique.common.constant.URL;
-import com.benchpress200.photique.user.application.UserCommandService;
+import com.benchpress200.photique.user.application.command.service.UserCommandService;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.util.DummyGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
