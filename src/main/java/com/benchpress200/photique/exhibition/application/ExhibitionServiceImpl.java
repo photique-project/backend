@@ -26,8 +26,6 @@ import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
-import com.benchpress200.photique.user.domain.FollowDomainService;
-import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
@@ -49,10 +47,8 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     @Value("${cloud.aws.s3.path.exhibition}")
     private String imagePath;
 
-    private final UserDomainService userDomainService;
     private final ExhibitionDomainService exhibitionDomainService;
     private final ExhibitionCommentDomainService exhibitionCommentDomainService;
-    private final FollowDomainService followDomainService;
     private final ExhibitionCacheService exhibitionCacheService;
 
     @Override
@@ -64,7 +60,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     public void holdNewExhibition(ExhibitionCreateRequest exhibitionCreateRequest) {
         // 작가 조회
         Long writerId = exhibitionCreateRequest.getWriterId();
-        User writer = userDomainService.findUser(writerId);
+        User writer = null;
 
         // 워크 리스트 순회하면서 유저 조회 하고 이미지 변환하고 전시회 작품 엔티티 저장
         Exhibition exhibition = exhibitionCreateRequest.toEntity(writer);
@@ -94,7 +90,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
         // 알림생성
         Long exhibitionId = exhibition.getId();
-        List<Follow> follows = followDomainService.getFollowers(writer);// 보낼 대상은 팔로워들
+        List<Follow> follows = null;// 보낼 대상은 팔로워들
         follows.forEach((follow) -> {
             User follower = follow.getFollower();
             Notification notification = Notification.builder()
@@ -218,7 +214,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     public void incrementLike(ExhibitionLikeIncrementRequest exhibitionLikeIncrementRequest) {
         // 유저존재확인
         Long userId = exhibitionLikeIncrementRequest.getUserId();
-        User user = userDomainService.findUser(userId);
+        User user = null;
 
         // 전시회 존재 확인
         Long exhibitionId = exhibitionLikeIncrementRequest.getExhibitionId();
@@ -233,7 +229,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
         // 알림생성
         Long exhibitionWriterId = exhibition.getWriter().getId();
-        User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
+        User exhibitionWriter = null;
 
         Notification notification = Notification.builder()
                 .receiver(exhibitionWriter)
@@ -256,7 +252,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     public void decrementLike(ExhibitionLikeDecrementRequest exhibitionLikeDecrementRequest) {
         // 유저존재확인
         Long userId = exhibitionLikeDecrementRequest.getUserId();
-        User user = userDomainService.findUser(userId);
+        User user = null;
 
         // 전시회 존재 확인
         Long exhibitionId = exhibitionLikeDecrementRequest.getExhibitionId();
@@ -274,7 +270,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     public void addBookmark(ExhibitionBookmarkRequest exhibitionBookmarkRequest) {
         // 유저존재확인
         Long userId = exhibitionBookmarkRequest.getUserId();
-        User user = userDomainService.findUser(userId);
+        User user = null;
 
         // 전시회 존재 확인
         Long exhibitionId = exhibitionBookmarkRequest.getExhibitionId();
@@ -289,7 +285,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
 
         // 알림생성
         Long exhibitionWriterId = exhibition.getWriter().getId();
-        User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
+        User exhibitionWriter = null;
 
         Notification notification = Notification.builder()
                 .receiver(exhibitionWriter)
@@ -309,7 +305,7 @@ public class ExhibitionServiceImpl implements ExhibitionService {
     public void removeBookmark(ExhibitionBookmarkRemoveRequest exhibitionBookmarkRemoveRequest) {
         // 유저존재확인
         Long userId = exhibitionBookmarkRemoveRequest.getUserId();
-        User user = userDomainService.findUser(userId);
+        User user = null;
 
         // 전시회 존재 확인
         Long exhibitionId = exhibitionBookmarkRemoveRequest.getExhibitionId();

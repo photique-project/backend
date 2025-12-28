@@ -1,9 +1,9 @@
 package com.benchpress200.photique.util;
 
-import com.benchpress200.photique.user.application.result.MyDetailsResult;
-import com.benchpress200.photique.user.application.result.UserDetailsResult;
-import com.benchpress200.photique.user.application.result.UserSearchResult;
-import com.benchpress200.photique.user.application.result.ValidateNicknameResult;
+import com.benchpress200.photique.user.application.query.result.MyDetailsResult;
+import com.benchpress200.photique.user.application.query.result.NicknameValidateResult;
+import com.benchpress200.photique.user.application.query.result.UserDetailsResult;
+import com.benchpress200.photique.user.application.query.result.UserSearchResult;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -76,8 +76,8 @@ public class DummyGenerator {
         );
     }
 
-    public static ValidateNicknameResult generateValidateNicknameResult(boolean result) {
-        return ValidateNicknameResult.of(result);
+    public static NicknameValidateResult generateValidateNicknameResult(boolean result) {
+        return NicknameValidateResult.of(result);
     }
 
     public static UserDetailsResult generateUserDetailsResult(

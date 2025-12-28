@@ -8,7 +8,6 @@ import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDeleteR
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDetailResponse;
 import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentUpdateRequest;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
-import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
 
-    private final UserDomainService userDomainService;
     private final SingleWorkCommentDomainService singleWorkCommentDomainService;
 
     @Override
@@ -28,7 +26,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
     public void addSingleWorkComment(SingleWorkCommentCreateRequest singleWorkCommentCreateRequest) {
         // 작성자 조회
         Long writerId = singleWorkCommentCreateRequest.getWriterId();
-        User writer = userDomainService.findUser(writerId);
+        User writer = null;
 
         // 작품 조회
         Long singleWorkId = singleWorkCommentCreateRequest.getSingleWorkId();
@@ -84,7 +82,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
     public void updateSingleWorkComment(SingleWorkCommentUpdateRequest singleWorkCommentUpdateRequest) {
         // 작성자 조회
         Long writerId = singleWorkCommentUpdateRequest.getWriterId();
-        userDomainService.findUser(writerId);
+//        userDomainService.findUser(writerId);
 
         // 작품 조회
         Long singleWorkId = singleWorkCommentUpdateRequest.getSingleWorkId();
@@ -104,7 +102,7 @@ public class SingleWorkCommentServiceImpl implements SingleWorkCommentService {
     public void deleteSingleWorkComment(SingleWorkCommentDeleteRequest singleWorkCommentDeleteRequest) {
         // 작성자 조회
         Long writerId = singleWorkCommentDeleteRequest.getWriterId();
-        userDomainService.findUser(writerId);
+//        userDomainService.findUser(writerId);
 
         // 작품 조회
         Long singleWorkId = singleWorkCommentDeleteRequest.getSingleWorkId();

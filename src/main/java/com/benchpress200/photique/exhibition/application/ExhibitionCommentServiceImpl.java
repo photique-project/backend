@@ -10,7 +10,6 @@ import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
-import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -24,8 +23,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Transactional
 public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
-
-    private final UserDomainService userDomainService;
     private final ExhibitionDomainService exhibitionDomainService;
     private final ExhibitionCommentDomainService exhibitionCommentDomainService;
 
@@ -35,7 +32,7 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
         // 작성자 조회
         Long writerId = exhibitionCommentCreateRequest.getWriterId();
-        User writer = userDomainService.findUser(writerId);
+        User writer = null;
 
         // 전시회 조회
         Long exhibitionId = exhibitionCommentCreateRequest.getExhibitionId();
@@ -47,7 +44,7 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
 
         // 알림 생성
         Long exhibitionWriterId = exhibition.getWriter().getId();
-        User exhibitionWriter = userDomainService.findUser(exhibitionWriterId);
+        User exhibitionWriter = null;
 
         Notification notification = Notification.builder()
                 .receiver(exhibitionWriter)
@@ -89,7 +86,7 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
     public void updateExhibitionComment(ExhibitionCommentUpdateRequest exhibitionCommentUpdateRequest) {
         // 작성자 조회
         Long writerId = exhibitionCommentUpdateRequest.getWriterId();
-        userDomainService.findUser(writerId);
+//        userDomainService.findUser(writerId);
 
         // 전시회 조회
         Long exhibitionId = exhibitionCommentUpdateRequest.getExhibitionId();
@@ -109,7 +106,7 @@ public class ExhibitionCommentServiceImpl implements ExhibitionCommentService {
     public void deleteExhibitionComment(ExhibitionCommentDeleteRequest exhibitionCommentDeleteRequest) {
         // 작성자 조회
         Long writerId = exhibitionCommentDeleteRequest.getWriterId();
-        userDomainService.findUser(writerId);
+//        userDomainService.findUser(writerId);
 
         // 전시회 조회
         Long exhibitionId = exhibitionCommentDeleteRequest.getExhibitionId();

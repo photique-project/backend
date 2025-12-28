@@ -9,7 +9,6 @@ import com.benchpress200.photique.chat.domain.dto.ExhibitionLeaveRequest;
 import com.benchpress200.photique.chat.domain.dto.ExhibitionLeaveResponse;
 import com.benchpress200.photique.chat.domain.entity.ExhibitionSession;
 import com.benchpress200.photique.exhibition.domain.ExhibitionDomainService;
-import com.benchpress200.photique.user.domain.UserDomainService;
 import com.benchpress200.photique.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
-    private final UserDomainService userDomainService;
     private final ExhibitionDomainService exhibitionDomainService;
     private final ChatDomainService chatDomainService;
 
@@ -28,7 +26,7 @@ public class ChatServiceImpl implements ChatService {
 
         // 유저확인
         Long userId = chatSendRequest.getUserId();
-        User user = userDomainService.findUser(userId);
+        User user = null;
 
         // 전시회 확인
         Long exhibitionId = chatSendRequest.getExhibitionId();
@@ -42,7 +40,7 @@ public class ChatServiceImpl implements ChatService {
     public ExhibitionJoinResponse joinExhibition(ExhibitionJoinRequest exhibitionJoinRequest) {
         // 유저 존재확인
         Long userId = exhibitionJoinRequest.getUserId();
-        User user = userDomainService.findUser(userId);
+        User user = null;
 
         // 세션정보 저장
         ExhibitionSession exhibitionSession = exhibitionJoinRequest.toEntity();
@@ -69,7 +67,7 @@ public class ChatServiceImpl implements ChatService {
 
         // 떠나는 유저 조회
         Long userId = exhibitionSession.getUserId();
-        User user = userDomainService.findUser(userId);
+        User user = null;
 
         // 전시회 참여 유저수 조회
         Long exhibitionId = exhibitionSession.getExhibitionId();
