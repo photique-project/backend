@@ -1,6 +1,6 @@
-package com.benchpress200.photique.tag.presentation.validator.annotation;
+package com.benchpress200.photique.tag.api.validator.annotation;
 
-import com.benchpress200.photique.tag.presentation.validator.TagValidator;
+import com.benchpress200.photique.tag.api.validator.TagValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import java.lang.annotation.ElementType;

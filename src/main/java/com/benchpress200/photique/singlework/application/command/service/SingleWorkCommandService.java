@@ -19,11 +19,11 @@ import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotOwned
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkWriterNotFoundException;
 import com.benchpress200.photique.singlework.infrastructure.persistence.jpa.SingleWorkRepository;
 import com.benchpress200.photique.singlework.infrastructure.persistence.jpa.SingleWorkTagRepository;
+import com.benchpress200.photique.tag.application.command.port.out.persistence.TagCommandPort;
+import com.benchpress200.photique.tag.application.query.port.out.persistence.TagQueryPort;
 import com.benchpress200.photique.tag.application.query.support.AbsentTags;
 import com.benchpress200.photique.tag.application.query.support.ExistingTags;
 import com.benchpress200.photique.tag.domain.entity.Tag;
-import com.benchpress200.photique.tag.domain.port.TagCommandPort;
-import com.benchpress200.photique.tag.domain.port.TagQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.infrastructure.persistence.jpa.UserRepository;
 import jakarta.transaction.Transactional;

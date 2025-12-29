@@ -7,7 +7,7 @@ import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
 import com.benchpress200.photique.singlework.presentation.command.exception.InvalidFieldToUpdateException;
 import com.benchpress200.photique.singlework.presentation.validator.annotation.Enum;
-import com.benchpress200.photique.tag.presentation.validator.annotation.Tag;
+import com.benchpress200.photique.tag.api.validator.annotation.Tag;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.ArrayList;
