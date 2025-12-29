@@ -10,23 +10,23 @@ import com.benchpress200.photique.auth.domain.exception.VerificationCodeNotFound
 import com.benchpress200.photique.auth.infrastructure.exception.LoginRequestObjectReadException;
 import com.benchpress200.photique.auth.infrastructure.exception.MailSendException;
 import com.benchpress200.photique.common.response.ResponseHandler;
+import com.benchpress200.photique.image.infrastructure.exception.ImageDeleteException;
+import com.benchpress200.photique.image.infrastructure.exception.ImageUploadException;
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploaderFileWriteException;
-import com.benchpress200.photique.image.infrastructure.exception.S3DeleteException;
-import com.benchpress200.photique.image.infrastructure.exception.S3UploadException;
 import com.benchpress200.photique.notification.domain.exception.NotificationTargetSingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotOwnedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkWriterNotFoundException;
 import com.benchpress200.photique.singlework.infrastructure.exception.ElasticsearchMaxResultWindowException;
 import com.benchpress200.photique.singlework.infrastructure.exception.ElasticsearchSearchException;
-import com.benchpress200.photique.singlework.presentation.exception.InvalidFieldToSearch;
-import com.benchpress200.photique.singlework.presentation.exception.InvalidFieldToUpdateException;
-import com.benchpress200.photique.singlework.presentation.exception.InvalidImageException;
+import com.benchpress200.photique.singlework.presentation.command.exception.InvalidFieldToUpdateException;
+import com.benchpress200.photique.singlework.presentation.command.exception.InvalidImageException;
+import com.benchpress200.photique.singlework.presentation.query.exception.InvalidFieldToSearch;
+import com.benchpress200.photique.user.api.command.exception.InvalidProfileImageException;
 import com.benchpress200.photique.user.domain.exception.DuplicatedFollowException;
 import com.benchpress200.photique.user.domain.exception.DuplicatedUserException;
 import com.benchpress200.photique.user.domain.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
-import com.benchpress200.photique.user.presentation.command.exception.InvalidProfileImageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -102,8 +102,8 @@ public class GlobalExceptionHandler {
     }
 
     // S3 업로드 예외 처리 응답
-    @ExceptionHandler(S3UploadException.class)
-    public ResponseEntity<?> handleS3UploadException(S3UploadException e) {
+    @ExceptionHandler(ImageUploadException.class)
+    public ResponseEntity<?> handleS3UploadException(ImageUploadException e) {
         String errorMessage = e.getMessage();
         log.error(errorMessage);
 
@@ -153,11 +153,11 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // S3 이미지 삭제 예외 처리 응답
-    @ExceptionHandler(S3DeleteException.class)
-    public ResponseEntity<?> handleS3DeleteException(S3DeleteException s3DeleteException) {
-        String errorMessage = s3DeleteException.getMessage();
-        String imageUrl = s3DeleteException.getImageUrl();
+    // 외부 인프라 이미지 삭제 예외 처리 응답
+    @ExceptionHandler(ImageDeleteException.class)
+    public ResponseEntity<?> handleImageDeleteException(ImageDeleteException e) {
+        String errorMessage = e.getMessage();
+        String imageUrl = e.getImageUrl();
         log.error(errorMessage);
         log.error("[{}] delete failed", imageUrl);
 

@@ -5,7 +5,7 @@ import com.benchpress200.photique.notification.domain.enumeration.NotificationTy
 import com.benchpress200.photique.notification.domain.exception.NotificationTargetSingleWorkNotFoundException;
 import com.benchpress200.photique.notification.domain.repository.NotificationRepository;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
-import com.benchpress200.photique.singlework.domain.repository.SingleWorkRepository;
+import com.benchpress200.photique.singlework.infrastructure.persistence.jpa.SingleWorkRepository;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.infrastructure.persistence.jpa.FollowRepository;

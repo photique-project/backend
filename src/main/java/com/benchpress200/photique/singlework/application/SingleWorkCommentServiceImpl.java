@@ -2,12 +2,11 @@ package com.benchpress200.photique.singlework.application;
 
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
-import com.benchpress200.photique.singlework.domain.SingleWorkCommentDomainService;
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentCreateRequest;
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDeleteRequest;
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDetailResponse;
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentUpdateRequest;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentCreateRequest;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentDeleteRequest;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentDetailResponse;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentUpdateRequest;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

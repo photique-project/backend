@@ -1,9 +1,9 @@
 package com.benchpress200.photique.singlework.application;
 
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentCreateRequest;
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDeleteRequest;
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDetailResponse;
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentUpdateRequest;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentCreateRequest;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentDeleteRequest;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentDetailResponse;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -3,8 +3,6 @@ package com.benchpress200.photique.image.infrastructure.storage.s3;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploaderFileWriteException;
-import com.benchpress200.photique.image.infrastructure.exception.S3DeleteException;
-import com.benchpress200.photique.image.infrastructure.exception.S3UploadException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,13 +48,7 @@ public class S3ImageUploader {
     public void delete(String path) {
         if (path != null) {
             String imagePath = path.substring(path.indexOf("com/") + 4);
-
-            try {
-                amazonS3.deleteObject(bucket, imagePath);
-            } catch (RuntimeException e) {
-                throw new S3DeleteException(e.getMessage(), imagePath);
-            }
-
+            amazonS3.deleteObject(bucket, imagePath);
         }
     }
 
@@ -89,13 +81,8 @@ public class S3ImageUploader {
             String imageName
     ) {
         PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, imageName, uploadImage);
-        try {
-            amazonS3.putObject(putObjectRequest);
-            return amazonS3.getUrl(bucket, imageName).toString();
-
-        } catch (RuntimeException e) { // S3 업로드 예외 캐치 후 GlobalExceptionHandler에서 처리
-            throw new S3UploadException(e.getMessage());
-        }
+        amazonS3.putObject(putObjectRequest);
+        return amazonS3.getUrl(bucket, imageName).toString();
     }
 
     private void removeNewFile(File image) {

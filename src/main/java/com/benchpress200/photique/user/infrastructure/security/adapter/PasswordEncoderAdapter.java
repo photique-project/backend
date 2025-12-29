@@ -1,6 +1,6 @@
 package com.benchpress200.photique.user.infrastructure.security.adapter;
 
-import com.benchpress200.photique.user.domain.port.security.PasswordEncoderPort;
+import com.benchpress200.photique.user.application.command.port.out.security.PasswordEncoderPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;

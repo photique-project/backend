@@ -59,7 +59,7 @@ public class UserCommandControllerTest {
     @BeforeEach
     void setUp() {
         // 컨트롤러 단위 테스트이므로 UserCommandService는 항상 정상 동작하도록 설정
-        Mockito.doNothing().when(userCommandService).join(Mockito.any());
+        Mockito.doNothing().when(userCommandService).resister(Mockito.any());
         Mockito.doNothing().when(userCommandService).updateUserDetails(Mockito.any());
         Mockito.doNothing().when(userCommandService).updateUserPassword(Mockito.any());
         Mockito.doNothing().when(userCommandService).resetUserPassword(Mockito.any());

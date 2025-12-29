@@ -30,7 +30,7 @@ public class SingleWorkTag {
     @JoinColumn(name = "tag_id", nullable = false)
     private Tag tag;
 
-    public SingleWorkTag(
+    private SingleWorkTag(
             SingleWork singleWork,
             Tag tag
     ) {
