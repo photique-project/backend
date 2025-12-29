@@ -1,15 +1,19 @@
-package com.benchpress200.photique.auth.presentation.command.controller;
+package com.benchpress200.photique.auth.api.command.controller;
 
+import com.benchpress200.photique.auth.api.command.constant.AuthCommandResponseMessage;
+import com.benchpress200.photique.auth.api.command.request.AuthMailCodeValidateRequest;
+import com.benchpress200.photique.auth.api.command.request.AuthMailRequest;
+import com.benchpress200.photique.auth.api.command.response.AuthCodeValidateResponse;
+import com.benchpress200.photique.auth.api.command.response.AuthTokenRefreshResponse;
 import com.benchpress200.photique.auth.application.command.model.AuthMailCodeValidateCommand;
 import com.benchpress200.photique.auth.application.command.model.AuthMailCommand;
 import com.benchpress200.photique.auth.application.command.model.AuthTokenRefreshCommand;
+import com.benchpress200.photique.auth.application.command.port.in.RefreshAuthTokenUseCase;
+import com.benchpress200.photique.auth.application.command.port.in.SendJoinAuthMailUseCase;
+import com.benchpress200.photique.auth.application.command.port.in.SendPasswordAuthMailUseCase;
+import com.benchpress200.photique.auth.application.command.port.in.ValidateAuthMailCodeUseCase;
 import com.benchpress200.photique.auth.application.command.result.AuthMailCodeValidateResult;
 import com.benchpress200.photique.auth.application.command.result.AuthTokenResult;
-import com.benchpress200.photique.auth.application.command.service.AuthCommandService;
-import com.benchpress200.photique.auth.presentation.command.constant.AuthCommandResponseMessage;
-import com.benchpress200.photique.auth.presentation.command.dto.request.AuthMailCodeValidateRequest;
-import com.benchpress200.photique.auth.presentation.command.dto.request.AuthMailRequest;
-import com.benchpress200.photique.auth.presentation.command.dto.response.AuthTokenRefreshResponse;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import jakarta.validation.Valid;
@@ -26,14 +30,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(URL.BASE_URL + URL.AUTH_DOMAIN)
 @RequiredArgsConstructor
 public class AuthCommandController {
-    private final AuthCommandService authCommandService;
+    private final SendJoinAuthMailUseCase sendJoinAuthMailUseCase;
+    private final SendPasswordAuthMailUseCase sendPasswordAuthMailUseCase;
+    private final ValidateAuthMailCodeUseCase validateAuthMailCodeUseCase;
+    private final RefreshAuthTokenUseCase refreshAuthTokenUseCase;
 
     @PostMapping(URL.JOIN_MAIL)
     public ResponseEntity<?> sendJoinAuthMail(
-            @RequestBody @Valid AuthMailRequest authMailRequest
+            @RequestBody @Valid AuthMailRequest request
     ) {
-        AuthMailCommand authMailCommand = authMailRequest.toCommand();
-        authCommandService.sendJoinAuthMail(authMailCommand);
+        AuthMailCommand command = request.toCommand();
+        sendJoinAuthMailUseCase.sendJoinAuthMail(command);
+
         return ResponseHandler.handleResponse(
                 HttpStatus.CREATED,
                 AuthCommandResponseMessage.AUTH_MAIL_SEND_COMPLETED
@@ -42,10 +50,11 @@ public class AuthCommandController {
 
     @PostMapping(URL.PASSWORD_MAIL)
     public ResponseEntity<?> sendPasswordAuthMail(
-            @RequestBody @Valid AuthMailRequest authMailRequest
+            @RequestBody @Valid AuthMailRequest request
     ) {
-        AuthMailCommand authMailCommand = authMailRequest.toCommand();
-        authCommandService.sendPasswordAuthMail(authMailCommand);
+        AuthMailCommand command = request.toCommand();
+        sendPasswordAuthMailUseCase.sendPasswordAuthMail(command);
+
         return ResponseHandler.handleResponse(
                 HttpStatus.CREATED,
                 AuthCommandResponseMessage.AUTH_MAIL_SEND_COMPLETED
@@ -54,16 +63,17 @@ public class AuthCommandController {
 
     @PostMapping(URL.VALIDATE_CODE)
     public ResponseEntity<?> validateAuthMailCode(
-            @RequestBody @Valid AuthMailCodeValidateRequest authMailCodeValidateRequest
+            @RequestBody @Valid AuthMailCodeValidateRequest request
     ) {
-        AuthMailCodeValidateCommand authMailCodeValidationCommand = authMailCodeValidateRequest.toCommand();
-        AuthMailCodeValidateResult authMailCodeValidationResult = authCommandService.validateAuthMailCode(
-                authMailCodeValidationCommand);
+        AuthMailCodeValidateCommand command = request.toCommand();
+        AuthMailCodeValidateResult result = validateAuthMailCodeUseCase.validateAuthMailCode(
+                command);
+        AuthCodeValidateResponse response = AuthCodeValidateResponse.from(result);
 
         return ResponseHandler.handleResponse(
                 HttpStatus.OK,
                 AuthCommandResponseMessage.AUTH_MAIL_CODE_VALIDATION_COMPLETED,
-                authMailCodeValidationResult
+                response
         );
     }
 
@@ -71,15 +81,15 @@ public class AuthCommandController {
     public ResponseEntity<?> refreshAuthToken(
             @CookieValue(value = "refreshToken") String refreshToken
     ) {
-        AuthTokenRefreshCommand authTokenRefreshCommand = AuthTokenRefreshCommand.of(refreshToken);
-        AuthTokenResult authTokenResult = authCommandService.refreshAuthToken(authTokenRefreshCommand);
-        AuthTokenRefreshResponse authTokenRefreshResponse = AuthTokenRefreshResponse.from(authTokenResult);
+        AuthTokenRefreshCommand command = AuthTokenRefreshCommand.of(refreshToken);
+        AuthTokenResult result = refreshAuthTokenUseCase.refreshAuthToken(command);
+        AuthTokenRefreshResponse response = AuthTokenRefreshResponse.from(result);
 
         return ResponseHandler.handleResponse(
                 HttpStatus.OK,
                 AuthCommandResponseMessage.AUTHENTICATION_TOKEN_REFRESH_COMPLETED,
-                authTokenRefreshResponse.getAccessTokenResponse(),
-                authTokenRefreshResponse.getCookie()
+                response.getAccessTokenResponse(),
+                response.getCookie()
         );
     }
 }

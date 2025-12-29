@@ -1,4 +1,4 @@
-package com.benchpress200.photique.auth.presentation.command.dto.response;
+package com.benchpress200.photique.auth.api.command.response;
 
 import com.benchpress200.photique.auth.application.command.result.AuthTokenResult;
 import lombok.Builder;

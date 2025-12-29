@@ -1,4 +1,4 @@
-package com.benchpress200.photique.auth.presentation;
+package com.benchpress200.photique.auth.api;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -7,7 +7,7 @@ import com.benchpress200.photique.auth.application.command.model.AuthTokenRefres
 import com.benchpress200.photique.auth.application.command.result.AuthMailCodeValidateResult;
 import com.benchpress200.photique.auth.application.command.result.AuthTokenResult;
 import com.benchpress200.photique.auth.application.command.service.AuthCommandService;
-import com.benchpress200.photique.auth.domain.port.security.AuthenticationTokenManagerPort;
+import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.util.DummyGenerator;

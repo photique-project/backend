@@ -1,7 +1,7 @@
 package com.benchpress200.photique.user.application;
 
 import com.benchpress200.photique.TestContainerConfiguration;
-import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.user.application.query.model.NicknameValidateQuery;
 import com.benchpress200.photique.user.application.query.model.UserSearchQuery;
 import com.benchpress200.photique.user.application.query.result.MyDetailsResult;

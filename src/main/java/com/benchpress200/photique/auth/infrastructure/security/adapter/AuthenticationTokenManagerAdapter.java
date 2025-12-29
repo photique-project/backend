@@ -1,7 +1,7 @@
 package com.benchpress200.photique.auth.infrastructure.security.adapter;
 
 import com.benchpress200.photique.auth.domain.enumeration.TokenValidationStatus;
-import com.benchpress200.photique.auth.domain.port.security.AuthenticationTokenManagerPort;
+import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.auth.domain.vo.TokenValidationResult;
 import io.jsonwebtoken.Claims;

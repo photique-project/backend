@@ -1,6 +1,6 @@
 package com.benchpress200.photique.singlework.application.query.service;
 
-import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.singlework.application.query.model.SearchSingleWorksQuery;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkDetailsResult;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkSearchResult;

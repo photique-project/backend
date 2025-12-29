@@ -1,6 +1,6 @@
 package com.benchpress200.photique.user.application.query.service;
 
-import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import com.benchpress200.photique.exhibition.domain.repository.ExhibitionRepository;
 import com.benchpress200.photique.singlework.infrastructure.persistence.jpa.SingleWorkRepository;

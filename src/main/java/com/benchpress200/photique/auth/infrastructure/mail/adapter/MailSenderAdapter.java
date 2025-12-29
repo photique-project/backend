@@ -2,7 +2,7 @@ package com.benchpress200.photique.auth.infrastructure.mail.adapter;
 
 import static java.lang.Boolean.TRUE;
 
-import com.benchpress200.photique.auth.domain.port.mail.MailSenderPort;
+import com.benchpress200.photique.auth.application.command.port.out.mail.MailSenderPort;
 import com.benchpress200.photique.auth.domain.vo.MailContent;
 import com.benchpress200.photique.auth.infrastructure.exception.MailSendException;
 import jakarta.mail.MessagingException;

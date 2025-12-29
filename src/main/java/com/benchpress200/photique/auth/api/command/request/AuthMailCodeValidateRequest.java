@@ -1,4 +1,4 @@
-package com.benchpress200.photique.auth.presentation.command.dto.request;
+package com.benchpress200.photique.auth.api.command.request;
 
 import com.benchpress200.photique.auth.application.command.model.AuthMailCodeValidateCommand;
 import jakarta.validation.constraints.Email;

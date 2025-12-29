@@ -1,6 +1,6 @@
 package com.benchpress200.photique.auth.infrastructure.security.filter;
 
-import com.benchpress200.photique.auth.domain.port.security.AuthenticationTokenManagerPort;
+import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
 import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.auth.infrastructure.exception.LoginRequestObjectReadException;

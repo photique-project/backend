@@ -1,6 +1,6 @@
 package com.benchpress200.photique.user.application.query.service;
 
-import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.user.application.query.model.FolloweeSearchQuery;
 import com.benchpress200.photique.user.application.query.model.FollowerSearchQuery;
 import com.benchpress200.photique.user.application.query.port.in.SearchFolloweeUseCase;

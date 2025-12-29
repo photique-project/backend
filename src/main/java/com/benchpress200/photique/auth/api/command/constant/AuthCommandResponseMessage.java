@@ -1,4 +1,4 @@
-package com.benchpress200.photique.auth.presentation.command.constant;
+package com.benchpress200.photique.auth.api.command.constant;
 
 public class AuthCommandResponseMessage {
     public static final String AUTH_MAIL_SEND_COMPLETED = "Authentication email has been sent";

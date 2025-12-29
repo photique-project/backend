@@ -13,9 +13,9 @@ import com.benchpress200.photique.auth.domain.exception.EmailAlreadyInUseExcepti
 import com.benchpress200.photique.auth.domain.exception.EmailNotFoundException;
 import com.benchpress200.photique.auth.domain.exception.InvalidRefreshTokenException;
 import com.benchpress200.photique.auth.domain.exception.VerificationCodeNotFoundException;
-import com.benchpress200.photique.auth.domain.port.mail.MailSenderPort;
-import com.benchpress200.photique.auth.domain.port.persistence.AuthMailCodeCommandPort;
-import com.benchpress200.photique.auth.domain.port.security.AuthenticationTokenManagerPort;
+import com.benchpress200.photique.auth.application.command.port.out.mail.MailSenderPort;
+import com.benchpress200.photique.auth.application.command.port.out.persistence.AuthMailCodeCommandPort;
+import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.auth.domain.vo.TokenValidationResult;
 import com.benchpress200.photique.user.infrastructure.persistence.jpa.UserRepository;
