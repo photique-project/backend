@@ -1,9 +1,9 @@
 package com.benchpress200.photique.user.application.command.service;
 
+import com.benchpress200.photique.auth.application.query.port.out.persistence.AuthMailCodeQueryPort;
 import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
-import com.benchpress200.photique.auth.domain.port.persistence.AuthMailCodeQueryPort;
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
 import com.benchpress200.photique.user.application.command.model.ResisterCommand;
 import com.benchpress200.photique.user.application.command.model.UserDetailsUpdateCommand;

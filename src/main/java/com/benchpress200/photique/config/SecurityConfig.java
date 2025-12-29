@@ -1,6 +1,6 @@
 package com.benchpress200.photique.config;
 
-import com.benchpress200.photique.auth.domain.port.security.AuthenticationTokenManagerPort;
+import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
 import com.benchpress200.photique.auth.infrastructure.security.filter.JwtFilter;
 import com.benchpress200.photique.auth.infrastructure.security.filter.LoginFilter;
 import com.benchpress200.photique.common.constant.URL;

@@ -1,6 +1,6 @@
 package com.benchpress200.photique.user.application.command.service;
 
-import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
 import com.benchpress200.photique.notification.domain.repository.NotificationRepository;

@@ -1,4 +1,4 @@
-package com.benchpress200.photique.auth.domain.port.security;
+package com.benchpress200.photique.auth.application.command.port.out.security;
 
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.auth.domain.vo.TokenValidationResult;

@@ -1,6 +1,6 @@
 package com.benchpress200.photique.singlework.application.command.service;
 
-import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.image.domain.event.UploadImageEvent;
 import com.benchpress200.photique.image.domain.port.event.ImageEventPublishPort;
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
