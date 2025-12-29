@@ -3,9 +3,14 @@ package com.benchpress200.photique.user.application.query.service;
 import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import com.benchpress200.photique.exhibition.domain.repository.ExhibitionRepository;
-import com.benchpress200.photique.singlework.domain.repository.SingleWorkRepository;
+import com.benchpress200.photique.singlework.infrastructure.persistence.jpa.SingleWorkRepository;
 import com.benchpress200.photique.user.application.query.model.NicknameValidateQuery;
 import com.benchpress200.photique.user.application.query.model.UserSearchQuery;
+import com.benchpress200.photique.user.application.query.port.in.GetMyDetailsUseCase;
+import com.benchpress200.photique.user.application.query.port.in.GetUserDetailsUseCase;
+import com.benchpress200.photique.user.application.query.port.in.SearchUserUseCase;
+import com.benchpress200.photique.user.application.query.port.in.ValidateNicknameUseCase;
+import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.application.query.result.MyDetailsResult;
 import com.benchpress200.photique.user.application.query.result.NicknameValidateResult;
 import com.benchpress200.photique.user.application.query.result.UserDetailsResult;
@@ -15,7 +20,6 @@ import com.benchpress200.photique.user.application.query.support.SearchedUsers;
 import com.benchpress200.photique.user.application.query.support.UserIds;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
-import com.benchpress200.photique.user.domain.port.persistence.UserQueryPort;
 import com.benchpress200.photique.user.infrastructure.persistence.jpa.FollowRepository;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +32,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UserQueryService implements UserDetailsService {
+public class UserQueryService implements
+        UserDetailsService,
+        ValidateNicknameUseCase,
+        GetUserDetailsUseCase,
+        GetMyDetailsUseCase,
+        SearchUserUseCase {
     private final UserQueryPort userQueryPort;
     private final SingleWorkRepository singleWorkRepository;
     private final ExhibitionRepository exhibitionRepository;
@@ -37,8 +46,8 @@ public class UserQueryService implements UserDetailsService {
 
     // @Transactional이 없기 때문에 조회 쿼리가 나갈 때 커넥션을 얻고 MySQL 오토커밋
     // 결과셋이 애플리케이션으로 반환되면 바로 커넥션 반납
-    public NicknameValidateResult validateNickname(NicknameValidateQuery nicknameValidateQuery) {
-        String nickname = nicknameValidateQuery.getNickname();
+    public NicknameValidateResult validateNickname(NicknameValidateQuery query) {
+        String nickname = query.getNickname();
         boolean isDuplicated = userQueryPort.existsByNickname(nickname);
 
         return NicknameValidateResult.of(isDuplicated);
@@ -104,9 +113,9 @@ public class UserQueryService implements UserDetailsService {
         );
     }
 
-    public UserSearchResult searchUser(UserSearchQuery userSearchQuery) {
-        String keyword = userSearchQuery.getKeyword();
-        Pageable pageable = userSearchQuery.getPageable();
+    public UserSearchResult searchUser(UserSearchQuery query) {
+        String keyword = query.getKeyword();
+        Pageable pageable = query.getPageable();
 
         // 요청한 유저 id 조회
         Long currentUserId = authenticationUserProviderPort.getCurrentUserId();

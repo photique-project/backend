@@ -1,6 +1,6 @@
 package com.benchpress200.photique.singlework.presentation.validator;
 
-import com.benchpress200.photique.singlework.presentation.exception.InvalidFieldToSearch;
+import com.benchpress200.photique.singlework.presentation.query.exception.InvalidFieldToSearch;
 import java.util.Set;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;

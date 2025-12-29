@@ -18,7 +18,7 @@ import com.benchpress200.photique.auth.domain.support.AuthCodeGenerator;
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.auth.domain.vo.MailContent;
 import com.benchpress200.photique.auth.domain.vo.TokenValidationResult;
-import com.benchpress200.photique.user.domain.port.persistence.UserQueryPort;
+import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

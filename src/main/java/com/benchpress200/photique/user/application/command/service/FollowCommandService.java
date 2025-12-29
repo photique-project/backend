@@ -4,22 +4,26 @@ import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserPr
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
 import com.benchpress200.photique.notification.domain.repository.NotificationRepository;
+import com.benchpress200.photique.user.application.command.port.in.FollowUseCase;
+import com.benchpress200.photique.user.application.command.port.in.UnfollowUseCase;
+import com.benchpress200.photique.user.application.command.port.out.persistence.FollowCommandPort;
+import com.benchpress200.photique.user.application.query.port.out.persistence.FollowQueryPort;
+import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.exception.AlreadyUnfollowException;
 import com.benchpress200.photique.user.domain.exception.DuplicatedFollowException;
 import com.benchpress200.photique.user.domain.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
-import com.benchpress200.photique.user.domain.port.persistence.FollowCommandPort;
-import com.benchpress200.photique.user.domain.port.persistence.FollowQueryPort;
-import com.benchpress200.photique.user.domain.port.persistence.UserQueryPort;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class FollowCommandService {
+public class FollowCommandService implements
+        FollowUseCase,
+        UnfollowUseCase {
     private final FollowCommandPort followCommandPort;
     private final FollowQueryPort followQueryPort;
     private final UserQueryPort userQueryPort;

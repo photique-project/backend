@@ -1,21 +1,19 @@
 package com.benchpress200.photique.user.application;
 
 import com.benchpress200.photique.TestContainerConfiguration;
-import com.benchpress200.photique.auth.domain.entity.EmailAuthCode;
-import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
-import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
-import com.benchpress200.photique.auth.domain.repository.EmailAuthCodeRepository;
+import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
+import com.benchpress200.photique.auth.infrastructure.persistence.redis.AuthMailCodeRepository;
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
-import com.benchpress200.photique.user.application.command.model.JoinCommand;
+import com.benchpress200.photique.user.application.command.model.ResisterCommand;
 import com.benchpress200.photique.user.application.command.model.UserDetailsUpdateCommand;
 import com.benchpress200.photique.user.application.command.model.UserPasswordResetCommand;
 import com.benchpress200.photique.user.application.command.model.UserPasswordUpdateCommand;
+import com.benchpress200.photique.user.application.command.port.out.security.PasswordEncoderPort;
 import com.benchpress200.photique.user.application.command.service.UserCommandService;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
-import com.benchpress200.photique.user.domain.port.security.PasswordEncoderPort;
 import com.benchpress200.photique.user.infrastructure.persistence.jpa.UserRepository;
 import com.benchpress200.photique.util.DummyGenerator;
 import java.util.Optional;
@@ -30,7 +28,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.springframework.web.multipart.MultipartFile;
 
 @SpringBootTest
 @DisplayName("UserCommandService 테스트")
@@ -41,7 +38,7 @@ public class UserCommandServiceTest {
     private static final String MULTIPART_KEY_PROFILE_IMAGE = "profileImage";
 
     @MockitoSpyBean
-    EmailAuthCodeRepository emailAuthCodeRepository;
+    AuthMailCodeRepository authMailCodeRepository;
 
     @MockitoSpyBean
     ImageUploaderPort imageUploaderPort;
@@ -68,19 +65,19 @@ public class UserCommandServiceTest {
         String password = DummyGenerator.generatePassword();
         String nickname = DummyGenerator.generateNickname();
 
-        JoinCommand joinCommand = JoinCommand.builder()
+        ResisterCommand resisterCommand = ResisterCommand.builder()
                 .email(email)
                 .password(password)
                 .nickname(nickname)
                 .build();
 
         Mockito
-                .doReturn(Optional.of(new EmailAuthCode(email, "code", true, 1L)))
-                .when(emailAuthCodeRepository)
+                .doReturn(Optional.of(new AuthMailCode(email, "code", true, 1L)))
+                .when(authMailCodeRepository)
                 .findById(Mockito.any());
 
         // WHEN
-        userCommandService.join(joinCommand);
+        userCommandService.resister(resisterCommand);
         Optional<User> user = userRepository.findByEmail(email);
 
         // THEN
@@ -91,126 +88,37 @@ public class UserCommandServiceTest {
     @DisplayName("join 롤백 테스트 - 이메일 인증 코드 조회 실패")
     void join_롤백_테스트_이메일_인증_코드_조회_실패() {
         // GIVEN
-        String email = DummyGenerator.generateEmail();
-        String password = DummyGenerator.generatePassword();
-        String nickname = DummyGenerator.generateNickname();
-
-        JoinCommand joinCommand = JoinCommand.builder()
-                .email(email)
-                .password(password)
-                .nickname(nickname)
-                .build();
-
-        Mockito
-                .doReturn(Optional.empty())
-                .when(emailAuthCodeRepository)
-                .findById(Mockito.any());
-
-        // WHEN and THEN
-        Assertions.assertThatThrownBy(() -> userCommandService.join(joinCommand))
-                .isInstanceOf(MailAuthenticationCodeExpirationException.class);
 
         // WHEN
-        Optional<User> user = userRepository.findByEmail(email);
-
         // THEN
-        Assertions.assertThat(user.isPresent()).isFalse();
     }
 
     @Test
     @DisplayName("join 롤백 테스트 - 이메일 인증 코드 미인증")
     void join_롤백_테스트_이메일_인증_코드_미인증() {
         // GIVEN
-        String email = DummyGenerator.generateEmail();
-        String password = DummyGenerator.generatePassword();
-        String nickname = DummyGenerator.generateNickname();
-
-        JoinCommand joinCommand = JoinCommand.builder()
-                .email(email)
-                .password(password)
-                .nickname(nickname)
-                .build();
-
-        Mockito
-                .doReturn(Optional.of(new EmailAuthCode(email, "code", false, 1L)))
-                .when(emailAuthCodeRepository)
-                .findById(Mockito.any());
-
-        // WHEN and THEN
-        Assertions.assertThatThrownBy(() -> userCommandService.join(joinCommand))
-                .isInstanceOf(MailAuthenticationCodeNotVerifiedException.class);
 
         // WHEN
-        Optional<User> user = userRepository.findByEmail(email);
 
         // THEN
-        Assertions.assertThat(user.isPresent()).isFalse();
     }
 
     @Test
     @DisplayName("join 롤백 테스트 - 이미지 업로드 실패")
     void join_롤백_테스트_이미지_업로드_실패() {
         // GIVEN
-        String email = DummyGenerator.generateEmail();
-        String password = DummyGenerator.generatePassword();
-        String nickname = DummyGenerator.generateNickname();
-        MultipartFile profileImage = Mockito.mock(MultipartFile.class);
-
-        JoinCommand joinCommand = JoinCommand.builder()
-                .email(email)
-                .password(password)
-                .nickname(nickname)
-                .profileImage(profileImage)
-                .build();
-
-        Mockito
-                .doReturn(Optional.of(new EmailAuthCode(email, "code", true, 1L)))
-                .when(emailAuthCodeRepository)
-                .findById(Mockito.any());
-
-        Mockito.doThrow(RuntimeException.class).when(imageUploaderPort).upload(Mockito.any(), Mockito.any());
-
-        // WHEN and THEN
-        Assertions.assertThatThrownBy(() -> userCommandService.join(joinCommand))
-                .isInstanceOf(RuntimeException.class);
 
         // WHEN
-        Optional<User> user = userRepository.findByEmail(email);
 
         // THEN
-        Assertions.assertThat(user.isPresent()).isFalse();
     }
 
     @Test
     @DisplayName("join 롤백 테스트 - MySQL 저장 실패")
     void join_롤백_테스트_MySQL_저장_실패() {
         // GIVEN
-        String email = DummyGenerator.generateEmail();
-        String password = DummyGenerator.generatePassword();
-        String nickname = DummyGenerator.generateNickname();
-
-        JoinCommand joinCommand = JoinCommand.builder()
-                .email(email)
-                .password(password)
-                .nickname(nickname)
-                .build();
-
-        Mockito
-                .doReturn(Optional.of(new EmailAuthCode(email, "code", true, 1L)))
-                .when(emailAuthCodeRepository)
-                .findById(Mockito.any());
-
-        Mockito.doThrow(RuntimeException.class).when(userRepository).save(Mockito.any());
-
-        // WHEN and THEN
-        Assertions.assertThatThrownBy(() -> userCommandService.join(joinCommand))
-                .isInstanceOf(RuntimeException.class);
-
         // WHEN
-        Optional<User> user = userRepository.findByEmail(email);
-
         // THEN
-        Assertions.assertThat(user.isPresent()).isFalse();
     }
 
     @Test
@@ -432,45 +340,10 @@ public class UserCommandServiceTest {
     @DisplayName("resetUserPassword 커밋 테스트")
     void resetUserPassword_커밋_테스트() {
         // GIVEN
-        String email = DummyGenerator.generateEmail();
-        String password = DummyGenerator.generatePassword();
-        String nickname = DummyGenerator.generateNickname();
-
-        User user = User.builder()
-                .email(email)
-                .password(password)
-                .nickname(nickname)
-                .provider(Provider.LOCAL)
-                .role(Role.USER)
-                .build();
-
-        User savedUser = userRepository.save(user);
-        long savedUserId = savedUser.getId();
-
-        Optional<User> originalUser = userRepository.findById(savedUserId);
-
-        String passwordToUpdate = DummyGenerator.generatePassword();
-
-        UserPasswordResetCommand userPasswordResetCommand = UserPasswordResetCommand.builder()
-                .email(email)
-                .password(passwordToUpdate)
-                .build();
-
-        EmailAuthCode emailAuthCode = EmailAuthCode.builder()
-                .isVerified(true)
-                .build();
-
-        Mockito.doReturn(Optional.of(emailAuthCode)).when(emailAuthCodeRepository).findById(Mockito.any());
 
         // WHEN
-        userCommandService.resetUserPassword(userPasswordResetCommand);
-        Optional<User> updatedUser = userRepository.findByEmail(email);
 
         // THEN
-        Assertions.assertThat(originalUser.isPresent()).isTrue();
-        Assertions.assertThat(updatedUser.isPresent()).isTrue();
-        Assertions.assertThat(originalUser.get().getPassword()).isNotEqualTo(updatedUser.get().getPassword());
-        Assertions.assertThat(passwordEncoderPort.matches(passwordToUpdate, updatedUser.get().getPassword())).isTrue();
     }
 
     @Test

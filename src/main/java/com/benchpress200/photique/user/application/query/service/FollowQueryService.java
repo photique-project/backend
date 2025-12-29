@@ -3,13 +3,15 @@ package com.benchpress200.photique.user.application.query.service;
 import com.benchpress200.photique.auth.domain.port.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.user.application.query.model.FolloweeSearchQuery;
 import com.benchpress200.photique.user.application.query.model.FollowerSearchQuery;
+import com.benchpress200.photique.user.application.query.port.in.SearchFolloweeUseCase;
+import com.benchpress200.photique.user.application.query.port.in.SearchFollowerUseCase;
+import com.benchpress200.photique.user.application.query.port.out.persistence.FollowQueryPort;
 import com.benchpress200.photique.user.application.query.result.FolloweeSearchResult;
 import com.benchpress200.photique.user.application.query.result.FollowerSearchResult;
 import com.benchpress200.photique.user.application.query.support.FolloweeIds;
 import com.benchpress200.photique.user.application.query.support.SearchedUsers;
 import com.benchpress200.photique.user.application.query.support.UserIds;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.domain.port.persistence.FollowQueryPort;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,14 +20,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class FollowQueryService {
+public class FollowQueryService implements
+        SearchFollowerUseCase,
+        SearchFolloweeUseCase {
     private final FollowQueryPort followQueryPort;
     private final AuthenticationUserProviderPort authenticationUserProviderPort;
 
-    public FollowerSearchResult searchFollower(FollowerSearchQuery followerSearchQuery) {
-        Long userId = followerSearchQuery.getUserId();
-        String keyword = followerSearchQuery.getKeyword();
-        Pageable pageable = followerSearchQuery.getPageable();
+    public FollowerSearchResult searchFollower(FollowerSearchQuery query) {
+        Long userId = query.getUserId();
+        String keyword = query.getKeyword();
+        Pageable pageable = query.getPageable();
 
         // 요청 유저 id 조회
         Long currentUserId = authenticationUserProviderPort.getCurrentUserId();
@@ -47,10 +51,10 @@ public class FollowQueryService {
         return FollowerSearchResult.of(searchedUsers, followerPage);
     }
 
-    public FolloweeSearchResult searchFollowee(FolloweeSearchQuery followeeSearchQuery) {
-        Long userId = followeeSearchQuery.getUserId();
-        String keyword = followeeSearchQuery.getKeyword();
-        Pageable pageable = followeeSearchQuery.getPageable();
+    public FolloweeSearchResult searchFollowee(FolloweeSearchQuery query) {
+        Long userId = query.getUserId();
+        String keyword = query.getKeyword();
+        Pageable pageable = query.getPageable();
 
         // 요청 유저 id 조회
         Long currentUserId = authenticationUserProviderPort.getCurrentUserId();

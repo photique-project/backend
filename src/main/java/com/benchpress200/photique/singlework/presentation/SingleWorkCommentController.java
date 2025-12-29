@@ -4,10 +4,10 @@ import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.application.SingleWorkCommentService;
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentCreateRequest;
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDeleteRequest;
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentDetailResponse;
-import com.benchpress200.photique.singlework.domain.dto.SingleWorkCommentUpdateRequest;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentCreateRequest;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentDeleteRequest;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentDetailResponse;
+import com.benchpress200.photique.singlework.presentation.dto.SingleWorkCommentUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -62,7 +62,7 @@ public class SingleWorkCommentController {
 
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
-    
+
     @DeleteMapping(URL.SINGLE_WORK_COMMENT_DATA)
     public ApiSuccessResponse<?> deleteSingleWorkComment(
             @PathVariable("singleworkId") Long singleWorkId,

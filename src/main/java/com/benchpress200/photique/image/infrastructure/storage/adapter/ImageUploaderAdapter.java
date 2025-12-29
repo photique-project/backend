@@ -1,6 +1,8 @@
 package com.benchpress200.photique.image.infrastructure.storage.adapter;
 
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
+import com.benchpress200.photique.image.infrastructure.exception.ImageDeleteException;
+import com.benchpress200.photique.image.infrastructure.exception.ImageUploadException;
 import com.benchpress200.photique.image.infrastructure.storage.s3.S3ImageUploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,7 +15,13 @@ public class ImageUploaderAdapter implements ImageUploaderPort {
 
     @Override
     public String upload(MultipartFile image, String path) {
-        return s3ImageUploader.upload(image, path);
+        try {
+            return s3ImageUploader.upload(image, path);
+        } catch (RuntimeException e) {
+            // 이미지 업로드 처리 실패 시 전역 예외 핸들러에서 로깅
+            String message = e.getMessage();
+            throw new ImageUploadException(message);
+        }
     }
 
     @Override
@@ -23,6 +31,12 @@ public class ImageUploaderAdapter implements ImageUploaderPort {
 
     @Override
     public void delete(String path) {
-        s3ImageUploader.delete(path);
+        try {
+            s3ImageUploader.delete(path);
+        } catch (RuntimeException e) {
+            // 이미지 삭제 처리 실패 시 전역 예외 핸들러에서 로깅
+            String message = e.getMessage();
+            throw new ImageDeleteException(message, path);
+        }
     }
 }
