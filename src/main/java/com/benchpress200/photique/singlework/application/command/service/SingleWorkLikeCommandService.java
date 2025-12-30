@@ -2,6 +2,7 @@ package com.benchpress200.photique.singlework.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.singlework.application.command.port.in.AddLikeToSingleWorkUseCase;
+import com.benchpress200.photique.singlework.application.command.port.in.CancelLikeToSingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkLikeCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
@@ -20,7 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class SingleWorkLikeCommandService implements
-        AddLikeToSingleWorkUseCase {
+        AddLikeToSingleWorkUseCase,
+        CancelLikeToSingleWorkUseCase {
 
     private final AuthenticationUserProviderPort authenticationUserProvider;
 
@@ -48,5 +50,21 @@ public class SingleWorkLikeCommandService implements
         // 좋아요 처리
         SingleWorkLike singleWorkLike = SingleWorkLike.of(user, singleWork);
         singleWorkLikeCommandPort.save(singleWorkLike);
+    }
+
+    @Override
+    public void cancelLikeToSingleWork(Long singleWorkId) {
+        // 요청 유저 아이디 꺼내기
+        Long currentUserId = authenticationUserProvider.getCurrentUserId();
+        User user = userQueryPort.findActiveById(currentUserId)
+                .orElseThrow(() -> new UserNotFoundException(currentUserId));
+
+        // 단일작품 조회
+        SingleWork singleWork = singleWorkQueryPort.findActiveById(singleWorkId)
+                .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
+
+        // 좋아요 엔티티 조회 후 존재한다면 삭제 처리
+        singleWorkLikeQueryPort.findByUserAndSingleWork(user, singleWork)
+                .ifPresent(singleWorkLikeCommandPort::delete);
     }
 }
