@@ -35,7 +35,7 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
                     "JOIN FETCH f.follower " +
                     "WHERE f.followee = :followee"
     )
-    Slice<Follow> findByFollowee(
+    Slice<Follow> findByFolloweeWithFollower(
             @Param("followee") User followee,
             Pageable pageable
     );

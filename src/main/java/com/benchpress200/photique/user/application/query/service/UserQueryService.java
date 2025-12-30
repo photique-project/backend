@@ -2,14 +2,15 @@ package com.benchpress200.photique.user.application.query.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
-import com.benchpress200.photique.exhibition.domain.repository.ExhibitionRepository;
-import com.benchpress200.photique.singlework.infrastructure.persistence.jpa.SingleWorkRepository;
+import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionQueryPort;
+import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.user.application.query.model.NicknameValidateQuery;
 import com.benchpress200.photique.user.application.query.model.UserSearchQuery;
 import com.benchpress200.photique.user.application.query.port.in.GetMyDetailsUseCase;
 import com.benchpress200.photique.user.application.query.port.in.GetUserDetailsUseCase;
 import com.benchpress200.photique.user.application.query.port.in.SearchUserUseCase;
 import com.benchpress200.photique.user.application.query.port.in.ValidateNicknameUseCase;
+import com.benchpress200.photique.user.application.query.port.out.persistence.FollowQueryPort;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.application.query.result.MyDetailsResult;
 import com.benchpress200.photique.user.application.query.result.NicknameValidateResult;
@@ -20,7 +21,6 @@ import com.benchpress200.photique.user.application.query.support.SearchedUsers;
 import com.benchpress200.photique.user.application.query.support.UserIds;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
-import com.benchpress200.photique.user.infrastructure.persistence.jpa.FollowRepository;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,11 +38,14 @@ public class UserQueryService implements
         GetUserDetailsUseCase,
         GetMyDetailsUseCase,
         SearchUserUseCase {
-    private final UserQueryPort userQueryPort;
-    private final SingleWorkRepository singleWorkRepository;
-    private final ExhibitionRepository exhibitionRepository;
-    private final FollowRepository followRepository;
+
     private final AuthenticationUserProviderPort authenticationUserProviderPort;
+
+    private final UserQueryPort userQueryPort;
+    private final SingleWorkQueryPort singleWorkQueryPort;
+    private final ExhibitionQueryPort exhibitionQueryPort;
+    private final FollowQueryPort followQueryPort;
+
 
     // @Transactional이 없기 때문에 조회 쿼리가 나갈 때 커넥션을 얻고 MySQL 오토커밋
     // 결과셋이 애플리케이션으로 반환되면 바로 커넥션 반납
@@ -58,22 +61,22 @@ public class UserQueryService implements
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 단일작품 카운팅
-        Long singleWorkCount = singleWorkRepository.countByWriter(user);
+        Long singleWorkCount = singleWorkQueryPort.countByWriter(user);
 
         // 전시회 카운팅
-        Long exhibitionCount = exhibitionRepository.countByWriter(user);
+        Long exhibitionCount = exhibitionQueryPort.countByWriter(user);
 
         // 본인'을' 팔로우하는 유저 카운팅
-        Long followerCount = followRepository.countByFollowee(user);
+        Long followerCount = followQueryPort.countByFollowee(user);
 
         // 본인'이' 팔로우하는 유저 카운팅
-        Long followingCount = followRepository.countByFollower(user);
+        Long followingCount = followQueryPort.countByFollower(user);
 
         // 요청 유저의 팔로우 유무확인을 위한 조회
         Long currentUserId = authenticationUserProviderPort.getCurrentUserId();
 
         // 본인 팔로우 유무 조회
-        boolean isFollowing = followRepository.existsByFollowerIdAndFolloweeId(currentUserId, userId);
+        boolean isFollowing = followQueryPort.existsByFollowerIdAndFolloweeId(currentUserId, userId);
 
         return UserDetailsResult.of(
                 user,
@@ -93,16 +96,16 @@ public class UserQueryService implements
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 단일작품 카운팅
-        Long singleWorkCount = singleWorkRepository.countByWriter(user);
+        Long singleWorkCount = singleWorkQueryPort.countByWriter(user);
 
         // 전시회 카운팅
-        Long exhibitionCount = exhibitionRepository.countByWriter(user);
+        Long exhibitionCount = exhibitionQueryPort.countByWriter(user);
 
         // 본인'을' 팔로우하는 유저 카운팅
-        Long followerCount = followRepository.countByFollowee(user);
+        Long followerCount = followQueryPort.countByFollowee(user);
 
         // 본인'이' 팔로우하는 유저 카운팅
-        Long followingCount = followRepository.countByFollower(user);
+        Long followingCount = followQueryPort.countByFollower(user);
 
         return MyDetailsResult.of(
                 user,
@@ -127,7 +130,7 @@ public class UserQueryService implements
         UserIds userIds = UserIds.from(userPage);
 
         // 검색 결과 유저들 중에서 요청 유저가 팔로우한 유저 셋으로 조회
-        Set<Long> followeeIdSet = followRepository.findFolloweeIds(currentUserId, userIds.values());
+        Set<Long> followeeIdSet = followQueryPort.findFolloweeIds(currentUserId, userIds.values());
         FolloweeIds followeeIds = FolloweeIds.from(followeeIdSet);
 
         // 각 유저마다 팔로우 여부를 확인

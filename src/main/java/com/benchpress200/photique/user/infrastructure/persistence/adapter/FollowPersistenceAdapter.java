@@ -72,8 +72,8 @@ public class FollowPersistenceAdapter implements
     }
 
     @Override
-    public Slice<Follow> findByFollowee(User followee, Pageable pageable) {
-        return followRepository.findByFollowee(followee, pageable);
+    public Slice<Follow> findByFolloweeWithFollower(User followee, Pageable pageable) {
+        return followRepository.findByFolloweeWithFollower(followee, pageable);
     }
 
     @Override

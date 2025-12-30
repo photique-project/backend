@@ -28,11 +28,12 @@ public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, 
 
     Page<SingleWorkLike> findByUserId(Long userId, Pageable pageable);
 
-    @Query(
-            "SELECT l.singleWork.id " +
-                    "FROM SingleWorkLike l " +
-                    "WHERE l.user.id = :userId " +
-                    "AND l.singleWork.id IN :singleWorkIds")
+    @Query("""
+            SELECT l.singleWork.id
+            FROM SingleWorkLike l
+            WHERE l.user.id = :userId
+            AND l.singleWork.id IN :singleWorkIds
+            """)
     Set<Long> findSingleWorkIds(
             @Param("userId") Long userId,
             @Param("singleWorkIds") List<Long> singleWorkIds

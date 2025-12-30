@@ -16,7 +16,7 @@ public interface SingleWorkTagRepository extends JpaRepository<SingleWorkTag, Lo
                     "JOIN FETCH swt.tag " +
                     "WHERE swt.singleWork = :singleWork"
     )
-    List<SingleWorkTag> findWithTag(@Param("singleWork") SingleWork singleWork);
+    List<SingleWorkTag> findBySingleWorkWithTag(@Param("singleWork") SingleWork singleWork);
 
     List<SingleWorkTag> findBySingleWork(SingleWork singleWork);
 

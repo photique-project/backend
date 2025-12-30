@@ -1,16 +1,15 @@
 package com.benchpress200.photique.user.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
-import com.benchpress200.photique.notification.domain.entity.Notification;
-import com.benchpress200.photique.notification.domain.enumeration.NotificationType;
-import com.benchpress200.photique.notification.domain.repository.NotificationRepository;
 import com.benchpress200.photique.user.application.command.port.in.FollowUseCase;
 import com.benchpress200.photique.user.application.command.port.in.UnfollowUseCase;
+import com.benchpress200.photique.user.application.command.port.out.event.FollowEventPublishPort;
 import com.benchpress200.photique.user.application.command.port.out.persistence.FollowCommandPort;
 import com.benchpress200.photique.user.application.query.port.out.persistence.FollowQueryPort;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
+import com.benchpress200.photique.user.domain.event.FollowEvent;
 import com.benchpress200.photique.user.domain.exception.AlreadyUnfollowException;
 import com.benchpress200.photique.user.domain.exception.DuplicatedFollowException;
 import com.benchpress200.photique.user.domain.exception.InvalidFollowRequestException;
@@ -21,16 +20,19 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class FollowCommandService implements
         FollowUseCase,
         UnfollowUseCase {
+    private final UserQueryPort userQueryPort;
+
     private final FollowCommandPort followCommandPort;
     private final FollowQueryPort followQueryPort;
-    private final UserQueryPort userQueryPort;
-    private final NotificationRepository notificationRepository;
+    private final FollowEventPublishPort followEventPublishPort;
+
     private final AuthenticationUserProviderPort authenticationUserProviderPort;
 
-    @Transactional
+    
     public void follow(Long followeeId) {
         // 팔로워 유저 조회
         Long followerId = authenticationUserProviderPort.getCurrentUserId();
@@ -58,18 +60,11 @@ public class FollowCommandService implements
         Follow follow = Follow.of(follower, followee);
         followCommandPort.save(follow);
 
-        // 팔로잉 유저(팔로우 요청받은 유저) 알림 데이터 저장
-        Notification notification = Notification.of(
-                followee,
-                NotificationType.FOLLOW,
-                followerId
-        );
-
-        notificationRepository.save(notification);
+        FollowEvent event = FollowEvent.of(followerId, followeeId);
+        followEventPublishPort.publishFollowEvent(event); // 트랜잭션 커밋 시 팔로우 알림 생성 이벤트 발행
     }
 
 
-    @Transactional
     public void unfollow(Long followeeId) {
         // 팔로워 유저 조회
         Long followerId = authenticationUserProviderPort.getCurrentUserId();
