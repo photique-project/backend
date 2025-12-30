@@ -4,34 +4,13 @@ import lombok.Getter;
 
 @Getter
 public class UserDetailsUpdateEvent {
-    private String oldProfileImageUrl;
-    private String newProfileImageUrl;
     private Long userId;
 
-    private UserDetailsUpdateEvent() {
-    }
-
-    public static UserDetailsUpdateEvent empty() {
-        return new UserDetailsUpdateEvent();
-    }
-
-    public void addOldProfileImageUrl(String oldProfileImageUrl) {
-        this.oldProfileImageUrl = oldProfileImageUrl;
-    }
-
-    public void addNewProfileImageUrl(String newProfileImageUrl) {
-        this.newProfileImageUrl = newProfileImageUrl;
-    }
-
-    public void addUserId(Long userId) {
+    private UserDetailsUpdateEvent(Long userId) {
         this.userId = userId;
     }
 
-    public boolean existsOldProfileImageUrl() {
-        return oldProfileImageUrl != null;
-    }
-
-    public boolean existsNewProfileImageUrl() {
-        return newProfileImageUrl != null;
+    public static UserDetailsUpdateEvent of(Long userId) {
+        return new UserDetailsUpdateEvent(userId);
     }
 }

@@ -2,12 +2,13 @@ package com.benchpress200.photique.user.infrastructure.event.listener;
 
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
-import com.benchpress200.photique.singlework.infrastructure.persistence.jpa.SingleWorkSearchRepository;
+import com.benchpress200.photique.singlework.infrastructure.persistence.elasticsearch.SingleWorkSearchRepository;
+import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.domain.event.ResisterEvent;
 import com.benchpress200.photique.user.domain.event.UserDetailsUpdateEvent;
+import com.benchpress200.photique.user.domain.event.UserProfileImageDeleteEvent;
+import com.benchpress200.photique.user.domain.event.UserProfileImageUploadEvent;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
-import com.benchpress200.photique.user.infrastructure.persistence.jpa.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,37 +27,28 @@ public class UserEventListener {
     private static final String DEFAULT_SORT_COLUMN = "createdAt";
 
     private final ImageUploaderPort imageUploaderPort;
-    private final UserRepository userRepository;
+    private final UserQueryPort userQueryPort;
     private final SingleWorkSearchRepository singleWorkSearchRepository;
 
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)
-    public void handleResisterEventIfRollback(ResisterEvent event) {
+    public void handleUserProfileImageUploadEventIfRollback(UserProfileImageUploadEvent event) {
         // 이미지 삭제 처리 실패하면 전역 예외 핸들러에서 로깅
         String imageUrl = event.getImageUrl();
         imageUploaderPort.delete(imageUrl);
     }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)
-    public void handleUserDetailsUpdateEventIfRollback(UserDetailsUpdateEvent event) {
-        // 새 프로파일 사진을 업로드하고 해당 트랜잭션이 롤백 됐다면 이미지 삭제 처리
-        if (event.existsNewProfileImageUrl()) {
-            String imageUrl = event.getNewProfileImageUrl();
-            imageUploaderPort.delete(imageUrl);
-        }
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleUserProfileImageDeleteEventIfCommit(UserProfileImageDeleteEvent event) {
+        String imageUrl = event.getImageUrl();
+        imageUploaderPort.delete(imageUrl);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUpdateUserDetailsEventIfCommit(UserDetailsUpdateEvent event) {
-        // 프로파일 사진 후 커밋됐다면 이전 프로파일 사진 제거
-        if (event.existsOldProfileImageUrl()) {
-            String imageUrl = event.getOldProfileImageUrl();
-            imageUploaderPort.delete(imageUrl);
-        }
-
         // FIXME: 이후 메시지 큐 도입한다면 배치 처리는 컨슈머에서 수행
         Long userId = event.getUserId();
-        User user = userRepository.findById(userId)
+        User user = userQueryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         Pageable pageable = PageRequest.of(

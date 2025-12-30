@@ -30,7 +30,7 @@ public class URL {
     // SINGLE WORK
     public static final String SINGLE_WORK_DOMAIN = "/singleworks";
     public static final String SINGLE_WORK_DATA = "/{singleworkId}";
-    public static final String LIKE = "/like";
+    public static final String LIKE = "/likes";
 
     // SINGLE WORK COMMENT
     public static final String SINGLE_WORK_COMMENT_DOMAIN = "/singleworks/{singleworkId}/comments";
@@ -39,7 +39,7 @@ public class URL {
     // EXHIBITION
     public static final String EXHIBITION_DOMAIN = "/exhibitions";
     public static final String EXHIBITION_DATA = "/{exhibitionId}";
-    public static final String BOOKMARK = "/bookmark";
+    public static final String BOOKMARK = "/bookmarks";
 
     // EXHIBITION COMMENT
     public static final String EXHIBITION_COMMENT_DOMAIN = "/exhibitions/{exhibitionId}/comments";

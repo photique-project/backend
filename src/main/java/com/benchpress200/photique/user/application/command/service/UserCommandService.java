@@ -21,8 +21,9 @@ import com.benchpress200.photique.user.application.query.port.out.persistence.Us
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
-import com.benchpress200.photique.user.domain.event.ResisterEvent;
 import com.benchpress200.photique.user.domain.event.UserDetailsUpdateEvent;
+import com.benchpress200.photique.user.domain.event.UserProfileImageDeleteEvent;
+import com.benchpress200.photique.user.domain.event.UserProfileImageUploadEvent;
 import com.benchpress200.photique.user.domain.exception.DuplicatedUserException;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
 import jakarta.transaction.Transactional;
@@ -49,9 +50,7 @@ public class UserCommandService implements
     private final UserEventPublishPort userEventPublishPort;
 
     private final ImageUploaderPort imageUploaderPort;
-
     private final PasswordEncoderPort passwordEncoderPort;
-
     private final AuthMailCodeQueryPort authMailCodeQueryPort;
 
     public void resister(ResisterCommand command) {
@@ -80,8 +79,8 @@ public class UserCommandService implements
             uploadedImageUrl = imageUploaderPort.upload(profileImage, profileImagePath);
 
             // 회원가입 유스케이스 롤백 시 업로드한 이미지 삭제하는 이벤트 발행
-            ResisterEvent event = ResisterEvent.of(uploadedImageUrl);
-            userEventPublishPort.publishResisterEvent(event);
+            UserProfileImageUploadEvent event = UserProfileImageUploadEvent.of(uploadedImageUrl);
+            userEventPublishPort.publishUserProfileImageUploadEvent(event);
         }
 
         // 새 유저 엔티티 변환 및 저장
@@ -123,24 +122,28 @@ public class UserCommandService implements
         // 프로필 이미지 업데이트
         MultipartFile newProfileImage = command.getProfileImage();
 
-        UserDetailsUpdateEvent event = UserDetailsUpdateEvent.empty();
-
         if (newProfileImage != null) { // null이면 프로필 이미지 유지
             String oldProfileImageUrl = user.getProfileImage();
-            event.addOldProfileImageUrl(oldProfileImageUrl);
+            UserProfileImageDeleteEvent userProfileImageDeleteEvent = UserProfileImageDeleteEvent.of(
+                    oldProfileImageUrl);
+            userEventPublishPort.publishUserProfileImageDeleteEvent(
+                    userProfileImageDeleteEvent); // 트랜잭션 커밋 시 이미지 삭제 처리 이벤트 발행
 
             if (newProfileImage.isEmpty()) { // 기본값으로 업데이트
                 user.updateProfileImage(null);
             } else {
                 String newProfileImageUrl = imageUploaderPort.upload(newProfileImage, profileImagePath);
-                event.addNewProfileImageUrl(newProfileImageUrl);
                 user.updateProfileImage(newProfileImageUrl);
+
+                UserProfileImageUploadEvent userProfileImageUploadEvent = UserProfileImageUploadEvent.of(
+                        newProfileImageUrl);
+                userEventPublishPort.publishUserProfileImageUploadEvent(
+                        userProfileImageUploadEvent); // 트랜잭션 롤백 시 이미지 삭제 처리 이벤트 발행
             }
         }
 
-        // 유저 업데이트 유스케이스 커밋 or 롤백 이벤트 발행
-        event.addUserId(userId);
-        userEventPublishPort.publishUserDetailsUpdateEvent(event);
+        UserDetailsUpdateEvent userDetailsUpdateEvent = UserDetailsUpdateEvent.of(userId);
+        userEventPublishPort.publishUserDetailsUpdateEvent(userDetailsUpdateEvent); // 트랜잭션 커밋 시 작가 데이터 ES 동기화 이벤트 발행
     }
 
     // 여기서 @Transactional이 없다면, 유저 엔티티를 조회한 후 엔티티 매니저를 close하기 떄문에

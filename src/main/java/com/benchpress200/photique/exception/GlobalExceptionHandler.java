@@ -14,14 +14,15 @@ import com.benchpress200.photique.image.infrastructure.exception.ImageDeleteExce
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploadException;
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploaderFileWriteException;
 import com.benchpress200.photique.notification.domain.exception.NotificationTargetSingleWorkNotFoundException;
+import com.benchpress200.photique.singlework.api.command.exception.InvalidFieldToUpdateException;
+import com.benchpress200.photique.singlework.api.command.exception.InvalidImageException;
+import com.benchpress200.photique.singlework.api.query.exception.InvalidFieldToSearch;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkAlreadyLikedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotOwnedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkWriterNotFoundException;
 import com.benchpress200.photique.singlework.infrastructure.exception.ElasticsearchMaxResultWindowException;
 import com.benchpress200.photique.singlework.infrastructure.exception.ElasticsearchSearchException;
-import com.benchpress200.photique.singlework.presentation.command.exception.InvalidFieldToUpdateException;
-import com.benchpress200.photique.singlework.presentation.command.exception.InvalidImageException;
-import com.benchpress200.photique.singlework.presentation.query.exception.InvalidFieldToSearch;
 import com.benchpress200.photique.user.api.command.exception.InvalidProfileImageException;
 import com.benchpress200.photique.user.domain.exception.DuplicatedFollowException;
 import com.benchpress200.photique.user.domain.exception.DuplicatedUserException;
@@ -364,6 +365,16 @@ public class GlobalExceptionHandler {
         return ResponseHandler.handleResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 SERVER_ERROR_MESSAGE
+        );
+    }
+
+    @ExceptionHandler(SingleWorkAlreadyLikedException.class)
+    public ResponseEntity<?> handleSingleWorkAlreadyLikedException(SingleWorkAlreadyLikedException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.CONFLICT,
+                errorMessage
         );
     }
 }

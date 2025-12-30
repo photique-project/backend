@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 public interface UserQueryPort {
     Optional<User> findById(Long id);
 
+    Optional<User> findActiveById(Long id);
+
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);

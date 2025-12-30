@@ -26,7 +26,7 @@ public interface FollowQueryPort {
 
     boolean existsByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
 
-    Slice<Follow> findByFollowee(
+    Slice<Follow> findByFolloweeWithFollower(
             User followee,
             Pageable pageable
     );

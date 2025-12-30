@@ -3,7 +3,7 @@ package com.benchpress200.photique.exhibition.domain;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
 import com.benchpress200.photique.exhibition.exception.ExhibitionException;
-import com.benchpress200.photique.exhibition.domain.repository.ExhibitionCommentRepository;
+import com.benchpress200.photique.exhibition.infrastructure.persistence.jpa.ExhibitionCommentRepository;
 import com.benchpress200.photique.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

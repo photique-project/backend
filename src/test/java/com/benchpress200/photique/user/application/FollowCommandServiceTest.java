@@ -3,7 +3,7 @@ package com.benchpress200.photique.user.application;
 import com.benchpress200.photique.TestContainerConfiguration;
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.notification.domain.entity.Notification;
-import com.benchpress200.photique.notification.domain.repository.NotificationRepository;
+import com.benchpress200.photique.notification.infrastructure.persistence.jpa.NotificationRepository;
 import com.benchpress200.photique.user.application.command.service.FollowCommandService;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;

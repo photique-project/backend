@@ -28,6 +28,11 @@ public class UserPersistenceAdapter implements
     }
 
     @Override
+    public Optional<User> findActiveById(Long id) {
+        return userRepository.findActiveById(id);
+    }
+
+    @Override
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
