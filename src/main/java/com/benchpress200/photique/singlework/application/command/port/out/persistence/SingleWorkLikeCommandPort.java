@@ -4,4 +4,6 @@ import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
 
 public interface SingleWorkLikeCommandPort {
     SingleWorkLike save(SingleWorkLike singleWorkLike);
+
+    void delete(SingleWorkLike singleWorkLike);
 }
