@@ -4,7 +4,6 @@ public class URL {
     // BASE
     public static final String BASE_URL = "/api/v1";
     public static final String ALL = "/*";
-    public static final String COMMENT_DOMAIN = "/comments";
 
     // AUTH
     public static final String AUTH_DOMAIN = "/auth";
@@ -32,9 +31,9 @@ public class URL {
     public static final String SINGLE_WORK_DATA = "/{singleworkId}";
     public static final String LIKE = "/likes";
 
-    // SINGLE WORK COMMENT
-    public static final String SINGLE_WORK_COMMENT_DOMAIN = "/singleworks/{singleworkId}/comments";
-    public static final String SINGLE_WORK_COMMENT_DATA = "/{commentId}";
+    // COMMENT
+    public static final String COMMENT_DOMAIN = "/comments";
+    public static final String COMMENT_DATA = "/{commentId}";
 
     // EXHIBITION
     public static final String EXHIBITION_DOMAIN = "/exhibitions";

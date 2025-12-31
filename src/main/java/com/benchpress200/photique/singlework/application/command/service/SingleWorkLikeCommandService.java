@@ -1,8 +1,8 @@
 package com.benchpress200.photique.singlework.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
-import com.benchpress200.photique.singlework.application.command.port.in.AddLikeToSingleWorkUseCase;
-import com.benchpress200.photique.singlework.application.command.port.in.CancelLikeToSingleWorkUseCase;
+import com.benchpress200.photique.singlework.application.command.port.in.AddSingleWorkLikeUseCase;
+import com.benchpress200.photique.singlework.application.command.port.in.CancelSingleWorkLikeUseCase;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkLikeCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
@@ -21,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class SingleWorkLikeCommandService implements
-        AddLikeToSingleWorkUseCase,
-        CancelLikeToSingleWorkUseCase {
+        AddSingleWorkLikeUseCase,
+        CancelSingleWorkLikeUseCase {
 
     private final AuthenticationUserProviderPort authenticationUserProvider;
 
@@ -32,7 +32,7 @@ public class SingleWorkLikeCommandService implements
     private final SingleWorkLikeCommandPort singleWorkLikeCommandPort;
 
     @Override
-    public void addLikeToSingleWork(Long singleWorkId) {
+    public void addSingleWorkLike(Long singleWorkId) {
         // 요청 유저 아이디 꺼내기
         Long currentUserId = authenticationUserProvider.getCurrentUserId();
         User user = userQueryPort.findActiveById(currentUserId)
@@ -53,7 +53,7 @@ public class SingleWorkLikeCommandService implements
     }
 
     @Override
-    public void cancelLikeToSingleWork(Long singleWorkId) {
+    public void cancelSingleWorkLike(Long singleWorkId) {
         // 요청 유저 아이디 꺼내기
         Long currentUserId = authenticationUserProvider.getCurrentUserId();
         User user = userQueryPort.findActiveById(currentUserId)
