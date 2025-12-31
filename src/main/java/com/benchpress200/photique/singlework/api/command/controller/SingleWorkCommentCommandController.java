@@ -1,0 +1,39 @@
+package com.benchpress200.photique.singlework.api.command.controller;
+
+import com.benchpress200.photique.common.constant.PathVariableName;
+import com.benchpress200.photique.common.constant.URL;
+import com.benchpress200.photique.common.response.ResponseHandler;
+import com.benchpress200.photique.singlework.api.command.constant.SingleWorkCommandResponseMessage;
+import com.benchpress200.photique.singlework.api.command.request.SingleWorkCommentCreateRequest;
+import com.benchpress200.photique.singlework.application.command.model.SingleWorkCommentCreateCommand;
+import com.benchpress200.photique.singlework.application.command.port.in.CreateSingleWorkCommentUseCase;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(URL.BASE_URL + URL.SINGLE_WORK_DOMAIN + URL.SINGLE_WORK_DATA + URL.COMMENT_DOMAIN)
+public class SingleWorkCommentCommandController {
+    private final CreateSingleWorkCommentUseCase createSingleWorkCommentUseCase;
+
+    @PostMapping
+    public ResponseEntity<?> createSingleWorkComment(
+            @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId,
+            @RequestBody @Valid SingleWorkCommentCreateRequest request
+    ) {
+        SingleWorkCommentCreateCommand command = request.toCommand(singleWorkId);
+        createSingleWorkCommentUseCase.createSingleWorkComment(command);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.CREATED,
+                SingleWorkCommandResponseMessage.COMMENT_CREATE_SUCCESS
+        );
+    }
+}

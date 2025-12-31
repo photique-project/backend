@@ -29,8 +29,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "singleworks")
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "singleworks")
 public class SingleWork {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

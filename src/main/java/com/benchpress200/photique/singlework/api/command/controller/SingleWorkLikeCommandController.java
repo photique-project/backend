@@ -4,8 +4,8 @@ import com.benchpress200.photique.common.constant.PathVariableName;
 import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.api.command.constant.SingleWorkCommandResponseMessage;
-import com.benchpress200.photique.singlework.application.command.port.in.AddLikeToSingleWorkUseCase;
-import com.benchpress200.photique.singlework.application.command.port.in.CancelLikeToSingleWorkUseCase;
+import com.benchpress200.photique.singlework.application.command.port.in.AddSingleWorkLikeUseCase;
+import com.benchpress200.photique.singlework.application.command.port.in.CancelSingleWorkLikeUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping(URL.BASE_URL + URL.SINGLE_WORK_DOMAIN + URL.SINGLE_WORK_DATA + URL.LIKE)
 public class SingleWorkLikeCommandController {
-    private final AddLikeToSingleWorkUseCase addLikeToSingleWorkUseCase;
-    private final CancelLikeToSingleWorkUseCase cancelLikeToSingleWorkUseCase;
+    private final AddSingleWorkLikeUseCase addSingleWorkLikeUseCase;
+    private final CancelSingleWorkLikeUseCase cancelSingleWorkLikeUseCase;
 
     @PostMapping
-    public ResponseEntity<?> addLikeToSingleWork(
+    public ResponseEntity<?> addSingleWorkLike(
             @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId
     ) {
-        addLikeToSingleWorkUseCase.addLikeToSingleWork(singleWorkId);
+        addSingleWorkLikeUseCase.addSingleWorkLike(singleWorkId);
 
         return ResponseHandler.handleResponse(
                 HttpStatus.CREATED,
@@ -35,11 +35,11 @@ public class SingleWorkLikeCommandController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> cancelLikeToSingleWork(
+    public ResponseEntity<?> cancelSingleWorkLike(
             @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId
     ) {
-        cancelLikeToSingleWorkUseCase.cancelLikeToSingleWork(singleWorkId);
-        
+        cancelSingleWorkLikeUseCase.cancelSingleWorkLike(singleWorkId);
+
         return ResponseHandler.handleResponse(
                 HttpStatus.NO_CONTENT
         );
