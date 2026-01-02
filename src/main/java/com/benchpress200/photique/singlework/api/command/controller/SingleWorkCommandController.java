@@ -9,8 +9,8 @@ import com.benchpress200.photique.singlework.api.command.request.SingleWorkCreat
 import com.benchpress200.photique.singlework.api.command.request.SingleWorkUpdateRequest;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCreateCommand;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkUpdateCommand;
+import com.benchpress200.photique.singlework.application.command.port.in.DeleteSingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.PostSingleWorkUseCase;
-import com.benchpress200.photique.singlework.application.command.port.in.RemoveSingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.UpdateSingleWorkDetailsUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class SingleWorkCommandController {
     private final PostSingleWorkUseCase postSingleWorkUseCase;
     private final UpdateSingleWorkDetailsUseCase updateSingleWorkDetailsUseCase;
-    private final RemoveSingleWorkUseCase removeSingleWorkUseCase;
+    private final DeleteSingleWorkUseCase deleteSingleWorkUseCase;
 
     @PostMapping(
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -64,10 +64,10 @@ public class SingleWorkCommandController {
     }
 
     @DeleteMapping(URL.SINGLE_WORK_DATA)
-    public ResponseEntity<?> removeSingleWork(
+    public ResponseEntity<?> deleteSingleWork(
             @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId
     ) {
-        removeSingleWorkUseCase.removeSingleWork(singleWorkId);
+        deleteSingleWorkUseCase.deleteSingleWork(singleWorkId);
 
         return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);
     }

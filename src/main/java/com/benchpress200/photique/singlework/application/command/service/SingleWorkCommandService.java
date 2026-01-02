@@ -4,14 +4,13 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCreateCommand;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkUpdateCommand;
+import com.benchpress200.photique.singlework.application.command.port.in.DeleteSingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.PostSingleWorkUseCase;
-import com.benchpress200.photique.singlework.application.command.port.in.RemoveSingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.UpdateSingleWorkDetailsUseCase;
 import com.benchpress200.photique.singlework.application.command.port.out.event.SingleWorkEventPublishPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkTagCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
-import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkTagQueryPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
@@ -46,7 +45,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class SingleWorkCommandService implements
         PostSingleWorkUseCase,
         UpdateSingleWorkDetailsUseCase,
-        RemoveSingleWorkUseCase {
+        DeleteSingleWorkUseCase {
     @Value("${cloud.aws.s3.path.single-work}")
     private String imagePath;
 
@@ -58,7 +57,6 @@ public class SingleWorkCommandService implements
     private final SingleWorkCommandPort singleWorkCommandPort;
     private final SingleWorkQueryPort singleWorkQueryPort;
     private final SingleWorkTagCommandPort singleWorkTagCommandPort;
-    private final SingleWorkTagQueryPort singleWorkTagQueryPort;
     private final SingleWorkEventPublishPort singleWorkEventPublishPort;
 
     private final TagCommandPort tagCommandPort;
@@ -187,23 +185,24 @@ public class SingleWorkCommandService implements
     }
 
     // FIXME: 삭제 처리할 때 관련 댓글 처리 어떻게 할지, deletedAt 이 null 아닌 데이터를 어느 시점에 어떻게 처리할지 고민
-    public void removeSingleWork(Long singleWorkId) {
+    public void deleteSingleWork(Long singleWorkId) {
         // 작품 조회
-        SingleWork singleWork = singleWorkQueryPort.findByIdWithWriter(singleWorkId)
-                .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
+        singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
+                .ifPresent(singleWork -> { // 존재한다면 삭제 처리
+                    Long writerId = authenticationUserProviderPort.getCurrentUserId();
 
-        Long writerId = authenticationUserProviderPort.getCurrentUserId();
+                    // 요청한 유저가 해당 단일작품의 주인이 아닐 때
+                    if (!singleWork.isOwnedBy(writerId)) {
+                        throw new SingleWorkNotOwnedException();
+                    }
 
-        // 요청한 유저가 해당 단일작품의 주인이 아닐 때
-        if (!singleWork.isOwnedBy(writerId)) {
-            throw new SingleWorkNotOwnedException();
-        }
+                    singleWork.remove();
 
-        singleWork.remove();
+                    // 단일작품 MySQL-ES 동기화 이벤트 발행
+                    SingleWorkRemoveEvent event = SingleWorkRemoveEvent.of(singleWorkId);
+                    singleWorkEventPublishPort.publishSingleWorkRemoveEvent(event);
+                });
 
-        // 단일작품 MySQL-ES 동기화 이벤트 발행
-        SingleWorkRemoveEvent event = SingleWorkRemoveEvent.of(singleWorkId);
-        singleWorkEventPublishPort.publishSingleWorkRemoveEvent(event);
     }
 
     private void attachTags(SingleWork singleWork, List<String> tagNames) {
