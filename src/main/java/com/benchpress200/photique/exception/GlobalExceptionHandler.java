@@ -18,6 +18,8 @@ import com.benchpress200.photique.singlework.api.command.exception.InvalidFieldT
 import com.benchpress200.photique.singlework.api.command.exception.InvalidImageException;
 import com.benchpress200.photique.singlework.api.query.exception.InvalidFieldToSearch;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkAlreadyLikedException;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkCommentNotFoundException;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkCommentNotOwnedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotOwnedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkWriterNotFoundException;
@@ -310,7 +312,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 단일작품 업데이트 요청 시, 단알직품의 주인이 아닌 유저가 요청했을 때 예외 처리 응답
+    // 단일작품 업데이트 요청 시, 단일작품의 주인이 아닌 유저가 요청했을 때 예외 처리 응답
     @ExceptionHandler(SingleWorkNotOwnedException.class)
     public ResponseEntity<?> handleSingleWorkNotOwnedException(SingleWorkNotOwnedException e) {
         String errorMessage = e.getMessage();
@@ -368,12 +370,35 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // 중복 좋아요 예외 처리 응답
     @ExceptionHandler(SingleWorkAlreadyLikedException.class)
     public ResponseEntity<?> handleSingleWorkAlreadyLikedException(SingleWorkAlreadyLikedException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
                 HttpStatus.CONFLICT,
+                errorMessage
+        );
+    }
+
+    // 존재하지 않는 댓글 조회 예외 처리 응답
+    @ExceptionHandler(SingleWorkCommentNotFoundException.class)
+    public ResponseEntity<?> handleSingleWorkCommentNotFoundException(SingleWorkCommentNotFoundException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NOT_FOUND,
+                errorMessage
+        );
+    }
+
+    // 단일작품 댓글의 주인이 아닌 유저가 해당 댓글 쓰기 요청했을 때 예외 처리 응답
+    @ExceptionHandler(SingleWorkCommentNotOwnedException.class)
+    public ResponseEntity<?> handleSingleWorkCommentNotOwnedException(SingleWorkCommentNotOwnedException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.FORBIDDEN,
                 errorMessage
         );
     }

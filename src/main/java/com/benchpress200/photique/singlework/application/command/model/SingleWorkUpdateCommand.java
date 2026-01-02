@@ -9,8 +9,8 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
-@Builder
 @Getter
+@Builder
 public class SingleWorkUpdateCommand {
     private Long singleWorkId;
 
