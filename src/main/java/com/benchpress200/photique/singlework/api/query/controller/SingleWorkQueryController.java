@@ -7,7 +7,7 @@ import com.benchpress200.photique.singlework.api.query.constant.SingleWorkQueryR
 import com.benchpress200.photique.singlework.api.query.request.SingleWorkSearchRequest;
 import com.benchpress200.photique.singlework.api.query.response.SingleWorkDetailsResponse;
 import com.benchpress200.photique.singlework.api.query.response.SingleWorkSearchResponse;
-import com.benchpress200.photique.singlework.application.query.model.SearchSingleWorksQuery;
+import com.benchpress200.photique.singlework.application.query.model.SingleWorkSearchQuery;
 import com.benchpress200.photique.singlework.application.query.port.in.GetSingleWorkDetailsUseCase;
 import com.benchpress200.photique.singlework.application.query.port.in.SearchSingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkDetailsResult;
@@ -47,7 +47,7 @@ public class SingleWorkQueryController {
     public ResponseEntity<?> searchSingleWork(
             @ModelAttribute @Valid SingleWorkSearchRequest request
     ) {
-        SearchSingleWorksQuery query = request.toQuery();
+        SingleWorkSearchQuery query = request.toQuery();
         SingleWorkSearchResult result = searchSingleWorkUseCase.searchSingleWork(
                 query);
         SingleWorkSearchResponse response = SingleWorkSearchResponse.from(result);

@@ -57,7 +57,7 @@ public class UserQueryService implements
     }
 
     public UserDetailsResult getUserDetails(Long userId) {
-        User user = userQueryPort.findById(userId)
+        User user = userQueryPort.findActiveById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 단일작품 카운팅
@@ -92,7 +92,7 @@ public class UserQueryService implements
         // 인증된 유저 id 조회
         Long userId = authenticationUserProviderPort.getCurrentUserId();
 
-        User user = userQueryPort.findById(userId)
+        User user = userQueryPort.findActiveById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 단일작품 카운팅

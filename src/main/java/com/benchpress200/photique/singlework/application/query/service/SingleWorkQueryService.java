@@ -2,7 +2,7 @@ package com.benchpress200.photique.singlework.application.query.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
-import com.benchpress200.photique.singlework.application.query.model.SearchSingleWorksQuery;
+import com.benchpress200.photique.singlework.application.query.model.SingleWorkSearchQuery;
 import com.benchpress200.photique.singlework.application.query.port.in.GetSingleWorkDetailsUseCase;
 import com.benchpress200.photique.singlework.application.query.port.in.SearchSingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
@@ -84,7 +84,7 @@ public class SingleWorkQueryService implements
         );
     }
 
-    public SingleWorkSearchResult searchSingleWork(SearchSingleWorksQuery query) {
+    public SingleWorkSearchResult searchSingleWork(SingleWorkSearchQuery query) {
         Target target = query.getTarget();
         String keyword = query.getKeyword();
         List<Category> categories = query.getCategories();
