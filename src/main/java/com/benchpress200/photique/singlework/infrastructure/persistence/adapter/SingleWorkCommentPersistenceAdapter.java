@@ -23,6 +23,11 @@ public class SingleWorkCommentPersistenceAdapter implements
     }
 
     @Override
+    public void delete(SingleWorkComment singleWorkComment) {
+        singleWorkCommentRepository.delete(singleWorkComment);
+    }
+
+    @Override
     public Optional<SingleWorkComment> findById(Long id) {
         return singleWorkCommentRepository.findById(id);
     }

@@ -4,6 +4,7 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCommentCreateCommand;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCommentUpdateCommand;
 import com.benchpress200.photique.singlework.application.command.port.in.CreateSingleWorkCommentUseCase;
+import com.benchpress200.photique.singlework.application.command.port.in.DeleteSingleWorkCommentUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.UpdateSingleWorkCommentUseCase;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommentCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkCommentQueryPort;
@@ -25,7 +26,8 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class SingleWorkCommentCommandService implements
         CreateSingleWorkCommentUseCase,
-        UpdateSingleWorkCommentUseCase {
+        UpdateSingleWorkCommentUseCase,
+        DeleteSingleWorkCommentUseCase {
     private final AuthenticationUserProviderPort authenticationUserProvider;
 
     private final UserQueryPort userQueryPort;
@@ -69,5 +71,19 @@ public class SingleWorkCommentCommandService implements
         // 댓글 업데이트
         String content = command.getContent();
         singleWorkComment.updateContent(content);
+    }
+
+    @Override
+    public void deleteSingleWorkComment(Long singleWorkCommentId) {
+        singleWorkCommentQueryPort.findById(singleWorkCommentId)
+                .ifPresent(singleWorkComment -> {
+                    Long writerId = authenticationUserProvider.getCurrentUserId();
+
+                    if (!singleWorkComment.isOwnedBy(writerId)) {
+                        throw new SingleWorkCommentNotOwnedException();
+                    }
+
+                    singleWorkCommentCommandPort.delete(singleWorkComment);
+                });
     }
 }
