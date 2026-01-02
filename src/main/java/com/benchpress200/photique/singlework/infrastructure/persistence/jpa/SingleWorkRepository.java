@@ -18,7 +18,7 @@ public interface SingleWorkRepository extends JpaRepository<SingleWork, Long> {
             WHERE sw.id = :id
             AND sw.deletedAt IS NULL
             """)
-    Optional<SingleWork> findActiveById(Long id);
+    Optional<SingleWork> findActiveById(@Param("id") Long id);
 
     @Query("""
             SELECT sw

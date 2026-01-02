@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 
 @Getter
 @Builder
-public class SearchSingleWorksQuery {
+public class SingleWorkSearchQuery {
     private Target target;
     private String keyword;
     private List<Category> categories;

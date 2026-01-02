@@ -1,24 +1,19 @@
 package com.benchpress200.photique.singlework.infrastructure.persistence.jpa;
 
-import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
-import com.benchpress200.photique.user.domain.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface SingleWorkCommentRepository extends JpaRepository<SingleWorkComment, Long> {
-    Page<SingleWorkComment> findBySingleWorkId(Long singleWorkId, Pageable pageable);
 
-    void deleteBySingleWorkId(Long singleWorkId);
-
-    Long countBySingleWorkId(Long singleWorkId);
-
-    void deleteByWriter(User writer);
-
-    void deleteBySingleWork(SingleWork singleWork);
-
-    Long countBySingleWork(SingleWork singleWork);
-
-    Page<SingleWorkComment> findBySingleWork(SingleWork singleWork, Pageable pageable);
+    @Query("""
+            SELECT swc
+            FROM SingleWorkComment swc
+            JOIN FETCH swc.writer
+            WHERE swc.singleWork.id = :singleWorkId
+            """)
+    Page<SingleWorkComment> findBySingleWorkIdWithWriter(@Param("singleWorkId") Long singleWorkId, Pageable pageable);
 }

@@ -4,7 +4,7 @@ import com.benchpress200.photique.singlework.api.query.exception.InvalidFieldToS
 import com.benchpress200.photique.singlework.api.validator.CategoryValidator;
 import com.benchpress200.photique.singlework.api.validator.SortValidator;
 import com.benchpress200.photique.singlework.api.validator.annotation.Enum;
-import com.benchpress200.photique.singlework.application.query.model.SearchSingleWorksQuery;
+import com.benchpress200.photique.singlework.application.query.model.SingleWorkSearchQuery;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.Target;
 import jakarta.validation.constraints.Max;
@@ -45,7 +45,7 @@ public class SingleWorkSearchRequest {
 
     private String sort;
 
-    public SearchSingleWorksQuery toQuery() {
+    public SingleWorkSearchQuery toQuery() {
         if (categories == null) {
             categories = new ArrayList<>();
         }
@@ -66,7 +66,7 @@ public class SingleWorkSearchRequest {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         // target null 넣었을 때 WORK로 박히는지 확인
-        return SearchSingleWorksQuery.builder()
+        return SingleWorkSearchQuery.builder()
                 .target(Target.from(target))
                 .keyword(keyword)
                 .categories(
