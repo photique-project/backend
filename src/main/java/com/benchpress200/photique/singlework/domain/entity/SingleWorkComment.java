@@ -62,4 +62,8 @@ public class SingleWorkComment {
     public void updateContent(String content) {
         this.content = content;
     }
+
+    public boolean isOwnedBy(Long writerId) {
+        return writer.getId().equals(writerId);
+    }
 }

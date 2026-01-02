@@ -2,11 +2,16 @@ package com.benchpress200.photique.singlework.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCommentCreateCommand;
+import com.benchpress200.photique.singlework.application.command.model.SingleWorkCommentUpdateCommand;
 import com.benchpress200.photique.singlework.application.command.port.in.CreateSingleWorkCommentUseCase;
+import com.benchpress200.photique.singlework.application.command.port.in.UpdateSingleWorkCommentUseCase;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommentCommandPort;
+import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkCommentQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkCommentNotFoundException;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkCommentNotOwnedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -19,12 +24,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Transactional
 public class SingleWorkCommentCommandService implements
-        CreateSingleWorkCommentUseCase {
+        CreateSingleWorkCommentUseCase,
+        UpdateSingleWorkCommentUseCase {
     private final AuthenticationUserProviderPort authenticationUserProvider;
 
     private final UserQueryPort userQueryPort;
     private final SingleWorkQueryPort singleWorkQueryPort;
 
+    private final SingleWorkCommentQueryPort singleWorkCommentQueryPort;
     private final SingleWorkCommentCommandPort singleWorkCommentCommandPort;
 
 
@@ -43,5 +50,24 @@ public class SingleWorkCommentCommandService implements
         // 댓글 생성 및 저장
         SingleWorkComment singleWorkComment = command.toEntity(writer, singleWork);
         singleWorkCommentCommandPort.save(singleWorkComment);
+    }
+
+    @Override
+    public void updateSingleWorkComment(SingleWorkCommentUpdateCommand command) {
+        // 댓글 조회
+        Long singleWorkCommentId = command.getCommentId();
+        SingleWorkComment singleWorkComment = singleWorkCommentQueryPort.findById(singleWorkCommentId)
+                .orElseThrow(() -> new SingleWorkCommentNotFoundException(singleWorkCommentId));
+
+        // 작성자 맞는지 확인
+        Long writerId = authenticationUserProvider.getCurrentUserId();
+
+        if (!singleWorkComment.isOwnedBy(writerId)) {
+            throw new SingleWorkCommentNotOwnedException();
+        }
+
+        // 댓글 업데이트
+        String content = command.getContent();
+        singleWorkComment.updateContent(content);
     }
 }

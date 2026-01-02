@@ -4,6 +4,7 @@ import com.benchpress200.photique.singlework.application.command.port.out.persis
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkCommentQueryPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
 import com.benchpress200.photique.singlework.infrastructure.persistence.jpa.SingleWorkCommentRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,11 @@ public class SingleWorkCommentPersistenceAdapter implements
     @Override
     public SingleWorkComment save(SingleWorkComment singleWorkComment) {
         return singleWorkCommentRepository.save(singleWorkComment);
+    }
+
+    @Override
+    public Optional<SingleWorkComment> findById(Long id) {
+        return singleWorkCommentRepository.findById(id);
     }
 
     @Override
