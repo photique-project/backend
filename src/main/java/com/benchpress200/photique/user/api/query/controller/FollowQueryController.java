@@ -1,7 +1,7 @@
 package com.benchpress200.photique.user.api.query.controller;
 
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.constant.PathVariableName;
-import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.api.query.constant.FollowQueryResponseMessage;
 import com.benchpress200.photique.user.api.query.request.FolloweeSearchRequest;
@@ -21,17 +21,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA + URL.FOLLOW_DOMAIN)
 @RequiredArgsConstructor
 public class FollowQueryController {
     private final SearchFollowerUseCase searchFollowerUseCase;
     private final SearchFolloweeUseCase searchFolloweeUseCase;
 
-    @GetMapping(URL.FOLLOWER)
+    @GetMapping(ApiPath.FOLLOWER)
     public ResponseEntity<?> searchFollower(
             @PathVariable(PathVariableName.USER_ID) Long userId,
             @ModelAttribute @Valid FollowerSearchRequest request
@@ -47,7 +45,7 @@ public class FollowQueryController {
         );
     }
 
-    @GetMapping(URL.FOLLOWEE)
+    @GetMapping(ApiPath.FOLLOWEE)
     public ResponseEntity<?> searchFollowee(
             @PathVariable(PathVariableName.USER_ID) Long userId,
             @ModelAttribute @Valid FolloweeSearchRequest request

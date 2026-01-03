@@ -1,7 +1,7 @@
 package com.benchpress200.photique.user.api.query.controller;
 
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.constant.PathVariableName;
-import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.api.query.constant.UserQueryResponseMessage;
 import com.benchpress200.photique.user.api.query.request.NicknameValidateRequest;
@@ -23,16 +23,13 @@ import com.benchpress200.photique.user.application.query.result.UserSearchResult
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(URL.BASE_URL + URL.USER_DOMAIN)
 @RequiredArgsConstructor
 public class UserQueryController {
     private final ValidateNicknameUseCase validateNicknameUseCase;
@@ -40,10 +37,7 @@ public class UserQueryController {
     private final GetMyDetailsUseCase getMyDetailsUseCase;
     private final SearchUserUseCase searchUserUseCase;
 
-    @GetMapping(
-            path = URL.VALIDATE_NICKNAME,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @GetMapping(ApiPath.USER_NICKNAME_EXISTS)
     public ResponseEntity<?> validateNickname(
             @ModelAttribute @Valid NicknameValidateRequest request
     ) {
@@ -58,10 +52,7 @@ public class UserQueryController {
         );
     }
 
-    @GetMapping(
-            path = URL.USER_DATA,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @GetMapping(ApiPath.USER_DATA)
     public ResponseEntity<?> getUserDetails(@PathVariable(PathVariableName.USER_ID) Long userId) {
         UserDetailsResult result = getUserDetailsUseCase.getUserDetails(userId);
         UserDetailsResponse response = UserDetailsResponse.from(result);
@@ -73,10 +64,7 @@ public class UserQueryController {
         );
     }
 
-    @GetMapping(
-            path = URL.MY_DATA,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @GetMapping(ApiPath.USER_MY_DATA)
     public ResponseEntity<?> getMyDetails() {
         MyDetailsResult result = getMyDetailsUseCase.getMyDetails();
         MyDetailsResponse response = MyDetailsResponse.from(result);
@@ -88,7 +76,7 @@ public class UserQueryController {
         );
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(ApiPath.USER_ROOT)
     public ResponseEntity<?> searchUser(
             @ModelAttribute @Valid UserSearchRequest request
     ) {

@@ -1,7 +1,7 @@
 package com.benchpress200.photique.singlework.api.command.controller;
 
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.constant.PathVariableName;
-import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.api.command.constant.SingleWorkCommandResponseMessage;
 import com.benchpress200.photique.singlework.api.command.request.SingleWorkCommentCreateRequest;
@@ -20,18 +20,16 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(URL.BASE_URL + URL.SINGLE_WORK_DOMAIN + URL.SINGLE_WORK_DATA + URL.COMMENT_DOMAIN)
 public class SingleWorkCommentCommandController {
     private final CreateSingleWorkCommentUseCase createSingleWorkCommentUseCase;
     private final UpdateSingleWorkCommentUseCase updateSingleWorkCommentUseCase;
     private final DeleteSingleWorkCommentUseCase deleteSingleWorkCommentUseCase;
 
-    @PostMapping
+    @PostMapping(ApiPath.SINGLEWORK_COMMENT)
     public ResponseEntity<?> createSingleWorkComment(
             @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId,
             @RequestBody @Valid SingleWorkCommentCreateRequest request
@@ -45,7 +43,7 @@ public class SingleWorkCommentCommandController {
         );
     }
 
-    @PatchMapping(URL.COMMENT_DATA)
+    @PatchMapping(ApiPath.SINGLEWORK_COMMENT_DATA)
     public ResponseEntity<?> updateSingleWorkComment(
             @PathVariable(PathVariableName.COMMENT_ID) Long commentId,
             @RequestBody @Valid SingleWorkCommentUpdateRequest request
@@ -58,7 +56,7 @@ public class SingleWorkCommentCommandController {
         );
     }
 
-    @DeleteMapping(URL.COMMENT_DATA)
+    @DeleteMapping(ApiPath.SINGLEWORK_COMMENT_DATA)
     public ResponseEntity<?> deleteSingleWorkComment(
             @PathVariable(PathVariableName.COMMENT_ID) Long commentId
     ) {

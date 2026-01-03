@@ -1,7 +1,7 @@
 package com.benchpress200.photique.singlework.api.query.controller;
 
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.constant.PathVariableName;
-import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.api.query.constant.SingleWorkQueryResponseMessage;
 import com.benchpress200.photique.singlework.api.query.request.SingleWorkCommentsRequest;
@@ -16,16 +16,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(URL.BASE_URL + URL.SINGLE_WORK_DOMAIN + URL.SINGLE_WORK_DATA + URL.COMMENT_DOMAIN)
 public class SingleWorkCommentQueryController {
     private final GetSingleWorkCommentsUseCase getSingleWorkCommentsUseCase;
 
-    @GetMapping
+    @GetMapping(ApiPath.SINGLEWORK_COMMENT)
     public ResponseEntity<?> getSingleWorkComments(
             @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId,
             @ModelAttribute @Valid SingleWorkCommentsRequest request

@@ -1,7 +1,7 @@
 package com.benchpress200.photique.singlework.api.query.controller;
 
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.constant.PathVariableName;
-import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.api.query.constant.SingleWorkQueryResponseMessage;
 import com.benchpress200.photique.singlework.api.query.request.SingleWorkSearchRequest;
@@ -19,17 +19,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(URL.BASE_URL + URL.SINGLE_WORK_DOMAIN)
 @RequiredArgsConstructor
 public class SingleWorkQueryController {
     private final GetSingleWorkDetailsUseCase getSingleWorkDetailsUseCase;
     private final SearchSingleWorkUseCase searchSingleWorkUseCase;
 
-    @GetMapping(URL.SINGLE_WORK_DATA)
+    @GetMapping(ApiPath.SINGLEWORK_DATA)
     public ResponseEntity<?> getSingleWorkDetails(
             @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleworkId
     ) {
@@ -43,7 +41,7 @@ public class SingleWorkQueryController {
         );
     }
 
-    @GetMapping
+    @GetMapping(ApiPath.SINGLEWORK_ROOT)
     public ResponseEntity<?> searchSingleWork(
             @ModelAttribute @Valid SingleWorkSearchRequest request
     ) {

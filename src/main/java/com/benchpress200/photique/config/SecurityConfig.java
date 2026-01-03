@@ -3,7 +3,7 @@ package com.benchpress200.photique.config;
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
 import com.benchpress200.photique.auth.infrastructure.security.filter.JwtFilter;
 import com.benchpress200.photique.auth.infrastructure.security.filter.LoginFilter;
-import com.benchpress200.photique.common.constant.URL;
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +31,9 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 @EnableMethodSecurity
 @EnableWebSecurity
 public class SecurityConfig {
+    private static final String ALL = "/*";
+    private static final String COMMENT_DOMAIN = "/comments";
+
     private final AuthenticationTokenManagerPort authenticationTokenManagerPort;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final ObjectMapper objectMapper;
@@ -58,7 +61,7 @@ public class SecurityConfig {
                 authenticationTokenManagerPort,
                 objectMapper
         );
-        loginFilter.setFilterProcessesUrl(URL.BASE_URL + URL.AUTH_DOMAIN + URL.LOGIN);
+        loginFilter.setFilterProcessesUrl(ApiPath.AUTH_LOGIN);
 
         http // jwt 인증 방식을 위한 기본 설정
                 .csrf(AbstractHttpConfigurer::disable)
@@ -71,31 +74,30 @@ public class SecurityConfig {
         http // 인증 API 설정
                 .authorizeHttpRequests((auth) -> auth
 
-                        .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.LOGIN).permitAll()
-                        .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.JOIN_MAIL).permitAll()
-                        .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.PASSWORD_MAIL)
+                        .requestMatchers(HttpMethod.POST, ApiPath.AUTH_LOGIN).permitAll()
+                        .requestMatchers(HttpMethod.POST, ApiPath.AUTH_MAIL_JOIN).permitAll()
+                        .requestMatchers(HttpMethod.POST, ApiPath.AUTH_MAIL_PASSWORD)
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.VALIDATE_CODE)
+                        .requestMatchers(HttpMethod.POST, ApiPath.AUTH_CODE)
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.AUTH_DOMAIN + URL.REFRESH_TOKEN)
+                        .requestMatchers(HttpMethod.POST, ApiPath.AUTH_REFRESH_TOKEN)
                         .permitAll()
 
-                        .requestMatchers(HttpMethod.POST, URL.BASE_URL + URL.USER_DOMAIN).permitAll()
-                        .requestMatchers(HttpMethod.GET, URL.BASE_URL + URL.USER_DOMAIN + URL.VALIDATE_NICKNAME)
+                        .requestMatchers(HttpMethod.POST, ApiPath.USER_ROOT).permitAll()
+                        .requestMatchers(HttpMethod.GET, ApiPath.USER_NICKNAME_EXISTS)
                         .permitAll()
-                        .requestMatchers(HttpMethod.PATCH, URL.BASE_URL + URL.USER_DOMAIN + URL.PASSWORD).permitAll()
+                        .requestMatchers(HttpMethod.PATCH, ApiPath.USER_PASSWORD_RESET).permitAll()
 
-                        .requestMatchers(HttpMethod.GET, URL.BASE_URL + URL.SINGLE_WORK_DOMAIN).permitAll()
-                        .requestMatchers(HttpMethod.GET, URL.BASE_URL + URL.SINGLE_WORK_DOMAIN + URL.ALL).permitAll()
-                        .requestMatchers(HttpMethod.GET,
-                                URL.BASE_URL + URL.SINGLE_WORK_DOMAIN + URL.ALL + URL.COMMENT_DOMAIN).permitAll()
+                        .requestMatchers(HttpMethod.GET, ApiPath.SINGLEWORK_ROOT).permitAll()
+                        .requestMatchers(HttpMethod.GET, ApiPath.SINGLEWORK_ROOT + ALL).permitAll()
+                        .requestMatchers(HttpMethod.GET, ApiPath.SINGLEWORK_ROOT + ALL + COMMENT_DOMAIN).permitAll()
 
-                        .requestMatchers(HttpMethod.GET, URL.BASE_URL + URL.EXHIBITION_DOMAIN).permitAll()
+                        .requestMatchers(HttpMethod.GET, ApiPath.EXHIBITION_ROOT).permitAll()
                         .anyRequest().authenticated());
 
         http // 로그아웃 설정
                 .logout((logout) -> logout
-                        .logoutUrl(URL.BASE_URL + URL.AUTH_DOMAIN + URL.LOGOUT) // 로그아웃 처리 URL
+                        .logoutUrl(ApiPath.AUTH_LOGOUT) // 로그아웃 처리 URL
                         .addLogoutHandler(logoutHandler) // 로그아웃 핸들러 추가
                         .logoutSuccessHandler(logoutSuccessHandler) // 로그아웃 성공 핸들러 추가
                 );

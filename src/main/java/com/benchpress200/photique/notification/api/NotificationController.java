@@ -1,10 +1,9 @@
 package com.benchpress200.photique.notification.api;
 
-import com.benchpress200.photique.common.constant.URL;
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.notification.application.NotificationService;
-import com.benchpress200.photique.notification.domain.dto.CountUnreadResponse;
 import com.benchpress200.photique.notification.domain.dto.NotificationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,18 +13,15 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(URL.BASE_URL + URL.USER_DOMAIN + URL.USER_DATA + URL.NOTIFICATION_DOMAIN)
 @RequiredArgsConstructor
 public class NotificationController {
-
     private final NotificationService notificationService;
 
 
-    @GetMapping
+    @GetMapping(ApiPath.NOTIFICATION_ROOT)
     public ApiSuccessResponse<?> getNotifications(
             @PathVariable("userId") final Long userId,
             final Pageable pageable
@@ -34,7 +30,7 @@ public class NotificationController {
         return ResponseHandler.handleSuccessResponse(notificationRequestPage, HttpStatus.OK);
     }
 
-    @PatchMapping(URL.NOTIFICATION_DATA)
+    @PatchMapping(ApiPath.NOTIFICATION_DATA)
     public ApiSuccessResponse<?> markAsRead(
             @PathVariable("userId") final Long userId,
             @PathVariable("notificationId") final Long notificationId
@@ -43,7 +39,7 @@ public class NotificationController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @PatchMapping
+    @PatchMapping(ApiPath.NOTIFICATION_ROOT)
     public ApiSuccessResponse<?> markAllAsRead(
             @PathVariable("userId") final Long userId
     ) {
@@ -51,20 +47,12 @@ public class NotificationController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(URL.NOTIFICATION_DATA)
+    @DeleteMapping(ApiPath.NOTIFICATION_DATA)
     public ApiSuccessResponse<?> deleteNotification(
             @PathVariable("userId") final Long userId,
             @PathVariable("notificationId") final Long notificationId
     ) {
         notificationService.deleteNotification(userId, notificationId);
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
-    }
-
-    @GetMapping(URL.UNREAD)
-    public ApiSuccessResponse<?> countUnread(
-            @PathVariable("userId") final Long userId
-    ) {
-        CountUnreadResponse countUnreadResponse = notificationService.countUnread(userId);
-        return ResponseHandler.handleSuccessResponse(countUnreadResponse, HttpStatus.OK);
     }
 }
