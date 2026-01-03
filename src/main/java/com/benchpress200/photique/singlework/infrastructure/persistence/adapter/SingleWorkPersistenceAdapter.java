@@ -75,6 +75,15 @@ public class SingleWorkPersistenceAdapter implements
     }
 
     @Override
+    public Page<SingleWork> searchMySingleWork(Long userId, String keyword, Pageable pageable) {
+        return singleWorkRepository.searchMySingleWork(
+                userId,
+                keyword,
+                pageable
+        );
+    }
+
+    @Override
     public Optional<SingleWork> findActiveById(Long id) {
         return singleWorkRepository.findActiveById(id);
     }

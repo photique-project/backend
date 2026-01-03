@@ -24,6 +24,12 @@ public interface SingleWorkQueryPort {
             Pageable pageable
     );
 
+    Page<SingleWork> searchMySingleWork(
+            Long userId,
+            String keyword,
+            Pageable pageable
+    );
+
     Optional<SingleWork> findActiveById(Long id);
 
 

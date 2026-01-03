@@ -4,12 +4,17 @@ import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.constant.PathVariableName;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.api.query.constant.SingleWorkQueryResponseMessage;
+import com.benchpress200.photique.singlework.api.query.request.MySingleWorkSearchRequest;
 import com.benchpress200.photique.singlework.api.query.request.SingleWorkSearchRequest;
+import com.benchpress200.photique.singlework.api.query.response.MySingleWorkSearchResponse;
 import com.benchpress200.photique.singlework.api.query.response.SingleWorkDetailsResponse;
 import com.benchpress200.photique.singlework.api.query.response.SingleWorkSearchResponse;
+import com.benchpress200.photique.singlework.application.query.model.MySingleWorkSearchQuery;
 import com.benchpress200.photique.singlework.application.query.model.SingleWorkSearchQuery;
 import com.benchpress200.photique.singlework.application.query.port.in.GetSingleWorkDetailsUseCase;
+import com.benchpress200.photique.singlework.application.query.port.in.SearchMySingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.query.port.in.SearchSingleWorkUseCase;
+import com.benchpress200.photique.singlework.application.query.result.MySingleWorkSearchResult;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkDetailsResult;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkSearchResult;
 import jakarta.validation.Valid;
@@ -26,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SingleWorkQueryController {
     private final GetSingleWorkDetailsUseCase getSingleWorkDetailsUseCase;
     private final SearchSingleWorkUseCase searchSingleWorkUseCase;
+    private final SearchMySingleWorkUseCase searchMySingleWorkUseCase;
 
     @GetMapping(ApiPath.SINGLEWORK_DATA)
     public ResponseEntity<?> getSingleWorkDetails(
@@ -53,6 +59,21 @@ public class SingleWorkQueryController {
         return ResponseHandler.handleResponse(
                 HttpStatus.OK,
                 SingleWorkQueryResponseMessage.WORK_SEARCH_SUCCESS,
+                response
+        );
+    }
+
+    @GetMapping(ApiPath.SINGLEWORK_MY_DATA)
+    public ResponseEntity<?> searchMySingleWork(
+            @ModelAttribute @Valid MySingleWorkSearchRequest request
+    ) {
+        MySingleWorkSearchQuery query = request.toQuery();
+        MySingleWorkSearchResult result = searchMySingleWorkUseCase.searchMySingleWork(query);
+        MySingleWorkSearchResponse response = MySingleWorkSearchResponse.from(result);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.OK,
+                SingleWorkQueryResponseMessage.MY_WORK_SEARCH_SUCCESS,
                 response
         );
     }
