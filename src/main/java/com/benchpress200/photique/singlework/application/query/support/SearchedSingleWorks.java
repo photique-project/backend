@@ -14,10 +14,10 @@ public class SearchedSingleWorks {
     }
 
     public static SearchedSingleWorks of(
-            Page<SingleWorkSearch> singleWorkSearchPage,
+            Page<SingleWorkSearch> page,
             LikedSingleWorkIds likedSingleWorkIds
     ) {
-        List<SearchedSingleWork> searchedSingleWorks = singleWorkSearchPage.stream()
+        List<SearchedSingleWork> searchedSingleWorks = page.stream()
                 .map(singleWorkSearch -> {
                     Long singleWorkId = singleWorkSearch.getId();
                     boolean isLiked = likedSingleWorkIds.contains(singleWorkId);

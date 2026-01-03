@@ -2,17 +2,20 @@ package com.benchpress200.photique.singlework.application.query.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
+import com.benchpress200.photique.singlework.application.query.model.MySingleWorkSearchQuery;
 import com.benchpress200.photique.singlework.application.query.model.SingleWorkSearchQuery;
 import com.benchpress200.photique.singlework.application.query.port.in.GetSingleWorkDetailsUseCase;
+import com.benchpress200.photique.singlework.application.query.port.in.SearchMySingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.query.port.in.SearchSingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkTagQueryPort;
+import com.benchpress200.photique.singlework.application.query.result.MySingleWorkSearchResult;
+import com.benchpress200.photique.singlework.application.query.result.SearchedSingleWork;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkDetailsResult;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkSearchResult;
 import com.benchpress200.photique.singlework.application.query.support.LikedSingleWorkIds;
 import com.benchpress200.photique.singlework.application.query.support.SearchedSingleWorks;
-import com.benchpress200.photique.singlework.application.query.support.SingleWorkIds;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
@@ -32,7 +35,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SingleWorkQueryService implements
         GetSingleWorkDetailsUseCase,
-        SearchSingleWorkUseCase {
+        SearchSingleWorkUseCase,
+        SearchMySingleWorkUseCase {
     private final AuthenticationUserProviderPort authenticationUserProviderPort;
 
     private final SingleWorkCommandPort singleWorkCommandPort;
@@ -98,7 +102,11 @@ public class SingleWorkQueryService implements
         );
 
         // 요청 유저가 좋아요한 작품 아이디 조회
-        LikedSingleWorkIds likedSingleWorkIds = findLikedSingleWorkIds(singleWorkSearchPage);
+        List<Long> singleWorkSearchIds = singleWorkSearchPage.stream()
+                .map(SingleWorkSearch::getId)
+                .toList();
+
+        LikedSingleWorkIds likedSingleWorkIds = findLikedSingleWorkIds(singleWorkSearchIds);
 
         // 각 작품마다 유저의 좋아요 여부 확인
         SearchedSingleWorks searchedSingleWorks = SearchedSingleWorks.of(singleWorkSearchPage, likedSingleWorkIds);
@@ -106,7 +114,41 @@ public class SingleWorkQueryService implements
         return SingleWorkSearchResult.of(searchedSingleWorks, singleWorkSearchPage);
     }
 
-    private LikedSingleWorkIds findLikedSingleWorkIds(Page<SingleWorkSearch> singleWorkSearchPage) {
+    @Override
+    public MySingleWorkSearchResult searchMySingleWork(MySingleWorkSearchQuery query) {
+        Long userId = authenticationUserProviderPort.getCurrentUserId();
+        String keyword = query.getKeyword();
+        Pageable pageable = query.getPageable();
+
+        // 본인 단일작품 페이지 조회
+        Page<SingleWork> singleWorkPage = singleWorkQueryPort.searchMySingleWork(
+                userId,
+                keyword,
+                pageable
+        );
+
+        // 요청 유저가 좋아요한 작품 아이디 조회
+        List<Long> singleWorkIds = singleWorkPage.stream()
+                .map(SingleWork::getId)
+                .toList();
+
+        LikedSingleWorkIds likedSingleWorkIds = findLikedSingleWorkIds(singleWorkIds);
+
+        // FIXME: 일급 컬렉션을 활용하여 간소화
+        // 각 작품마다 유저의 좋아요 여부 확인
+        List<SearchedSingleWork> searchedSingleWorks = singleWorkPage.stream()
+                .map(singleWork -> {
+                    Long singleWorkId = singleWork.getId();
+                    boolean isLiked = likedSingleWorkIds.contains(singleWorkId);
+
+                    return SearchedSingleWork.of(singleWork, isLiked);
+                })
+                .toList();
+
+        return MySingleWorkSearchResult.of(searchedSingleWorks, singleWorkPage);
+    }
+
+    private LikedSingleWorkIds findLikedSingleWorkIds(List<Long> ids) {
         // 인증된 유저가 아니라면
         if (!authenticationUserProviderPort.isAuthenticated()) {
             return LikedSingleWorkIds.empty();
@@ -114,11 +156,8 @@ public class SingleWorkQueryService implements
 
         Long requestUserId = authenticationUserProviderPort.getCurrentUserId();
 
-        // 검색한 단일작품 페이지에서 단일작품 id를 일급 컬렉션으로 변환
-        SingleWorkIds singleWorkIds = SingleWorkIds.from(singleWorkSearchPage);
-
         // 검색 결과 단일작품 중에서 요청 유저가 좋아요한 작품 아이디 셋 조회
-        Set<Long> likedSet = singleWorkLikeQueryPort.findSingleWorkIds(requestUserId, singleWorkIds.values());
+        Set<Long> likedSet = singleWorkLikeQueryPort.findSingleWorkIds(requestUserId, ids);
 
         return LikedSingleWorkIds.from(likedSet);
     }

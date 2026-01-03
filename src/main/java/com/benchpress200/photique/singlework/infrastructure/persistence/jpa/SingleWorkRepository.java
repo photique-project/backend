@@ -4,6 +4,8 @@ import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.user.domain.entity.User;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -64,4 +66,20 @@ public interface SingleWorkRepository extends JpaRepository<SingleWork, Long> {
             WHERE s.id = :singleWorkId
             """)
     void decrementLikeCount(@Param("singleWorkId") Long singleWorkId);
+
+    @Query("""
+            SELECT s
+            FROM SingleWork s
+            JOIN FETCH s.writer w
+            WHERE w.id = :userId
+            AND (
+                   :keyword IS NULL
+                   OR s.title LIKE CONCAT('%', :keyword, '%')
+            )
+            """)
+    Page<SingleWork> searchMySingleWork(
+            @Param("userId") Long userId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 }

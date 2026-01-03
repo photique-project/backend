@@ -45,6 +45,20 @@ public class SearchedSingleWork {
                 .build();
     }
 
+    public static SearchedSingleWork of(
+            SingleWork singleWork,
+            boolean isLiked
+    ) {
+        return SearchedSingleWork.builder()
+                .id(singleWork.getId())
+                .writer(Writer.from(singleWork.getWriter()))
+                .image(singleWork.getImage())
+                .likeCount(singleWork.getLikeCount())
+                .viewCount(singleWork.getViewCount())
+                .isLiked(isLiked)
+                .build();
+    }
+
     public static SearchedSingleWork from(SingleWorkLike singleWorkLike) {
         SingleWork singleWork = singleWorkLike.getSingleWork();
         User writer = singleWork.getWriter();
