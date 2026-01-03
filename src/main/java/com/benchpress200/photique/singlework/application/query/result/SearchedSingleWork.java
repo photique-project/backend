@@ -1,6 +1,9 @@
 package com.benchpress200.photique.singlework.application.query.result;
 
+import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
+import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -42,5 +45,17 @@ public class SearchedSingleWork {
                 .build();
     }
 
+    public static SearchedSingleWork from(SingleWorkLike singleWorkLike) {
+        SingleWork singleWork = singleWorkLike.getSingleWork();
+        User writer = singleWork.getWriter();
 
+        return SearchedSingleWork.builder()
+                .id(singleWork.getId())
+                .writer(Writer.from(writer))
+                .image(singleWork.getImage())
+                .viewCount(singleWork.getViewCount())
+                .likeCount(singleWork.getLikeCount())
+                .isLiked(true)
+                .build();
+    }
 }

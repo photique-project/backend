@@ -35,6 +35,16 @@ public class SingleWorkPersistenceAdapter implements
     }
 
     @Override
+    public void incrementLikeCount(Long singleWorkId) {
+        singleWorkRepository.incrementLikeCount(singleWorkId);
+    }
+
+    @Override
+    public void decrementLikeCount(Long singleWorkId) {
+        singleWorkRepository.decrementLikeCount(singleWorkId);
+    }
+
+    @Override
     public Optional<SingleWork> findByIdWithWriter(Long id) {
         return singleWorkRepository.findByIdWithWriter(id);
     }

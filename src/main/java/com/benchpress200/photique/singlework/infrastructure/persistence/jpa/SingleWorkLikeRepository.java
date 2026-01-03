@@ -41,4 +41,22 @@ public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, 
     );
 
     Optional<SingleWorkLike> findByUserAndSingleWork(User user, SingleWork singleWork);
+
+
+    @Query("""
+            SELECT sl
+            FROM SingleWorkLike sl
+            JOIN FETCH sl.user
+            JOIN FETCH sl.singleWork
+            WHERE sl.user.id = :userId
+            AND (
+               :keyword IS NULL
+               OR sl.singleWork.title LIKE CONCAT('%', :keyword, '%')
+            )
+            """)
+    Page<SingleWorkLike> searchLikedSingleWork(
+            @Param("userId") Long userId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 }

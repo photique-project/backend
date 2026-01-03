@@ -25,4 +25,6 @@ public interface SingleWorkQueryPort {
     );
 
     Optional<SingleWork> findActiveById(Long id);
+
+
 }

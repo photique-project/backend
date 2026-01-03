@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -47,5 +49,14 @@ public class SingleWorkLikePersistenceAdapter implements
     @Override
     public Optional<SingleWorkLike> findByUserAndSingleWork(User user, SingleWork singleWork) {
         return singleWorkLikeRepository.findByUserAndSingleWork(user, singleWork);
+    }
+
+    @Override
+    public Page<SingleWorkLike> searchLikedSingleWork(
+            Long userId,
+            String keyword,
+            Pageable pageable
+    ) {
+        return singleWorkLikeRepository.searchLikedSingleWork(userId, keyword, pageable);
     }
 }

@@ -48,4 +48,20 @@ public interface SingleWorkRepository extends JpaRepository<SingleWork, Long> {
             WHERE s.id = :singleWorkId
             """)
     void incrementViewCount(@Param("singleWorkId") Long singleWorkId);
+
+    @Modifying
+    @Query("""
+            UPDATE SingleWork s
+            SET s.likeCount = s.likeCount + 1
+            WHERE s.id = :singleWorkId
+            """)
+    void incrementLikeCount(@Param("singleWorkId") Long singleWorkId);
+
+    @Modifying
+    @Query("""
+            UPDATE SingleWork s
+            SET s.likeCount = s.likeCount - 1
+            WHERE s.id = :singleWorkId
+            """)
+    void decrementLikeCount(@Param("singleWorkId") Long singleWorkId);
 }
