@@ -95,7 +95,7 @@ public class ApiPath {
     public static final String SINGLEWORK_COMMENT_DATA = SINGLEWORK_ROOT + COMMENT_DATA;
 
     // api/v1/singleworks/me/likes
-    public static final String SINGLEWORK_MY_LIKE = SINGLEWORK_ROOT + MY_DATA + LIKE_DOMAIN;
+    public static final String SINGLEWORK_MY_LIKE = SINGLEWORK_ROOT + LIKE_DOMAIN + MY_DATA;
 
     // api/v1/singleworks/me
     public static final String SINGLEWORK_MY_DATA = SINGLEWORK_ROOT + MY_DATA;
@@ -125,10 +125,10 @@ public class ApiPath {
     public static final String EXHIBITION_COMMENT_DATA = EXHIBITION_ROOT + COMMENT_DATA;
 
     // api/v1/exhibitions/me/likes
-    public static final String EXHIBITION_MY_LIKE = EXHIBITION_ROOT + MY_DATA + LIKE_DOMAIN;
+    public static final String EXHIBITION_MY_LIKE = EXHIBITION_ROOT + LIKE_DOMAIN + MY_DATA;
 
     // api/v1/exhibitions/me/bookmarks
-    public static final String EXHIBITION_MY_BOOKMARK = EXHIBITION_ROOT + MY_DATA + BOOKMARK_DOMAIN;
+    public static final String EXHIBITION_MY_BOOKMARK = EXHIBITION_ROOT + BOOKMARK_DOMAIN + MY_DATA;
 
     // api/v1/exhibitions/me
     public static final String EXHIBITION_MY_DATA = EXHIBITION_ROOT + MY_DATA;

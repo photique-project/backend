@@ -6,4 +6,8 @@ public interface SingleWorkCommandPort {
     SingleWork save(SingleWork singleWork);
 
     void incrementViewCount(Long singleWorkId);
+
+    void incrementLikeCount(Long singleWorkId);
+
+    void decrementLikeCount(Long singleWorkId);
 }

@@ -1,7 +1,7 @@
 package com.benchpress200.photique.singlework.api.query.response;
 
+import com.benchpress200.photique.singlework.application.query.result.LikedSingleWorkSearchResult;
 import com.benchpress200.photique.singlework.application.query.result.SearchedSingleWork;
-import com.benchpress200.photique.singlework.application.query.result.SingleWorkSearchResult;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.AccessLevel;
@@ -10,7 +10,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class SingleWorkSearchResponse {
+public class LikedSingleWorkSearchResponse {
     private int page;
     private int size;
     private long totalElements;
@@ -25,8 +25,8 @@ public class SingleWorkSearchResponse {
     private boolean hasPrevious;
     private List<SearchedSingleWork> singleWorks;
 
-    public static SingleWorkSearchResponse from(SingleWorkSearchResult result) {
-        return SingleWorkSearchResponse.builder()
+    public static LikedSingleWorkSearchResponse from(LikedSingleWorkSearchResult result) {
+        return LikedSingleWorkSearchResponse.builder()
                 .page(result.getPage())
                 .size(result.getSize())
                 .totalElements(result.getTotalElements())

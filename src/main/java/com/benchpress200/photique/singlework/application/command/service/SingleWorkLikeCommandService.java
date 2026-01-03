@@ -3,6 +3,7 @@ package com.benchpress200.photique.singlework.application.command.service;
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.singlework.application.command.port.in.AddSingleWorkLikeUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.CancelSingleWorkLikeUseCase;
+import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkLikeCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
@@ -28,6 +29,7 @@ public class SingleWorkLikeCommandService implements
 
     private final UserQueryPort userQueryPort;
     private final SingleWorkQueryPort singleWorkQueryPort;
+    private final SingleWorkCommandPort singleWorkCommandPort;
     private final SingleWorkLikeQueryPort singleWorkLikeQueryPort;
     private final SingleWorkLikeCommandPort singleWorkLikeCommandPort;
 
@@ -50,6 +52,10 @@ public class SingleWorkLikeCommandService implements
         // 좋아요 처리
         SingleWorkLike singleWorkLike = SingleWorkLike.of(user, singleWork);
         singleWorkLikeCommandPort.save(singleWorkLike);
+
+        // FIXME: 좋아요 추가 & 취소 값을 언제, 어떻게 단일작품 칼럼에 반영하고 ES에 동기화시킬지 전략 정해야 함
+        // MySQL에 반영했을 때, 업데이트 이벤트 발행?
+        singleWorkCommandPort.incrementLikeCount(singleWorkId);
     }
 
     @Override
@@ -65,6 +71,11 @@ public class SingleWorkLikeCommandService implements
 
         // 좋아요 엔티티 조회 후 존재한다면 삭제 처리
         singleWorkLikeQueryPort.findByUserAndSingleWork(user, singleWork)
-                .ifPresent(singleWorkLikeCommandPort::delete);
+                .ifPresent(singleWorkLike -> {
+                    singleWorkLikeCommandPort.delete(singleWorkLike);
+
+                    // FIXME: 좋아요 추가 & 취소 값을 언제, 어떻게 단일작품 칼럼에 반영하고 ES에 동기화시킬지 전략 정해야 함
+                    singleWorkCommandPort.decrementLikeCount(singleWorkId);
+                });
     }
 }

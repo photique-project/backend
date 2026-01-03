@@ -62,7 +62,7 @@ public class SingleWorkSearchRequest {
             size = 30;
         }
 
-        Sort sort = SortValidator.verifyAndParse(this.sort);
+        Sort sort = SortValidator.verifyAndParseSingleWorkSearch(this.sort);
         Pageable pageable = PageRequest.of(page, size, sort);
 
         // target null 넣었을 때 WORK로 박히는지 확인
