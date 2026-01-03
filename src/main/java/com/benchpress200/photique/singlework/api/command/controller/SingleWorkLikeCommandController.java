@@ -1,7 +1,7 @@
 package com.benchpress200.photique.singlework.api.command.controller;
 
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.constant.PathVariableName;
-import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.api.command.constant.SingleWorkCommandResponseMessage;
 import com.benchpress200.photique.singlework.application.command.port.in.AddSingleWorkLikeUseCase;
@@ -12,17 +12,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(URL.BASE_URL + URL.SINGLE_WORK_DOMAIN + URL.SINGLE_WORK_DATA + URL.LIKE)
 public class SingleWorkLikeCommandController {
     private final AddSingleWorkLikeUseCase addSingleWorkLikeUseCase;
     private final CancelSingleWorkLikeUseCase cancelSingleWorkLikeUseCase;
 
-    @PostMapping
+    @PostMapping(ApiPath.SINGLEWORK_LIKE)
     public ResponseEntity<?> addSingleWorkLike(
             @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId
     ) {
@@ -34,7 +32,7 @@ public class SingleWorkLikeCommandController {
         );
     }
 
-    @DeleteMapping
+    @DeleteMapping(ApiPath.SINGLEWORK_LIKE)
     public ResponseEntity<?> cancelSingleWorkLike(
             @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId
     ) {

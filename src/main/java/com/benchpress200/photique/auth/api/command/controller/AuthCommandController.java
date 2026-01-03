@@ -14,7 +14,7 @@ import com.benchpress200.photique.auth.application.command.port.in.SendPasswordA
 import com.benchpress200.photique.auth.application.command.port.in.ValidateAuthMailCodeUseCase;
 import com.benchpress200.photique.auth.application.command.result.AuthMailCodeValidateResult;
 import com.benchpress200.photique.auth.application.command.result.AuthTokenResult;
-import com.benchpress200.photique.common.constant.URL;
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(URL.BASE_URL + URL.AUTH_DOMAIN)
 @RequiredArgsConstructor
 public class AuthCommandController {
     private final SendJoinAuthMailUseCase sendJoinAuthMailUseCase;
@@ -35,7 +33,7 @@ public class AuthCommandController {
     private final ValidateAuthMailCodeUseCase validateAuthMailCodeUseCase;
     private final RefreshAuthTokenUseCase refreshAuthTokenUseCase;
 
-    @PostMapping(URL.JOIN_MAIL)
+    @PostMapping(ApiPath.AUTH_MAIL_JOIN)
     public ResponseEntity<?> sendJoinAuthMail(
             @RequestBody @Valid AuthMailRequest request
     ) {
@@ -48,7 +46,7 @@ public class AuthCommandController {
         );
     }
 
-    @PostMapping(URL.PASSWORD_MAIL)
+    @PostMapping(ApiPath.AUTH_MAIL_PASSWORD)
     public ResponseEntity<?> sendPasswordAuthMail(
             @RequestBody @Valid AuthMailRequest request
     ) {
@@ -61,7 +59,7 @@ public class AuthCommandController {
         );
     }
 
-    @PostMapping(URL.VALIDATE_CODE)
+    @PostMapping(ApiPath.AUTH_CODE)
     public ResponseEntity<?> validateAuthMailCode(
             @RequestBody @Valid AuthMailCodeValidateRequest request
     ) {
@@ -77,7 +75,7 @@ public class AuthCommandController {
         );
     }
 
-    @PostMapping(URL.REFRESH_TOKEN)
+    @PostMapping(ApiPath.AUTH_REFRESH_TOKEN)
     public ResponseEntity<?> refreshAuthToken(
             @CookieValue(value = "refreshToken") String refreshToken
     ) {

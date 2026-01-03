@@ -1,8 +1,8 @@
 package com.benchpress200.photique.singlework.api.command.controller;
 
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.constant.MultipartKey;
 import com.benchpress200.photique.common.constant.PathVariableName;
-import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.singlework.api.command.constant.SingleWorkCommandResponseMessage;
 import com.benchpress200.photique.singlework.api.command.request.SingleWorkCreateRequest;
@@ -22,13 +22,11 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping(URL.BASE_URL + URL.SINGLE_WORK_DOMAIN)
 @RequiredArgsConstructor
 public class SingleWorkCommandController {
     private final PostSingleWorkUseCase postSingleWorkUseCase;
@@ -36,6 +34,7 @@ public class SingleWorkCommandController {
     private final DeleteSingleWorkUseCase deleteSingleWorkUseCase;
 
     @PostMapping(
+            path = ApiPath.SINGLEWORK_ROOT,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -52,7 +51,7 @@ public class SingleWorkCommandController {
         );
     }
 
-    @PatchMapping(URL.SINGLE_WORK_DATA)
+    @PatchMapping(ApiPath.SINGLEWORK_DATA)
     public ResponseEntity<?> updateSingleWorkDetails(
             @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId,
             @RequestBody SingleWorkUpdateRequest request
@@ -63,7 +62,7 @@ public class SingleWorkCommandController {
         return ResponseHandler.handleResponse(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(URL.SINGLE_WORK_DATA)
+    @DeleteMapping(ApiPath.SINGLEWORK_DATA)
     public ResponseEntity<?> deleteSingleWork(
             @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId
     ) {

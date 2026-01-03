@@ -1,6 +1,6 @@
 package com.benchpress200.photique.exhibition.presentation;
 
-import com.benchpress200.photique.common.constant.URL;
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.response.ApiSuccessResponse;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.application.ExhibitionCommentService;
@@ -19,17 +19,15 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(URL.BASE_URL + URL.EXHIBITION_COMMENT_DOMAIN)
 @RequiredArgsConstructor
 public class ExhibitionCommentController {
 
     private final ExhibitionCommentService exhibitionCommentService;
 
-    @PostMapping
+    @PostMapping(ApiPath.EXHIBITION_COMMENT)
     public ApiSuccessResponse<?> createExhibitionComment(
             @PathVariable("exhibitionId") Long exhibitionId,
             @RequestBody @Valid ExhibitionCommentCreateRequest exhibitionCommentCreateRequest
@@ -40,7 +38,7 @@ public class ExhibitionCommentController {
         return ResponseHandler.handleSuccessResponse(HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping(ApiPath.EXHIBITION_COMMENT)
     public ApiSuccessResponse<?> getExhibitionComments(
             @PathVariable("exhibitionId") Long exhibitionId,
             Pageable pageable
@@ -51,7 +49,7 @@ public class ExhibitionCommentController {
         return ResponseHandler.handleSuccessResponse(exhibitionCommentPage, HttpStatus.OK);
     }
 
-    @PatchMapping(URL.EXHIBITION_COMMENT_DATA)
+    @PatchMapping(ApiPath.EXHIBITION_COMMENT_DATA)
     public ApiSuccessResponse<?> updateExhibitionComment(
             @PathVariable("exhibitionId") Long exhibitionId,
             @PathVariable("commentId") Long commentId,
@@ -63,8 +61,8 @@ public class ExhibitionCommentController {
 
         return ResponseHandler.handleSuccessResponse(HttpStatus.NO_CONTENT);
     }
-    
-    @DeleteMapping(URL.EXHIBITION_COMMENT_DATA)
+
+    @DeleteMapping(ApiPath.EXHIBITION_COMMENT_DATA)
     public ApiSuccessResponse<?> deleteExhibitionComment(
             @PathVariable("exhibitionId") Long exhibitionId,
             @PathVariable("commentId") Long commentId,

@@ -1,8 +1,8 @@
 package com.benchpress200.photique.user.api.command.controller;
 
+import com.benchpress200.photique.common.constant.ApiPath;
 import com.benchpress200.photique.common.constant.MultipartKey;
 import com.benchpress200.photique.common.constant.PathVariableName;
-import com.benchpress200.photique.common.constant.URL;
 import com.benchpress200.photique.common.response.ResponseHandler;
 import com.benchpress200.photique.user.api.command.constant.UserCommandResponseMessage;
 import com.benchpress200.photique.user.api.command.request.ResisterRequest;
@@ -29,14 +29,12 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(URL.BASE_URL + URL.USER_DOMAIN)
 public class UserCommandController {
     private final ResisterUseCase resisterUseCase;
     private final UpdateUserDetailsUseCase updateUserDetailsUseCase;
@@ -46,6 +44,7 @@ public class UserCommandController {
 
 
     @PostMapping(
+            path = ApiPath.USER_ROOT,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -64,7 +63,7 @@ public class UserCommandController {
 
 
     @PatchMapping(
-            path = URL.USER_DATA,
+            path = ApiPath.USER_DATA,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -81,11 +80,7 @@ public class UserCommandController {
     }
 
 
-    @PatchMapping(
-            path = URL.USER_DATA + URL.PASSWORD,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @PatchMapping(ApiPath.USER_PASSWORD)
     @PreAuthorize("authentication.principal.userId.equals(#userId)")
     public ResponseEntity<?> updateUserPassword(
             @PathVariable(PathVariableName.USER_ID) Long userId,
@@ -98,11 +93,7 @@ public class UserCommandController {
     }
 
 
-    @PatchMapping(
-            path = URL.PASSWORD,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @PatchMapping(path = ApiPath.USER_PASSWORD_RESET)
     public ResponseEntity<?> resetUserPassword(
             @RequestBody @Valid UserPasswordResetRequest request
     ) {
@@ -113,10 +104,7 @@ public class UserCommandController {
     }
 
 
-    @DeleteMapping(
-            path = URL.USER_DATA,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @DeleteMapping(path = ApiPath.USER_DATA)
     @PreAuthorize("authentication.principal.userId.equals(#userId)")
     public ResponseEntity<?> withdraw(@PathVariable(PathVariableName.USER_ID) Long userId) {
         withdrawUseCase.withdraw(userId);
