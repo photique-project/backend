@@ -3,9 +3,9 @@ package com.benchpress200.photique.singlework.infrastructure.event.adapter;
 import com.benchpress200.photique.singlework.application.command.port.out.event.SingleWorkEventPublishPort;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkCommentCreateEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkCreateEvent;
+import com.benchpress200.photique.singlework.domain.event.SingleWorkDeleteEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkImageUploadEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkLikeAddEvent;
-import com.benchpress200.photique.singlework.domain.event.SingleWorkRemoveEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,7 +32,7 @@ public class SingleWorkEventPublishAdapter implements SingleWorkEventPublishPort
     }
 
     @Override
-    public void publishSingleWorkRemoveEvent(SingleWorkRemoveEvent event) {
+    public void publishSingleWorkDeleteEvent(SingleWorkDeleteEvent event) {
         publisher.publishEvent(event);
     }
 

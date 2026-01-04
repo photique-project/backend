@@ -6,6 +6,7 @@ import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionCreateEvent;
+import com.benchpress200.photique.exhibition.domain.event.ExhibitionDeleteEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionUpdateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionWorkImageUploadEvent;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
@@ -134,5 +135,11 @@ public class ExhibitionEventListener {
         );
 
         exhibitionSearchRepository.save(exhibitionSearch);
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleExhibitionDeleteEventIfCommit(ExhibitionDeleteEvent event) {
+        Long exhibitionId = event.getExhibitionId();
+        exhibitionSearchRepository.deleteById(exhibitionId);
     }
 }

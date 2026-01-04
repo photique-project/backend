@@ -18,8 +18,8 @@ import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkCreateEvent;
+import com.benchpress200.photique.singlework.domain.event.SingleWorkDeleteEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkImageUploadEvent;
-import com.benchpress200.photique.singlework.domain.event.SingleWorkRemoveEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkUpdateEvent;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotOwnedException;
@@ -62,7 +62,7 @@ public class SingleWorkCommandService implements
     private final TagCommandPort tagCommandPort;
     private final TagQueryPort tagQueryPort;
 
-
+    @Override
     public void postSingleWork(SingleWorkCreateCommand command) {
         // 작성자 조회
         Long writerId = authenticationUserProviderPort.getCurrentUserId();
@@ -92,7 +92,7 @@ public class SingleWorkCommandService implements
         singleWorkEventPublishPort.publishSingleWorkCreateEvent(singleWorkCreateEvent);
     }
 
-
+    @Override
     public void updateSingleWorkDetails(SingleWorkUpdateCommand command) {
         // 작품 조회
         Long singleWorkId = command.getSingleWorkId();
@@ -185,6 +185,7 @@ public class SingleWorkCommandService implements
     }
 
     // FIXME: 삭제 처리할 때 관련 댓글 처리 어떻게 할지, deletedAt 이 null 아닌 데이터를 어느 시점에 어떻게 처리할지 고민
+    @Override
     public void deleteSingleWork(Long singleWorkId) {
         // 작품 조회
         singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
@@ -199,8 +200,8 @@ public class SingleWorkCommandService implements
                     singleWork.remove();
 
                     // 단일작품 MySQL-ES 동기화 이벤트 발행
-                    SingleWorkRemoveEvent event = SingleWorkRemoveEvent.of(singleWorkId);
-                    singleWorkEventPublishPort.publishSingleWorkRemoveEvent(event);
+                    SingleWorkDeleteEvent event = SingleWorkDeleteEvent.of(singleWorkId);
+                    singleWorkEventPublishPort.publishSingleWorkDeleteEvent(event);
                 });
 
     }
