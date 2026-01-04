@@ -182,13 +182,10 @@ public class UserCommandService implements
     }
 
     public void withdraw(Long userId) {
-        // 유저 조회
-        User user = userQueryPort.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
         // 소프트 딜리트
         // 해당 유저 로그인 불가능
         // 해당 유저가 작성한 게시글 조회 가능
-        user.markAsDeleted();
+        userQueryPort.findById(userId)
+                .ifPresent(User::remove);
     }
 }

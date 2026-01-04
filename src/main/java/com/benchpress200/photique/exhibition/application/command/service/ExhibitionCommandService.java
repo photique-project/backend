@@ -5,6 +5,7 @@ import com.benchpress200.photique.exhibition.application.command.model.Exhibitio
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionUpdateCommand;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionWorkCreateCommand;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionWorkUpdateCommand;
+import com.benchpress200.photique.exhibition.application.command.port.in.ExhibitionDeleteUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.ExhibitionDetailsUpdateUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.OpenExhibitionUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
@@ -17,6 +18,7 @@ import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionCreateEvent;
+import com.benchpress200.photique.exhibition.domain.event.ExhibitionDeleteEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionUpdateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionWorkImageUploadEvent;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
@@ -44,7 +46,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional
 public class ExhibitionCommandService implements
         OpenExhibitionUseCase,
-        ExhibitionDetailsUpdateUseCase {
+        ExhibitionDetailsUpdateUseCase,
+        ExhibitionDeleteUseCase {
     @Value("${cloud.aws.s3.path.exhibition}")
     private String imagePath;
 
@@ -176,6 +179,26 @@ public class ExhibitionCommandService implements
             ExhibitionUpdateEvent event = ExhibitionUpdateEvent.of(exhibitionId);
             exhibitionEventPublishPort.publishExhibitionUpdateEvent(event);
         }
+    }
+
+    // FIXME: 삭제 처리할 때 관련 댓글 처리 어떻게 할지, deletedAt 이 null 아닌 데이터를 어느 시점에 어떻게 처리할지 고민
+    @Override
+    public void deleteExhibition(Long exhibitionId) {
+        exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+                .ifPresent(exhibition -> {
+                    Long writerId = authenticationUserProviderPort.getCurrentUserId();
+
+                    // 요청한 유저가 해당 전시회의 주인이 아닐 때
+                    if (!exhibition.isOwnedBy(writerId)) {
+                        throw new ExhibitionNotOwnedException();
+                    }
+
+                    exhibition.remove();
+
+                    // 전시회 MySQL-ES 동기화 이벤트 발행
+                    ExhibitionDeleteEvent event = ExhibitionDeleteEvent.of(exhibitionId);
+                    exhibitionEventPublishPort.publishExhibitionDeleteEvent(event);
+                });
     }
 
     private void attachTags(Exhibition exhibition, List<String> tagNames) {

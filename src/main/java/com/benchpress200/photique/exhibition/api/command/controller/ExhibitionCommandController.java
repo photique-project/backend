@@ -9,6 +9,7 @@ import com.benchpress200.photique.exhibition.api.command.request.ExhibitionCreat
 import com.benchpress200.photique.exhibition.api.command.request.ExhibitionUpdateRequest;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionCreateCommand;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionUpdateCommand;
+import com.benchpress200.photique.exhibition.application.command.port.in.ExhibitionDeleteUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.ExhibitionDetailsUpdateUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.OpenExhibitionUseCase;
 import jakarta.validation.Valid;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ExhibitionCommandController {
     private final OpenExhibitionUseCase openExhibitionUseCase;
     private final ExhibitionDetailsUpdateUseCase exhibitionDetailsUpdateUseCase;
+    private final ExhibitionDeleteUseCase exhibitionDeleteUseCase;
 
     @PostMapping(
             path = ApiPath.EXHIBITION_ROOT,
@@ -56,6 +59,17 @@ public class ExhibitionCommandController {
     ) {
         ExhibitionUpdateCommand command = request.toCommand(exhibitionId);
         exhibitionDetailsUpdateUseCase.updateExhibitionDetailsUpdate(command);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NO_CONTENT
+        );
+    }
+
+    @DeleteMapping(ApiPath.EXHIBITION_DATA)
+    public ResponseEntity<?> deleteExhibition(
+            @PathVariable(PathVariableName.EXHIBITION_ID) Long exhibitionId
+    ) {
+        exhibitionDeleteUseCase.deleteExhibition(exhibitionId);
 
         return ResponseHandler.handleResponse(
                 HttpStatus.NO_CONTENT

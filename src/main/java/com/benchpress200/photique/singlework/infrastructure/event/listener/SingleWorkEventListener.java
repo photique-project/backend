@@ -12,9 +12,9 @@ import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkCommentCreateEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkCreateEvent;
+import com.benchpress200.photique.singlework.domain.event.SingleWorkDeleteEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkImageUploadEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkLikeAddEvent;
-import com.benchpress200.photique.singlework.domain.event.SingleWorkRemoveEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkUpdateEvent;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.infrastructure.persistence.elasticsearch.SingleWorkSearchRepository;
@@ -145,7 +145,7 @@ public class SingleWorkEventListener {
 
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleSingleWorkRemoveEventIfCommit(SingleWorkRemoveEvent event) {
+    public void handleSingleWorkDeleteEventIfCommit(SingleWorkDeleteEvent event) {
         Long singleWorkId = event.getSingleWorkId();
         singleWorkSearchRepository.deleteById(singleWorkId);
     }
