@@ -47,7 +47,7 @@ public class SingleWorkQueryService implements
     private final FollowQueryPort followQueryPort;
 
     public SingleWorkDetailsResult getSingleWorkDetails(Long singleWorkId) {
-        // 작품 조회 - 삭제된 데이터는 조회 X
+        // 작품 조회
         SingleWork singleWork = singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
@@ -70,9 +70,9 @@ public class SingleWorkQueryService implements
         }
 
         // FIXME: 현재 레코드 레벨에서 원자적인 업데이트를 위한 쿼리가 나가는 중인데,
-        // FIXME: query API 임에도 불구하고 쓰기 쿼리가 발생하는 트랜잭션임
+        // FIXME: query 어노테이션 API 임에도 불구하고 쓰기 쿼리가 발생하는 트랜잭션임
         // FIXME: 이후에 JPA 쓰기 지연 VS 원자적 쿼리 수행 VS 비관적, 낙관적 락 VS 실시간 동기화 포기하고 레디스 활용 방안 비교하고 적용
-        // FIXME: failover로 기존 로직 동작?
+        // FIXME: failover 로 기존 로직 동작?
         // FIXME: ES에 조회수 동기화도 필요 & 좋아요 수 동기화도 필요함
         singleWorkCommandPort.incrementViewCount(singleWorkId);
 
