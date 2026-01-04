@@ -31,4 +31,9 @@ public class ExhibitionPersistenceAdapter implements
     public Exhibition save(Exhibition exhibition) {
         return exhibitionRepository.save(exhibition);
     }
+
+    @Override
+    public void incrementViewCount(Long exhibitionId) {
+        exhibitionRepository.incrementViewCount(exhibitionId);
+    }
 }
