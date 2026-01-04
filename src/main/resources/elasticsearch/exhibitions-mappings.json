@@ -13,10 +13,6 @@
       "type": "keyword",
       "index": false
     },
-    "writerIntroduction": {
-      "type": "keyword",
-      "index": false
-    },
     "cardColor": {
       "type": "keyword",
       "index": false

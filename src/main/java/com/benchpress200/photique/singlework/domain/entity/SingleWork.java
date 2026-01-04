@@ -81,7 +81,7 @@ public class SingleWork {
     // 단일작품 - 좋아요 테이블이 따로 있지만,
     // 유저가 좋아요한 작품, 본인 작품 조회 시 복잡한 검색이 아니므로
     // MySQL에서 조회하게 되고 각각 좋아요 수 집계를 위해 추가적인 쿼리가 나갈 수 있음
-    // => 해당 부분을 보완하기위해 좋아요 카운트 수 칼럼 추기
+    // => 해당 부분을 보완하기위해 좋아요 카운트 수 칼럼 추가
     @Column(name = "like_count", nullable = false)
     private Long likeCount;
 

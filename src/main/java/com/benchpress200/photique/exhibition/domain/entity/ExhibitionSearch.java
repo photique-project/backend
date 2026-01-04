@@ -31,8 +31,16 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 @Setting(settingPath = "elasticsearch/settings.json")
 @Mapping(mappingPath = "elasticsearch/exhibitions-mappings.json")
 public class ExhibitionSearch {
+    /*
+     * === 필드 타입 ===
+     * Text: 분석 + 텍스트 전체 검색
+     * Keyword: 분석되지 않고 정확한 일치 검색
+     */
+
+    private static final String DOCUMENT_ID_FIELD = "id";
+
     @Id
-    @Field(name = "id", type = FieldType.Long)
+    @Field(name = DOCUMENT_ID_FIELD, type = FieldType.Long)
     private Long id;
 
     @Field(type = FieldType.Long)
@@ -45,15 +53,12 @@ public class ExhibitionSearch {
     private String writerProfileImage;
 
     @Field(type = FieldType.Keyword, index = false)
-    private String writerIntroduction;
-
-    @Field(type = FieldType.Keyword, index = false)
     private String cardColor;
 
     @Field(type = FieldType.Text)
     private String title;
 
-    @Field(type = FieldType.Text, index = false)
+    @Field(type = FieldType.Text)
     private String description;
 
     @Field(type = FieldType.Text)
@@ -74,27 +79,25 @@ public class ExhibitionSearch {
         writerId = writer.getId();
         writerNickname = writer.getNickname();
         writerProfileImage = writer.getProfileImage();
-        writerIntroduction = writer.getIntroduction();
     }
 
-    // SingleWorkSearch는 JPA가 관리하는 영속성 객체가 아니기 때문에 엔티티 클래스 내부에 변환메서드 작성했음
     public static ExhibitionSearch of(
             Exhibition exhibition,
-            User writer,
             List<String> tags
     ) {
+        User writer = exhibition.getWriter();
+
         return ExhibitionSearch.builder()
                 .id(exhibition.getId())
                 .writerId(writer.getId())
                 .writerNickname(writer.getNickname())
                 .writerProfileImage(writer.getProfileImage())
-                .writerIntroduction(writer.getIntroduction())
                 .title(exhibition.getTitle())
                 .cardColor(exhibition.getCardColor())
                 .description(exhibition.getDescription())
                 .tags(tags)
-                .likeCount(0L)
-                .viewCount(0L)
+                .likeCount(exhibition.getLikeCount())
+                .viewCount(exhibition.getViewCount())
                 .createdAt(exhibition.getCreatedAt())
                 .build();
     }

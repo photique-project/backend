@@ -10,8 +10,10 @@ import com.benchpress200.photique.singlework.application.query.port.out.persiste
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
+import com.benchpress200.photique.singlework.domain.event.SingleWorkCommentCreateEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkCreateEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkImageUploadEvent;
+import com.benchpress200.photique.singlework.domain.event.SingleWorkLikeAddEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkRemoveEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkUpdateEvent;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
@@ -63,7 +65,7 @@ public class SingleWorkEventListener {
         // FIXME: 이후 메시지 큐 도입한다면 메시지 발행해서 MySQL - ES 동기화 컨슈머 추가하여 비동기 처리
 
         Long singleWorkId = event.getSingleWorkId();
-        SingleWork singleWork = singleWorkQueryPort.findByIdWithWriter(singleWorkId)
+        SingleWork singleWork = singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
         // 태그 조회
@@ -72,7 +74,7 @@ public class SingleWorkEventListener {
                 .map(singleWorkTag -> singleWorkTag.getTag().getName())
                 .toList();
 
-        // 단일작품 검색 엔티티 생성
+        // 단일작품 검색 엔티티 생성 및 저장
         SingleWorkSearch singleWorkSearch = SingleWorkSearch.of(
                 singleWork,
                 singleWorkTagNames
@@ -92,7 +94,6 @@ public class SingleWorkEventListener {
 
         Slice<Follow> slice;
 
-        // DB 왕복횟수 확인
         do {
             slice = followQueryPort.findByFolloweeWithFollower(writer, pageable);
             List<Notification> buffer = new ArrayList<>(BATCH_SIZE);
@@ -117,6 +118,7 @@ public class SingleWorkEventListener {
             pageable = slice.nextPageable();
         } while (slice.hasNext());
     }
+
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleSingleWorkUpdateEventIfCommit(SingleWorkUpdateEvent event) {
@@ -145,9 +147,46 @@ public class SingleWorkEventListener {
         singleWorkSearchRepository.save(singleWorkSearch);
     }
 
+
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleSingleWorkRemoveEventIfCommit(SingleWorkRemoveEvent event) {
         Long singleWorkId = event.getSingleWorkId();
         singleWorkSearchRepository.deleteById(singleWorkId);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleSingleWorkLikeAddEventIfCommit(SingleWorkLikeAddEvent event) {
+        Long singleWorkId = event.getSingleWorkId();
+        SingleWork singleWork = singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
+                .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
+
+        User receiver = singleWork.getWriter();
+
+        Notification notification = Notification.of(
+                receiver,
+                NotificationType.SINGLE_WORK_LIKE,
+                singleWorkId
+        );
+
+        notificationCommandPort.save(notification);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleSingleWorkCommentCreateEventIfCommit(SingleWorkCommentCreateEvent event) {
+        Long singleWorkId = event.getSingleWorkId();
+        SingleWork singleWork = singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
+                .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
+
+        User receiver = singleWork.getWriter();
+
+        Notification notification = Notification.of(
+                receiver,
+                NotificationType.SINGLE_WORK_COMMENT,
+                singleWorkId
+        );
+
+        notificationCommandPort.save(notification);
     }
 }

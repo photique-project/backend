@@ -10,12 +10,12 @@ import org.springframework.data.repository.query.Param;
 public interface SingleWorkTagRepository extends JpaRepository<SingleWorkTag, Long> {
     List<SingleWorkTag> findBySingleWorkId(Long singleWorkId);
 
-    @Query(
-            "SELECT swt " +
-                    "FROM SingleWorkTag swt " +
-                    "JOIN FETCH swt.tag " +
-                    "WHERE swt.singleWork = :singleWork"
-    )
+    @Query("""
+            SELECT swt
+            FROM SingleWorkTag swt
+            JOIN FETCH swt.tag
+            WHERE swt.singleWork = :singleWork
+            """)
     List<SingleWorkTag> findBySingleWorkWithTag(@Param("singleWork") SingleWork singleWork);
 
     List<SingleWorkTag> findBySingleWork(SingleWork singleWork);
