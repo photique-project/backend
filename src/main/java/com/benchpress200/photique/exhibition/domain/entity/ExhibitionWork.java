@@ -53,4 +53,16 @@ public class ExhibitionWork {
         this.description = description;
         this.image = image;
     }
+
+    public void updateDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
 }

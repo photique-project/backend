@@ -1,6 +1,6 @@
 package com.benchpress200.photique.singlework.api.command.request;
 
-import com.benchpress200.photique.singlework.api.command.exception.InvalidFieldToUpdateException;
+import com.benchpress200.photique.singlework.api.command.exception.InvalidSingleWorkFieldToUpdateException;
 import com.benchpress200.photique.singlework.api.validator.annotation.Enum;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkUpdateCommand;
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
@@ -75,22 +75,22 @@ public class SingleWorkUpdateRequest {
     public SingleWorkUpdateCommand toCommand(Long singleWorkId) {
         // 제목(null 허용 X)이 업데이트 대상인데 null로 업데이트할 경우
         if (updateTitle && title == null) {
-            throw new InvalidFieldToUpdateException(INVALID_TITLE);
+            throw new InvalidSingleWorkFieldToUpdateException(INVALID_TITLE);
         }
 
         // 설명(null 허용 X) 업데이트 대상인데 null로 업데이트할 경우
         if (updateDescription && description == null) {
-            throw new InvalidFieldToUpdateException(INVALID_DESCRIPTION);
+            throw new InvalidSingleWorkFieldToUpdateException(INVALID_DESCRIPTION);
         }
 
         // 카메라(null 허용 X) 업데이트 대상인데 null로 업데이트할 경우
         if (updateCamera && camera == null) {
-            throw new InvalidFieldToUpdateException(INVALID_CAMERA);
+            throw new InvalidSingleWorkFieldToUpdateException(INVALID_CAMERA);
         }
 
         // 카테고리(null 허용 X) 업데이트 대상인데 null로 업데이트할 경우
         if (updateCategory && category == null) {
-            throw new InvalidFieldToUpdateException(INVALID_CATEGORY);
+            throw new InvalidSingleWorkFieldToUpdateException(INVALID_CATEGORY);
         }
 
         // 태그를 빈 값으로 업데이트할 경우 NPE 방지를 위한 빈 리스트 할당
@@ -100,11 +100,12 @@ public class SingleWorkUpdateRequest {
 
         // 날짜(null 허용 X) 업데이트 대상인데 null로 업데이트할 경우
         if (updateDate && date == null) {
-            throw new InvalidFieldToUpdateException(INVALID_DATE);
+            throw new InvalidSingleWorkFieldToUpdateException(INVALID_DATE);
         }
 
         // 검색데이터(ES 저장) 업데이트 플래그
         boolean update = updateTitle ||
+                updateDescription ||
                 updateCategory ||
                 updateTags;
 

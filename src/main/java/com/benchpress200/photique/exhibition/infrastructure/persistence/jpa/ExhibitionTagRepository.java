@@ -15,4 +15,6 @@ public interface ExhibitionTagRepository extends JpaRepository<ExhibitionTag, Lo
             WHERE et.exhibition = :exhibition
             """)
     List<ExhibitionTag> findByExhibitionWithTag(@Param("exhibition") Exhibition exhibition);
+
+    void deleteByExhibition(Exhibition exhibition);
 }

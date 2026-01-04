@@ -6,6 +6,7 @@ import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionCreateEvent;
+import com.benchpress200.photique.exhibition.domain.event.ExhibitionUpdateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionWorkImageUploadEvent;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
 import com.benchpress200.photique.exhibition.infrastructure.persistence.elasticsearch.ExhibitionSearchRepository;
@@ -86,7 +87,7 @@ public class ExhibitionEventListener {
         );
 
         Slice<Follow> slice;
-        
+
         do {
             slice = followQueryPort.findByFolloweeWithFollower(writer, pageable);
             List<Notification> buffer = new ArrayList<>(BATCH_SIZE);
@@ -110,5 +111,28 @@ public class ExhibitionEventListener {
 
             pageable = slice.nextPageable();
         } while (slice.hasNext());
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleExhibitionUpdateEventIfCommit(ExhibitionUpdateEvent event) {
+        // FIXME: 이후 메시지 큐 도입한다면 메시지 발행해서 MySQL - ES 동기화 컨슈머 추가하여 비동기 처리
+
+        Long exhibitionId = event.getExhibitionId();
+        Exhibition exhibition = exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+                .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
+
+        // 태그 조회
+        List<ExhibitionTag> exhibitionTags = exhibitionTagQueryPort.findByExhibitionWithTag(exhibition);
+        List<String> exhibitionTagNames = exhibitionTags.stream()
+                .map(exhibitionTag -> exhibitionTag.getTag().getName())
+                .toList();
+
+        // 전시회 검색 엔티티 생성 후 덮어쓰기
+        ExhibitionSearch exhibitionSearch = ExhibitionSearch.of(
+                exhibition,
+                exhibitionTagNames
+        );
+
+        exhibitionSearchRepository.save(exhibitionSearch);
     }
 }
