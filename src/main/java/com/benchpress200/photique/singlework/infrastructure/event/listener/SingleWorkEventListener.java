@@ -134,14 +134,10 @@ public class SingleWorkEventListener {
                 .map(singleWorkTag -> singleWorkTag.getTag().getName())
                 .toList();
 
-        // 좋아요 수 집계
-        Long likeCount = singleWorkLikeQueryPort.countBySingleWork(singleWork);
-
         // 단일작품 검색 엔티티 생성 후 덮어쓰기
         SingleWorkSearch singleWorkSearch = SingleWorkSearch.of(
                 singleWork,
-                singleWorkTagNames,
-                likeCount
+                singleWorkTagNames
         );
 
         singleWorkSearchRepository.save(singleWorkSearch);

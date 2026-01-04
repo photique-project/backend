@@ -2,17 +2,27 @@ package com.benchpress200.photique.exhibition.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionCreateCommand;
+import com.benchpress200.photique.exhibition.application.command.model.ExhibitionUpdateCommand;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionWorkCreateCommand;
+import com.benchpress200.photique.exhibition.application.command.model.ExhibitionWorkUpdateCommand;
+import com.benchpress200.photique.exhibition.application.command.port.in.ExhibitionDetailsUpdateUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.OpenExhibitionUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionTagCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionWorkCommandPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionWorkQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionCreateEvent;
+import com.benchpress200.photique.exhibition.domain.event.ExhibitionUpdateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionWorkImageUploadEvent;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotOwnedException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionWorkDuplicatedDisplayOrderException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionWorkNotFoundException;
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
 import com.benchpress200.photique.tag.application.command.port.out.persistence.TagCommandPort;
 import com.benchpress200.photique.tag.application.query.port.out.persistence.TagQueryPort;
@@ -33,7 +43,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @Transactional
 public class ExhibitionCommandService implements
-        OpenExhibitionUseCase {
+        OpenExhibitionUseCase,
+        ExhibitionDetailsUpdateUseCase {
     @Value("${cloud.aws.s3.path.exhibition}")
     private String imagePath;
 
@@ -43,8 +54,10 @@ public class ExhibitionCommandService implements
 
     private final ExhibitionEventPublishPort exhibitionEventPublishPort;
     private final ExhibitionCommandPort exhibitionCommandPort;
-    private final ExhibitionWorkCommandPort exhibitionWorkCommandPort;
+    private final ExhibitionQueryPort exhibitionQueryPort;
     private final ExhibitionTagCommandPort exhibitionTagCommandPort;
+    private final ExhibitionWorkCommandPort exhibitionWorkCommandPort;
+    private final ExhibitionWorkQueryPort exhibitionWorkQueryPort;
 
     private final TagCommandPort tagCommandPort;
     private final TagQueryPort tagQueryPort;
@@ -85,6 +98,86 @@ public class ExhibitionCommandService implements
         exhibitionEventPublishPort.publishExhibitionCreateEvent(event);
     }
 
+    @Override
+    public void updateExhibitionDetailsUpdate(ExhibitionUpdateCommand command) {
+        // 전시회 조회
+        Long exhibitionId = command.getExhibitionId();
+        Exhibition exhibition = exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+                .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
+
+        Long writerId = authenticationUserProviderPort.getCurrentUserId();
+
+        // 요청한 유저가 해당 전시회의 주인이 아닐 때
+        if (!exhibition.isOwnedBy(writerId)) {
+            throw new ExhibitionNotOwnedException();
+        }
+
+        // 제목 업데이트
+        if (command.isUpdateTitle()) {
+            String titleToUpdate = command.getTitle();
+            exhibition.updateTitle(titleToUpdate);
+        }
+
+        // 설명 업데이트
+        if (command.isUpdateDescription()) {
+            String descriptionToUpdate = command.getDescription();
+            exhibition.updateDescription(descriptionToUpdate);
+        }
+
+        // 카드 색상 업데이트
+        if (command.isUpdateCardColor()) {
+            String cardColorToUpdate = command.getCardColor();
+            exhibition.updateCardColor(cardColorToUpdate);
+        }
+
+        // 태그 업데이트
+        if (command.isUpdateTags()) {
+            List<String> tagNamesToUpdate = command.getTags();
+
+            // 해당 전시회의 기존 태그 모두 삭제 (벌크연산)
+            exhibitionTagCommandPort.deleteByExhibition(exhibition);
+
+            // 업데이트 태그 등록
+            attachTags(exhibition, tagNamesToUpdate);
+        }
+
+        // 전시회 개별 작품 업데이트
+        if (command.isUpdateWorks()) {
+            List<ExhibitionWorkUpdateCommand> workCommands = command.getWorks();
+
+            workCommands.forEach(workCommand -> {
+                Long id = workCommand.getId();
+                ExhibitionWork exhibitionWork = exhibitionWorkQueryPort.findById(id)
+                        .orElseThrow(() -> new ExhibitionWorkNotFoundException(id));
+
+                Integer displayOrder = workCommand.getDisplayOrder();
+                String title = workCommand.getTitle();
+                String description = workCommand.getDescription();
+
+                exhibitionWork.updateDisplayOrder(displayOrder);
+                exhibitionWork.updateTitle(title);
+                exhibitionWork.updateDescription(description);
+            });
+
+            // 작품들 모두 조회해서 중복 order 없는지 확인
+            List<ExhibitionWork> exhibitionWorks = exhibitionWorkQueryPort.findByExhibition(exhibition);
+
+            if (exhibitionWorks.stream()
+                    .map(ExhibitionWork::getDisplayOrder)
+                    .distinct()
+                    .count() != exhibitionWorks.size()
+            ) {
+                throw new ExhibitionWorkDuplicatedDisplayOrderException();
+            }
+        }
+
+        // 전시회 MySQL-ES 동기화 이벤트 발행
+        if (command.isUpdate()) {
+            ExhibitionUpdateEvent event = ExhibitionUpdateEvent.of(exhibitionId);
+            exhibitionEventPublishPort.publishExhibitionUpdateEvent(event);
+        }
+    }
+
     private void attachTags(Exhibition exhibition, List<String> tagNames) {
         List<Tag> tags = tagQueryPort.findByNameIn(tagNames);
         ExistingTags existingTags = ExistingTags.of(tags); // 존재하는 태그 일급 컬렉션
@@ -101,4 +194,5 @@ public class ExhibitionCommandService implements
             exhibitionTagCommandPort.save(exhibitionTag);
         }
     }
+
 }

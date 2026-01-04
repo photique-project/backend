@@ -54,7 +54,7 @@ public class SingleWorkCommandController {
     @PatchMapping(ApiPath.SINGLEWORK_DATA)
     public ResponseEntity<?> updateSingleWorkDetails(
             @PathVariable(PathVariableName.SINGLEWORK_ID) Long singleWorkId,
-            @RequestBody SingleWorkUpdateRequest request
+            @RequestBody @Valid SingleWorkUpdateRequest request
     ) {
         SingleWorkUpdateCommand command = request.toCommand(singleWorkId);
         updateSingleWorkDetailsUseCase.updateSingleWorkDetails(command);

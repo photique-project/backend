@@ -1,6 +1,8 @@
 package com.benchpress200.photique.exhibition.api.command.request;
 
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionImage;
+import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionWorkDisplayOrder;
+import com.benchpress200.photique.exhibition.api.command.validator.ExhibitionWorkDisplayOrderValidator;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionCreateCommand;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionWorkCreateCommand;
 import com.benchpress200.photique.image.presentation.validator.ImageValidator;
@@ -55,7 +57,12 @@ public class ExhibitionCreateRequest {
             tags = new ArrayList<>();
         }
 
-        List<ExhibitionWorkCreateCommand> worksCommand = works.stream()
+        // 중복 displayOrder가 없는지 검사
+        if (!ExhibitionWorkDisplayOrderValidator.isValid(works)) {
+            throw new InvalidExhibitionWorkDisplayOrder();
+        }
+
+        List<ExhibitionWorkCreateCommand> workCommands = works.stream()
                 .map(request ->
                         ExhibitionWorkCreateCommand.builder()
                                 .displayOrder(request.getDisplayOrder())
@@ -70,7 +77,7 @@ public class ExhibitionCreateRequest {
                 .description(description)
                 .cardColor(cardColor)
                 .tags(tags)
-                .works(worksCommand)
+                .works(workCommands)
                 .build();
     }
 }

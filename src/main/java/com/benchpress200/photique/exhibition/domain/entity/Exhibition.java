@@ -81,4 +81,16 @@ public class Exhibition {
     public void remove() {
         deletedAt = LocalDateTime.now();
     }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateCardColor(String cardColor) {
+        this.cardColor = cardColor;
+    }
 }

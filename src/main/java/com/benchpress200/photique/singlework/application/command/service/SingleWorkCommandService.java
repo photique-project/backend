@@ -96,7 +96,7 @@ public class SingleWorkCommandService implements
     public void updateSingleWorkDetails(SingleWorkUpdateCommand command) {
         // 작품 조회
         Long singleWorkId = command.getSingleWorkId();
-        SingleWork singleWork = singleWorkQueryPort.findByIdWithWriter(singleWorkId)
+        SingleWork singleWork = singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
         Long writerId = authenticationUserProviderPort.getCurrentUserId();

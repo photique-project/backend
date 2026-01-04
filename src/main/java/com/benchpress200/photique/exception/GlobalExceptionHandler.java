@@ -10,14 +10,19 @@ import com.benchpress200.photique.auth.domain.exception.VerificationCodeNotFound
 import com.benchpress200.photique.auth.infrastructure.exception.LoginRequestObjectReadException;
 import com.benchpress200.photique.auth.infrastructure.exception.MailSendException;
 import com.benchpress200.photique.common.response.ResponseHandler;
+import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionFieldToUpdateException;
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionImage;
+import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionWorkDisplayOrder;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotOwnedException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionWorkDuplicatedDisplayOrderException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionWorkNotFoundException;
 import com.benchpress200.photique.image.infrastructure.exception.ImageDeleteException;
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploadException;
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploaderFileWriteException;
 import com.benchpress200.photique.notification.domain.exception.NotificationTargetSingleWorkNotFoundException;
-import com.benchpress200.photique.singlework.api.command.exception.InvalidFieldToUpdateException;
 import com.benchpress200.photique.singlework.api.command.exception.InvalidImageException;
+import com.benchpress200.photique.singlework.api.command.exception.InvalidSingleWorkFieldToUpdateException;
 import com.benchpress200.photique.singlework.api.query.exception.InvalidFieldToSearch;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkAlreadyLikedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkCommentNotFoundException;
@@ -304,8 +309,8 @@ public class GlobalExceptionHandler {
     }
 
     // 단일작품 업데이트 요청 시, 유효하지 않은 필드 예외 처리 응답
-    @ExceptionHandler(InvalidFieldToUpdateException.class)
-    public ResponseEntity<?> handleInvalidFieldToUpdateException(InvalidFieldToUpdateException e) {
+    @ExceptionHandler(InvalidSingleWorkFieldToUpdateException.class)
+    public ResponseEntity<?> handleInvalidFieldToUpdateException(InvalidSingleWorkFieldToUpdateException e) {
         String errorMessage = e.getMessage();
 
         return ResponseHandler.handleResponse(
@@ -423,6 +428,61 @@ public class GlobalExceptionHandler {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.NOT_FOUND,
+                errorMessage
+        );
+    }
+
+    // 전시회 작품의 중복된 순서 예외 처리 응답
+    @ExceptionHandler(InvalidExhibitionWorkDisplayOrder.class)
+    public ResponseEntity<?> handleExhibitionWorkDisplayOrderException(InvalidExhibitionWorkDisplayOrder e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
+                errorMessage
+        );
+    }
+
+    // 전시회 작품의 유효하지 않은 업데이트 필드 예외 처리 응답
+    @ExceptionHandler(InvalidExhibitionFieldToUpdateException.class)
+    public ResponseEntity<?> handleInvalidFieldToUpdateException(InvalidExhibitionFieldToUpdateException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
+                errorMessage
+        );
+    }
+
+    // 전시회 수정 요청한 유저가 전시회의 주인이 아닐 때 예외 처리 응답
+    @ExceptionHandler(ExhibitionNotOwnedException.class)
+    public ResponseEntity<?> handleExhibitionNotOwnedException(ExhibitionNotOwnedException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.FORBIDDEN,
+                errorMessage
+        );
+    }
+
+    // 존재하지 않는 전시회 개별 작품 예외 처리 응답
+    @ExceptionHandler(ExhibitionWorkNotFoundException.class)
+    public ResponseEntity<?> handleExhibitionWorkNotFoundException(ExhibitionWorkNotFoundException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NOT_FOUND,
+                errorMessage
+        );
+    }
+
+    @ExceptionHandler(ExhibitionWorkDuplicatedDisplayOrderException.class)
+    public ResponseEntity<?> handleExhibitionWorkDuplicatedDisplayOrderException(
+            ExhibitionWorkDuplicatedDisplayOrderException e
+    ) {
+        String errorMessage = e.getMessage();
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
                 errorMessage
         );
     }
