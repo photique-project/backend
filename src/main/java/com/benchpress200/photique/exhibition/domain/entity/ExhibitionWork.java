@@ -12,8 +12,6 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -26,11 +24,10 @@ public class ExhibitionWork {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exhibition_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Exhibition exhibition;
 
-    @Column(length = 2048, nullable = false)
-    private String image;
+    @Column(name = "display_order", nullable = false)
+    private Integer displayOrder;
 
     @Column(length = 30, nullable = false)
     private String title;
@@ -38,17 +35,22 @@ public class ExhibitionWork {
     @Column(length = 200, nullable = false)
     private String description;
 
+    @Column(length = 2048, nullable = false)
+    private String image;
+
 
     @Builder
     public ExhibitionWork(
             Exhibition exhibition,
-            String image,
+            Integer displayOrder,
             String title,
-            String description
+            String description,
+            String image
     ) {
         this.exhibition = exhibition;
-        this.image = image;
+        this.displayOrder = displayOrder;
         this.title = title;
         this.description = description;
+        this.image = image;
     }
 }

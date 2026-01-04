@@ -37,7 +37,6 @@ public class SingleWorkDetailsResult {
     public static SingleWorkDetailsResult of(
             SingleWork singleWork,
             List<Tag> tags,
-            Long likeCount,
             boolean isLiked,
             boolean isFollowing
     ) {
@@ -69,7 +68,7 @@ public class SingleWorkDetailsResult {
                 .location(singleWork.getLocation())
                 .date(singleWork.getDate())
                 .tags(tagNames)
-                .likeCount(likeCount)
+                .likeCount(singleWork.getLikeCount())
                 .viewCount(singleWork.getViewCount())
                 .createdAt(singleWork.getCreatedAt())
                 .isLiked(isLiked)

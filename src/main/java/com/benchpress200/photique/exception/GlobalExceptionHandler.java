@@ -10,6 +10,8 @@ import com.benchpress200.photique.auth.domain.exception.VerificationCodeNotFound
 import com.benchpress200.photique.auth.infrastructure.exception.LoginRequestObjectReadException;
 import com.benchpress200.photique.auth.infrastructure.exception.MailSendException;
 import com.benchpress200.photique.common.response.ResponseHandler;
+import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionImage;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
 import com.benchpress200.photique.image.infrastructure.exception.ImageDeleteException;
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploadException;
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploaderFileWriteException;
@@ -399,6 +401,28 @@ public class GlobalExceptionHandler {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.FORBIDDEN,
+                errorMessage
+        );
+    }
+
+    // 전시회 생성 시 유효하지 않은 이미지 예외 처리 응답
+    @ExceptionHandler(InvalidExhibitionImage.class)
+    public ResponseEntity<?> handleInvalidExhibitionImageException(InvalidExhibitionImage e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.BAD_REQUEST,
+                errorMessage
+        );
+    }
+
+    // 존재하지 않는 전시회 조회 예외 처리 응답
+    @ExceptionHandler(ExhibitionNotFoundException.class)
+    public ResponseEntity<?> handleExhibitionNotFoundException(ExhibitionNotFoundException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NOT_FOUND,
                 errorMessage
         );
     }

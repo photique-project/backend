@@ -57,9 +57,6 @@ public class SingleWorkQueryService implements
                 .map(SingleWorkTag::getTag)
                 .toList();
 
-        // 좋아요 수 집계
-        Long likeCount = singleWorkLikeQueryPort.countBySingleWork(singleWork);
-
         // 작품 좋아요 유무, 작가 팔로우 유무 확인
         boolean isLiked = false;
         boolean isFollowing = false;
@@ -82,7 +79,6 @@ public class SingleWorkQueryService implements
         return SingleWorkDetailsResult.of(
                 singleWork,
                 tags,
-                likeCount,
                 isLiked,
                 isFollowing
         );

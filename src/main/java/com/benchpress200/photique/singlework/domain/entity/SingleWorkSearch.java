@@ -40,10 +40,7 @@ public class SingleWorkSearch {
     private static final String DOCUMENT_ID_FIELD = "id";
 
     @Id
-    @Field(
-            name = DOCUMENT_ID_FIELD,
-            type = FieldType.Long
-    )
+    @Field(name = DOCUMENT_ID_FIELD, type = FieldType.Long)
     private Long id;
 
     @Field(type = FieldType.Keyword, index = false)
@@ -103,7 +100,7 @@ public class SingleWorkSearch {
                 .description(singleWork.getDescription())
                 .tags(tags)
                 .category(singleWork.getCategory().getValue())
-                .likeCount(0L)
+                .likeCount(singleWork.getLikeCount())
                 .viewCount(singleWork.getViewCount())
                 .createdAt(singleWork.getCreatedAt())
                 .build();

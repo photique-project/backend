@@ -24,35 +24,45 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 @NoArgsConstructor
 public class SingleWorkCreateRequest {
-    @NotBlank(message = "Title must not be null")
-    @Size(min = 1, max = 30, message = "Invalid title")
+    private static final String INVALID_TITLE = "Invalid title";
+    private static final String INVALID_DESCRIPTION = "Invalid description";
+    private static final String INVALID_CAMERA = "Invalid camera";
+    private static final String INVALID_LENS = "Invalid lens";
+    private static final String INVALID_APERTURE = "Invalid aperture";
+    private static final String INVALID_SHUTTER_SPEED = "Invalid shutter speed";
+    private static final String INVALID_ISO = "Invalid ISO";
+    private static final String INVALID_CATEGORY = "Invalid category";
+    private static final String INVALID_LOCATION = "Invalid location";
+
+    @NotBlank(message = INVALID_TITLE)
+    @Size(min = 1, max = 30, message = INVALID_TITLE)
     private String title;
 
-    @NotBlank(message = "Description must not be null")
-    @Size(min = 1, max = 500, message = "Invalid description")
+    @NotBlank(message = INVALID_DESCRIPTION)
+    @Size(min = 1, max = 500, message = INVALID_DESCRIPTION)
     private String description;
 
-    @NotBlank(message = "Camera must not be null")
-    @Size(min = 1, max = 30, message = "Invalid camera")
+    @NotBlank(message = INVALID_CAMERA)
+    @Size(min = 1, max = 30, message = INVALID_CAMERA)
     private String camera;
 
-    @Size(max = 30, message = "Invalid lens")
+    @Size(max = 30, message = INVALID_LENS)
     private String lens;
 
-    @Enum(enumClass = Aperture.class, message = "Invalid aperture")
+    @Enum(enumClass = Aperture.class, message = INVALID_APERTURE)
     private String aperture;
 
-    @Enum(enumClass = ShutterSpeed.class, message = "Invalid shutter speed")
+    @Enum(enumClass = ShutterSpeed.class, message = INVALID_SHUTTER_SPEED)
     private String shutterSpeed;
 
-    @Enum(enumClass = ISO.class, message = "Invalid ISO")
+    @Enum(enumClass = ISO.class, message = INVALID_ISO)
     private String iso;
 
-    @NotBlank(message = "Invalid category")
-    @Enum(enumClass = Category.class, message = "Invalid category")
+    @NotBlank(message = INVALID_CATEGORY)
+    @Enum(enumClass = Category.class, message = INVALID_CATEGORY)
     private String category;
 
-    @Size(max = 30, message = "Invalid location")
+    @Size(max = 30, message = INVALID_LOCATION)
     private String location;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")

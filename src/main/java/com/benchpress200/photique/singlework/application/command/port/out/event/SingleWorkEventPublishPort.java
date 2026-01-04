@@ -1,7 +1,9 @@
 package com.benchpress200.photique.singlework.application.command.port.out.event;
 
+import com.benchpress200.photique.singlework.domain.event.SingleWorkCommentCreateEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkCreateEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkImageUploadEvent;
+import com.benchpress200.photique.singlework.domain.event.SingleWorkLikeAddEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkRemoveEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkUpdateEvent;
 
@@ -13,4 +15,8 @@ public interface SingleWorkEventPublishPort {
     void publishSingleWorkUpdateEvent(SingleWorkUpdateEvent event);
 
     void publishSingleWorkRemoveEvent(SingleWorkRemoveEvent event);
+
+    void publishSingleWorkLikeAddEvent(SingleWorkLikeAddEvent event);
+
+    void publishSingleWorkCommentCreateEvent(SingleWorkCommentCreateEvent event);
 }

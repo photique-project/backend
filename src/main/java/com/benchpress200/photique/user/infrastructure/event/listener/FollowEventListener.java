@@ -9,6 +9,8 @@ import com.benchpress200.photique.user.domain.event.FollowEvent;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -18,6 +20,7 @@ public class FollowEventListener {
     private final UserQueryPort userQueryPort;
     private final NotificationCommandPort notificationCommandPort;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleFollowEventIfCommit(FollowEvent event) {
         // FIXME: 메시지 큐 도입하면 비동기 알림 생성 처리 고려
