@@ -4,4 +4,6 @@ import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 
 public interface ExhibitionBookmarkCommandPort {
     ExhibitionBookmark save(ExhibitionBookmark exhibitionBookmark);
+
+    void delete(ExhibitionBookmark exhibitionBookmark);
 }
