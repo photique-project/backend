@@ -1,6 +1,7 @@
 package com.benchpress200.photique.exhibition.infrastructure.event.adapter;
 
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
+import com.benchpress200.photique.exhibition.domain.event.ExhibitionBookmarkAddEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionCreateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionDeleteEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionLikeAddEvent;
@@ -37,6 +38,11 @@ public class ExhibitionEventPublishAdapter implements ExhibitionEventPublishPort
 
     @Override
     public void publishExhibitionLikeAddEvent(ExhibitionLikeAddEvent event) {
+        publisher.publishEvent(event);
+    }
+
+    @Override
+    public void publishExhibitionBookmarkAddEvent(ExhibitionBookmarkAddEvent event) {
         publisher.publishEvent(event);
     }
 }

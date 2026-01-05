@@ -13,6 +13,7 @@ import com.benchpress200.photique.common.api.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionFieldToUpdateException;
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionImage;
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionWorkDisplayOrder;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionAlreadyBookmarkedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionAlreadyLikedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotOwnedException;
@@ -493,6 +494,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ExhibitionAlreadyLikedException.class)
     public ResponseEntity<?> handleExhibitionAlreadyLikedException(
             ExhibitionAlreadyLikedException e
+    ) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.CONFLICT,
+                errorMessage
+        );
+    }
+
+    // 전시회 중복 북마크 예외 처리 응답
+    @ExceptionHandler(ExhibitionAlreadyBookmarkedException.class)
+    public ResponseEntity<?> handleExhibitionAlreadyBookmarkedException(
+            ExhibitionAlreadyBookmarkedException e
     ) {
         String errorMessage = e.getMessage();
 
