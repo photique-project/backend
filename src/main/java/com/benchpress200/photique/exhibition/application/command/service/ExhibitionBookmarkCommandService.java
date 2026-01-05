@@ -2,8 +2,8 @@ package com.benchpress200.photique.exhibition.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.exhibition.application.command.port.in.AddExhibitionBookmarkUseCase;
+import com.benchpress200.photique.exhibition.application.command.port.in.CancelExhibitionBookmarkUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionBookmarkCommandPort;
-import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionBookmarkQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionQueryPort;
@@ -23,13 +23,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Transactional
 public class ExhibitionBookmarkCommandService implements
-        AddExhibitionBookmarkUseCase {
+        AddExhibitionBookmarkUseCase,
+        CancelExhibitionBookmarkUseCase {
 
     private final AuthenticationUserProviderPort authenticationUserProvider;
 
     private final UserQueryPort userQueryPort;
     private final ExhibitionQueryPort exhibitionQueryPort;
-    private final ExhibitionCommandPort exhibitionCommandPort;
     private final ExhibitionBookmarkQueryPort exhibitionBookmarkQueryPort;
     private final ExhibitionBookmarkCommandPort exhibitionBookmarkCommandPort;
     private final ExhibitionEventPublishPort exhibitionEventPublishPort;
@@ -57,5 +57,21 @@ public class ExhibitionBookmarkCommandService implements
         // 북마크 알림 생성 이벤트 발행
         ExhibitionBookmarkAddEvent event = ExhibitionBookmarkAddEvent.of(exhibitionId);
         exhibitionEventPublishPort.publishExhibitionBookmarkAddEvent(event);
+    }
+
+    @Override
+    public void cancelExhibitionBookmark(Long exhibitionId) {
+        // 요청 유저 조회
+        Long currentUserId = authenticationUserProvider.getCurrentUserId();
+        User user = userQueryPort.findActiveById(currentUserId)
+                .orElseThrow(() -> new UserNotFoundException(currentUserId));
+
+        // 전시회 조회
+        Exhibition exhibition = exhibitionQueryPort.findActiveById(exhibitionId)
+                .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
+
+        // 북마크 엔티티 조회 후 존재한다면 삭제 처리
+        exhibitionBookmarkQueryPort.findByUserAndExhibition(user, exhibition)
+                .ifPresent(exhibitionBookmarkCommandPort::delete);
     }
 }
