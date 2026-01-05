@@ -5,9 +5,9 @@ import com.benchpress200.photique.exhibition.application.command.model.Exhibitio
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionUpdateCommand;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionWorkCreateCommand;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionWorkUpdateCommand;
-import com.benchpress200.photique.exhibition.application.command.port.in.ExhibitionDeleteUseCase;
-import com.benchpress200.photique.exhibition.application.command.port.in.ExhibitionDetailsUpdateUseCase;
+import com.benchpress200.photique.exhibition.application.command.port.in.DeleteExhibitionUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.OpenExhibitionUseCase;
+import com.benchpress200.photique.exhibition.application.command.port.in.UpdateExhibitionDetailsUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionTagCommandPort;
@@ -46,8 +46,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional
 public class ExhibitionCommandService implements
         OpenExhibitionUseCase,
-        ExhibitionDetailsUpdateUseCase,
-        ExhibitionDeleteUseCase {
+        UpdateExhibitionDetailsUseCase,
+        DeleteExhibitionUseCase {
     @Value("${cloud.aws.s3.path.exhibition}")
     private String imagePath;
 

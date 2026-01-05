@@ -29,6 +29,11 @@ public class ExhibitionPersistenceAdapter implements
     }
 
     @Override
+    public Optional<Exhibition> findActiveById(Long id) {
+        return exhibitionRepository.findActiveById(id);
+    }
+
+    @Override
     public Optional<Exhibition> findActiveByIdWithWriter(Long id) {
         return exhibitionRepository.findActiveByIdWithWriter(id);
     }
@@ -50,5 +55,10 @@ public class ExhibitionPersistenceAdapter implements
     @Override
     public void incrementViewCount(Long exhibitionId) {
         exhibitionRepository.incrementViewCount(exhibitionId);
+    }
+
+    @Override
+    public void incrementLikeCount(Long exhibitionId) {
+        exhibitionRepository.incrementLikeCount(exhibitionId);
     }
 }

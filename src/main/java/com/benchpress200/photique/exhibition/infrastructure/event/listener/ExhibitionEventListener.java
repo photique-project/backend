@@ -7,6 +7,7 @@ import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionCreateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionDeleteEvent;
+import com.benchpress200.photique.exhibition.domain.event.ExhibitionLikeAddEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionUpdateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionWorkImageUploadEvent;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
@@ -141,5 +142,23 @@ public class ExhibitionEventListener {
     public void handleExhibitionDeleteEventIfCommit(ExhibitionDeleteEvent event) {
         Long exhibitionId = event.getExhibitionId();
         exhibitionSearchRepository.deleteById(exhibitionId);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleExhibitionLikeAddEventIfCommit(ExhibitionLikeAddEvent event) {
+        Long exhibitionId = event.getExhibitionId();
+        Exhibition exhibition = exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+                .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
+
+        User receiver = exhibition.getWriter();
+
+        Notification notification = Notification.of(
+                receiver,
+                NotificationType.EXHIBITION_LIKE,
+                exhibitionId
+        );
+
+        notificationCommandPort.save(notification);
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 public interface ExhibitionQueryPort {
     Long countByWriter(User writer);
 
+    Optional<Exhibition> findActiveById(Long id);
+
     Optional<Exhibition> findActiveByIdWithWriter(Long id);
 
     Page<ExhibitionSearch> search(
