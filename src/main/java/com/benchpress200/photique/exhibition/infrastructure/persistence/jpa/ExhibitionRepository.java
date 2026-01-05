@@ -46,4 +46,13 @@ public interface ExhibitionRepository extends JpaRepository<Exhibition, Long> {
             WHERE e.id = :exhibitionId
             """)
     void incrementLikeCount(@Param("exhibitionId") Long exhibitionId);
+
+    @Transactional
+    @Modifying
+    @Query("""
+            UPDATE Exhibition e
+            SET e.likeCount = e.likeCount - 1
+            WHERE e.id = :exhibitionId
+            """)
+    void decrementLikeCount(@Param("exhibitionId") Long exhibitionId);
 }

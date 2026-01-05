@@ -5,10 +5,12 @@ import com.benchpress200.photique.common.api.constant.PathVariableName;
 import com.benchpress200.photique.common.api.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.api.command.constant.ExhibitionCommandResponseMessage;
 import com.benchpress200.photique.exhibition.application.command.port.in.AddExhibitionLikeUseCase;
+import com.benchpress200.photique.exhibition.application.command.port.in.CancelExhibitionLikeUseCase;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Transactional
 public class ExhibitionLikeCommandController {
     private final AddExhibitionLikeUseCase addExhibitionLikeUseCase;
+    private final CancelExhibitionLikeUseCase cancelExhibitionLikeUseCase;
 
     @PostMapping(ApiPath.EXHIBITION_LIKE)
     public ResponseEntity<?> addExhibitionLike(
@@ -28,6 +31,17 @@ public class ExhibitionLikeCommandController {
         return ResponseHandler.handleResponse(
                 HttpStatus.CREATED,
                 ExhibitionCommandResponseMessage.EXHIBITION_LIKE_SUCCESS
+        );
+    }
+
+    @DeleteMapping(ApiPath.EXHIBITION_LIKE)
+    public ResponseEntity<?> cancelExhibitionLike(
+            @PathVariable(PathVariableName.EXHIBITION_ID) Long exhibitionId
+    ) {
+        cancelExhibitionLikeUseCase.cancelExhibitionLike(exhibitionId);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NO_CONTENT
         );
     }
 }
