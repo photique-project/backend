@@ -1,6 +1,7 @@
 package com.benchpress200.photique.exhibition.application.command.port.out;
 
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionBookmarkAddEvent;
+import com.benchpress200.photique.exhibition.domain.event.ExhibitionCommentCreateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionCreateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionDeleteEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionLikeAddEvent;
@@ -19,4 +20,6 @@ public interface ExhibitionEventPublishPort {
     void publishExhibitionLikeAddEvent(ExhibitionLikeAddEvent event);
 
     void publishExhibitionBookmarkAddEvent(ExhibitionBookmarkAddEvent event);
+
+    void publishExhibitionCommentCreateEvent(ExhibitionCommentCreateEvent event);
 }

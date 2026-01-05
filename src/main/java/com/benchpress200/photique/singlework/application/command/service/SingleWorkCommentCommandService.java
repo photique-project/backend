@@ -31,10 +31,9 @@ public class SingleWorkCommentCommandService implements
         UpdateSingleWorkCommentUseCase,
         DeleteSingleWorkCommentUseCase {
     private final AuthenticationUserProviderPort authenticationUserProvider;
-
     private final UserQueryPort userQueryPort;
-    private final SingleWorkQueryPort singleWorkQueryPort;
 
+    private final SingleWorkQueryPort singleWorkQueryPort;
     private final SingleWorkCommentQueryPort singleWorkCommentQueryPort;
     private final SingleWorkCommentCommandPort singleWorkCommentCommandPort;
     private final SingleWorkEventPublishPort singleWorkEventPublishPort;

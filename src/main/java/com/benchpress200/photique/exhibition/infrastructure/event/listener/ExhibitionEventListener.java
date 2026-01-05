@@ -6,6 +6,7 @@ import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionBookmarkAddEvent;
+import com.benchpress200.photique.exhibition.domain.event.ExhibitionCommentCreateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionCreateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionDeleteEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionLikeAddEvent;
@@ -182,5 +183,21 @@ public class ExhibitionEventListener {
         notificationCommandPort.save(notification);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleExhibitionCommentCreateEventIfCommit(ExhibitionCommentCreateEvent event) {
+        Long exhibitionId = event.getExhibitionId();
+        Exhibition exhibition = exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+                .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
+        User receiver = exhibition.getWriter();
+
+        Notification notification = Notification.of(
+                receiver,
+                NotificationType.EXHIBITION_COMMENT,
+                exhibitionId
+        );
+
+        notificationCommandPort.save(notification);
+    }
 }
