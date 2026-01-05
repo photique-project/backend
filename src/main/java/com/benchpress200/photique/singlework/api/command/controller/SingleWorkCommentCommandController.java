@@ -1,8 +1,8 @@
 package com.benchpress200.photique.singlework.api.command.controller;
 
-import com.benchpress200.photique.common.constant.ApiPath;
-import com.benchpress200.photique.common.constant.PathVariableName;
-import com.benchpress200.photique.common.response.ResponseHandler;
+import com.benchpress200.photique.common.api.constant.ApiPath;
+import com.benchpress200.photique.common.api.constant.PathVariableName;
+import com.benchpress200.photique.common.api.response.ResponseHandler;
 import com.benchpress200.photique.singlework.api.command.constant.SingleWorkCommandResponseMessage;
 import com.benchpress200.photique.singlework.api.command.request.SingleWorkCommentCreateRequest;
 import com.benchpress200.photique.singlework.api.command.request.SingleWorkCommentUpdateRequest;

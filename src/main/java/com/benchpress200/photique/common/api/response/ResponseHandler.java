@@ -1,4 +1,4 @@
-package com.benchpress200.photique.common.response;
+package com.benchpress200.photique.common.api.response;
 
 import java.time.LocalDateTime;
 import org.springframework.http.HttpHeaders;

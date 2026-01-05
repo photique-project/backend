@@ -1,29 +1,39 @@
 package com.benchpress200.photique.exhibition.application.query.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.common.application.support.Ids;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
+import com.benchpress200.photique.exhibition.application.query.model.ExhibitionSearchQuery;
 import com.benchpress200.photique.exhibition.application.query.port.in.GetExhibitionDetailsUseCase;
+import com.benchpress200.photique.exhibition.application.query.port.in.SearchExhibitionUseCase;
 import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionBookmarkQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionLikeQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionTagQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionWorkQueryPort;
 import com.benchpress200.photique.exhibition.application.query.result.ExhibitionDetailsResult;
+import com.benchpress200.photique.exhibition.application.query.result.ExhibitionSearchResult;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
+import com.benchpress200.photique.exhibition.domain.enumeration.Target;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.application.query.port.out.persistence.FollowQueryPort;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class ExhibitionQueryService implements
-        GetExhibitionDetailsUseCase {
-    private final AuthenticationUserProviderPort authenticationUserProvider;
+        GetExhibitionDetailsUseCase,
+        SearchExhibitionUseCase {
+    private final AuthenticationUserProviderPort authenticationUserProviderPort;
 
     private final FollowQueryPort followQueryPort;
 
@@ -50,7 +60,7 @@ public class ExhibitionQueryService implements
         List<ExhibitionWork> exhibitionWorks = exhibitionWorkQueryPort.findByExhibition(exhibition);
 
         // 작가 팔로우, 좋아요, 북마크 유무 조회
-        Long requestUserId = authenticationUserProvider.getCurrentUserId();
+        Long requestUserId = authenticationUserProviderPort.getCurrentUserId();
         Long writerId = exhibition.getWriter().getId();
 
         boolean isFollowing = followQueryPort.existsByFollowerIdAndFolloweeId(requestUserId, writerId);
@@ -73,5 +83,61 @@ public class ExhibitionQueryService implements
                 isLiked,
                 isBookmarked
         );
+    }
+
+    @Override
+    public ExhibitionSearchResult searchExhibition(ExhibitionSearchQuery query) {
+        Target target = query.getTarget();
+        String keyword = query.getKeyword();
+        Pageable pageable = query.getPageable();
+
+        Page<ExhibitionSearch> exhibitionSearchPage = exhibitionQueryPort.search(
+                target,
+                keyword,
+                pageable
+        );
+
+        List<Long> exhibitionSearchIds = exhibitionSearchPage.stream()
+                .map(ExhibitionSearch::getId)
+                .toList();
+
+        // 요청 유저가 좋아요한 작품 아이디 조회
+        Ids likedExhibitionIds = findLikedExhibitionIds(exhibitionSearchIds);
+
+        // 요청 유저가 북마크한 작품 아이디 조회
+        Ids bookmarkedExhibitionIds = findBookmarkedExhibitionIds(exhibitionSearchIds);
+
+        // 결과 반환
+        return ExhibitionSearchResult.of(
+                exhibitionSearchPage,
+                likedExhibitionIds,
+                bookmarkedExhibitionIds
+        );
+    }
+
+    private Ids findLikedExhibitionIds(List<Long> ids) {
+        // 인증된 유저가 아니라면
+        if (!authenticationUserProviderPort.isAuthenticated()) {
+            return Ids.empty();
+        }
+
+        Long requestUserId = authenticationUserProviderPort.getCurrentUserId();
+        // 검색 결과 전시회 중에서 요청 유저가 좋아요한 작품 아이디 셋 조회
+        Set<Long> likedSet = exhibitionLikeQueryPort.findExhibitionIds(requestUserId, ids);
+
+        return Ids.from(likedSet);
+    }
+
+    private Ids findBookmarkedExhibitionIds(List<Long> ids) {
+        // 인증된 유저가 아니라면
+        if (!authenticationUserProviderPort.isAuthenticated()) {
+            return Ids.empty();
+        }
+
+        Long requestUserId = authenticationUserProviderPort.getCurrentUserId();
+        // 검색 결과 전시회 중에서 요청 유저가 북마크한 작품 아이디 셋 조회
+        Set<Long> likedSet = exhibitionBookmarkQueryPort.findExhibitionIds(requestUserId, ids);
+
+        return Ids.from(likedSet);
     }
 }

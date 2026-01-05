@@ -1,6 +1,6 @@
-package com.benchpress200.photique.singlework.api.validator;
+package com.benchpress200.photique.common.api.validator;
 
-import com.benchpress200.photique.singlework.api.validator.annotation.Enum;
+import com.benchpress200.photique.common.api.validator.annotation.Enum;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.lang.reflect.Method;

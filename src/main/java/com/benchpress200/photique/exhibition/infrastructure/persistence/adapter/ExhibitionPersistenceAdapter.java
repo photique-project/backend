@@ -3,10 +3,15 @@ package com.benchpress200.photique.exhibition.infrastructure.persistence.adapter
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
+import com.benchpress200.photique.exhibition.domain.enumeration.Target;
+import com.benchpress200.photique.exhibition.infrastructure.persistence.elasticsearch.ExhibitionSearchRepository;
 import com.benchpress200.photique.exhibition.infrastructure.persistence.jpa.ExhibitionRepository;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -16,6 +21,7 @@ public class ExhibitionPersistenceAdapter implements
         ExhibitionCommandPort {
 
     private final ExhibitionRepository exhibitionRepository;
+    private final ExhibitionSearchRepository exhibitionSearchRepository;
 
     @Override
     public Long countByWriter(User writer) {
@@ -25,6 +31,15 @@ public class ExhibitionPersistenceAdapter implements
     @Override
     public Optional<Exhibition> findActiveByIdWithWriter(Long id) {
         return exhibitionRepository.findActiveByIdWithWriter(id);
+    }
+
+    @Override
+    public Page<ExhibitionSearch> search(Target target, String keyword, Pageable pageable) {
+        return exhibitionSearchRepository.search(
+                target,
+                keyword,
+                pageable
+        );
     }
 
     @Override

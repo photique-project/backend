@@ -1,8 +1,8 @@
 package com.benchpress200.photique.singlework.api.command.request;
 
+import com.benchpress200.photique.common.api.validator.annotation.Enum;
 import com.benchpress200.photique.image.presentation.validator.ImageValidator;
 import com.benchpress200.photique.singlework.api.command.exception.InvalidImageException;
-import com.benchpress200.photique.singlework.api.validator.annotation.Enum;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCreateCommand;
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
