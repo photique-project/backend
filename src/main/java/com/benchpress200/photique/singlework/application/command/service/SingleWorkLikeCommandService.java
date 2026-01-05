@@ -38,7 +38,7 @@ public class SingleWorkLikeCommandService implements
 
     @Override
     public void addSingleWorkLike(Long singleWorkId) {
-        // 요청 유저 아이디 꺼내기
+        // 요청 유저 조회
         Long currentUserId = authenticationUserProvider.getCurrentUserId();
         User user = userQueryPort.findActiveById(currentUserId)
                 .orElseThrow(() -> new UserNotFoundException(currentUserId));

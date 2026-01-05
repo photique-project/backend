@@ -15,6 +15,14 @@ public interface ExhibitionRepository extends JpaRepository<Exhibition, Long> {
     @Query("""
             SELECT e
             FROM Exhibition e
+            WHERE e.id = :id
+            AND e.deletedAt IS NULL
+            """)
+    Optional<Exhibition> findActiveById(Long id);
+
+    @Query("""
+            SELECT e
+            FROM Exhibition e
             JOIN FETCH e.writer
             WHERE e.id = :id
             AND e.deletedAt IS NULL
@@ -29,4 +37,13 @@ public interface ExhibitionRepository extends JpaRepository<Exhibition, Long> {
             WHERE e.id = :exhibitionId
             """)
     void incrementViewCount(@Param("exhibitionId") Long exhibitionId);
+
+    @Transactional
+    @Modifying
+    @Query("""
+            UPDATE Exhibition e
+            SET e.likeCount = e.likeCount + 1
+            WHERE e.id = :exhibitionId
+            """)
+    void incrementLikeCount(@Param("exhibitionId") Long exhibitionId);
 }

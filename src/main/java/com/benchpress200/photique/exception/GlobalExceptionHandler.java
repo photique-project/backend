@@ -13,6 +13,7 @@ import com.benchpress200.photique.common.api.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionFieldToUpdateException;
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionImage;
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionWorkDisplayOrder;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionAlreadyLikedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotOwnedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionWorkDuplicatedDisplayOrderException;
@@ -476,6 +477,7 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // 전시회 개별 작품 중복 순서 예외 처리 응답
     @ExceptionHandler(ExhibitionWorkDuplicatedDisplayOrderException.class)
     public ResponseEntity<?> handleExhibitionWorkDuplicatedDisplayOrderException(
             ExhibitionWorkDuplicatedDisplayOrderException e
@@ -483,6 +485,19 @@ public class GlobalExceptionHandler {
         String errorMessage = e.getMessage();
         return ResponseHandler.handleResponse(
                 HttpStatus.BAD_REQUEST,
+                errorMessage
+        );
+    }
+
+    // 전시회 중복 좋아요 예외 처리 응답
+    @ExceptionHandler(ExhibitionAlreadyLikedException.class)
+    public ResponseEntity<?> handleExhibitionAlreadyLikedException(
+            ExhibitionAlreadyLikedException e
+    ) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.CONFLICT,
                 errorMessage
         );
     }

@@ -9,9 +9,9 @@ import com.benchpress200.photique.exhibition.api.command.request.ExhibitionCreat
 import com.benchpress200.photique.exhibition.api.command.request.ExhibitionUpdateRequest;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionCreateCommand;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionUpdateCommand;
-import com.benchpress200.photique.exhibition.application.command.port.in.ExhibitionDeleteUseCase;
-import com.benchpress200.photique.exhibition.application.command.port.in.ExhibitionDetailsUpdateUseCase;
+import com.benchpress200.photique.exhibition.application.command.port.in.DeleteExhibitionUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.OpenExhibitionUseCase;
+import com.benchpress200.photique.exhibition.application.command.port.in.UpdateExhibitionDetailsUseCase;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +31,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ExhibitionCommandController {
     private final OpenExhibitionUseCase openExhibitionUseCase;
-    private final ExhibitionDetailsUpdateUseCase exhibitionDetailsUpdateUseCase;
-    private final ExhibitionDeleteUseCase exhibitionDeleteUseCase;
+    private final UpdateExhibitionDetailsUseCase updateExhibitionDetailsUpdate;
+    private final DeleteExhibitionUseCase deleteExhibitionUseCase;
 
     @PostMapping(
             path = ApiPath.EXHIBITION_ROOT,
@@ -58,7 +58,7 @@ public class ExhibitionCommandController {
             @RequestBody @Valid ExhibitionUpdateRequest request
     ) {
         ExhibitionUpdateCommand command = request.toCommand(exhibitionId);
-        exhibitionDetailsUpdateUseCase.updateExhibitionDetailsUpdate(command);
+        updateExhibitionDetailsUpdate.updateExhibitionDetailsUpdate(command);
 
         return ResponseHandler.handleResponse(
                 HttpStatus.NO_CONTENT
@@ -69,7 +69,7 @@ public class ExhibitionCommandController {
     public ResponseEntity<?> deleteExhibition(
             @PathVariable(PathVariableName.EXHIBITION_ID) Long exhibitionId
     ) {
-        exhibitionDeleteUseCase.deleteExhibition(exhibitionId);
+        deleteExhibitionUseCase.deleteExhibition(exhibitionId);
 
         return ResponseHandler.handleResponse(
                 HttpStatus.NO_CONTENT

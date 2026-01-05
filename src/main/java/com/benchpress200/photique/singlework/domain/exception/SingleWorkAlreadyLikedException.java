@@ -6,6 +6,6 @@ public class SingleWorkAlreadyLikedException extends RuntimeException {
             Long userId,
             Long singleWorkId
     ) {
-        super("User with id [" + userId + "] have already liked this singleWork with id [" + singleWorkId + "]");
+        super(String.format("User with id [%s] have already liked this singlework with id [%s]", userId, singleWorkId));
     }
 }

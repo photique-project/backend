@@ -6,4 +6,6 @@ public interface ExhibitionCommandPort {
     Exhibition save(Exhibition exhibition);
 
     void incrementViewCount(Long exhibitionId);
+
+    void incrementLikeCount(Long exhibitionId);
 }

@@ -29,12 +29,6 @@ public interface ExhibitionLikeRepository extends JpaRepository<ExhibitionLike, 
 
     Page<ExhibitionLike> findByUserId(Long userId, Pageable pageable);
 
-    @Query("SELECT e.id FROM ExhibitionLike l JOIN l.exhibition e WHERE l.user.id = :userId AND e.id IN :exhibitionIds")
-    List<Long> findLikedExhibitionIdsByUserIdAndExhibitionIds(
-            @Param("userId") long userId,
-            @Param("exhibitionIds") List<Long> exhibitionIds
-    );
-
     @Query("""
             SELECT l.exhibition.id
             FROM ExhibitionLike l
