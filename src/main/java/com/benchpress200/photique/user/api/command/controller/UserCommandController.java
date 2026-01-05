@@ -1,9 +1,9 @@
 package com.benchpress200.photique.user.api.command.controller;
 
-import com.benchpress200.photique.common.constant.ApiPath;
-import com.benchpress200.photique.common.constant.MultipartKey;
-import com.benchpress200.photique.common.constant.PathVariableName;
-import com.benchpress200.photique.common.response.ResponseHandler;
+import com.benchpress200.photique.common.api.constant.ApiPath;
+import com.benchpress200.photique.common.api.constant.MultipartKey;
+import com.benchpress200.photique.common.api.constant.PathVariableName;
+import com.benchpress200.photique.common.api.response.ResponseHandler;
 import com.benchpress200.photique.user.api.command.constant.UserCommandResponseMessage;
 import com.benchpress200.photique.user.api.command.request.ResisterRequest;
 import com.benchpress200.photique.user.api.command.request.UserDetailsUpdateRequest;

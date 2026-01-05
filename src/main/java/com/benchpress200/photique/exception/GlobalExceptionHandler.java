@@ -9,7 +9,7 @@ import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNo
 import com.benchpress200.photique.auth.domain.exception.VerificationCodeNotFoundException;
 import com.benchpress200.photique.auth.infrastructure.exception.LoginRequestObjectReadException;
 import com.benchpress200.photique.auth.infrastructure.exception.MailSendException;
-import com.benchpress200.photique.common.response.ResponseHandler;
+import com.benchpress200.photique.common.api.response.ResponseHandler;
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionFieldToUpdateException;
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionImage;
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionWorkDisplayOrder;

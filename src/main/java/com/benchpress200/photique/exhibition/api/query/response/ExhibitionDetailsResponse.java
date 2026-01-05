@@ -2,7 +2,7 @@ package com.benchpress200.photique.exhibition.api.query.response;
 
 import com.benchpress200.photique.exhibition.application.query.result.ExhibitionDetailsResult;
 import com.benchpress200.photique.exhibition.application.query.result.ExhibitionWorkResult;
-import com.benchpress200.photique.exhibition.application.query.result.ExhibitionWriterResult;
+import com.benchpress200.photique.exhibition.application.query.result.Writer;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
@@ -14,7 +14,7 @@ import lombok.Getter;
 @Builder
 public class ExhibitionDetailsResponse {
     private Long id;
-    private ExhibitionWriterResult writer;
+    private Writer writer;
     private String title;
     private String description;
     private List<String> tags;

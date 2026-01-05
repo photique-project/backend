@@ -1,4 +1,4 @@
-package com.benchpress200.photique.common.constant;
+package com.benchpress200.photique.common.api.constant;
 
 public class MultipartKey {
     public static final String USER = "user";

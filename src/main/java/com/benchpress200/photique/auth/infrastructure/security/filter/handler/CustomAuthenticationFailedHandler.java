@@ -1,6 +1,6 @@
 package com.benchpress200.photique.auth.infrastructure.security.filter.handler;
 
-import com.benchpress200.photique.common.response.ResponseBody;
+import com.benchpress200.photique.common.api.response.ResponseBody;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

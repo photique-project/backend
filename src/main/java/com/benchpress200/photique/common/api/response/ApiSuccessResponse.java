@@ -1,6 +1,6 @@
-package com.benchpress200.photique.common.response;
+package com.benchpress200.photique.common.api.response;
 
-import com.benchpress200.photique.common.response.ApiSuccessResponse.SuccessData;
+import com.benchpress200.photique.common.api.response.ApiSuccessResponse.SuccessData;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

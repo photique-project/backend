@@ -1,4 +1,4 @@
-package com.benchpress200.photique.common.response;
+package com.benchpress200.photique.common.api.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;

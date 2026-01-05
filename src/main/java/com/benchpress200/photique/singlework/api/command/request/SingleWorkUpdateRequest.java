@@ -1,7 +1,7 @@
 package com.benchpress200.photique.singlework.api.command.request;
 
+import com.benchpress200.photique.common.api.validator.annotation.Enum;
 import com.benchpress200.photique.singlework.api.command.exception.InvalidSingleWorkFieldToUpdateException;
-import com.benchpress200.photique.singlework.api.validator.annotation.Enum;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkUpdateCommand;
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;

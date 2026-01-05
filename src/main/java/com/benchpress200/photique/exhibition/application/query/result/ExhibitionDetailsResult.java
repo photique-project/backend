@@ -12,7 +12,7 @@ import lombok.Getter;
 @Builder
 public class ExhibitionDetailsResult {
     private Long id;
-    private ExhibitionWriterResult writer;
+    private Writer writer;
     private String title;
     private String description;
     private List<String> tags;
@@ -32,7 +32,7 @@ public class ExhibitionDetailsResult {
             boolean isLiked,
             boolean isBookmarked
     ) {
-        ExhibitionWriterResult writer = ExhibitionWriterResult.from(exhibition.getWriter());
+        Writer writer = Writer.from(exhibition.getWriter());
 
         List<String> tagNames = tags.stream()
                 .map(Tag::getName)

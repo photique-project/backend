@@ -14,8 +14,8 @@ import com.benchpress200.photique.auth.application.command.port.in.SendPasswordA
 import com.benchpress200.photique.auth.application.command.port.in.ValidateAuthMailCodeUseCase;
 import com.benchpress200.photique.auth.application.command.result.AuthMailCodeValidateResult;
 import com.benchpress200.photique.auth.application.command.result.AuthTokenResult;
-import com.benchpress200.photique.common.constant.ApiPath;
-import com.benchpress200.photique.common.response.ResponseHandler;
+import com.benchpress200.photique.common.api.constant.ApiPath;
+import com.benchpress200.photique.common.api.response.ResponseHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

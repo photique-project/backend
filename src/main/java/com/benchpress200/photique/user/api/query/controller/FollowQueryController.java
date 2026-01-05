@@ -1,8 +1,8 @@
 package com.benchpress200.photique.user.api.query.controller;
 
-import com.benchpress200.photique.common.constant.ApiPath;
-import com.benchpress200.photique.common.constant.PathVariableName;
-import com.benchpress200.photique.common.response.ResponseHandler;
+import com.benchpress200.photique.common.api.constant.ApiPath;
+import com.benchpress200.photique.common.api.constant.PathVariableName;
+import com.benchpress200.photique.common.api.response.ResponseHandler;
 import com.benchpress200.photique.user.api.query.constant.FollowQueryResponseMessage;
 import com.benchpress200.photique.user.api.query.request.FolloweeSearchRequest;
 import com.benchpress200.photique.user.api.query.request.FollowerSearchRequest;

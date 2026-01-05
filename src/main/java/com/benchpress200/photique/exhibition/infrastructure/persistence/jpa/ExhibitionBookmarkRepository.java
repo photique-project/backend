@@ -4,6 +4,7 @@ import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,9 +28,14 @@ public interface ExhibitionBookmarkRepository extends JpaRepository<ExhibitionBo
 
     Page<ExhibitionBookmark> findByUserId(Long userId, Pageable pageable);
 
-    @Query("SELECT e.id FROM ExhibitionBookmark b JOIN b.exhibition e WHERE b.user.id = :userId AND e.id IN :exhibitionIds")
-    List<Long> findBookmarkedExhibitionIdsByUserIdAndExhibitionIds(
-            @Param("userId") long userId,
+    @Query("""
+            SELECT b.exhibition.id
+            FROM ExhibitionBookmark b
+            WHERE b.user.id = :userId
+            AND b.exhibition.id IN :exhibitionIds
+            """)
+    Set<Long> findExhibitionIds(
+            @Param("userId") Long userId,
             @Param("exhibitionIds") List<Long> exhibitionIds
     );
 }

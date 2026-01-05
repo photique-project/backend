@@ -3,7 +3,7 @@ package com.benchpress200.photique.config;
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
 import com.benchpress200.photique.auth.infrastructure.security.filter.JwtFilter;
 import com.benchpress200.photique.auth.infrastructure.security.filter.LoginFilter;
-import com.benchpress200.photique.common.constant.ApiPath;
+import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -6,7 +6,7 @@ import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.auth.infrastructure.exception.LoginRequestObjectReadException;
 import com.benchpress200.photique.auth.infrastructure.security.filter.request.LoginRequest;
 import com.benchpress200.photique.auth.infrastructure.security.filter.response.LoginSuccessResponse;
-import com.benchpress200.photique.common.response.ResponseBody;
+import com.benchpress200.photique.common.api.response.ResponseBody;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
