@@ -55,8 +55,8 @@ public interface ExhibitionLikeRepository extends JpaRepository<ExhibitionLike, 
             )
             """)
     Page<ExhibitionLike> searchLikedExhibition(
-            Long userId,
-            String keyword,
+            @Param("userId") Long userId,
+            @Param("keyword") String keyword,
             Pageable pageable
     );
 }

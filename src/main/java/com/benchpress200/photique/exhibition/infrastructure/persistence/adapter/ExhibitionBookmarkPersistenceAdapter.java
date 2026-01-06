@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -33,6 +35,15 @@ public class ExhibitionBookmarkPersistenceAdapter implements
     @Override
     public Optional<ExhibitionBookmark> findByUserAndExhibition(User user, Exhibition exhibition) {
         return exhibitionBookmarkRepository.findByUserAndExhibition(user, exhibition);
+    }
+
+    @Override
+    public Page<ExhibitionBookmark> searchBookmarkedExhibition(Long userId, String keyword, Pageable pageable) {
+        return exhibitionBookmarkRepository.searchBookmarkedExhibition(
+                userId,
+                keyword,
+                pageable
+        );
     }
 
     @Override

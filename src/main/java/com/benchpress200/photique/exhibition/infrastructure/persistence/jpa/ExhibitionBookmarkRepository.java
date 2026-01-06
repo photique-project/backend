@@ -41,4 +41,21 @@ public interface ExhibitionBookmarkRepository extends JpaRepository<ExhibitionBo
     );
 
     Optional<ExhibitionBookmark> findByUserAndExhibition(User user, Exhibition exhibition);
+
+    @Query("""
+            SELECT eb
+            FROM ExhibitionBookmark eb
+            JOIN FETCH eb.user
+            JOIN FETCH eb.exhibition
+            WHERE eb.user.id = :userId
+            AND (
+               :keyword IS NULL
+               OR eb.exhibition.title LIKE CONCAT('%', :keyword, '%')
+            )
+            """)
+    Page<ExhibitionBookmark> searchBookmarkedExhibition(
+            @Param("userId") Long userId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 }
