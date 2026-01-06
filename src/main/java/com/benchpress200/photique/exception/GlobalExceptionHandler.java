@@ -15,6 +15,8 @@ import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibi
 import com.benchpress200.photique.exhibition.api.command.exception.InvalidExhibitionWorkDisplayOrder;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionAlreadyBookmarkedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionAlreadyLikedException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionCommentNotFoundException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionCommentNotOwnedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotOwnedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionWorkDuplicatedDisplayOrderException;
@@ -512,6 +514,32 @@ public class GlobalExceptionHandler {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.CONFLICT,
+                errorMessage
+        );
+    }
+
+    // 존재하지 않는 전시회 감상평 예외 처리 응답
+    @ExceptionHandler(ExhibitionCommentNotFoundException.class)
+    public ResponseEntity<?> handleExhibitionCommentNotFoundException(
+            ExhibitionCommentNotFoundException e
+    ) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NOT_FOUND,
+                errorMessage
+        );
+    }
+
+    // 전시회 감상평 주인이 아닌 유저가 수정 요청했을 때 예외 처리 응답
+    @ExceptionHandler(ExhibitionCommentNotOwnedException.class)
+    public ResponseEntity<?> handleExhibitionCommentNotOwnedException(
+            ExhibitionCommentNotOwnedException e
+    ) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.FORBIDDEN,
                 errorMessage
         );
     }
