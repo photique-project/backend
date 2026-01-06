@@ -20,20 +20,21 @@ public class LikedSingleWorkSearchResult {
     private List<SearchedSingleWork> singleWorks;
 
     public static LikedSingleWorkSearchResult from(
-            Page<SingleWorkLike> likedSingleWorkPage
+            Page<SingleWorkLike> singleWorkLikePage
     ) {
-        List<SearchedSingleWork> searchedSingleWorks = likedSingleWorkPage.getContent().stream()
+        List<SearchedSingleWork> searchedSingleWorks = singleWorkLikePage.getContent().stream()
                 .map(SearchedSingleWork::from)
                 .toList();
 
         return LikedSingleWorkSearchResult.builder()
-                .page(likedSingleWorkPage.getNumber())
-                .size(likedSingleWorkPage.getSize())
-                .totalElements(likedSingleWorkPage.getTotalElements())
-                .isFirst(likedSingleWorkPage.isFirst())
-                .isLast(likedSingleWorkPage.isLast())
-                .hasNext(likedSingleWorkPage.hasNext())
-                .hasPrevious(likedSingleWorkPage.hasPrevious())
+                .page(singleWorkLikePage.getNumber())
+                .size(singleWorkLikePage.getSize())
+                .totalElements(singleWorkLikePage.getTotalElements())
+                .totalPages(singleWorkLikePage.getTotalPages())
+                .isFirst(singleWorkLikePage.isFirst())
+                .isLast(singleWorkLikePage.isLast())
+                .hasNext(singleWorkLikePage.hasNext())
+                .hasPrevious(singleWorkLikePage.hasPrevious())
                 .singleWorks(searchedSingleWorks)
                 .build();
     }

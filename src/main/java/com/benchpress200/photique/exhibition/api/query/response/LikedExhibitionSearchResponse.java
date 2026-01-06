@@ -1,7 +1,7 @@
-package com.benchpress200.photique.singlework.api.query.response;
+package com.benchpress200.photique.exhibition.api.query.response;
 
-import com.benchpress200.photique.singlework.application.query.result.LikedSingleWorkSearchResult;
-import com.benchpress200.photique.singlework.application.query.result.SearchedSingleWork;
+import com.benchpress200.photique.exhibition.application.query.result.LikedExhibitionSearchResult;
+import com.benchpress200.photique.exhibition.application.query.result.SearchedExhibition;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.AccessLevel;
@@ -10,7 +10,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class LikedSingleWorkSearchResponse {
+public class LikedExhibitionSearchResponse {
     private int page;
     private int size;
     private long totalElements;
@@ -23,10 +23,10 @@ public class LikedSingleWorkSearchResponse {
     private boolean isLast;
     private boolean hasNext;
     private boolean hasPrevious;
-    private List<SearchedSingleWork> singleWorks;
+    private List<SearchedExhibition> exhibitions;
 
-    public static LikedSingleWorkSearchResponse from(LikedSingleWorkSearchResult result) {
-        return LikedSingleWorkSearchResponse.builder()
+    public static LikedExhibitionSearchResponse from(LikedExhibitionSearchResult result) {
+        return LikedExhibitionSearchResponse.builder()
                 .page(result.getPage())
                 .size(result.getSize())
                 .totalElements(result.getTotalElements())
@@ -35,7 +35,7 @@ public class LikedSingleWorkSearchResponse {
                 .isLast(result.isLast())
                 .hasNext(result.isHasNext())
                 .hasPrevious(result.isHasPrevious())
-                .singleWorks(result.getSingleWorks())
+                .exhibitions(result.getExhibitions())
                 .build();
     }
 }

@@ -28,12 +28,12 @@ public class SingleWorkLikeQueryService implements
         String keyword = query.getKeyword();
         Pageable pageable = query.getPageable();
 
-        Page<SingleWorkLike> likedSingleWorkPage = singleWorkLikeQueryPort.searchLikedSingleWork(
+        Page<SingleWorkLike> singleWorkLikePage = singleWorkLikeQueryPort.searchLikedSingleWork(
                 userId,
                 keyword,
                 pageable
         );
 
-        return LikedSingleWorkSearchResult.from(likedSingleWorkPage);
+        return LikedSingleWorkSearchResult.from(singleWorkLikePage);
     }
 }

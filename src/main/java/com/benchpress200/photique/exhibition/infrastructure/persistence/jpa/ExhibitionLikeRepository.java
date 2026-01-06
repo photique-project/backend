@@ -42,4 +42,21 @@ public interface ExhibitionLikeRepository extends JpaRepository<ExhibitionLike, 
     );
 
     Optional<ExhibitionLike> findByUserAndExhibition(User user, Exhibition exhibition);
+
+    @Query("""
+            SELECT el
+            FROM ExhibitionLike el
+            JOIN FETCH el.user
+            JOIN FETCH el.exhibition
+            WHERE el.user.id = :userId
+            AND (
+               :keyword IS NULL
+               OR el.exhibition.title LIKE CONCAT('%', :keyword, '%')
+            )
+            """)
+    Page<ExhibitionLike> searchLikedExhibition(
+            Long userId,
+            String keyword,
+            Pageable pageable
+    );
 }
