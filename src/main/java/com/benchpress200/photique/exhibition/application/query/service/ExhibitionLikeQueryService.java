@@ -46,8 +46,8 @@ public class ExhibitionLikeQueryService implements
     }
 
     private Ids findBookmarkedExhibitionIds(Long userId, List<Long> ids) {
-        Set<Long> likedSet = exhibitionBookmarkQueryPort.findExhibitionIds(userId, ids);
+        Set<Long> bookmarkedSet = exhibitionBookmarkQueryPort.findExhibitionIds(userId, ids);
 
-        return Ids.from(likedSet);
+        return Ids.from(bookmarkedSet);
     }
 }
