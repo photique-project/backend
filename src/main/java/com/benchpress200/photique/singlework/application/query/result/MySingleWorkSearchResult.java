@@ -37,6 +37,7 @@ public class MySingleWorkSearchResult {
                 .page(singleWorkPage.getNumber())
                 .size(singleWorkPage.getSize())
                 .totalElements(singleWorkPage.getTotalElements())
+                .totalPages(singleWorkPage.getTotalPages())
                 .isFirst(singleWorkPage.isFirst())
                 .isLast(singleWorkPage.isLast())
                 .hasNext(singleWorkPage.hasNext())

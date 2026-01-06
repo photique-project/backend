@@ -20,4 +20,10 @@ public interface ExhibitionQueryPort {
             String keyword,
             Pageable pageable
     );
+
+    Page<Exhibition> searchMyExhibition(
+            Long userId,
+            String keyword,
+            Pageable pageable
+    );
 }
