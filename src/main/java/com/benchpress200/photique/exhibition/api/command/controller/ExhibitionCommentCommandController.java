@@ -9,11 +9,13 @@ import com.benchpress200.photique.exhibition.api.command.request.ExhibitionComme
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionCommentCreateCommand;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionCommentUpdateCommand;
 import com.benchpress200.photique.exhibition.application.command.port.in.CreateExhibitionCommentUseCase;
+import com.benchpress200.photique.exhibition.application.command.port.in.DeleteExhibitionCommentUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.UpdateExhibitionCommentUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ExhibitionCommentCommandController {
     private final CreateExhibitionCommentUseCase createExhibitionCommentUseCase;
     private final UpdateExhibitionCommentUseCase updateExhibitionCommentUseCase;
+    private final DeleteExhibitionCommentUseCase deleteExhibitionCommentUseCase;
 
     @PostMapping(ApiPath.EXHIBITION_COMMENT)
     public ResponseEntity<?> createExhibitionComment(
@@ -47,6 +50,17 @@ public class ExhibitionCommentCommandController {
     ) {
         ExhibitionCommentUpdateCommand command = request.toCommand(commentId);
         updateExhibitionCommentUseCase.updateExhibitionComment(command);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NO_CONTENT
+        );
+    }
+
+    @DeleteMapping(ApiPath.EXHIBITION_COMMENT_DATA)
+    public ResponseEntity<?> deleteExhibitionComment(
+            @PathVariable(PathVariableName.COMMENT_ID) Long commentId
+    ) {
+        deleteExhibitionCommentUseCase.deleteExhibitionComment(commentId);
 
         return ResponseHandler.handleResponse(
                 HttpStatus.NO_CONTENT

@@ -4,6 +4,7 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionCommentCreateCommand;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionCommentUpdateCommand;
 import com.benchpress200.photique.exhibition.application.command.port.in.CreateExhibitionCommentUseCase;
+import com.benchpress200.photique.exhibition.application.command.port.in.DeleteExhibitionCommentUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.UpdateExhibitionCommentUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommentCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
@@ -27,7 +28,8 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class ExhibitionCommentCommandService implements
         CreateExhibitionCommentUseCase,
-        UpdateExhibitionCommentUseCase {
+        UpdateExhibitionCommentUseCase,
+        DeleteExhibitionCommentUseCase {
     private final AuthenticationUserProviderPort authenticationUserProvider;
     private final UserQueryPort userQueryPort;
 
@@ -75,5 +77,19 @@ public class ExhibitionCommentCommandService implements
         // 감상평 업데이트
         String content = command.getContent();
         exhibitionComment.updateContent(content);
+    }
+
+    @Override
+    public void deleteExhibitionComment(Long exhibitionCommentId) {
+        exhibitionCommentQueryPort.findById(exhibitionCommentId)
+                .ifPresent(exhibitionComment -> {
+                    Long writerId = authenticationUserProvider.getCurrentUserId();
+
+                    if (!exhibitionComment.isOwnedBy(writerId)) {
+                        throw new ExhibitionCommentNotOwnedException();
+                    }
+
+                    exhibitionCommentCommandPort.delete(exhibitionComment);
+                });
     }
 }

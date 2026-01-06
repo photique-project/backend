@@ -24,6 +24,11 @@ public class ExhibitionCommentPersistenceAdapter implements
     }
 
     @Override
+    public void delete(ExhibitionComment exhibitionComment) {
+        exhibitionCommentRepository.delete(exhibitionComment);
+    }
+
+    @Override
     public Page<ExhibitionComment> findByExhibitionIdWithWriter(Long exhibitionId, Pageable pageable) {
         return exhibitionCommentRepository.findByExhibitionIdWithWriter(exhibitionId, pageable);
     }
