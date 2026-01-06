@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -32,6 +34,11 @@ public class ExhibitionLikePersistenceAdapter implements
     @Override
     public Optional<ExhibitionLike> findByUserAndExhibition(User user, Exhibition exhibition) {
         return exhibitionLikeRepository.findByUserAndExhibition(user, exhibition);
+    }
+
+    @Override
+    public Page<ExhibitionLike> searchLikedExhibition(Long userId, String keyword, Pageable pageable) {
+        return exhibitionLikeRepository.searchLikedExhibition(userId, keyword, pageable);
     }
 
     @Override

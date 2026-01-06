@@ -1,8 +1,6 @@
 package com.benchpress200.photique.exhibition.application.query.result;
 
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
-import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
-import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
@@ -67,46 +65,6 @@ public class SearchedExhibition {
                 .viewCount(exhibition.getViewCount())
                 .isLiked(isLiked)
                 .isBookmarked(isBookmarked)
-                .build();
-    }
-
-    public static SearchedExhibition of(
-            ExhibitionLike exhibitionLike,
-            boolean isBookmarked
-    ) {
-        Exhibition exhibition = exhibitionLike.getExhibition();
-        Writer writer = Writer.from(exhibition.getWriter());
-
-        return SearchedExhibition.builder()
-                .id(exhibition.getId())
-                .writer(writer)
-                .title(exhibition.getTitle())
-                .description(exhibition.getDescription())
-                .cardColor(exhibition.getCardColor())
-                .likeCount(exhibition.getLikeCount())
-                .viewCount(exhibition.getViewCount())
-                .isLiked(true)
-                .isBookmarked(isBookmarked)
-                .build();
-    }
-
-    public static SearchedExhibition of(
-            ExhibitionBookmark exhibitionBookmark,
-            boolean isLiked
-    ) {
-        Exhibition exhibition = exhibitionBookmark.getExhibition();
-        Writer writer = Writer.from(exhibition.getWriter());
-
-        return SearchedExhibition.builder()
-                .id(exhibition.getId())
-                .writer(writer)
-                .title(exhibition.getTitle())
-                .description(exhibition.getDescription())
-                .cardColor(exhibition.getCardColor())
-                .likeCount(exhibition.getLikeCount())
-                .viewCount(exhibition.getViewCount())
-                .isLiked(isLiked)
-                .isBookmarked(true)
                 .build();
     }
 }
