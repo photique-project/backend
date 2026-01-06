@@ -48,6 +48,15 @@ public class ExhibitionPersistenceAdapter implements
     }
 
     @Override
+    public Page<Exhibition> searchMyExhibition(Long userId, String keyword, Pageable pageable) {
+        return exhibitionRepository.searchMyExhibition(
+                userId,
+                keyword,
+                pageable
+        );
+    }
+
+    @Override
     public Exhibition save(Exhibition exhibition) {
         return exhibitionRepository.save(exhibition);
     }

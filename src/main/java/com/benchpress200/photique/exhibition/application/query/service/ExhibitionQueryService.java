@@ -19,6 +19,9 @@ import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 import com.benchpress200.photique.exhibition.domain.enumeration.Target;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
+import com.benchpress200.photique.singlework.application.query.model.MyExhibitionSearchQuery;
+import com.benchpress200.photique.singlework.application.query.port.in.SearchMyExhibitionUseCase;
+import com.benchpress200.photique.singlework.application.query.result.MyExhibitionSearchResult;
 import com.benchpress200.photique.tag.domain.entity.Tag;
 import com.benchpress200.photique.user.application.query.port.out.persistence.FollowQueryPort;
 import java.util.List;
@@ -32,7 +35,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ExhibitionQueryService implements
         GetExhibitionDetailsUseCase,
-        SearchExhibitionUseCase {
+        SearchExhibitionUseCase,
+        SearchMyExhibitionUseCase {
     private final AuthenticationUserProviderPort authenticationUserProviderPort;
 
     private final FollowQueryPort followQueryPort;
@@ -139,5 +143,31 @@ public class ExhibitionQueryService implements
         Set<Long> likedSet = exhibitionBookmarkQueryPort.findExhibitionIds(requestUserId, ids);
 
         return Ids.from(likedSet);
+    }
+
+    @Override
+    public MyExhibitionSearchResult searchMyExhibition(MyExhibitionSearchQuery query) {
+        Long userId = authenticationUserProviderPort.getCurrentUserId();
+        String keyword = query.getKeyword();
+        Pageable pageable = query.getPageable();
+
+        Page<Exhibition> exhibitionPage = exhibitionQueryPort.searchMyExhibition(
+                userId,
+                keyword,
+                pageable
+        );
+
+        List<Long> exhibitionIds = exhibitionPage.stream()
+                .map(Exhibition::getId)
+                .toList();
+
+        Ids likedExhibitionIds = findLikedExhibitionIds(exhibitionIds);
+        Ids bookmarkedExhibitionIds = findBookmarkedExhibitionIds(exhibitionIds);
+
+        return MyExhibitionSearchResult.of(
+                exhibitionPage,
+                likedExhibitionIds,
+                bookmarkedExhibitionIds
+        );
     }
 }
