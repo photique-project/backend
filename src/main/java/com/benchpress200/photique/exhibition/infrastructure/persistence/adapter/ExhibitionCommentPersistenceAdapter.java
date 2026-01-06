@@ -5,6 +5,8 @@ import com.benchpress200.photique.exhibition.application.query.port.out.Exhibiti
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
 import com.benchpress200.photique.exhibition.infrastructure.persistence.jpa.ExhibitionCommentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -18,5 +20,10 @@ public class ExhibitionCommentPersistenceAdapter implements
     @Override
     public ExhibitionComment save(ExhibitionComment exhibitionComment) {
         return exhibitionCommentRepository.save(exhibitionComment);
+    }
+
+    @Override
+    public Page<ExhibitionComment> findByExhibitionIdWithWriter(Long exhibitionId, Pageable pageable) {
+        return exhibitionCommentRepository.findByExhibitionIdWithWriter(exhibitionId, pageable);
     }
 }

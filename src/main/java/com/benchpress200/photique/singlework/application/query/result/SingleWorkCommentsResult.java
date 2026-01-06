@@ -22,8 +22,7 @@ public class SingleWorkCommentsResult {
     public static SingleWorkCommentsResult from(
             Page<SingleWorkComment> singleWorkCommentPage
     ) {
-        List<SingleWorkCommentView> comments = singleWorkCommentPage.getContent()
-                .stream()
+        List<SingleWorkCommentView> comments = singleWorkCommentPage.getContent().stream()
                 .map(SingleWorkCommentView::from)
                 .toList();
 

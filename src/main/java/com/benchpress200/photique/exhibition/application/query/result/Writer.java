@@ -25,7 +25,6 @@ public class Writer {
         this.id = id;
         this.nickname = nickname;
         this.profileImage = profileImage;
-
     }
 
     public static Writer from(User writer) {
