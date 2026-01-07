@@ -24,7 +24,7 @@ import com.benchpress200.photique.exhibition.domain.exception.ExhibitionWorkNotF
 import com.benchpress200.photique.image.infrastructure.exception.ImageDeleteException;
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploadException;
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploaderFileWriteException;
-import com.benchpress200.photique.notification.domain.exception.NotificationTargetSingleWorkNotFoundException;
+import com.benchpress200.photique.notification.domain.exception.NotificationNotFoundException;
 import com.benchpress200.photique.singlework.api.command.exception.InvalidImageException;
 import com.benchpress200.photique.singlework.api.command.exception.InvalidSingleWorkFieldToUpdateException;
 import com.benchpress200.photique.singlework.api.query.exception.InvalidFieldToSearch;
@@ -300,18 +300,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // 존재하지 않는 알림 대상 단일작품 예외 처리 응답
-    @ExceptionHandler(NotificationTargetSingleWorkNotFoundException.class)
-    public ResponseEntity<?> handleNotificationTargetSingleWorkNotFoundException(
-            NotificationTargetSingleWorkNotFoundException e) {
-        String errorMessage = e.getMessage();
-
-        return ResponseHandler.handleResponse(
-                HttpStatus.NOT_FOUND,
-                errorMessage
-        );
-    }
-
     // 단일작품 업데이트 요청 시, 유효하지 않은 필드 예외 처리 응답
     @ExceptionHandler(InvalidSingleWorkFieldToUpdateException.class)
     public ResponseEntity<?> handleInvalidFieldToUpdateException(InvalidSingleWorkFieldToUpdateException e) {
@@ -540,6 +528,19 @@ public class GlobalExceptionHandler {
 
         return ResponseHandler.handleResponse(
                 HttpStatus.FORBIDDEN,
+                errorMessage
+        );
+    }
+
+    // 존재하지 않는 알림 조회 예외 처리 응답
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ResponseEntity<?> handleNotificationNotFoundException(
+            NotificationNotFoundException e
+    ) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NOT_FOUND,
                 errorMessage
         );
     }
