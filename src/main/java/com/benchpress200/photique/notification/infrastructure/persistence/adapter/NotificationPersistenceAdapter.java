@@ -29,22 +29,22 @@ public class NotificationPersistenceAdapter implements
     }
 
     @Override
-    public void markAllAsReadByReceiverId(Long receiverId) {
-        notificationRepository.markAllAsReadByReceiverId(receiverId);
+    public void markAllAsReadByReceiverIdAndDeletedAtIsNull(Long receiverId) {
+        notificationRepository.markAllAsReadByReceiverIdAndDeletedAtIsNull(receiverId);
     }
 
     @Override
-    public Page<Notification> findByReceiverId(Long receiverId, Pageable pageable) {
-        return notificationRepository.findByReceiverId(receiverId, pageable);
+    public Page<Notification> findByReceiverIdAndDeletedAtIsNull(Long receiverId, Pageable pageable) {
+        return notificationRepository.findByReceiverIdAndDeletedAtIsNull(receiverId, pageable);
     }
 
     @Override
-    public boolean existsByReceiverIdAndIsReadFalse(Long receiverId) {
-        return notificationRepository.existsByReceiverIdAndIsReadFalse(receiverId);
+    public boolean existsByReceiverIdAndIsReadFalseAndDeletedAtIsNull(Long receiverId) {
+        return notificationRepository.existsByReceiverIdAndIsReadFalseAndDeletedAtIsNull(receiverId);
     }
 
     @Override
-    public Optional<Notification> findById(Long id) {
-        return notificationRepository.findById(id);
+    public Optional<Notification> findByIdAndDeletedAtIsNull(Long id) {
+        return notificationRepository.findByIdAndDeletedAtIsNull(id);
     }
 }
