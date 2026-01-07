@@ -6,6 +6,8 @@ import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.notification.infrastructure.persistence.jpa.NotificationRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -23,5 +25,15 @@ public class NotificationPersistenceAdapter implements
     @Override
     public List<Notification> saveAll(List<Notification> notifications) {
         return notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    public Page<Notification> findByReceiverId(Long receiverId, Pageable pageable) {
+        return notificationRepository.findByReceiverId(receiverId, pageable);
+    }
+
+    @Override
+    public boolean existsByReceiverIdAndIsReadFalse(Long receiverId) {
+        return notificationRepository.existsByReceiverIdAndIsReadFalse(receiverId);
     }
 }

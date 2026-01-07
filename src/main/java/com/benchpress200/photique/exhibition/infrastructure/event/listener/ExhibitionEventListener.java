@@ -102,7 +102,7 @@ public class ExhibitionEventListener {
 
                 Notification notification = Notification.of(
                         follower,
-                        NotificationType.FOLLOWING_SINGLE_WORK,
+                        NotificationType.FOLLOWING_EXHIBITION,
                         exhibitionId
                 );
 

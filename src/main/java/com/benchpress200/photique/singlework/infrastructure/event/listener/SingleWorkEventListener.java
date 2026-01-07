@@ -104,7 +104,7 @@ public class SingleWorkEventListener {
 
                 Notification notification = Notification.of(
                         follower,
-                        NotificationType.FOLLOWING_SINGLE_WORK,
+                        NotificationType.FOLLOWING_SINGLEWORK,
                         singleWorkId
                 );
 
@@ -161,7 +161,7 @@ public class SingleWorkEventListener {
 
         Notification notification = Notification.of(
                 receiver,
-                NotificationType.SINGLE_WORK_LIKE,
+                NotificationType.SINGLEWORK_LIKE,
                 singleWorkId
         );
 
@@ -179,7 +179,7 @@ public class SingleWorkEventListener {
 
         Notification notification = Notification.of(
                 receiver,
-                NotificationType.SINGLE_WORK_COMMENT,
+                NotificationType.SINGLEWORK_COMMENT,
                 singleWorkId
         );
 
