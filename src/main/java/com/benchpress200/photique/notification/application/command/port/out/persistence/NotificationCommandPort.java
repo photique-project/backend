@@ -7,4 +7,6 @@ public interface NotificationCommandPort {
     Notification save(Notification notification);
 
     List<Notification> saveAll(List<Notification> notifications);
+
+    void markAllAsReadByReceiverId(Long receiverId);
 }

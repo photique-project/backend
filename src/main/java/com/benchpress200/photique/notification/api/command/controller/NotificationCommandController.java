@@ -3,6 +3,7 @@ package com.benchpress200.photique.notification.api.command.controller;
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.common.api.constant.PathVariableName;
 import com.benchpress200.photique.common.api.response.ResponseHandler;
+import com.benchpress200.photique.notification.application.command.port.in.MarkAllAsReadUseCase;
 import com.benchpress200.photique.notification.application.command.port.in.MarkAsReadUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,12 +16,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class NotificationCommandController {
     private final MarkAsReadUseCase markAsReadUseCase;
+    private final MarkAllAsReadUseCase markAllAsReadUseCase;
 
     @PatchMapping(ApiPath.NOTIFICATION_DATA)
-    public ResponseEntity<?> markAsReadNotification(
+    public ResponseEntity<?> markAsRead(
             @PathVariable(PathVariableName.NOTIFICATION_ID) Long notificationId
     ) {
         markAsReadUseCase.markAsRead(notificationId);
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.NO_CONTENT
+        );
+    }
+
+    @PatchMapping(ApiPath.NOTIFICATION_ROOT)
+    public ResponseEntity<?> markAllAsRead() {
+        markAllAsReadUseCase.markAllAsRead();
 
         return ResponseHandler.handleResponse(
                 HttpStatus.NO_CONTENT

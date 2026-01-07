@@ -29,6 +29,11 @@ public class NotificationPersistenceAdapter implements
     }
 
     @Override
+    public void markAllAsReadByReceiverId(Long receiverId) {
+        notificationRepository.markAllAsReadByReceiverId(receiverId);
+    }
+
+    @Override
     public Page<Notification> findByReceiverId(Long receiverId, Pageable pageable) {
         return notificationRepository.findByReceiverId(receiverId, pageable);
     }
