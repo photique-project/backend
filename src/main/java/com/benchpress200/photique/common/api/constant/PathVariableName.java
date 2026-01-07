@@ -5,4 +5,5 @@ public class PathVariableName {
     public static final String SINGLEWORK_ID = "singleworkId";
     public static final String EXHIBITION_ID = "exhibitionId";
     public static final String COMMENT_ID = "commentId";
+    public static final String NOTIFICATION_ID = "notificationId";
 }
