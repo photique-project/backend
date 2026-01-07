@@ -3,6 +3,7 @@ package com.benchpress200.photique.notification.infrastructure.persistence.jpa;
 import com.benchpress200.photique.notification.domain.entity.Notification;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,13 +12,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    Page<Notification> findByReceiverOrderByCreatedAtDesc(User receiver, Pageable pageable);
+    Optional<Notification> findByIdAndDeletedAtIsNull(Long id);
 
     List<Notification> findByReceiver(User receiver);
 
-    boolean existsByReceiverIdAndIsReadFalse(Long receiverId);
+    boolean existsByReceiverIdAndIsReadFalseAndDeletedAtIsNull(Long receiverId);
 
-    Page<Notification> findByReceiverId(Long receiverId, Pageable pageable);
+    Page<Notification> findByReceiverIdAndDeletedAtIsNull(Long receiverId, Pageable pageable);
 
     @Modifying
     @Query("""
@@ -25,6 +26,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             SET n.isRead = true
             WHERE n.receiver.id = :receiverId
               AND n.isRead = false
+              AND n.deletedAt IS NULL
             """)
-    void markAllAsReadByReceiverId(@Param("receiverId") Long receiverId);
+    void markAllAsReadByReceiverIdAndDeletedAtIsNull(@Param("receiverId") Long receiverId);
 }

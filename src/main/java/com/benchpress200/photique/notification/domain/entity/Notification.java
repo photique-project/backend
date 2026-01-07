@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -48,6 +49,14 @@ public class Notification {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+
     @Builder
     public Notification(
             User receiver,
@@ -73,5 +82,9 @@ public class Notification {
                 .type(type)
                 .targetId(targetId)
                 .build();
+    }
+
+    public void delete() {
+        deletedAt = LocalDateTime.now();
     }
 }

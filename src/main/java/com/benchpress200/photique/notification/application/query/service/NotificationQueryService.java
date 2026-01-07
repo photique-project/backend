@@ -24,8 +24,9 @@ public class NotificationQueryService implements
         Long userId = authenticationUserProviderPort.getCurrentUserId();
         Pageable pageable = query.getPageable();
 
-        Page<Notification> notificationpage = notificationQueryPort.findByReceiverId(userId, pageable);
-        boolean unread = notificationQueryPort.existsByReceiverIdAndIsReadFalse(userId);
+        Page<Notification> notificationpage = notificationQueryPort.findByReceiverIdAndDeletedAtIsNull(userId,
+                pageable);
+        boolean unread = notificationQueryPort.existsByReceiverIdAndIsReadFalseAndDeletedAtIsNull(userId);
 
         return NotificationPageResult.of(notificationpage, unread);
     }

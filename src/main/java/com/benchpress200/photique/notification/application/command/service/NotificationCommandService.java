@@ -1,6 +1,7 @@
 package com.benchpress200.photique.notification.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.notification.application.command.port.in.DeleteNotificationUseCase;
 import com.benchpress200.photique.notification.application.command.port.in.MarkAllAsReadUseCase;
 import com.benchpress200.photique.notification.application.command.port.in.MarkAsReadUseCase;
 import com.benchpress200.photique.notification.application.command.port.out.persistence.NotificationCommandPort;
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class NotificationCommandService implements
         MarkAsReadUseCase,
-        MarkAllAsReadUseCase {
+        MarkAllAsReadUseCase,
+        DeleteNotificationUseCase {
     private final AuthenticationUserProviderPort authenticationUserProviderPort;
 
     private final NotificationCommandPort notificationCommandPort;
@@ -24,7 +26,7 @@ public class NotificationCommandService implements
 
     @Override
     public void markAsRead(Long notificationId) {
-        Notification notification = notificationQueryPort.findById(notificationId)
+        Notification notification = notificationQueryPort.findByIdAndDeletedAtIsNull(notificationId)
                 .orElseThrow(() -> new NotificationNotFoundException(notificationId));
 
         notification.read();
@@ -33,6 +35,12 @@ public class NotificationCommandService implements
     @Override
     public void markAllAsRead() {
         Long userId = authenticationUserProviderPort.getCurrentUserId();
-        notificationCommandPort.markAllAsReadByReceiverId(userId);
+        notificationCommandPort.markAllAsReadByReceiverIdAndDeletedAtIsNull(userId);
+    }
+
+    @Override
+    public void deleteNotification(Long notificationId) {
+        notificationQueryPort.findByIdAndDeletedAtIsNull(notificationId)
+                .ifPresent(Notification::delete);
     }
 }

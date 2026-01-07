@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationQueryPort {
-    Page<Notification> findByReceiverId(Long receiverId, Pageable pageable);
+    Page<Notification> findByReceiverIdAndDeletedAtIsNull(Long receiverId, Pageable pageable);
 
-    boolean existsByReceiverIdAndIsReadFalse(Long receiverId);
+    boolean existsByReceiverIdAndIsReadFalseAndDeletedAtIsNull(Long receiverId);
 
-    Optional<Notification> findById(Long id);
+    Optional<Notification> findByIdAndDeletedAtIsNull(Long id);
 }
