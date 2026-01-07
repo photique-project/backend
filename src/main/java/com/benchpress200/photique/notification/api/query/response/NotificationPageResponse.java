@@ -24,6 +24,7 @@ public class NotificationPageResponse {
     private boolean hasNext;
     private boolean hasPrevious;
     private List<NotificationView> notifications;
+    private boolean unread;
 
     public static NotificationPageResponse from(NotificationPageResult result) {
         return NotificationPageResponse.builder()
@@ -36,6 +37,7 @@ public class NotificationPageResponse {
                 .hasNext(result.isHasNext())
                 .hasPrevious(result.isHasPrevious())
                 .notifications(result.getNotifications())
+                .unread(result.isUnread())
                 .build();
     }
 }
