@@ -50,9 +50,9 @@ public class SingleWorkCommandService implements
     private String imagePath;
 
     private final AuthenticationUserProviderPort authenticationUserProviderPort;
-    private final ImageUploaderPort imageUploaderPort;
-
     private final UserQueryPort userQueryPort;
+
+    private final ImageUploaderPort imageUploaderPort;
 
     private final SingleWorkCommandPort singleWorkCommandPort;
     private final SingleWorkQueryPort singleWorkQueryPort;
@@ -66,7 +66,7 @@ public class SingleWorkCommandService implements
     public void postSingleWork(SingleWorkCreateCommand command) {
         // 작성자 조회
         Long writerId = authenticationUserProviderPort.getCurrentUserId();
-        User writer = userQueryPort.findById(writerId)
+        User writer = userQueryPort.findByIdAndDeletedAtIsNull(writerId)
                 .orElseThrow(() -> new SingleWorkWriterNotFoundException(writerId));
 
         // 이미지 업로드
@@ -96,7 +96,7 @@ public class SingleWorkCommandService implements
     public void updateSingleWorkDetails(SingleWorkUpdateCommand command) {
         // 작품 조회
         Long singleWorkId = command.getSingleWorkId();
-        SingleWork singleWork = singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
+        SingleWork singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
         Long writerId = authenticationUserProviderPort.getCurrentUserId();
@@ -188,7 +188,7 @@ public class SingleWorkCommandService implements
     @Override
     public void deleteSingleWork(Long singleWorkId) {
         // 작품 조회
-        singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
+        singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .ifPresent(singleWork -> { // 존재한다면 삭제 처리
                     Long writerId = authenticationUserProviderPort.getCurrentUserId();
 
@@ -197,7 +197,7 @@ public class SingleWorkCommandService implements
                         throw new SingleWorkNotOwnedException();
                     }
 
-                    singleWork.remove();
+                    singleWork.delete();
 
                     // 단일작품 MySQL-ES 동기화 이벤트 발행
                     SingleWorkDeleteEvent event = SingleWorkDeleteEvent.of(singleWorkId);

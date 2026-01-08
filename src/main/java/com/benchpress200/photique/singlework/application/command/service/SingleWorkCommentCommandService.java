@@ -43,12 +43,12 @@ public class SingleWorkCommentCommandService implements
     public void createSingleWorkComment(SingleWorkCommentCreateCommand command) {
         // 댓글 작성 유저 조회
         Long currentUserId = authenticationUserProvider.getCurrentUserId();
-        User writer = userQueryPort.findActiveById(currentUserId)
+        User writer = userQueryPort.findByIdAndDeletedAtIsNull(currentUserId)
                 .orElseThrow(() -> new UserNotFoundException(currentUserId));
 
         // 댓글 작성 단일작품 조회
         Long singleWorkId = command.getSingleWorkId();
-        SingleWork singleWork = singleWorkQueryPort.findActiveById(singleWorkId)
+        SingleWork singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
         // 댓글 생성 및 저장
@@ -64,7 +64,7 @@ public class SingleWorkCommentCommandService implements
     public void updateSingleWorkComment(SingleWorkCommentUpdateCommand command) {
         // 댓글 조회
         Long singleWorkCommentId = command.getCommentId();
-        SingleWorkComment singleWorkComment = singleWorkCommentQueryPort.findById(singleWorkCommentId)
+        SingleWorkComment singleWorkComment = singleWorkCommentQueryPort.findByIdAndDeletedAtIsNull(singleWorkCommentId)
                 .orElseThrow(() -> new SingleWorkCommentNotFoundException(singleWorkCommentId));
 
         // 작성자 맞는지 확인
@@ -81,7 +81,7 @@ public class SingleWorkCommentCommandService implements
 
     @Override
     public void deleteSingleWorkComment(Long singleWorkCommentId) {
-        singleWorkCommentQueryPort.findById(singleWorkCommentId)
+        singleWorkCommentQueryPort.findByIdAndDeletedAtIsNull(singleWorkCommentId)
                 .ifPresent(singleWorkComment -> {
                     Long writerId = authenticationUserProvider.getCurrentUserId();
 
@@ -89,7 +89,7 @@ public class SingleWorkCommentCommandService implements
                         throw new SingleWorkCommentNotOwnedException();
                     }
 
-                    singleWorkCommentCommandPort.delete(singleWorkComment);
+                    singleWorkComment.delete();
                 });
     }
 }

@@ -17,10 +17,11 @@ public interface SingleWorkRepository extends JpaRepository<SingleWork, Long> {
     @Query("""
             SELECT sw
             FROM SingleWork sw
+            JOIN FETCH sw.writer
             WHERE sw.id = :id
             AND sw.deletedAt IS NULL
             """)
-    Optional<SingleWork> findActiveById(@Param("id") Long id);
+    Optional<SingleWork> findByIdAndDeletedAtIsNull(@Param("id") Long id);
 
     @Query("""
             SELECT sw
@@ -28,16 +29,7 @@ public interface SingleWorkRepository extends JpaRepository<SingleWork, Long> {
             JOIN FETCH sw.writer
             WHERE sw.id = :id
             """)
-    Optional<SingleWork> findByIdWithWriter(@Param("id") Long id);
-
-    @Query("""
-            SELECT sw
-            FROM SingleWork sw
-            JOIN FETCH sw.writer
-            WHERE sw.id = :id
-            AND sw.deletedAt IS NULL
-            """)
-    Optional<SingleWork> findActiveByIdWithWriter(@Param("id") Long id);
+    Optional<SingleWork> findById(@Param("id") Long id);
 
     // Spring Data JPA는 모든 @Query를 기본적으로 SELECT로 간주
     // 이 상태에서 @Modifying이 없으면  결과를 엔티티/DTO로 매핑하려고 시도하고 런타임 예외 발생
@@ -77,7 +69,7 @@ public interface SingleWorkRepository extends JpaRepository<SingleWork, Long> {
                    OR s.title LIKE CONCAT('%', :keyword, '%')
             )
             """)
-    Page<SingleWork> searchMySingleWork(
+    Page<SingleWork> searchMySingleWorkByDeletedAtIsNull(
             @Param("userId") Long userId,
             @Param("keyword") String keyword,
             Pageable pageable

@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface SingleWorkCommentQueryPort {
-    Optional<SingleWorkComment> findById(Long id);
+    Optional<SingleWorkComment> findByIdAndDeletedAtIsNull(Long id);
 
-    Page<SingleWorkComment> findBySingleWorkIdWithWriter(Long singleWorkId, Pageable pageable);
+    Page<SingleWorkComment> findBySingleWorkIdAndDeletedAtIsNull(Long singleWorkId, Pageable pageable);
 }

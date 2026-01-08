@@ -37,8 +37,12 @@ public class ExhibitionLikePersistenceAdapter implements
     }
 
     @Override
-    public Page<ExhibitionLike> searchLikedExhibition(Long userId, String keyword, Pageable pageable) {
-        return exhibitionLikeRepository.searchLikedExhibition(userId, keyword, pageable);
+    public Page<ExhibitionLike> searchLikedExhibitionByDeletedAtIsNull(Long userId, String keyword, Pageable pageable) {
+        return exhibitionLikeRepository.searchLikedExhibitionByDeletedAtIsNull(
+                userId,
+                keyword,
+                pageable
+        );
     }
 
     @Override

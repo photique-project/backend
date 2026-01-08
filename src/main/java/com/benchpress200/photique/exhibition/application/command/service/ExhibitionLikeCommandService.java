@@ -38,11 +38,11 @@ public class ExhibitionLikeCommandService implements
     public void addExhibitionLike(Long exhibitionId) {
         // 요청 유저 조회
         Long currentUserId = authenticationUserProvider.getCurrentUserId();
-        User user = userQueryPort.findActiveById(currentUserId)
+        User user = userQueryPort.findByIdAndDeletedAtIsNull(currentUserId)
                 .orElseThrow(() -> new UserNotFoundException(currentUserId));
 
         // 전시회 조회
-        Exhibition exhibition = exhibitionQueryPort.findActiveById(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         // 좋아요 여부 확인
@@ -67,11 +67,11 @@ public class ExhibitionLikeCommandService implements
     public void cancelExhibitionLike(Long exhibitionId) {
         // 요청 유저 조회
         Long currentUserId = authenticationUserProvider.getCurrentUserId();
-        User user = userQueryPort.findActiveById(currentUserId)
+        User user = userQueryPort.findByIdAndDeletedAtIsNull(currentUserId)
                 .orElseThrow(() -> new UserNotFoundException(currentUserId));
 
         // 전시회 조회
-        Exhibition exhibition = exhibitionQueryPort.findActiveById(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         // 좋아요 엔티티 조회 후 존재한다면 삭제 처리

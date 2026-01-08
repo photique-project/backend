@@ -53,8 +53,9 @@ public interface ExhibitionLikeRepository extends JpaRepository<ExhibitionLike, 
                :keyword IS NULL
                OR el.exhibition.title LIKE CONCAT('%', :keyword, '%')
             )
+            AND el.exhibition.deletedAt IS NULL
             """)
-    Page<ExhibitionLike> searchLikedExhibition(
+    Page<ExhibitionLike> searchLikedExhibitionByDeletedAtIsNull(
             @Param("userId") Long userId,
             @Param("keyword") String keyword,
             Pageable pageable

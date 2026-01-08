@@ -48,6 +48,9 @@ public class ExhibitionComment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Builder
     public ExhibitionComment(
             Exhibition exhibition,
@@ -65,5 +68,9 @@ public class ExhibitionComment {
 
     public boolean isOwnedBy(Long writerId) {
         return writer.getId().equals(writerId);
+    }
+
+    public void delete() {
+        deletedAt = LocalDateTime.now();
     }
 }

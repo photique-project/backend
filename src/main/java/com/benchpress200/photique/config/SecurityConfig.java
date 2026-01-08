@@ -76,16 +76,12 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, ApiPath.AUTH_LOGIN).permitAll()
                         .requestMatchers(HttpMethod.POST, ApiPath.AUTH_MAIL_JOIN).permitAll()
-                        .requestMatchers(HttpMethod.POST, ApiPath.AUTH_MAIL_PASSWORD)
-                        .permitAll()
-                        .requestMatchers(HttpMethod.POST, ApiPath.AUTH_CODE)
-                        .permitAll()
-                        .requestMatchers(HttpMethod.POST, ApiPath.AUTH_REFRESH_TOKEN)
-                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, ApiPath.AUTH_MAIL_PASSWORD).permitAll()
+                        .requestMatchers(HttpMethod.POST, ApiPath.AUTH_CODE).permitAll()
+                        .requestMatchers(HttpMethod.POST, ApiPath.AUTH_REFRESH_TOKEN).permitAll()
 
                         .requestMatchers(HttpMethod.POST, ApiPath.USER_ROOT).permitAll()
-                        .requestMatchers(HttpMethod.GET, ApiPath.USER_NICKNAME_EXISTS)
-                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, ApiPath.USER_NICKNAME_EXISTS).permitAll()
                         .requestMatchers(HttpMethod.PATCH, ApiPath.USER_PASSWORD_RESET).permitAll()
 
                         .requestMatchers(HttpMethod.GET, ApiPath.SINGLEWORK_ROOT).permitAll()
@@ -93,6 +89,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, ApiPath.SINGLEWORK_ROOT + ALL + COMMENT_DOMAIN).permitAll()
 
                         .requestMatchers(HttpMethod.GET, ApiPath.EXHIBITION_ROOT).permitAll()
+
                         .anyRequest().authenticated());
 
         http // 로그아웃 설정

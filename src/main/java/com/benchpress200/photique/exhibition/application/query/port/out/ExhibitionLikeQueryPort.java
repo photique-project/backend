@@ -16,7 +16,7 @@ public interface ExhibitionLikeQueryPort {
 
     Optional<ExhibitionLike> findByUserAndExhibition(User user, Exhibition exhibition);
 
-    Page<ExhibitionLike> searchLikedExhibition(
+    Page<ExhibitionLike> searchLikedExhibitionByDeletedAtIsNull(
             Long userId,
             String keyword,
             Pageable pageable

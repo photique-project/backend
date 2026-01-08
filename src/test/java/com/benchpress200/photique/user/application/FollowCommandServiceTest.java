@@ -9,7 +9,6 @@ import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
-import com.benchpress200.photique.user.domain.exception.AlreadyUnfollowException;
 import com.benchpress200.photique.user.domain.exception.DuplicatedFollowException;
 import com.benchpress200.photique.user.domain.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;

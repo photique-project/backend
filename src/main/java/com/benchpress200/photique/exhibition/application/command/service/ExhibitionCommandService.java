@@ -69,7 +69,7 @@ public class ExhibitionCommandService implements
     public void openExhibition(ExhibitionCreateCommand command) {
         // 작가 조회
         Long writerId = authenticationUserProviderPort.getCurrentUserId();
-        User writer = userQueryPort.findActiveById(writerId)
+        User writer = userQueryPort.findByIdAndDeletedAtIsNull(writerId)
                 .orElseThrow(() -> new UserNotFoundException(writerId));
 
         // 전시회 엔티티 저장
@@ -105,7 +105,7 @@ public class ExhibitionCommandService implements
     public void updateExhibitionDetailsUpdate(ExhibitionUpdateCommand command) {
         // 전시회 조회
         Long exhibitionId = command.getExhibitionId();
-        Exhibition exhibition = exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         Long writerId = authenticationUserProviderPort.getCurrentUserId();
@@ -184,7 +184,7 @@ public class ExhibitionCommandService implements
     // FIXME: 삭제 처리할 때 관련 댓글 처리 어떻게 할지, deletedAt 이 null 아닌 데이터를 어느 시점에 어떻게 처리할지 고민
     @Override
     public void deleteExhibition(Long exhibitionId) {
-        exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+        exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .ifPresent(exhibition -> {
                     Long writerId = authenticationUserProviderPort.getCurrentUserId();
 

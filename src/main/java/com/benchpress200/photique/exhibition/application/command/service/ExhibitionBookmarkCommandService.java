@@ -38,11 +38,11 @@ public class ExhibitionBookmarkCommandService implements
     public void addExhibitionBookmark(Long exhibitionId) {
         // 요청 유저 조회
         Long currentUserId = authenticationUserProvider.getCurrentUserId();
-        User user = userQueryPort.findActiveById(currentUserId)
+        User user = userQueryPort.findByIdAndDeletedAtIsNull(currentUserId)
                 .orElseThrow(() -> new UserNotFoundException(currentUserId));
 
         // 전시회 조회
-        Exhibition exhibition = exhibitionQueryPort.findActiveById(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         // 북마크 여부 확인
@@ -63,11 +63,11 @@ public class ExhibitionBookmarkCommandService implements
     public void cancelExhibitionBookmark(Long exhibitionId) {
         // 요청 유저 조회
         Long currentUserId = authenticationUserProvider.getCurrentUserId();
-        User user = userQueryPort.findActiveById(currentUserId)
+        User user = userQueryPort.findByIdAndDeletedAtIsNull(currentUserId)
                 .orElseThrow(() -> new UserNotFoundException(currentUserId));
 
         // 전시회 조회
-        Exhibition exhibition = exhibitionQueryPort.findActiveById(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         // 북마크 엔티티 조회 후 존재한다면 삭제 처리

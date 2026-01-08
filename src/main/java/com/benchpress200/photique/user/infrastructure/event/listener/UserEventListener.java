@@ -47,6 +47,7 @@ public class UserEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUpdateUserDetailsEventIfCommit(UserDetailsUpdateEvent event) {
         // FIXME: 이후 메시지 큐 도입한다면 배치 처리는 컨슈머에서 수행
+        // FIXME: 전시회 검색 데이터도 동기화 추가 필요
         Long userId = event.getUserId();
         User user = userQueryPort.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));

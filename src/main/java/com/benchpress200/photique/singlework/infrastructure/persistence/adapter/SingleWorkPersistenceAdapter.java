@@ -45,28 +45,18 @@ public class SingleWorkPersistenceAdapter implements
     }
 
     @Override
-    public Optional<SingleWork> findByIdWithWriter(Long id) {
-        return singleWorkRepository.findByIdWithWriter(id);
-    }
-
-    @Override
-    public Optional<SingleWork> findActiveByIdWithWriter(Long id) {
-        return singleWorkRepository.findActiveByIdWithWriter(id);
-    }
-
-    @Override
     public Long countByWriter(User writer) {
         return singleWorkRepository.countByWriter(writer);
     }
 
     @Override
-    public Page<SingleWorkSearch> search(
+    public Page<SingleWorkSearch> searchSingleWork(
             Target target,
             String keyword,
             List<Category> categories,
             Pageable pageable
     ) {
-        return singleWorkSearchRepository.search(
+        return singleWorkSearchRepository.searchSingleWork(
                 target,
                 keyword,
                 categories,
@@ -75,8 +65,8 @@ public class SingleWorkPersistenceAdapter implements
     }
 
     @Override
-    public Page<SingleWork> searchMySingleWork(Long userId, String keyword, Pageable pageable) {
-        return singleWorkRepository.searchMySingleWork(
+    public Page<SingleWork> searchMySingleWorkByDeletedAtIsNull(Long userId, String keyword, Pageable pageable) {
+        return singleWorkRepository.searchMySingleWorkByDeletedAtIsNull(
                 userId,
                 keyword,
                 pageable
@@ -84,7 +74,7 @@ public class SingleWorkPersistenceAdapter implements
     }
 
     @Override
-    public Optional<SingleWork> findActiveById(Long id) {
-        return singleWorkRepository.findActiveById(id);
+    public Optional<SingleWork> findByIdAndDeletedAtIsNull(Long id) {
+        return singleWorkRepository.findByIdAndDeletedAtIsNull(id);
     }
 }

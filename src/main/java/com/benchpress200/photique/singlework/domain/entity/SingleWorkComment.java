@@ -48,6 +48,9 @@ public class SingleWorkComment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Builder
     public SingleWorkComment(
             User writer,
@@ -65,5 +68,9 @@ public class SingleWorkComment {
 
     public boolean isOwnedBy(Long writerId) {
         return writer.getId().equals(writerId);
+    }
+
+    public void delete() {
+        deletedAt = LocalDateTime.now();
     }
 }

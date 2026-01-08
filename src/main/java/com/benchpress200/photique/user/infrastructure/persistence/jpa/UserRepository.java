@@ -6,17 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    @Query("""
-            SELECT u
-            FROM User u
-            WHERE u.id = :id AND u.deletedAt IS NULL
-            """)
-    Optional<User> findActiveById(@Param("id") Long id);
+    Optional<User> findByIdAndDeletedAtIsNull(Long id);
 
-    Optional<User> findByEmail(String email);
+    Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
     boolean existsByEmail(String email);
 
@@ -24,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByNicknameContaining(String keyword, Pageable pageable);
 
-    Page<User> findByNicknameStartingWith(String keyword, Pageable pageable);
+    Page<User> findByNicknameStartingWithAndDeletedAtIsNull(String keyword, Pageable pageable);
 
     @Query(
             value = "SELECT * FROM users " +

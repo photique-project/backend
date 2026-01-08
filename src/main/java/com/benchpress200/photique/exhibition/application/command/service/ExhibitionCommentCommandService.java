@@ -43,12 +43,12 @@ public class ExhibitionCommentCommandService implements
     public void createExhibitionComment(ExhibitionCommentCreateCommand command) {
         // 감상평 작성 유저 조회
         Long currentUserId = authenticationUserProvider.getCurrentUserId();
-        User writer = userQueryPort.findActiveById(currentUserId)
+        User writer = userQueryPort.findByIdAndDeletedAtIsNull(currentUserId)
                 .orElseThrow(() -> new UserNotFoundException(currentUserId));
 
         // 감상평 작성 전시회 조회
         Long exhibitionId = command.getExhibitionId();
-        Exhibition exhibition = exhibitionQueryPort.findActiveById(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         // 감상평 생성 및 저장
@@ -64,7 +64,7 @@ public class ExhibitionCommentCommandService implements
     public void updateExhibitionComment(ExhibitionCommentUpdateCommand command) {
         // 감상평 조회
         Long exhibitionCommentId = command.getCommentId();
-        ExhibitionComment exhibitionComment = exhibitionCommentQueryPort.findById(exhibitionCommentId)
+        ExhibitionComment exhibitionComment = exhibitionCommentQueryPort.findByIdAndDeletedAtIsNull(exhibitionCommentId)
                 .orElseThrow(() -> new ExhibitionCommentNotFoundException(exhibitionCommentId));
 
         // 작성자 맞는지 확인
@@ -81,7 +81,7 @@ public class ExhibitionCommentCommandService implements
 
     @Override
     public void deleteExhibitionComment(Long exhibitionCommentId) {
-        exhibitionCommentQueryPort.findById(exhibitionCommentId)
+        exhibitionCommentQueryPort.findByIdAndDeletedAtIsNull(exhibitionCommentId)
                 .ifPresent(exhibitionComment -> {
                     Long writerId = authenticationUserProvider.getCurrentUserId();
 
@@ -89,7 +89,7 @@ public class ExhibitionCommentCommandService implements
                         throw new ExhibitionCommentNotOwnedException();
                     }
 
-                    exhibitionCommentCommandPort.delete(exhibitionComment);
+                    exhibitionComment.delete();
                 });
     }
 }

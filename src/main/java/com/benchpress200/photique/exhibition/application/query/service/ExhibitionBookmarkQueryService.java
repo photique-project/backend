@@ -29,7 +29,7 @@ public class ExhibitionBookmarkQueryService implements
         String keyword = query.getKeyword();
         Pageable pageable = query.getPageable();
 
-        Page<ExhibitionBookmark> exhibitionBookmarkPage = exhibitionBookmarkQueryPort.searchBookmarkedExhibition(
+        Page<ExhibitionBookmark> exhibitionBookmarkPage = exhibitionBookmarkQueryPort.searchBookmarkedExhibitionByDeletedAtIsNull(
                 userId,
                 keyword,
                 pageable

@@ -171,7 +171,7 @@ public class SingleWork {
         this.date = date;
     }
 
-    public void remove() {
+    public void delete() {
         deletedAt = LocalDateTime.now();
     }
 }

@@ -10,7 +10,6 @@ import com.benchpress200.photique.user.application.query.port.out.persistence.Us
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.event.FollowEvent;
-import com.benchpress200.photique.user.domain.exception.AlreadyUnfollowException;
 import com.benchpress200.photique.user.domain.exception.DuplicatedFollowException;
 import com.benchpress200.photique.user.domain.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
@@ -32,7 +31,7 @@ public class FollowCommandService implements
 
     private final AuthenticationUserProviderPort authenticationUserProviderPort;
 
-    
+
     public void follow(Long followeeId) {
         // 팔로워 유저 조회
         Long followerId = authenticationUserProviderPort.getCurrentUserId();
@@ -49,11 +48,11 @@ public class FollowCommandService implements
                 });
 
         // 팔로워 유저 조회
-        User follower = userQueryPort.findById(followerId)
+        User follower = userQueryPort.findByIdAndDeletedAtIsNull(followerId)
                 .orElseThrow(() -> new UserNotFoundException(followerId));
 
         // 팔로잉(팔로우 대상) 유저 조회
-        User followee = userQueryPort.findById(followeeId)
+        User followee = userQueryPort.findByIdAndDeletedAtIsNull(followeeId)
                 .orElseThrow(() -> new UserNotFoundException(followerId));
 
         // 팔로우 엔티티 저장
@@ -75,18 +74,7 @@ public class FollowCommandService implements
         }
 
         // 이미 팔로우 관계 데이터가 없다면 바로 성공 응답줘서 멱등 처리
-        Follow follow = followQueryPort.findByFollowerIdAndFolloweeId(followerId, followeeId)
-                .orElseThrow(AlreadyUnfollowException::new);
-
-        // 팔로워 유저 조회
-        userQueryPort.findById(followerId)
-                .orElseThrow(() -> new UserNotFoundException(followerId));
-
-        // 팔로잉(팔로우 대상) 유저 조회
-        userQueryPort.findById(followeeId)
-                .orElseThrow(() -> new UserNotFoundException(followerId));
-
-        // 팔로우 데이터 삭제
-        followCommandPort.delete(follow);
+        followQueryPort.findByFollowerIdAndFolloweeId(followerId, followeeId)
+                .ifPresent(followCommandPort::delete);
     }
 }
