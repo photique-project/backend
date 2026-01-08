@@ -1,7 +1,7 @@
 package com.benchpress200.photique.auth.infrastructure.security.adapter;
 
-import com.benchpress200.photique.auth.domain.enumeration.TokenValidationStatus;
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
+import com.benchpress200.photique.auth.domain.enumeration.TokenValidationStatus;
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.auth.domain.vo.TokenValidationResult;
 import io.jsonwebtoken.Claims;
@@ -90,7 +90,7 @@ public class AuthenticationTokenManagerAdapter implements AuthenticationTokenMan
                     .role(role)
                     .build();
         } catch (ExpiredJwtException e) {
-            Long userId = (Long) e.getClaims().get(CLAIM_USER_ID_KEY);
+            Long userId = e.getClaims().get(CLAIM_USER_ID_KEY, Long.class);
 
             return TokenValidationResult.builder()
                     .status(TokenValidationStatus.EXPIRED)
