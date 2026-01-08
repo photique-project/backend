@@ -4,6 +4,7 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.auth.infrastructure.security.filter.JwtFilter;
 import com.benchpress200.photique.auth.infrastructure.security.filter.LoginFilter;
 import com.benchpress200.photique.common.api.constant.ApiPath;
+import com.benchpress200.photique.common.security.RequestResponseLoggingFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +43,8 @@ public class SecurityConfig {
     private final AuthenticationEntryPoint authenticationEntryPoint;
     private final AccessDeniedHandler accessDeniedHandler;
     private final JwtFilter jwtFilter;
+    private final RequestResponseLoggingFilter requestResponseLoggingFilter;
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -106,6 +109,7 @@ public class SecurityConfig {
                 ); // 403 예외 처리 커스텀
 
         http // 필터 등록
+                .addFilterBefore(requestResponseLoggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, LoginFilter.class) // JWT 인증 필터 추가
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class); // 로그인 필터 추가
 
