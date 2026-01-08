@@ -51,7 +51,7 @@ public class ExhibitionQueryService implements
     @Override
     public ExhibitionDetailsResult getExhibitionDetails(Long exhibitionId) {
         // 전시회 조회
-        Exhibition exhibition = exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         // 태그 조회
@@ -95,7 +95,7 @@ public class ExhibitionQueryService implements
         String keyword = query.getKeyword();
         Pageable pageable = query.getPageable();
 
-        Page<ExhibitionSearch> exhibitionSearchPage = exhibitionQueryPort.search(
+        Page<ExhibitionSearch> exhibitionSearchPage = exhibitionQueryPort.searchExhibition(
                 target,
                 keyword,
                 pageable
@@ -151,7 +151,7 @@ public class ExhibitionQueryService implements
         String keyword = query.getKeyword();
         Pageable pageable = query.getPageable();
 
-        Page<Exhibition> exhibitionPage = exhibitionQueryPort.searchMyExhibition(
+        Page<Exhibition> exhibitionPage = exhibitionQueryPort.searchMyExhibitionByDeletedAtIsNull(
                 userId,
                 keyword,
                 pageable

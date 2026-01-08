@@ -21,7 +21,7 @@ public class SingleWorkCommentQueryService implements
         Long singleWorkId = query.getSingleWorkId();
         Pageable pageable = query.getPageable();
 
-        Page<SingleWorkComment> singleWorkCommentPage = singleWorkCommentQueryPort.findBySingleWorkIdWithWriter(
+        Page<SingleWorkComment> singleWorkCommentPage = singleWorkCommentQueryPort.findBySingleWorkIdAndDeletedAtIsNull(
                 singleWorkId, pageable);
 
         return SingleWorkCommentsResult.from(singleWorkCommentPage);

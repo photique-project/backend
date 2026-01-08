@@ -29,12 +29,12 @@ public class ExhibitionCommentPersistenceAdapter implements
     }
 
     @Override
-    public Page<ExhibitionComment> findByExhibitionIdWithWriter(Long exhibitionId, Pageable pageable) {
-        return exhibitionCommentRepository.findByExhibitionIdWithWriter(exhibitionId, pageable);
+    public Page<ExhibitionComment> findByExhibitionId(Long exhibitionId, Pageable pageable) {
+        return exhibitionCommentRepository.findByExhibitionId(exhibitionId, pageable);
     }
 
     @Override
-    public Optional<ExhibitionComment> findById(Long id) {
-        return exhibitionCommentRepository.findById(id);
+    public Optional<ExhibitionComment> findByIdAndDeletedAtIsNull(Long id) {
+        return exhibitionCommentRepository.findByIdAndDeletedAtIsNull(id);
     }
 }

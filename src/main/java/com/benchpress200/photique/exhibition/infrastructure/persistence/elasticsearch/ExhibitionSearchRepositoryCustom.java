@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ExhibitionSearchRepositoryCustom {
-    Page<ExhibitionSearch> search(
+    Page<ExhibitionSearch> searchExhibition(
             Target target,
             String keyword,
             Pageable pageable

@@ -21,7 +21,7 @@ public class ExhibitionCommentQueryService implements
         Long exhibitionId = query.getExhibitionId();
         Pageable pageable = query.getPageable();
 
-        Page<ExhibitionComment> exhibitionCommentPage = exhibitionCommentQueryPort.findByExhibitionIdWithWriter(
+        Page<ExhibitionComment> exhibitionCommentPage = exhibitionCommentQueryPort.findByExhibitionId(
                 exhibitionId,
                 pageable
         );

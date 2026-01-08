@@ -11,17 +11,15 @@ import org.springframework.data.domain.Pageable;
 public interface ExhibitionQueryPort {
     Long countByWriter(User writer);
 
-    Optional<Exhibition> findActiveById(Long id);
+    Optional<Exhibition> findByIdAndDeletedAtIsNull(Long id);
 
-    Optional<Exhibition> findActiveByIdWithWriter(Long id);
-
-    Page<ExhibitionSearch> search(
+    Page<ExhibitionSearch> searchExhibition(
             Target target,
             String keyword,
             Pageable pageable
     );
 
-    Page<Exhibition> searchMyExhibition(
+    Page<Exhibition> searchMyExhibitionByDeletedAtIsNull(
             Long userId,
             String keyword,
             Pageable pageable

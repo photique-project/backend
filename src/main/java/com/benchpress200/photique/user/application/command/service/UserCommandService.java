@@ -53,6 +53,7 @@ public class UserCommandService implements
     private final PasswordEncoderPort passwordEncoderPort;
     private final AuthMailCodeQueryPort authMailCodeQueryPort;
 
+    @Override
     public void resister(ResisterCommand command) {
         // 이메일 인증 완료 여부 확인
         String email = command.getEmail();
@@ -99,10 +100,11 @@ public class UserCommandService implements
         }
     }
 
+    @Override
     public void updateUserDetails(UserDetailsUpdateCommand command) {
         // 유저 조회
         Long userId = command.getUserId();
-        User user = userQueryPort.findById(userId)
+        User user = userQueryPort.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 닉네임 업데이트
@@ -146,12 +148,11 @@ public class UserCommandService implements
         userEventPublishPort.publishUserDetailsUpdateEvent(userDetailsUpdateEvent); // 트랜잭션 커밋 시 작가 데이터 ES 동기화 이벤트 발행
     }
 
-    // 여기서 @Transactional이 없다면, 유저 엔티티를 조회한 후 엔티티 매니저를 close하기 떄문에
-    // 변경 감지가 동작하지 않고 update 쿼리가 나가지 않음
+    @Override
     public void updateUserPassword(UserPasswordUpdateCommand command) {
         // 유저 조회
         Long userId = command.getUserId();
-        User user = userQueryPort.findById(userId)
+        User user = userQueryPort.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 비밀번호 업데이트
@@ -160,10 +161,11 @@ public class UserCommandService implements
         user.updatePassword(encodedPassword);
     }
 
+    @Override
     public void resetUserPassword(UserPasswordResetCommand command) {
         // 유저 조회
         String email = command.getEmail();
-        User user = userQueryPort.findByEmail(email)
+        User user = userQueryPort.findByEmailAndDeletedAtIsNull(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         // 인증 코드 있는지 확인
@@ -182,10 +184,9 @@ public class UserCommandService implements
     }
 
     public void withdraw(Long userId) {
-        // 소프트 딜리트
-        // 해당 유저 로그인 불가능
-        // 해당 유저가 작성한 게시글 조회 가능
-        userQueryPort.findById(userId)
-                .ifPresent(User::remove);
+        // 소프트 딜리트 & 해당 유저가 작성한 단일작품, 전시회, 댓글 조회 가능 & 팔로우 관계 존재
+        // => 해당 유저 로그인 및 상세 정보 조회 불가능
+        userQueryPort.findByIdAndDeletedAtIsNull(userId)
+                .ifPresent(User::delete);
     }
 }

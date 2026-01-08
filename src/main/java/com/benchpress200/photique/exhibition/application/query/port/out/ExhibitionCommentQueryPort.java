@@ -6,10 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ExhibitionCommentQueryPort {
-    Page<ExhibitionComment> findByExhibitionIdWithWriter(
+    Page<ExhibitionComment> findByExhibitionId(
             Long exhibitionId,
             Pageable pageable
     );
 
-    Optional<ExhibitionComment> findById(Long id);
+    Optional<ExhibitionComment> findByIdAndDeletedAtIsNull(Long id);
 }

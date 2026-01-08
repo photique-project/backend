@@ -11,26 +11,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface SingleWorkQueryPort {
-    Optional<SingleWork> findByIdWithWriter(Long id);
-
-    Optional<SingleWork> findActiveByIdWithWriter(Long id);
+    Optional<SingleWork> findByIdAndDeletedAtIsNull(Long id);
 
     Long countByWriter(User writer);
 
-    Page<SingleWorkSearch> search(
+    Page<SingleWorkSearch> searchSingleWork(
             Target target,
             String keyword,
             List<Category> categories,
             Pageable pageable
     );
 
-    Page<SingleWork> searchMySingleWork(
+    Page<SingleWork> searchMySingleWorkByDeletedAtIsNull(
             Long userId,
             String keyword,
             Pageable pageable
     );
-
-    Optional<SingleWork> findActiveById(Long id);
-
 
 }

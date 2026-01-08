@@ -52,11 +52,11 @@ public class SingleWorkLikePersistenceAdapter implements
     }
 
     @Override
-    public Page<SingleWorkLike> searchLikedSingleWork(
+    public Page<SingleWorkLike> searchLikedSingleWorkByDeletedAtIsNull(
             Long userId,
             String keyword,
             Pageable pageable
     ) {
-        return singleWorkLikeRepository.searchLikedSingleWork(userId, keyword, pageable);
+        return singleWorkLikeRepository.searchLikedSingleWorkByDeletedAtIsNull(userId, keyword, pageable);
     }
 }

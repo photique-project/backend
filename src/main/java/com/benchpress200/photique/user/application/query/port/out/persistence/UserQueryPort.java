@@ -8,9 +8,9 @@ import org.springframework.data.domain.Pageable;
 public interface UserQueryPort {
     Optional<User> findById(Long id);
 
-    Optional<User> findActiveById(Long id);
+    Optional<User> findByIdAndDeletedAtIsNull(Long id);
 
-    Optional<User> findByEmail(String email);
+    Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
     boolean existsByEmail(String email);
 
@@ -18,7 +18,7 @@ public interface UserQueryPort {
 
     Page<User> findByNicknameContaining(String keyword, Pageable pageable);
 
-    Page<User> findByNicknameStartingWith(String keyword, Pageable pageable);
+    Page<User> findByNicknameStartingWithAndDeletedAtIsNull(String keyword, Pageable pageable);
 
     Page<User> searchByNicknameFts(String keyword, Pageable pageable);
 }

@@ -63,7 +63,7 @@ public class ExhibitionEventListener {
     public void handleExhibitionCreateEventIfCommit(ExhibitionCreateEvent event) {
         // FIXME: 이후 메시지 큐 도입한다면 메시지 발행해서 MySQL - ES 동기화 컨슈머 추가하여 비동기 처리
         Long exhibitionId = event.getExhibitionId();
-        Exhibition exhibition = exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         // 태그 조회
@@ -122,7 +122,7 @@ public class ExhibitionEventListener {
         // FIXME: 이후 메시지 큐 도입한다면 메시지 발행해서 MySQL - ES 동기화 컨슈머 추가하여 비동기 처리
 
         Long exhibitionId = event.getExhibitionId();
-        Exhibition exhibition = exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         // 태그 조회
@@ -150,7 +150,7 @@ public class ExhibitionEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleExhibitionLikeAddEventIfCommit(ExhibitionLikeAddEvent event) {
         Long exhibitionId = event.getExhibitionId();
-        Exhibition exhibition = exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         User receiver = exhibition.getWriter();
@@ -169,7 +169,7 @@ public class ExhibitionEventListener {
     public void handleExhibitionBookmarkAddEventIfCommit(ExhibitionBookmarkAddEvent event) {
         Long exhibitionId = event.getExhibitionId();
 
-        Exhibition exhibition = exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         User receiver = exhibition.getWriter();
@@ -187,7 +187,7 @@ public class ExhibitionEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleExhibitionCommentCreateEventIfCommit(ExhibitionCommentCreateEvent event) {
         Long exhibitionId = event.getExhibitionId();
-        Exhibition exhibition = exhibitionQueryPort.findActiveByIdWithWriter(exhibitionId)
+        Exhibition exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
         User receiver = exhibition.getWriter();

@@ -18,7 +18,7 @@ public interface SingleWorkLikeQueryPort {
 
     Optional<SingleWorkLike> findByUserAndSingleWork(User user, SingleWork singleWork);
 
-    Page<SingleWorkLike> searchLikedSingleWork(
+    Page<SingleWorkLike> searchLikedSingleWorkByDeletedAtIsNull(
             Long userId,
             String keyword,
             Pageable pageable

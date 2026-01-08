@@ -47,7 +47,7 @@ public class SingleWorkQueryService implements
     @Override
     public SingleWorkDetailsResult getSingleWorkDetails(Long singleWorkId) {
         // 작품 조회
-        SingleWork singleWork = singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
+        SingleWork singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
         // 태그 조회
@@ -90,7 +90,7 @@ public class SingleWorkQueryService implements
         List<Category> categories = query.getCategories();
         Pageable pageable = query.getPageable();
 
-        Page<SingleWorkSearch> singleWorkSearchPage = singleWorkQueryPort.search(
+        Page<SingleWorkSearch> singleWorkSearchPage = singleWorkQueryPort.searchSingleWork(
                 target,
                 keyword,
                 categories,
@@ -115,7 +115,7 @@ public class SingleWorkQueryService implements
         Pageable pageable = query.getPageable();
 
         // 본인 단일작품 페이지 조회
-        Page<SingleWork> singleWorkPage = singleWorkQueryPort.searchMySingleWork(
+        Page<SingleWork> singleWorkPage = singleWorkQueryPort.searchMySingleWorkByDeletedAtIsNull(
                 userId,
                 keyword,
                 pageable

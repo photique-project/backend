@@ -38,8 +38,12 @@ public class ExhibitionBookmarkPersistenceAdapter implements
     }
 
     @Override
-    public Page<ExhibitionBookmark> searchBookmarkedExhibition(Long userId, String keyword, Pageable pageable) {
-        return exhibitionBookmarkRepository.searchBookmarkedExhibition(
+    public Page<ExhibitionBookmark> searchBookmarkedExhibitionByDeletedAtIsNull(
+            Long userId,
+            String keyword,
+            Pageable pageable
+    ) {
+        return exhibitionBookmarkRepository.searchBookmarkedExhibitionByDeletedAtIsNull(
                 userId,
                 keyword,
                 pageable

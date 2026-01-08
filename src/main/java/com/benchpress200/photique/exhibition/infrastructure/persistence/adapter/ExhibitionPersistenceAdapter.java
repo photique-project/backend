@@ -29,18 +29,13 @@ public class ExhibitionPersistenceAdapter implements
     }
 
     @Override
-    public Optional<Exhibition> findActiveById(Long id) {
-        return exhibitionRepository.findActiveById(id);
+    public Optional<Exhibition> findByIdAndDeletedAtIsNull(Long id) {
+        return exhibitionRepository.findByIdAndDeletedAtIsNull(id);
     }
 
     @Override
-    public Optional<Exhibition> findActiveByIdWithWriter(Long id) {
-        return exhibitionRepository.findActiveByIdWithWriter(id);
-    }
-
-    @Override
-    public Page<ExhibitionSearch> search(Target target, String keyword, Pageable pageable) {
-        return exhibitionSearchRepository.search(
+    public Page<ExhibitionSearch> searchExhibition(Target target, String keyword, Pageable pageable) {
+        return exhibitionSearchRepository.searchExhibition(
                 target,
                 keyword,
                 pageable
@@ -48,8 +43,8 @@ public class ExhibitionPersistenceAdapter implements
     }
 
     @Override
-    public Page<Exhibition> searchMyExhibition(Long userId, String keyword, Pageable pageable) {
-        return exhibitionRepository.searchMyExhibition(
+    public Page<Exhibition> searchMyExhibitionByDeletedAtIsNull(Long userId, String keyword, Pageable pageable) {
+        return exhibitionRepository.searchMyExhibitionByDeletedAtIsNull(
                 userId,
                 keyword,
                 pageable

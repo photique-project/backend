@@ -28,12 +28,12 @@ public class SingleWorkCommentPersistenceAdapter implements
     }
 
     @Override
-    public Optional<SingleWorkComment> findById(Long id) {
-        return singleWorkCommentRepository.findById(id);
+    public Optional<SingleWorkComment> findByIdAndDeletedAtIsNull(Long id) {
+        return singleWorkCommentRepository.findByIdAndDeletedAtIsNull(id);
     }
 
     @Override
-    public Page<SingleWorkComment> findBySingleWorkIdWithWriter(Long singleWorkId, Pageable pageable) {
-        return singleWorkCommentRepository.findBySingleWorkIdWithWriter(singleWorkId, pageable);
+    public Page<SingleWorkComment> findBySingleWorkIdAndDeletedAtIsNull(Long singleWorkId, Pageable pageable) {
+        return singleWorkCommentRepository.findBySingleWorkIdAndDeletedAtIsNull(singleWorkId, pageable);
     }
 }

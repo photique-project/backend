@@ -17,19 +17,11 @@ public interface ExhibitionRepository extends JpaRepository<Exhibition, Long> {
     @Query("""
             SELECT e
             FROM Exhibition e
-            WHERE e.id = :id
-            AND e.deletedAt IS NULL
-            """)
-    Optional<Exhibition> findActiveById(Long id);
-
-    @Query("""
-            SELECT e
-            FROM Exhibition e
             JOIN FETCH e.writer
             WHERE e.id = :id
             AND e.deletedAt IS NULL
             """)
-    Optional<Exhibition> findActiveByIdWithWriter(@Param("id") Long id);
+    Optional<Exhibition> findByIdAndDeletedAtIsNull(@Param("id") Long id);
 
     @Transactional
     @Modifying
@@ -67,8 +59,9 @@ public interface ExhibitionRepository extends JpaRepository<Exhibition, Long> {
                    :keyword IS NULL
                    OR e.title LIKE CONCAT('%', :keyword, '%')
             )
+            AND e.deletedAt IS NULL
             """)
-    Page<Exhibition> searchMyExhibition(
+    Page<Exhibition> searchMyExhibitionByDeletedAtIsNull(
             @Param("userId") Long userId,
             @Param("keyword") String keyword,
             Pageable pageable

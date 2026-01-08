@@ -36,7 +36,7 @@ public class SearchPerformanceTest {
 
         // LIKE(접두어) 측정
         start = System.nanoTime();
-        users = userRepository.findByNicknameStartingWith(keyword, pageable);
+        users = userRepository.findByNicknameStartingWithAndDeletedAtIsNull(keyword, pageable);
         int numberOfPrefixLike = users.getNumberOfElements();
         end = System.nanoTime();
         long prefixLike = (end - start);

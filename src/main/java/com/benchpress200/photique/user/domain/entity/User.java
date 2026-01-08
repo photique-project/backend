@@ -103,7 +103,7 @@ public class User {
         this.profileImage = profileImage;
     }
 
-    public void remove() {
+    public void delete() {
         this.deletedAt = LocalDateTime.now();
     }
 }

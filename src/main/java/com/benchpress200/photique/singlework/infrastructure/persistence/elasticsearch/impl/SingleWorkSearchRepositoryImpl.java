@@ -51,7 +51,7 @@ public class SingleWorkSearchRepositoryImpl implements SingleWorkSearchRepositor
      * - 각각의 bool 쿼리들은 AND 연산자와 유사하게 동작함을 인지
      */
     @Override
-    public Page<SingleWorkSearch> search(
+    public Page<SingleWorkSearch> searchSingleWork(
             Target target,
             String keyword,
             List<Category> categories,

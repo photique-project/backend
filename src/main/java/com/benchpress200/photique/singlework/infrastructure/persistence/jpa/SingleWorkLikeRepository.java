@@ -13,21 +13,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, Long> {
-    void deleteByUser(User user);
-
-    void deleteBySingleWork(SingleWork singleWork);
-
     Long countBySingleWork(SingleWork singleWork);
 
-    void deleteByUserAndSingleWork(User user, SingleWork singleWork);
-
-    boolean existsByUserAndSingleWork(User user, SingleWork singleWork);
-
     boolean existsByUserIdAndSingleWorkId(Long userId, Long singleWorkId);
-
-    List<SingleWorkLike> findByUserId(Long userId);
-
-    Page<SingleWorkLike> findByUserId(Long userId, Pageable pageable);
 
     @Query("""
             SELECT l.singleWork.id
@@ -42,7 +30,6 @@ public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, 
 
     Optional<SingleWorkLike> findByUserAndSingleWork(User user, SingleWork singleWork);
 
-
     @Query("""
             SELECT sl
             FROM SingleWorkLike sl
@@ -53,8 +40,9 @@ public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, 
                :keyword IS NULL
                OR sl.singleWork.title LIKE CONCAT('%', :keyword, '%')
             )
+            AND sl.singleWork.deletedAt IS NULL
             """)
-    Page<SingleWorkLike> searchLikedSingleWork(
+    Page<SingleWorkLike> searchLikedSingleWorkByDeletedAtIsNull(
             @Param("userId") Long userId,
             @Param("keyword") String keyword,
             Pageable pageable

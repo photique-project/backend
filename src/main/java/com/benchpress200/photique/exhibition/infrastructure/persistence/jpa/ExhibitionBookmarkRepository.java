@@ -52,8 +52,9 @@ public interface ExhibitionBookmarkRepository extends JpaRepository<ExhibitionBo
                :keyword IS NULL
                OR eb.exhibition.title LIKE CONCAT('%', :keyword, '%')
             )
+            AND eb.exhibition.deletedAt IS NULL
             """)
-    Page<ExhibitionBookmark> searchBookmarkedExhibition(
+    Page<ExhibitionBookmark> searchBookmarkedExhibitionByDeletedAtIsNull(
             @Param("userId") Long userId,
             @Param("keyword") String keyword,
             Pageable pageable

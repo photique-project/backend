@@ -28,7 +28,7 @@ public class SingleWorkLikeQueryService implements
         String keyword = query.getKeyword();
         Pageable pageable = query.getPageable();
 
-        Page<SingleWorkLike> singleWorkLikePage = singleWorkLikeQueryPort.searchLikedSingleWork(
+        Page<SingleWorkLike> singleWorkLikePage = singleWorkLikeQueryPort.searchLikedSingleWorkByDeletedAtIsNull(
                 userId,
                 keyword,
                 pageable

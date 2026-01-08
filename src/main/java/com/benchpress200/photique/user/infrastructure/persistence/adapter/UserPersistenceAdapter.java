@@ -28,13 +28,13 @@ public class UserPersistenceAdapter implements
     }
 
     @Override
-    public Optional<User> findActiveById(Long id) {
-        return userRepository.findActiveById(id);
+    public Optional<User> findByIdAndDeletedAtIsNull(Long id) {
+        return userRepository.findByIdAndDeletedAtIsNull(id);
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Optional<User> findByEmailAndDeletedAtIsNull(String email) {
+        return userRepository.findByEmailAndDeletedAtIsNull(email);
     }
 
     @Override
@@ -53,8 +53,8 @@ public class UserPersistenceAdapter implements
     }
 
     @Override
-    public Page<User> findByNicknameStartingWith(String keyword, Pageable pageable) {
-        return userRepository.findByNicknameStartingWith(keyword, pageable);
+    public Page<User> findByNicknameStartingWithAndDeletedAtIsNull(String keyword, Pageable pageable) {
+        return userRepository.findByNicknameStartingWithAndDeletedAtIsNull(keyword, pageable);
     }
 
     @Override

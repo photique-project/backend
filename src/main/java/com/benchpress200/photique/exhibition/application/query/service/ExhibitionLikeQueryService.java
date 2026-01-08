@@ -29,7 +29,7 @@ public class ExhibitionLikeQueryService implements
         String keyword = query.getKeyword();
         Pageable pageable = query.getPageable();
 
-        Page<ExhibitionLike> exhibitionLikePage = exhibitionLikeQueryPort.searchLikedExhibition(
+        Page<ExhibitionLike> exhibitionLikePage = exhibitionLikeQueryPort.searchLikedExhibitionByDeletedAtIsNull(
                 userId,
                 keyword,
                 pageable

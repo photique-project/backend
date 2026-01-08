@@ -40,11 +40,11 @@ public class SingleWorkLikeCommandService implements
     public void addSingleWorkLike(Long singleWorkId) {
         // 요청 유저 조회
         Long currentUserId = authenticationUserProvider.getCurrentUserId();
-        User user = userQueryPort.findActiveById(currentUserId)
+        User user = userQueryPort.findByIdAndDeletedAtIsNull(currentUserId)
                 .orElseThrow(() -> new UserNotFoundException(currentUserId));
 
         // 단일작품 조회
-        SingleWork singleWork = singleWorkQueryPort.findActiveById(singleWorkId)
+        SingleWork singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
         // 좋아요 여부 확인
@@ -69,11 +69,11 @@ public class SingleWorkLikeCommandService implements
     public void cancelSingleWorkLike(Long singleWorkId) {
         // 요청 유저 조회
         Long currentUserId = authenticationUserProvider.getCurrentUserId();
-        User user = userQueryPort.findActiveById(currentUserId)
+        User user = userQueryPort.findByIdAndDeletedAtIsNull(currentUserId)
                 .orElseThrow(() -> new UserNotFoundException(currentUserId));
 
         // 단일작품 조회
-        SingleWork singleWork = singleWorkQueryPort.findActiveById(singleWorkId)
+        SingleWork singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
         // 좋아요 엔티티 조회 후 존재한다면 삭제 처리

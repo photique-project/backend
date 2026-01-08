@@ -65,7 +65,7 @@ public class SingleWorkEventListener {
         // FIXME: 이후 메시지 큐 도입한다면 메시지 발행해서 MySQL - ES 동기화 컨슈머 추가하여 비동기 처리
 
         Long singleWorkId = event.getSingleWorkId();
-        SingleWork singleWork = singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
+        SingleWork singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
         // 태그 조회
@@ -125,7 +125,7 @@ public class SingleWorkEventListener {
         // FIXME: 이후 메시지 큐 도입한다면 메시지 발행해서 MySQL - ES 동기화 컨슈머 추가하여 비동기 처리
 
         Long singleWorkId = event.getSingleWorkId();
-        SingleWork singleWork = singleWorkQueryPort.findByIdWithWriter(singleWorkId)
+        SingleWork singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
         // 태그 조회
@@ -154,7 +154,7 @@ public class SingleWorkEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleSingleWorkLikeAddEventIfCommit(SingleWorkLikeAddEvent event) {
         Long singleWorkId = event.getSingleWorkId();
-        SingleWork singleWork = singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
+        SingleWork singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
         User receiver = singleWork.getWriter();
@@ -172,7 +172,7 @@ public class SingleWorkEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleSingleWorkCommentCreateEventIfCommit(SingleWorkCommentCreateEvent event) {
         Long singleWorkId = event.getSingleWorkId();
-        SingleWork singleWork = singleWorkQueryPort.findActiveByIdWithWriter(singleWorkId)
+        SingleWork singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
         User receiver = singleWork.getWriter();

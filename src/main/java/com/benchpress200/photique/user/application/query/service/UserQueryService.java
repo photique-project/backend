@@ -47,8 +47,7 @@ public class UserQueryService implements
     private final FollowQueryPort followQueryPort;
 
 
-    // @Transactional이 없기 때문에 조회 쿼리가 나갈 때 커넥션을 얻고 MySQL 오토커밋
-    // 결과셋이 애플리케이션으로 반환되면 바로 커넥션 반납
+    @Override
     public NicknameValidateResult validateNickname(NicknameValidateQuery query) {
         String nickname = query.getNickname();
         boolean isDuplicated = userQueryPort.existsByNickname(nickname);
@@ -56,8 +55,9 @@ public class UserQueryService implements
         return NicknameValidateResult.of(isDuplicated);
     }
 
+    @Override
     public UserDetailsResult getUserDetails(Long userId) {
-        User user = userQueryPort.findActiveById(userId)
+        User user = userQueryPort.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 단일작품 카운팅
@@ -88,11 +88,12 @@ public class UserQueryService implements
         );
     }
 
+    @Override
     public MyDetailsResult getMyDetails() {
         // 인증된 유저 id 조회
         Long userId = authenticationUserProviderPort.getCurrentUserId();
 
-        User user = userQueryPort.findActiveById(userId)
+        User user = userQueryPort.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 단일작품 카운팅
@@ -116,6 +117,7 @@ public class UserQueryService implements
         );
     }
 
+    @Override
     public UserSearchResult searchUser(UserSearchQuery query) {
         String keyword = query.getKeyword();
         Pageable pageable = query.getPageable();
@@ -124,7 +126,7 @@ public class UserQueryService implements
         Long currentUserId = authenticationUserProviderPort.getCurrentUserId();
 
         // 닉네임 접두사 기반 검색
-        Page<User> userPage = userQueryPort.findByNicknameContaining(keyword, pageable);
+        Page<User> userPage = userQueryPort.findByNicknameStartingWithAndDeletedAtIsNull(keyword, pageable);
 
         // 검색한 유저 페이지에서 유저의 id를 일급 컬렉션으로 변환
         UserIds userIds = UserIds.from(userPage);
@@ -143,7 +145,7 @@ public class UserQueryService implements
     // 스프링 시큐리티를 위한 오버라이딩 메서드
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userQueryPort.findByEmail(username)
+        User user = userQueryPort.findByEmailAndDeletedAtIsNull(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
 
         return AuthenticationUserResult.from(user);

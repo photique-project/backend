@@ -16,7 +16,7 @@ public interface ExhibitionBookmarkQueryPort {
 
     Optional<ExhibitionBookmark> findByUserAndExhibition(User user, Exhibition exhibition);
 
-    Page<ExhibitionBookmark> searchBookmarkedExhibition(
+    Page<ExhibitionBookmark> searchBookmarkedExhibitionByDeletedAtIsNull(
             Long userId,
             String keyword,
             Pageable pageable
