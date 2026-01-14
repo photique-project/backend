@@ -51,6 +51,12 @@ public class SingleWorkDetailsResponse {
                 .category(singleWorkDetailsResult.getCategory())
                 .location(singleWorkDetailsResult.getLocation())
                 .date(singleWorkDetailsResult.getDate())
+                .tags(singleWorkDetailsResult.getTags())
+                .likeCount(singleWorkDetailsResult.getLikeCount())
+                .viewCount(singleWorkDetailsResult.getViewCount())
+                .createdAt(singleWorkDetailsResult.getCreatedAt())
+                .isLiked(singleWorkDetailsResult.isLiked())
+                .isFollowing(singleWorkDetailsResult.isFollowing())
                 .build();
     }
 }

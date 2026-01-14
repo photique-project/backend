@@ -1,7 +1,7 @@
 package com.benchpress200.photique.exhibition.infrastructure.persistence.adapter;
 
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommentCommandPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionCommentQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionCommentQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
 import com.benchpress200.photique.exhibition.infrastructure.persistence.jpa.ExhibitionCommentRepository;
 import java.util.Optional;

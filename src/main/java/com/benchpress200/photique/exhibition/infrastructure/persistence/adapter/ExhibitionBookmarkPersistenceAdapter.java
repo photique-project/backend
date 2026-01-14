@@ -1,7 +1,7 @@
 package com.benchpress200.photique.exhibition.infrastructure.persistence.adapter;
 
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionBookmarkCommandPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionBookmarkQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionBookmarkQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.exhibition.infrastructure.persistence.jpa.ExhibitionBookmarkRepository;

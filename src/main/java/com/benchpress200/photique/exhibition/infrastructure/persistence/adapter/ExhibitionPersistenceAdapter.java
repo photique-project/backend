@@ -1,7 +1,7 @@
 package com.benchpress200.photique.exhibition.infrastructure.persistence.adapter;
 
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.enumeration.Target;

@@ -2,7 +2,7 @@ package com.benchpress200.photique.exhibition.application.query.service;
 
 import com.benchpress200.photique.exhibition.application.query.model.ExhibitionCommentsQuery;
 import com.benchpress200.photique.exhibition.application.query.port.in.GetExhibitionCommentsUseCase;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionCommentQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionCommentQueryPort;
 import com.benchpress200.photique.exhibition.application.query.result.ExhibitionCommentsResult;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
 import lombok.RequiredArgsConstructor;

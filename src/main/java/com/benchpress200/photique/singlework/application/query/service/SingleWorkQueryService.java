@@ -8,6 +8,7 @@ import com.benchpress200.photique.singlework.application.query.model.SingleWorkS
 import com.benchpress200.photique.singlework.application.query.port.in.GetSingleWorkDetailsUseCase;
 import com.benchpress200.photique.singlework.application.query.port.in.SearchMySingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.query.port.in.SearchSingleWorkUseCase;
+import com.benchpress200.photique.singlework.application.query.port.out.event.SingleWorkViewCountPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkTagQueryPort;
@@ -37,6 +38,7 @@ public class SingleWorkQueryService implements
         SearchMySingleWorkUseCase {
     private final AuthenticationUserProviderPort authenticationUserProviderPort;
 
+    private final SingleWorkViewCountPort singleWorkViewCountPort;
     private final SingleWorkCommandPort singleWorkCommandPort;
     private final SingleWorkQueryPort singleWorkQueryPort;
     private final SingleWorkTagQueryPort singleWorkTagQueryPort;
@@ -67,13 +69,13 @@ public class SingleWorkQueryService implements
             isLiked = singleWorkLikeQueryPort.existsByUserIdAndSingleWorkId(requestUserId, singleWorkId);
             isFollowing = followQueryPort.existsByFollowerIdAndFolloweeId(requestUserId, writerId);
         }
-
-        // FIXME: 현재 레코드 레벨에서 원자적인 업데이트를 위한 쿼리가 나가는 중인데,
-        // FIXME: query 어노테이션 API 임에도 불구하고 쓰기 쿼리가 발생하는 트랜잭션임
-        // FIXME: 이후에 JPA 쓰기 지연 VS 원자적 쿼리 수행 VS 비관적, 낙관적 락 VS 실시간 동기화 포기하고 레디스 활용 방안 비교하고 적용
-        // FIXME: failover 로 기존 로직 동작?
-        // FIXME: ES에 조회수 동기화도 필요 & 좋아요 수 동기화도 필요함
-        singleWorkCommandPort.incrementViewCount(singleWorkId);
+        
+        // 조회수 증가
+        try {
+            singleWorkViewCountPort.incrementViewCount(singleWorkId);
+        } catch (RuntimeException e) { // fallback 처리
+            singleWorkCommandPort.incrementViewCount(singleWorkId);
+        }
 
         return SingleWorkDetailsResult.of(
                 singleWork,

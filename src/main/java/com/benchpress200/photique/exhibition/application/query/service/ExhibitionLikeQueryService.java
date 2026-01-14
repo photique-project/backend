@@ -4,8 +4,8 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.common.application.support.Ids;
 import com.benchpress200.photique.exhibition.application.query.model.LikedExhibitionSearchQuery;
 import com.benchpress200.photique.exhibition.application.query.port.in.SearchLikedExhibitionUseCase;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionBookmarkQueryPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionLikeQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionBookmarkQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionLikeQueryPort;
 import com.benchpress200.photique.exhibition.application.query.result.LikedExhibitionSearchResult;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
 import java.util.List;
