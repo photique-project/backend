@@ -8,8 +8,8 @@ import com.benchpress200.photique.exhibition.application.command.port.in.DeleteE
 import com.benchpress200.photique.exhibition.application.command.port.in.UpdateExhibitionCommentUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommentCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionCommentQueryPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionCommentQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionCommentCreateEvent;

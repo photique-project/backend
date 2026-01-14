@@ -1,7 +1,7 @@
 package com.benchpress200.photique.exhibition.infrastructure.persistence.adapter;
 
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionTagCommandPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionTagQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionTagQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.infrastructure.persistence.jpa.ExhibitionTagRepository;

@@ -6,8 +6,8 @@ import com.benchpress200.photique.exhibition.application.command.port.in.CancelE
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionLikeCommandPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionLikeQueryPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionLikeQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionLikeAddEvent;

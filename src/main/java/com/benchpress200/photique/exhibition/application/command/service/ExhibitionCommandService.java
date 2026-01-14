@@ -12,8 +12,8 @@ import com.benchpress200.photique.exhibition.application.command.port.out.Exhibi
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionTagCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionWorkCommandPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionQueryPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionWorkQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionWorkQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;

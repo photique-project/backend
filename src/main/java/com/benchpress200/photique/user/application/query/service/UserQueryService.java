@@ -2,7 +2,7 @@ package com.benchpress200.photique.user.application.query.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.user.application.query.model.NicknameValidateQuery;
 import com.benchpress200.photique.user.application.query.model.UserSearchQuery;

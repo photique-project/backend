@@ -5,8 +5,8 @@ import com.benchpress200.photique.exhibition.application.command.port.in.AddExhi
 import com.benchpress200.photique.exhibition.application.command.port.in.CancelExhibitionBookmarkUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionBookmarkCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionBookmarkQueryPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.ExhibitionQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionBookmarkQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionBookmarkAddEvent;
