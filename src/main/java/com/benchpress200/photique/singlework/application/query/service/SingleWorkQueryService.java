@@ -26,6 +26,7 @@ import com.benchpress200.photique.user.application.query.port.out.persistence.Fo
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -69,11 +70,11 @@ public class SingleWorkQueryService implements
             isLiked = singleWorkLikeQueryPort.existsByUserIdAndSingleWorkId(requestUserId, singleWorkId);
             isFollowing = followQueryPort.existsByFollowerIdAndFolloweeId(requestUserId, writerId);
         }
-        
+
         // 조회수 증가
         try {
             singleWorkViewCountPort.incrementViewCount(singleWorkId);
-        } catch (RuntimeException e) { // fallback 처리
+        } catch (DataAccessException e) { // fallback 처리
             singleWorkCommandPort.incrementViewCount(singleWorkId);
         }
 
