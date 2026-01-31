@@ -2,6 +2,7 @@ package com.benchpress200.photique.singlework.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
+import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCreateCommand;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkUpdateCommand;
 import com.benchpress200.photique.singlework.application.command.port.in.DeleteSingleWorkUseCase;
@@ -61,6 +62,8 @@ public class SingleWorkCommandService implements
 
     private final TagCommandPort tagCommandPort;
     private final TagQueryPort tagQueryPort;
+
+    private final OutboxEventPort outboxEventPort;
 
     @Override
     public void postSingleWork(SingleWorkCreateCommand command) {
