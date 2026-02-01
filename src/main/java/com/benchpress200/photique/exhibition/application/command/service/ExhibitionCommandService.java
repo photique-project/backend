@@ -17,7 +17,6 @@ import com.benchpress200.photique.exhibition.application.query.port.out.persiste
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
-import com.benchpress200.photique.exhibition.domain.event.ExhibitionCreateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionDeleteEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionUpdateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionWorkImageUploadEvent;
@@ -26,6 +25,9 @@ import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotOwned
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionWorkDuplicatedDisplayOrderException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionWorkNotFoundException;
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
+import com.benchpress200.photique.outbox.application.factory.OutboxEventFactory;
+import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
+import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.tag.application.command.port.out.persistence.TagCommandPort;
 import com.benchpress200.photique.tag.application.query.port.out.persistence.TagQueryPort;
 import com.benchpress200.photique.tag.application.query.support.AbsentTags;
@@ -65,6 +67,10 @@ public class ExhibitionCommandService implements
     private final TagCommandPort tagCommandPort;
     private final TagQueryPort tagQueryPort;
 
+    private final OutboxEventFactory outboxEventFactory;
+    private final OutboxEventPort outboxEventPort;
+
+
     @Override
     public void openExhibition(ExhibitionCreateCommand command) {
         // 작가 조회
@@ -95,10 +101,11 @@ public class ExhibitionCommandService implements
         List<String> tagNames = command.getTags();
         attachTags(exhibition, tagNames);
 
-        // 트랜잭션 커밋 시 ES 동기화 & 작가 팔로워들에게 알림 생성 이벤트 발행
-        Long exhibitionId = exhibition.getId();
-        ExhibitionCreateEvent event = ExhibitionCreateEvent.of(exhibitionId);
-        exhibitionEventPublishPort.publishExhibitionCreateEvent(event);
+        // 아웃박스 이벤트 발행 -> ES 동기화 & 팔로워 알림 생성 배치 처리
+        OutboxEvent outboxEvent = outboxEventFactory.exhibitionCreated(exhibition, tagNames);
+        outboxEventPort.save(outboxEvent);
+
+        // TODO: 이후 알림 아웃박스 이벤트 생성 코드 추가 후 이벤트 발행 포트, 어댑터, 리스너 코드 제거
     }
 
     @Override

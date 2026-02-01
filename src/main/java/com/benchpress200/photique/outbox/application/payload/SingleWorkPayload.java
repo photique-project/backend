@@ -11,11 +11,11 @@ import lombok.Getter;
 @Builder
 public class SingleWorkPayload {
     private final Long id;
+    private final Writer writer;
     private final String title;
     private final String description;
     private final List<String> tags;
     private final String image;
-    private final Writer writer;
     private final String category;
     private final Long viewCount;
     private final Long likeCount;
@@ -44,11 +44,11 @@ public class SingleWorkPayload {
     ) {
         return SingleWorkPayload.builder()
                 .id(singleWork.getId())
+                .writer(Writer.from(singleWork.getWriter()))
                 .title(singleWork.getTitle())
                 .description(singleWork.getDescription())
                 .tags(tagNames)
                 .image(singleWork.getImage())
-                .writer(Writer.from(singleWork.getWriter()))
                 .category(singleWork.getCategory().getValue())
                 .viewCount(singleWork.getViewCount())
                 .likeCount(singleWork.getLikeCount())
