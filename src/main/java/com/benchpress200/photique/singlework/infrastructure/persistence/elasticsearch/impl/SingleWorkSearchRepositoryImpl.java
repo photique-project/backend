@@ -30,7 +30,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class SingleWorkSearchRepositoryImpl implements SingleWorkSearchRepositoryCustom {
     private final static String INDEX_NAME = "singleworks";
-    private final static String WRITER_FIELD = "writerNickname";
+    private final static String WRITER_FIELD = "writer.nickname";
     private final static String TITLE_FIELD = "title";
     private final static String DESCRIPTION_FIELD = "description";
     private final static String TAGS_FIELD = "tags";
