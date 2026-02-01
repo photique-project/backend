@@ -203,7 +203,7 @@ public class SingleWorkCommandService implements
 
                     singleWork.delete();
 
-                    // 단일작품 MySQL-ES 동기화 이벤트 발행
+                    // 아웃박스 이벤트 발행 -> 비동기 이벤트
                     OutboxEvent outboxEvent = outboxEventFactory.singleWorkDeleted(singleWork);
                     outboxEventPort.save(outboxEvent);
                 });
