@@ -14,6 +14,7 @@ import com.benchpress200.photique.singlework.application.command.port.out.event.
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkTagCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
+import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkTagQueryPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
 import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
@@ -21,7 +22,6 @@ import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkImageUploadEvent;
-import com.benchpress200.photique.singlework.domain.event.SingleWorkUpdateEvent;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotOwnedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkWriterNotFoundException;
@@ -58,6 +58,7 @@ public class SingleWorkCommandService implements
     private final SingleWorkCommandPort singleWorkCommandPort;
     private final SingleWorkQueryPort singleWorkQueryPort;
     private final SingleWorkTagCommandPort singleWorkTagCommandPort;
+    private final SingleWorkTagQueryPort singleWorkTagQueryPort;
     private final SingleWorkEventPublishPort singleWorkEventPublishPort;
 
     private final TagCommandPort tagCommandPort;
@@ -181,10 +182,14 @@ public class SingleWorkCommandService implements
             attachTags(singleWork, tagNamesToUpdate);
         }
 
-        // 단일작품 MySQL-ES 동기화 이벤트 발행
+        // 아웃박스 이벤트 발행 -> 비동기 이벤트
         if (command.isUpdate()) {
-            SingleWorkUpdateEvent event = SingleWorkUpdateEvent.of(singleWorkId);
-            singleWorkEventPublishPort.publishSingleWorkUpdateEvent(event);
+            List<String> tagNames = singleWorkTagQueryPort.findBySingleWorkWithTag(singleWork).stream()
+                    .map(singleWorkTag -> singleWorkTag.getTag().getName())
+                    .toList();
+
+            OutboxEvent outboxEvent = outboxEventFactory.singleWorkUpdated(singleWork, tagNames);
+            outboxEventPort.save(outboxEvent);
         }
     }
 
