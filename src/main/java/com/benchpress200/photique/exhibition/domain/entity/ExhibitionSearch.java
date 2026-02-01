@@ -55,12 +55,12 @@ public class ExhibitionSearch {
 
     @Field(type = FieldType.Text)
     private List<String> tags;
+    
+    @Field(type = FieldType.Long)
+    private Long viewCount;
 
     @Field(type = FieldType.Long)
     private Long likeCount;
-
-    @Field(type = FieldType.Long)
-    private Long viewCount;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)

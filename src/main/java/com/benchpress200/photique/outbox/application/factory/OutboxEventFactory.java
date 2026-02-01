@@ -1,6 +1,8 @@
 package com.benchpress200.photique.outbox.application.factory;
 
+import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.outbox.application.exception.OutboxPayloadSerializationException;
+import com.benchpress200.photique.outbox.application.payload.ExhibitionPayload;
 import com.benchpress200.photique.outbox.application.payload.SingleWorkPayload;
 import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.outbox.domain.enumeration.AggregateType;
@@ -28,6 +30,26 @@ public class OutboxEventFactory {
 
             return OutboxEvent.builder()
                     .aggregateType(AggregateType.SINGLEWORK)
+                    .aggregateId(aggregateId)
+                    .eventType(EventType.CREATE)
+                    .payload(payload)
+                    .build();
+        } catch (JsonProcessingException e) {
+            throw new OutboxPayloadSerializationException();
+        }
+    }
+
+    public OutboxEvent exhibitionCreated(
+            Exhibition exhibition,
+            List<String> tagNames
+    ) {
+        try {
+            String aggregateId = exhibition.getId().toString();
+            ExhibitionPayload exhibitionPayload = ExhibitionPayload.of(exhibition, tagNames);
+            String payload = objectMapper.writeValueAsString(exhibitionPayload);
+
+            return OutboxEvent.builder()
+                    .aggregateType(AggregateType.EXHIBITION)
                     .aggregateId(aggregateId)
                     .eventType(EventType.CREATE)
                     .payload(payload)
