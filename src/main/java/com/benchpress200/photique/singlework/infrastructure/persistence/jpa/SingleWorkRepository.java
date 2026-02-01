@@ -43,7 +43,7 @@ public interface SingleWorkRepository extends JpaRepository<SingleWork, Long> {
             """)
     void incrementViewCount(@Param("singleWorkId") Long singleWorkId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             UPDATE SingleWork s
             SET s.likeCount = s.likeCount + 1
@@ -51,7 +51,7 @@ public interface SingleWorkRepository extends JpaRepository<SingleWork, Long> {
             """)
     void incrementLikeCount(@Param("singleWorkId") Long singleWorkId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             UPDATE SingleWork s
             SET s.likeCount = s.likeCount - 1

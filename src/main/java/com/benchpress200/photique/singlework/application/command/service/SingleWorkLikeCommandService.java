@@ -1,6 +1,9 @@
 package com.benchpress200.photique.singlework.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.outbox.application.factory.OutboxEventFactory;
+import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
+import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.singlework.application.command.port.in.AddSingleWorkLikeUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.CancelSingleWorkLikeUseCase;
 import com.benchpress200.photique.singlework.application.command.port.out.event.SingleWorkEventPublishPort;
@@ -8,14 +11,15 @@ import com.benchpress200.photique.singlework.application.command.port.out.persis
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkLikeCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
+import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkTagQueryPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
-import com.benchpress200.photique.singlework.domain.event.SingleWorkLikeAddEvent;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkAlreadyLikedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +39,10 @@ public class SingleWorkLikeCommandService implements
     private final SingleWorkLikeQueryPort singleWorkLikeQueryPort;
     private final SingleWorkLikeCommandPort singleWorkLikeCommandPort;
     private final SingleWorkEventPublishPort singleWorkEventPublishPort;
+    private final SingleWorkTagQueryPort singleWorkTagQueryPort;
+
+    private final OutboxEventFactory outboxEventFactory;
+    private final OutboxEventPort outboxEventPort;
 
     @Override
     public void addSingleWorkLike(Long singleWorkId) {
@@ -55,14 +63,19 @@ public class SingleWorkLikeCommandService implements
         // 좋아요 처리
         SingleWorkLike singleWorkLike = SingleWorkLike.of(user, singleWork);
         singleWorkLikeCommandPort.save(singleWorkLike);
-
-        // FIXME: 좋아요 추가 & 취소 값을 언제, 어떻게 단일작품 칼럼에 반영하고 ES에 동기화시킬지 전략 정해야 함
-        // MySQL에 반영했을 때, 업데이트 이벤트 발행?
         singleWorkCommandPort.incrementLikeCount(singleWorkId);
 
-        // 좋아요 알림 생성 이벤트 발행
-        SingleWorkLikeAddEvent event = SingleWorkLikeAddEvent.of(singleWorkId);
-        singleWorkEventPublishPort.publishSingleWorkLikeAddEvent(event);
+        // 아웃박스 이벤트 발행 -> 비동기 이벤트
+        // incrementLikeCount의 Modifying(flush, clear) 메서드이기 때문에 다시 영속성 컨텍스트 적재
+        singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
+                .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
+        
+        List<String> tagNames = singleWorkTagQueryPort.findBySingleWorkWithTag(singleWork).stream()
+                .map(singleWorkTag -> singleWorkTag.getTag().getName())
+                .toList();
+
+        OutboxEvent outboxEvent = outboxEventFactory.singleWorkUpdated(singleWork, tagNames);
+        outboxEventPort.save(outboxEvent);
     }
 
     @Override
