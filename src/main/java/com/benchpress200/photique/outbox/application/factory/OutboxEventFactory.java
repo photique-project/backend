@@ -39,6 +39,26 @@ public class OutboxEventFactory {
         }
     }
 
+    public OutboxEvent singleWorkUpdated(
+            SingleWork singleWork,
+            List<String> tagNames
+    ) {
+        try {
+            String aggregateId = singleWork.getId().toString();
+            SingleWorkPayload singleWorkPayload = SingleWorkPayload.of(singleWork, tagNames);
+            String payload = objectMapper.writeValueAsString(singleWorkPayload);
+
+            return OutboxEvent.builder()
+                    .aggregateType(AggregateType.SINGLEWORK)
+                    .aggregateId(aggregateId)
+                    .eventType(EventType.UPDATE)
+                    .payload(payload)
+                    .build();
+        } catch (JsonProcessingException e) {
+            throw new OutboxPayloadSerializationException();
+        }
+    }
+
     public OutboxEvent singleWorkDeleted(SingleWork singleWork) {
         String aggregateId = singleWork.getId().toString();
 
