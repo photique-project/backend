@@ -37,23 +37,15 @@ public class SingleWorkSearch {
      * Keyword: 분석되지 않고 정확한 일치 검색
      */
 
-    private static final String DOCUMENT_ID_FIELD = "id";
-
     @Id
-    @Field(name = DOCUMENT_ID_FIELD, type = FieldType.Long)
+    @Field(type = FieldType.Long)
     private Long id;
+
+    @Field(type = FieldType.Object)
+    private Writer writer;
 
     @Field(type = FieldType.Keyword, index = false)
     private String image;
-
-    @Field(type = FieldType.Long)
-    private Long writerId;
-
-    @Field(type = FieldType.Keyword)
-    private String writerNickname;
-
-    @Field(type = FieldType.Keyword, index = false)
-    private String writerProfileImage;
 
     @Field(type = FieldType.Text)
     private String title;
@@ -78,10 +70,16 @@ public class SingleWorkSearch {
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
     private LocalDateTime createdAt;
 
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
+    private LocalDateTime updatedAt;
+
+    @Field(type = FieldType.Long)
+    private Long lastProcessedOutboxEventId;
+
     public void updateWriterDetails(User writer) {
-        writerId = writer.getId();
-        writerNickname = writer.getNickname();
-        writerProfileImage = writer.getProfileImage();
+        // FIXME: 이후 제거
     }
 
     public static SingleWorkSearch of(
@@ -93,9 +91,7 @@ public class SingleWorkSearch {
         return SingleWorkSearch.builder()
                 .id(singleWork.getId())
                 .image(singleWork.getImage())
-                .writerId(writer.getId())
-                .writerNickname(writer.getNickname())
-                .writerProfileImage(writer.getProfileImage())
+                .writer(Writer.from(writer))
                 .title(singleWork.getTitle())
                 .description(singleWork.getDescription())
                 .tags(tags)
@@ -104,5 +100,40 @@ public class SingleWorkSearch {
                 .viewCount(singleWork.getViewCount())
                 .createdAt(singleWork.getCreatedAt())
                 .build();
+    }
+
+    public Long getWriterId() {
+        return writer.getId();
+    }
+
+    public String getWriterNickname() {
+        return writer.getNickname();
+    }
+
+    public String getWriterProfileImage() {
+        return writer.getProfileImage();
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    private static class Writer {
+        @Field(type = FieldType.Long)
+        private Long id;
+
+        @Field(type = FieldType.Keyword)
+        private String nickname;
+
+        @Field(type = FieldType.Keyword, index = false)
+        private String profileImage;
+
+        public static Writer from(User writer) {
+            return Writer.builder()
+                    .id(writer.getId())
+                    .nickname(writer.getNickname())
+                    .profileImage(writer.getProfileImage())
+                    .build();
+        }
     }
 }

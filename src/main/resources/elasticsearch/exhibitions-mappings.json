@@ -3,15 +3,19 @@
     "id": {
       "type": "long"
     },
-    "writerId": {
-      "type": "long"
-    },
-    "writerNickname": {
-      "type": "keyword"
-    },
-    "writerProfileImage": {
-      "type": "keyword",
-      "index": false
+    "writer": {
+      "properties": {
+        "id": {
+          "type": "long"
+        },
+        "nickname": {
+          "type": "keyword"
+        },
+        "profileImage": {
+          "type": "keyword",
+          "index": false
+        }
+      }
     },
     "cardColor": {
       "type": "keyword",
@@ -38,6 +42,10 @@
     "createdAt": {
       "type": "date",
       "format": "yyyy-MM-dd'T'HH:mm:ss"
+    },
+    "lastProcessedOutboxEventId": {
+      "type": "long",
+      "index": false
     }
   }
 }

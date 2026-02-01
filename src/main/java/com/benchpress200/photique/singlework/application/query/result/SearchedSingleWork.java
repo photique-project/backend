@@ -25,6 +25,7 @@ public class SearchedSingleWork {
             SingleWorkSearch singleWorkSearch,
             boolean isLiked
     ) {
+
         Long writerId = singleWorkSearch.getWriterId();
         String nickname = singleWorkSearch.getWriterNickname();
         String profileImage = singleWorkSearch.getWriterProfileImage();

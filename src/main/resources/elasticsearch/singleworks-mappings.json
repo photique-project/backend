@@ -3,17 +3,21 @@
     "id": {
       "type": "long"
     },
+    "writer": {
+      "properties": {
+        "id": {
+          "type": "long"
+        },
+        "nickname": {
+          "type": "keyword"
+        },
+        "profileImage": {
+          "type": "keyword",
+          "index": false
+        }
+      }
+    },
     "image": {
-      "type": "keyword",
-      "index": false
-    },
-    "writerId": {
-      "type": "long"
-    },
-    "writerNickname": {
-      "type": "keyword"
-    },
-    "writerProfileImage": {
       "type": "keyword",
       "index": false
     },
@@ -41,6 +45,14 @@
     "createdAt": {
       "type": "date",
       "format": "yyyy-MM-dd'T'HH:mm:ss"
+    },
+    "updatedAt": {
+      "type": "date",
+      "format": "yyyy-MM-dd'T'HH:mm:ss"
+    },
+    "lastProcessedOutboxEventId": {
+      "type": "long",
+      "index": false
     }
   }
 }

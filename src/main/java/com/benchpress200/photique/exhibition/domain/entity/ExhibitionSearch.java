@@ -37,20 +37,12 @@ public class ExhibitionSearch {
      * Keyword: 분석되지 않고 정확한 일치 검색
      */
 
-    private static final String DOCUMENT_ID_FIELD = "id";
-
     @Id
-    @Field(name = DOCUMENT_ID_FIELD, type = FieldType.Long)
+    @Field(type = FieldType.Long)
     private Long id;
 
-    @Field(type = FieldType.Long)
-    private Long writerId;
-
-    @Field(type = FieldType.Keyword)
-    private String writerNickname;
-
-    @Field(type = FieldType.Keyword, index = false)
-    private String writerProfileImage;
+    @Field(type = FieldType.Object)
+    private Writer writer;
 
     @Field(type = FieldType.Keyword, index = false)
     private String cardColor;
@@ -75,11 +67,13 @@ public class ExhibitionSearch {
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
     private LocalDateTime createdAt;
 
-    public void updateWriterDetails(User writer) {
-        writerId = writer.getId();
-        writerNickname = writer.getNickname();
-        writerProfileImage = writer.getProfileImage();
-    }
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
+    private LocalDateTime updatedAt;
+
+    @Field(type = FieldType.Long)
+    private Long lastProcessedOutboxEventId;
 
     public static ExhibitionSearch of(
             Exhibition exhibition,
@@ -89,9 +83,7 @@ public class ExhibitionSearch {
 
         return ExhibitionSearch.builder()
                 .id(exhibition.getId())
-                .writerId(writer.getId())
-                .writerNickname(writer.getNickname())
-                .writerProfileImage(writer.getProfileImage())
+                .writer(Writer.from(writer))
                 .title(exhibition.getTitle())
                 .cardColor(exhibition.getCardColor())
                 .description(exhibition.getDescription())
@@ -100,6 +92,41 @@ public class ExhibitionSearch {
                 .viewCount(exhibition.getViewCount())
                 .createdAt(exhibition.getCreatedAt())
                 .build();
+    }
+
+    public Long getWriterId() {
+        return writer.getId();
+    }
+
+    public String getWriterNickname() {
+        return writer.getNickname();
+    }
+
+    public String getWriterProfileImage() {
+        return writer.getProfileImage();
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    private static class Writer {
+        @Field(type = FieldType.Long)
+        private Long id;
+
+        @Field(type = FieldType.Keyword)
+        private String nickname;
+
+        @Field(type = FieldType.Keyword, index = false)
+        private String profileImage;
+
+        public static Writer from(User writer) {
+            return Writer.builder()
+                    .id(writer.getId())
+                    .nickname(writer.getNickname())
+                    .profileImage(writer.getProfileImage())
+                    .build();
+        }
     }
 }
 
