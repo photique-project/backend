@@ -13,11 +13,11 @@ import com.benchpress200.photique.exhibition.application.command.port.out.Exhibi
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionTagCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionWorkCommandPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionTagQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionWorkQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionTag;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
-import com.benchpress200.photique.exhibition.domain.event.ExhibitionUpdateEvent;
 import com.benchpress200.photique.exhibition.domain.event.ExhibitionWorkImageUploadEvent;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotOwnedException;
@@ -60,6 +60,7 @@ public class ExhibitionCommandService implements
     private final ExhibitionCommandPort exhibitionCommandPort;
     private final ExhibitionQueryPort exhibitionQueryPort;
     private final ExhibitionTagCommandPort exhibitionTagCommandPort;
+    private final ExhibitionTagQueryPort exhibitionTagQueryPort;
     private final ExhibitionWorkCommandPort exhibitionWorkCommandPort;
     private final ExhibitionWorkQueryPort exhibitionWorkQueryPort;
 
@@ -180,10 +181,14 @@ public class ExhibitionCommandService implements
             }
         }
 
-        // 전시회 MySQL-ES 동기화 이벤트 발행
+        // 아웃박스 이벤트 발행 -> 비동기 이벤트
         if (command.isUpdate()) {
-            ExhibitionUpdateEvent event = ExhibitionUpdateEvent.of(exhibitionId);
-            exhibitionEventPublishPort.publishExhibitionUpdateEvent(event);
+            List<String> tagNames = exhibitionTagQueryPort.findByExhibitionWithTag(exhibition).stream()
+                    .map(exhibitionTag -> exhibitionTag.getTag().getName())
+                    .toList();
+
+            OutboxEvent outboxEvent = outboxEventFactory.exhibitionUpdated(exhibition, tagNames);
+            outboxEventPort.save(outboxEvent);
         }
     }
 

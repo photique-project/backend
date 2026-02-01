@@ -89,6 +89,26 @@ public class OutboxEventFactory {
         }
     }
 
+    public OutboxEvent exhibitionUpdated(
+            Exhibition exhibition,
+            List<String> tagNames
+    ) {
+        try {
+            String aggregateId = exhibition.getId().toString();
+            ExhibitionPayload exhibitionPayload = ExhibitionPayload.of(exhibition, tagNames);
+            String payload = objectMapper.writeValueAsString(exhibitionPayload);
+
+            return OutboxEvent.builder()
+                    .aggregateType(AggregateType.EXHIBITION)
+                    .aggregateId(aggregateId)
+                    .eventType(EventType.UPDATE)
+                    .payload(payload)
+                    .build();
+        } catch (JsonProcessingException e) {
+            throw new OutboxPayloadSerializationException();
+        }
+    }
+
     public OutboxEvent exhibitionDeleted(Exhibition exhibition) {
         String aggregateId = exhibition.getId().toString();
 
