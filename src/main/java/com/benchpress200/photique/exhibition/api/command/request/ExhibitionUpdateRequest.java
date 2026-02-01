@@ -71,6 +71,7 @@ public class ExhibitionUpdateRequest {
         // 검색데이터(ES 저장) 업데이트 플래그
         boolean update = updateTitle ||
                 updateDescription ||
+                updateCardColor ||
                 updateTags;
 
         List<ExhibitionWorkUpdateCommand> workCommands = works.stream()
