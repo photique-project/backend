@@ -68,4 +68,14 @@ public class OutboxEventFactory {
             throw new OutboxPayloadSerializationException();
         }
     }
+
+    public OutboxEvent exhibitionDeleted(Exhibition exhibition) {
+        String aggregateId = exhibition.getId().toString();
+
+        return OutboxEvent.builder()
+                .aggregateType(AggregateType.EXHIBITION)
+                .aggregateId(aggregateId)
+                .eventType(EventType.DELETE)
+                .build();
+    }
 }
