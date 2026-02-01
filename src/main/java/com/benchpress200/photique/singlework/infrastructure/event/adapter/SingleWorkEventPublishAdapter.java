@@ -2,7 +2,6 @@ package com.benchpress200.photique.singlework.infrastructure.event.adapter;
 
 import com.benchpress200.photique.singlework.application.command.port.out.event.SingleWorkEventPublishPort;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkCommentCreateEvent;
-import com.benchpress200.photique.singlework.domain.event.SingleWorkCreateEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkDeleteEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkImageUploadEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkLikeAddEvent;
@@ -18,11 +17,6 @@ public class SingleWorkEventPublishAdapter implements SingleWorkEventPublishPort
 
     @Override
     public void publishSingleWorkImageUploadEvent(SingleWorkImageUploadEvent event) {
-        publisher.publishEvent(event);
-    }
-
-    @Override
-    public void publishSingleWorkCreateEvent(SingleWorkCreateEvent event) {
         publisher.publishEvent(event);
     }
 

@@ -25,6 +25,7 @@ import com.benchpress200.photique.image.infrastructure.exception.ImageDeleteExce
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploadException;
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploaderFileWriteException;
 import com.benchpress200.photique.notification.domain.exception.NotificationNotFoundException;
+import com.benchpress200.photique.outbox.application.exception.OutboxPayloadSerializationException;
 import com.benchpress200.photique.singlework.api.command.exception.InvalidImageException;
 import com.benchpress200.photique.singlework.api.command.exception.InvalidSingleWorkFieldToUpdateException;
 import com.benchpress200.photique.singlework.api.query.exception.InvalidFieldToSearch;
@@ -542,6 +543,24 @@ public class GlobalExceptionHandler {
         return ResponseHandler.handleResponse(
                 HttpStatus.NOT_FOUND,
                 errorMessage
+        );
+    }
+
+    // 아웃박스 이벤트 페이로드 JSON 직렬화 예외 처리 응답
+    @ExceptionHandler(OutboxPayloadSerializationException.class)
+    public ResponseEntity<?> handleOutboxPayloadSerializationException(
+            OutboxPayloadSerializationException e
+    ) {
+        String errorMessage = e.getMessage();
+
+        log.error(
+                errorMessage,
+                e
+        );
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                SERVER_ERROR_MESSAGE
         );
     }
 }
