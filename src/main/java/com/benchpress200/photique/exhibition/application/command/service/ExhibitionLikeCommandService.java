@@ -92,8 +92,18 @@ public class ExhibitionLikeCommandService implements
                 .ifPresent(exhibitionLike -> {
                     exhibitionLikeCommandPort.delete(exhibitionLike);
 
-                    // FIXME: 좋아요 추가 & 취소 값을 언제, 어떻게 단일작품 칼럼에 반영하고 ES에 동기화시킬지 전략 정해야 함
                     exhibitionCommandPort.decrementLikeCount(exhibitionId);
+                    // 아웃박스 이벤트 발행 -> 비동기 이벤트
+                    // decrementLikeCount의 Modifying(flush, clear) 메서드이기 때문에 다시 영속성 컨텍스트 적재
+                    Exhibition e = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
+                            .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
+
+                    List<String> tagNames = exhibitionTagQueryPort.findByExhibitionWithTag(e).stream()
+                            .map(exhibitionTag -> exhibitionTag.getTag().getName())
+                            .toList();
+
+                    OutboxEvent outboxEvent = outboxEventFactory.exhibitionUpdated(e, tagNames);
+                    outboxEventPort.save(outboxEvent);
                 });
     }
 }
