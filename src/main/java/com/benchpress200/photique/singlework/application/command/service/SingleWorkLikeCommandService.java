@@ -69,7 +69,7 @@ public class SingleWorkLikeCommandService implements
         // incrementLikeCount의 Modifying(flush, clear) 메서드이기 때문에 다시 영속성 컨텍스트 적재
         singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
-        
+
         List<String> tagNames = singleWorkTagQueryPort.findBySingleWorkWithTag(singleWork).stream()
                 .map(singleWorkTag -> singleWorkTag.getTag().getName())
                 .toList();
@@ -94,8 +94,19 @@ public class SingleWorkLikeCommandService implements
                 .ifPresent(singleWorkLike -> {
                     singleWorkLikeCommandPort.delete(singleWorkLike);
 
-                    // FIXME: 좋아요 추가 & 취소 값을 언제, 어떻게 단일작품 칼럼에 반영하고 ES에 동기화시킬지 전략 정해야 함
                     singleWorkCommandPort.decrementLikeCount(singleWorkId);
+
+                    // 아웃박스 이벤트 발행 -> 비동기 이벤트
+                    // decrementLikeCount의 Modifying(flush, clear) 메서드이기 때문에 다시 영속성 컨텍스트 적재
+                    SingleWork sw = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
+                            .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
+
+                    List<String> tagNames = singleWorkTagQueryPort.findBySingleWorkWithTag(sw).stream()
+                            .map(singleWorkTag -> singleWorkTag.getTag().getName())
+                            .toList();
+
+                    OutboxEvent outboxEvent = outboxEventFactory.singleWorkUpdated(sw, tagNames);
+                    outboxEventPort.save(outboxEvent);
                 });
     }
 }
