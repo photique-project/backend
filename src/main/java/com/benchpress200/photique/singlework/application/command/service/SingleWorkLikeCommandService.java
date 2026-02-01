@@ -6,7 +6,6 @@ import com.benchpress200.photique.outbox.application.port.out.persistence.Outbox
 import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.singlework.application.command.port.in.AddSingleWorkLikeUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.CancelSingleWorkLikeUseCase;
-import com.benchpress200.photique.singlework.application.command.port.out.event.SingleWorkEventPublishPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkLikeCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
@@ -38,7 +37,6 @@ public class SingleWorkLikeCommandService implements
     private final SingleWorkCommandPort singleWorkCommandPort;
     private final SingleWorkLikeQueryPort singleWorkLikeQueryPort;
     private final SingleWorkLikeCommandPort singleWorkLikeCommandPort;
-    private final SingleWorkEventPublishPort singleWorkEventPublishPort;
     private final SingleWorkTagQueryPort singleWorkTagQueryPort;
 
     private final OutboxEventFactory outboxEventFactory;

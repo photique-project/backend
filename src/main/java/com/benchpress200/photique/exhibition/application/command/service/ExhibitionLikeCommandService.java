@@ -4,23 +4,28 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.exhibition.application.command.port.in.AddExhibitionLikeUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.CancelExhibitionLikeUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
-import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionLikeCommandPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionLikeQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
+import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionTagQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
-import com.benchpress200.photique.exhibition.domain.event.ExhibitionLikeAddEvent;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionAlreadyLikedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
+import com.benchpress200.photique.outbox.application.factory.OutboxEventFactory;
+import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
+import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ExhibitionLikeCommandService implements
         AddExhibitionLikeUseCase,
         CancelExhibitionLikeUseCase {
@@ -32,7 +37,10 @@ public class ExhibitionLikeCommandService implements
     private final ExhibitionCommandPort exhibitionCommandPort;
     private final ExhibitionLikeQueryPort exhibitionLikeQueryPort;
     private final ExhibitionLikeCommandPort exhibitionLikeCommandPort;
-    private final ExhibitionEventPublishPort exhibitionEventPublishPort;
+    private final ExhibitionTagQueryPort exhibitionTagQueryPort;
+
+    private final OutboxEventFactory outboxEventFactory;
+    private final OutboxEventPort outboxEventPort;
 
     @Override
     public void addExhibitionLike(Long exhibitionId) {
@@ -53,14 +61,19 @@ public class ExhibitionLikeCommandService implements
         // 좋아요 처리
         ExhibitionLike exhibitionLike = ExhibitionLike.of(user, exhibition);
         exhibitionLikeCommandPort.save(exhibitionLike);
-
-        // FIXME: 좋아요 추가 & 취소 값을 언제, 어떻게 전시회 칼럼에 반영하고 ES에 동기화시킬지 전략 정해야 함
-        // MySQL에 반영했을 때 업데이트 이벤트 발행?
         exhibitionCommandPort.incrementLikeCount(exhibitionId);
 
-        // 좋아요 알림 생성 이벤트 발행
-        ExhibitionLikeAddEvent event = ExhibitionLikeAddEvent.of(exhibitionId);
-        exhibitionEventPublishPort.publishExhibitionLikeAddEvent(event);
+        // 아웃박스 이벤트 발행 -> 비동기 이벤트
+        // incrementLikeCount의 Modifying(flush, clear) 메서드이기 때문에 다시 영속성 컨텍스트 적재
+        exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
+                .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
+
+        List<String> tagNames = exhibitionTagQueryPort.findByExhibitionWithTag(exhibition).stream()
+                .map(exhibitionTag -> exhibitionTag.getTag().getName())
+                .toList();
+
+        OutboxEvent outboxEvent = outboxEventFactory.exhibitionUpdated(exhibition, tagNames);
+        outboxEventPort.save(outboxEvent);
     }
 
     @Override

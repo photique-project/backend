@@ -31,9 +31,8 @@ public interface ExhibitionRepository extends JpaRepository<Exhibition, Long> {
             WHERE e.id = :exhibitionId
             """)
     void incrementViewCount(@Param("exhibitionId") Long exhibitionId);
-
-    @Transactional
-    @Modifying
+    
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             UPDATE Exhibition e
             SET e.likeCount = e.likeCount + 1
@@ -41,8 +40,7 @@ public interface ExhibitionRepository extends JpaRepository<Exhibition, Long> {
             """)
     void incrementLikeCount(@Param("exhibitionId") Long exhibitionId);
 
-    @Transactional
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             UPDATE Exhibition e
             SET e.likeCount = e.likeCount - 1
