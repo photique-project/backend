@@ -2,7 +2,9 @@ package com.benchpress200.photique.singlework.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
+import com.benchpress200.photique.outbox.application.factory.OutboxEventFactory;
 import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
+import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCreateCommand;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkUpdateCommand;
 import com.benchpress200.photique.singlework.application.command.port.in.DeleteSingleWorkUseCase;
@@ -18,7 +20,6 @@ import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
-import com.benchpress200.photique.singlework.domain.event.SingleWorkCreateEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkDeleteEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkImageUploadEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkUpdateEvent;
@@ -63,6 +64,7 @@ public class SingleWorkCommandService implements
     private final TagCommandPort tagCommandPort;
     private final TagQueryPort tagQueryPort;
 
+    private final OutboxEventFactory outboxEventFactory;
     private final OutboxEventPort outboxEventPort;
 
     @Override
@@ -88,11 +90,11 @@ public class SingleWorkCommandService implements
         List<String> tagNames = command.getTags();
         attachTags(singleWork, tagNames);
 
-        Long singleWorkId = singleWork.getId();
+        // 아웃박스 이벤트 발행 -> ES 동기화 & 팔로워 알림 생성 배치 처리
+        OutboxEvent outboxEvent = outboxEventFactory.singleWorkCreated(singleWork, tagNames);
+        outboxEventPort.save(outboxEvent);
 
-        // 트랜잭션 커밋 시 ES 동기화 & 작가 팔로워들에게 알림 생성 이벤트 발행
-        SingleWorkCreateEvent singleWorkCreateEvent = SingleWorkCreateEvent.of(singleWorkId);
-        singleWorkEventPublishPort.publishSingleWorkCreateEvent(singleWorkCreateEvent);
+        // TODO: 이후 알림 아웃박스 이벤트 생성 코드 추가 후 이벤트 발행 포트, 어댑터, 리스너 코드 제거
     }
 
     @Override
