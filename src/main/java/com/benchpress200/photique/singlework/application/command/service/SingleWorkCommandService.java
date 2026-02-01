@@ -20,7 +20,6 @@ import com.benchpress200.photique.singlework.domain.enumeration.Aperture;
 import com.benchpress200.photique.singlework.domain.enumeration.Category;
 import com.benchpress200.photique.singlework.domain.enumeration.ISO;
 import com.benchpress200.photique.singlework.domain.enumeration.ShutterSpeed;
-import com.benchpress200.photique.singlework.domain.event.SingleWorkDeleteEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkImageUploadEvent;
 import com.benchpress200.photique.singlework.domain.event.SingleWorkUpdateEvent;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
@@ -189,7 +188,7 @@ public class SingleWorkCommandService implements
         }
     }
 
-    // FIXME: 삭제 처리할 때 관련 댓글 처리 어떻게 할지, deletedAt 이 null 아닌 데이터를 어느 시점에 어떻게 처리할지 고민
+    // FIXME: deletedAt = null 아닌 데이터를 어느 시점에 어떻게 처리할지 고민
     @Override
     public void deleteSingleWork(Long singleWorkId) {
         // 작품 조회
@@ -205,8 +204,8 @@ public class SingleWorkCommandService implements
                     singleWork.delete();
 
                     // 단일작품 MySQL-ES 동기화 이벤트 발행
-                    SingleWorkDeleteEvent event = SingleWorkDeleteEvent.of(singleWorkId);
-                    singleWorkEventPublishPort.publishSingleWorkDeleteEvent(event);
+                    OutboxEvent outboxEvent = outboxEventFactory.singleWorkDeleted(singleWork);
+                    outboxEventPort.save(outboxEvent);
                 });
 
     }

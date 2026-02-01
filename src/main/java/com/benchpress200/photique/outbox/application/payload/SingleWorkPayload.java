@@ -56,4 +56,10 @@ public class SingleWorkPayload {
                 .updatedAt(singleWork.getUpdatedAt())
                 .build();
     }
+
+    public static SingleWorkPayload of(Long id) {
+        return SingleWorkPayload.builder()
+                .id(id)
+                .build();
+    }
 }

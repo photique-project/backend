@@ -39,6 +39,16 @@ public class OutboxEventFactory {
         }
     }
 
+    public OutboxEvent singleWorkDeleted(SingleWork singleWork) {
+        String aggregateId = singleWork.getId().toString();
+
+        return OutboxEvent.builder()
+                .aggregateType(AggregateType.SINGLEWORK)
+                .aggregateId(aggregateId)
+                .eventType(EventType.DELETE)
+                .build();
+    }
+
     public OutboxEvent exhibitionCreated(
             Exhibition exhibition,
             List<String> tagNames
