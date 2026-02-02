@@ -4,10 +4,12 @@ import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.outbox.application.exception.OutboxPayloadSerializationException;
 import com.benchpress200.photique.outbox.application.payload.ExhibitionPayload;
 import com.benchpress200.photique.outbox.application.payload.SingleWorkPayload;
+import com.benchpress200.photique.outbox.application.payload.UserPayload;
 import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.outbox.domain.enumeration.AggregateType;
 import com.benchpress200.photique.outbox.domain.enumeration.EventType;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -117,5 +119,22 @@ public class OutboxEventFactory {
                 .aggregateId(aggregateId)
                 .eventType(EventType.DELETE)
                 .build();
+    }
+
+    public OutboxEvent userUpdated(User user) {
+        try {
+            String aggregateId = user.getId().toString();
+            UserPayload userPayload = UserPayload.from(user);
+            String payload = objectMapper.writeValueAsString(userPayload);
+
+            return OutboxEvent.builder()
+                    .aggregateType(AggregateType.USER)
+                    .aggregateId(aggregateId)
+                    .eventType(EventType.UPDATE)
+                    .payload(payload)
+                    .build();
+        } catch (JsonProcessingException e) {
+            throw new OutboxPayloadSerializationException();
+        }
     }
 }

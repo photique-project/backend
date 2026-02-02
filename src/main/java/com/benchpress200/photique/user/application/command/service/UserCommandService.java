@@ -5,6 +5,9 @@ import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
+import com.benchpress200.photique.outbox.application.factory.OutboxEventFactory;
+import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
+import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.user.application.command.model.ResisterCommand;
 import com.benchpress200.photique.user.application.command.model.UserDetailsUpdateCommand;
 import com.benchpress200.photique.user.application.command.model.UserPasswordResetCommand;
@@ -21,7 +24,6 @@ import com.benchpress200.photique.user.application.query.port.out.persistence.Us
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.enumeration.Provider;
 import com.benchpress200.photique.user.domain.enumeration.Role;
-import com.benchpress200.photique.user.domain.event.UserDetailsUpdateEvent;
 import com.benchpress200.photique.user.domain.event.UserProfileImageDeleteEvent;
 import com.benchpress200.photique.user.domain.event.UserProfileImageUploadEvent;
 import com.benchpress200.photique.user.domain.exception.DuplicatedUserException;
@@ -52,6 +54,9 @@ public class UserCommandService implements
     private final ImageUploaderPort imageUploaderPort;
     private final PasswordEncoderPort passwordEncoderPort;
     private final AuthMailCodeQueryPort authMailCodeQueryPort;
+
+    private final OutboxEventPort outboxEventPort;
+    private final OutboxEventFactory outboxEventFactory;
 
     @Override
     public void resister(ResisterCommand command) {
@@ -144,8 +149,9 @@ public class UserCommandService implements
             }
         }
 
-        UserDetailsUpdateEvent userDetailsUpdateEvent = UserDetailsUpdateEvent.of(userId);
-        userEventPublishPort.publishUserDetailsUpdateEvent(userDetailsUpdateEvent); // 트랜잭션 커밋 시 작가 데이터 ES 동기화 이벤트 발행
+        // 아웃박스 이벤트 발행 -> 비동기 이벤트
+        OutboxEvent outboxEvent = outboxEventFactory.userUpdated(user);
+        outboxEventPort.save(outboxEvent);
     }
 
     @Override
