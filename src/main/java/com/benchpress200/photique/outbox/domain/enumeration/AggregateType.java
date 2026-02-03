@@ -1,5 +1,8 @@
 package com.benchpress200.photique.outbox.domain.enumeration;
 
+import lombok.Getter;
+
+@Getter
 public enum AggregateType {
     SINGLEWORK("singlework"),
     EXHIBITION("exhibition"),
@@ -11,17 +14,13 @@ public enum AggregateType {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
-
     public static AggregateType from(String value) {
         for (AggregateType type : values()) {
             if (type.value.equals(value)) {
                 return type;
             }
         }
-        
+
         throw new IllegalArgumentException("Unknown AggregateType: " + value);
     }
 }
