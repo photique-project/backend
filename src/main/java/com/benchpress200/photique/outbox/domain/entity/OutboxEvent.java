@@ -1,8 +1,10 @@
 package com.benchpress200.photique.outbox.domain.entity;
 
+import com.benchpress200.photique.outbox.domain.converter.AggregateTypeConverter;
 import com.benchpress200.photique.outbox.domain.enumeration.AggregateType;
 import com.benchpress200.photique.outbox.domain.enumeration.EventType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -31,7 +33,7 @@ public class OutboxEvent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = AggregateTypeConverter.class)
     @Column(name = "aggregate_type", nullable = false)
     private AggregateType aggregateType;
 

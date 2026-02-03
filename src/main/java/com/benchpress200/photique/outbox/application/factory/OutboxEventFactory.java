@@ -33,7 +33,7 @@ public class OutboxEventFactory {
             return OutboxEvent.builder()
                     .aggregateType(AggregateType.SINGLEWORK)
                     .aggregateId(aggregateId)
-                    .eventType(EventType.CREATE)
+                    .eventType(EventType.CREATED)
                     .payload(payload)
                     .build();
         } catch (JsonProcessingException e) {
@@ -53,7 +53,7 @@ public class OutboxEventFactory {
             return OutboxEvent.builder()
                     .aggregateType(AggregateType.SINGLEWORK)
                     .aggregateId(aggregateId)
-                    .eventType(EventType.UPDATE)
+                    .eventType(EventType.UPDATED)
                     .payload(payload)
                     .build();
         } catch (JsonProcessingException e) {
@@ -67,7 +67,7 @@ public class OutboxEventFactory {
         return OutboxEvent.builder()
                 .aggregateType(AggregateType.SINGLEWORK)
                 .aggregateId(aggregateId)
-                .eventType(EventType.DELETE)
+                .eventType(EventType.DELETED)
                 .build();
     }
 
@@ -83,7 +83,7 @@ public class OutboxEventFactory {
             return OutboxEvent.builder()
                     .aggregateType(AggregateType.EXHIBITION)
                     .aggregateId(aggregateId)
-                    .eventType(EventType.CREATE)
+                    .eventType(EventType.CREATED)
                     .payload(payload)
                     .build();
         } catch (JsonProcessingException e) {
@@ -103,7 +103,7 @@ public class OutboxEventFactory {
             return OutboxEvent.builder()
                     .aggregateType(AggregateType.EXHIBITION)
                     .aggregateId(aggregateId)
-                    .eventType(EventType.UPDATE)
+                    .eventType(EventType.UPDATED)
                     .payload(payload)
                     .build();
         } catch (JsonProcessingException e) {
@@ -117,7 +117,7 @@ public class OutboxEventFactory {
         return OutboxEvent.builder()
                 .aggregateType(AggregateType.EXHIBITION)
                 .aggregateId(aggregateId)
-                .eventType(EventType.DELETE)
+                .eventType(EventType.DELETED)
                 .build();
     }
 
@@ -130,7 +130,7 @@ public class OutboxEventFactory {
             return OutboxEvent.builder()
                     .aggregateType(AggregateType.USER)
                     .aggregateId(aggregateId)
-                    .eventType(EventType.UPDATE)
+                    .eventType(EventType.UPDATED)
                     .payload(payload)
                     .build();
         } catch (JsonProcessingException e) {
