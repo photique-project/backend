@@ -1,14 +1,14 @@
 package com.benchpress200.photique.outbox.domain.converter;
 
-import com.benchpress200.photique.outbox.domain.enumeration.AggregateType;
+import com.benchpress200.photique.outbox.domain.enumeration.EventType;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 @Converter
-public class AggregateTypeConverter implements AttributeConverter<AggregateType, String> {
+public class EventTypeConverter implements AttributeConverter<EventType, String> {
 
     @Override
-    public String convertToDatabaseColumn(AggregateType attribute) {
+    public String convertToDatabaseColumn(EventType attribute) {
         if (attribute == null) {
             return null;
         }
@@ -17,11 +17,11 @@ public class AggregateTypeConverter implements AttributeConverter<AggregateType,
     }
 
     @Override
-    public AggregateType convertToEntityAttribute(String dbData) {
+    public EventType convertToEntityAttribute(String dbData) {
         if (dbData == null) {
             return null;
         }
 
-        return AggregateType.from(dbData);
+        return EventType.from(dbData);
     }
 }
