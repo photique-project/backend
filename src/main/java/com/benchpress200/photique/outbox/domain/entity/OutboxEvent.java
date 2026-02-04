@@ -4,6 +4,7 @@ import com.benchpress200.photique.outbox.domain.converter.AggregateTypeConverter
 import com.benchpress200.photique.outbox.domain.converter.EventTypeConverter;
 import com.benchpress200.photique.outbox.domain.enumeration.AggregateType;
 import com.benchpress200.photique.outbox.domain.enumeration.EventType;
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -17,6 +18,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -43,8 +46,9 @@ public class OutboxEvent {
     @Column(name = "event_type", nullable = false)
     private EventType eventType;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json", nullable = false)
-    private String payload;
+    private JsonNode payload;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false)
