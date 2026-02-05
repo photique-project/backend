@@ -53,12 +53,16 @@ public class OutboxEventFactory {
     }
 
     public OutboxEvent singleWorkDeleted(SingleWork singleWork) {
-        String aggregateId = singleWork.getId().toString();
+        Long singleWorkId = singleWork.getId();
+        String aggregateId = singleWorkId.toString();
+        SingleWorkPayload singleWorkPayload = SingleWorkPayload.of(singleWorkId);
+        JsonNode payload = objectMapper.valueToTree(singleWorkPayload);
 
         return OutboxEvent.builder()
                 .aggregateType(AggregateType.SINGLEWORK)
                 .aggregateId(aggregateId)
                 .eventType(EventType.DELETED)
+                .payload(payload)
                 .build();
     }
 
@@ -95,12 +99,16 @@ public class OutboxEventFactory {
     }
 
     public OutboxEvent exhibitionDeleted(Exhibition exhibition) {
-        String aggregateId = exhibition.getId().toString();
+        Long exhibitionId = exhibition.getId();
+        String aggregateId = exhibitionId.toString();
+        ExhibitionPayload exhibitionPayload = ExhibitionPayload.of(exhibitionId);
+        JsonNode payload = objectMapper.valueToTree(exhibitionPayload);
 
         return OutboxEvent.builder()
                 .aggregateType(AggregateType.EXHIBITION)
                 .aggregateId(aggregateId)
                 .eventType(EventType.DELETED)
+                .payload(payload)
                 .build();
     }
 
