@@ -21,6 +21,22 @@ public class ExhibitionPayload {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @Getter
+    @Builder
+    private static class Writer {
+        private final Long id;
+        private final String nickname;
+        private final String profileImage;
+
+        private static Writer from(User user) {
+            return Writer.builder()
+                    .id(user.getId())
+                    .nickname(user.getNickname())
+                    .profileImage(user.getProfileImage())
+                    .build();
+        }
+    }
+
     public static ExhibitionPayload of(
             Exhibition exhibition,
             List<String> tagNames
@@ -39,19 +55,9 @@ public class ExhibitionPayload {
                 .build();
     }
 
-    @Getter
-    @Builder
-    private static class Writer {
-        private final Long id;
-        private final String nickname;
-        private final String profileImage;
-
-        private static Writer from(User user) {
-            return Writer.builder()
-                    .id(user.getId())
-                    .nickname(user.getNickname())
-                    .profileImage(user.getProfileImage())
-                    .build();
-        }
+    public static ExhibitionPayload of(Long exhibitionId) {
+        return ExhibitionPayload.builder()
+                .id(exhibitionId)
+                .build();
     }
 }
