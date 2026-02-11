@@ -1,18 +1,19 @@
 package com.benchpress200.photique.singlework.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.outbox.application.factory.OutboxEventFactory;
+import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
+import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCommentCreateCommand;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCommentUpdateCommand;
 import com.benchpress200.photique.singlework.application.command.port.in.CreateSingleWorkCommentUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.DeleteSingleWorkCommentUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.UpdateSingleWorkCommentUseCase;
-import com.benchpress200.photique.singlework.application.command.port.out.event.SingleWorkEventPublishPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommentCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkCommentQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
-import com.benchpress200.photique.singlework.domain.event.SingleWorkCommentCreateEvent;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkCommentNotFoundException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkCommentNotOwnedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
@@ -36,7 +37,9 @@ public class SingleWorkCommentCommandService implements
     private final SingleWorkQueryPort singleWorkQueryPort;
     private final SingleWorkCommentQueryPort singleWorkCommentQueryPort;
     private final SingleWorkCommentCommandPort singleWorkCommentCommandPort;
-    private final SingleWorkEventPublishPort singleWorkEventPublishPort;
+
+    private final OutboxEventFactory outboxEventFactory;
+    private final OutboxEventPort outboxEventPort;
 
 
     @Override
@@ -56,8 +59,8 @@ public class SingleWorkCommentCommandService implements
         singleWorkCommentCommandPort.save(singleWorkComment);
 
         // 댓글 추가 알림 생성 이벤트 발행
-        SingleWorkCommentCreateEvent event = SingleWorkCommentCreateEvent.of(singleWorkId);
-        singleWorkEventPublishPort.publishSingleWorkCommentCreateEvent(event);
+        OutboxEvent outboxEvent = outboxEventFactory.singleWorkCommentCreated(singleWorkComment);
+        outboxEventPort.save(outboxEvent);
     }
 
     @Override

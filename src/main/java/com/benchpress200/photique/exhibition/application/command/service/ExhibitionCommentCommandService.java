@@ -7,15 +7,16 @@ import com.benchpress200.photique.exhibition.application.command.port.in.CreateE
 import com.benchpress200.photique.exhibition.application.command.port.in.DeleteExhibitionCommentUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.UpdateExhibitionCommentUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommentCommandPort;
-import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionCommentQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
-import com.benchpress200.photique.exhibition.domain.event.ExhibitionCommentCreateEvent;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionCommentNotFoundException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionCommentNotOwnedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
+import com.benchpress200.photique.outbox.application.factory.OutboxEventFactory;
+import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
+import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
@@ -36,7 +37,9 @@ public class ExhibitionCommentCommandService implements
     private final ExhibitionQueryPort exhibitionQueryPort;
     private final ExhibitionCommentQueryPort exhibitionCommentQueryPort;
     private final ExhibitionCommentCommandPort exhibitionCommentCommandPort;
-    private final ExhibitionEventPublishPort exhibitionEventPublishPort;
+
+    private final OutboxEventFactory outboxEventFactory;
+    private final OutboxEventPort outboxEventPort;
 
 
     @Override
@@ -55,9 +58,8 @@ public class ExhibitionCommentCommandService implements
         ExhibitionComment exhibitionComment = command.toEntity(writer, exhibition);
         exhibitionCommentCommandPort.save(exhibitionComment);
 
-        // 감상평 추가 알림 생성 이벤트 발행
-        ExhibitionCommentCreateEvent event = ExhibitionCommentCreateEvent.of(exhibitionId);
-        exhibitionEventPublishPort.publishExhibitionCommentCreateEvent(event);
+        OutboxEvent outboxEvent = outboxEventFactory.exhibitionCommentCreated(exhibitionComment);
+        outboxEventPort.save(outboxEvent);
     }
 
     @Override

@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum AggregateType {
     SINGLEWORK("singlework"),
     EXHIBITION("exhibition"),
+    FOLLOW("follow"),
     USER("user");
 
     private final String value;

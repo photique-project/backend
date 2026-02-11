@@ -1,7 +1,6 @@
 package com.benchpress200.photique.user.infrastructure.event.adapter;
 
 import com.benchpress200.photique.user.application.command.port.out.event.UserEventPublishPort;
-import com.benchpress200.photique.user.domain.event.UserDetailsUpdateEvent;
 import com.benchpress200.photique.user.domain.event.UserProfileImageDeleteEvent;
 import com.benchpress200.photique.user.domain.event.UserProfileImageUploadEvent;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +20,6 @@ public class UserEventPublishAdapter implements UserEventPublishPort {
 
     @Override
     public void publishUserProfileImageDeleteEvent(UserProfileImageDeleteEvent event) {
-        publisher.publishEvent(event);
-    }
-
-    @Override
-    public void publishUserDetailsUpdateEvent(UserDetailsUpdateEvent event) {
         publisher.publishEvent(event);
     }
 }

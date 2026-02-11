@@ -62,4 +62,11 @@ public class SingleWorkPayload {
                 .id(id)
                 .build();
     }
+
+    public static SingleWorkPayload of(SingleWork singleWork) {
+        return SingleWorkPayload.builder()
+                .id(singleWork.getId())
+                .likeCount(singleWork.getLikeCount())
+                .build();
+    }
 }

@@ -5,7 +5,9 @@ import lombok.Getter;
 @Getter
 public enum EventType {
     CREATED("created"),
+    COMMENT_CREATED("commentCreated"),
     UPDATED("updated"),
+    LIKE_COUNT_UPDATED("likeCountUpdated"),
     DELETED("deleted");
 
     private final String value;

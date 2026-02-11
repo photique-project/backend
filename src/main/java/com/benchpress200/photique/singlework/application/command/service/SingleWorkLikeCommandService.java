@@ -10,7 +10,6 @@ import com.benchpress200.photique.singlework.application.command.port.out.persis
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkLikeCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
-import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkTagQueryPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkAlreadyLikedException;
@@ -18,7 +17,6 @@ import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFound
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +35,6 @@ public class SingleWorkLikeCommandService implements
     private final SingleWorkCommandPort singleWorkCommandPort;
     private final SingleWorkLikeQueryPort singleWorkLikeQueryPort;
     private final SingleWorkLikeCommandPort singleWorkLikeCommandPort;
-    private final SingleWorkTagQueryPort singleWorkTagQueryPort;
 
     private final OutboxEventFactory outboxEventFactory;
     private final OutboxEventPort outboxEventPort;
@@ -68,11 +65,7 @@ public class SingleWorkLikeCommandService implements
         singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
-        List<String> tagNames = singleWorkTagQueryPort.findBySingleWorkWithTag(singleWork).stream()
-                .map(singleWorkTag -> singleWorkTag.getTag().getName())
-                .toList();
-
-        OutboxEvent outboxEvent = outboxEventFactory.singleWorkUpdated(singleWork, tagNames);
+        OutboxEvent outboxEvent = outboxEventFactory.singleWorkLikeCountUpdated(singleWork);
         outboxEventPort.save(outboxEvent);
     }
 
@@ -99,11 +92,7 @@ public class SingleWorkLikeCommandService implements
                     SingleWork sw = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                             .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
-                    List<String> tagNames = singleWorkTagQueryPort.findBySingleWorkWithTag(sw).stream()
-                            .map(singleWorkTag -> singleWorkTag.getTag().getName())
-                            .toList();
-
-                    OutboxEvent outboxEvent = outboxEventFactory.singleWorkUpdated(sw, tagNames);
+                    OutboxEvent outboxEvent = outboxEventFactory.singleWorkLikeCountUpdated(sw);
                     outboxEventPort.save(outboxEvent);
                 });
     }

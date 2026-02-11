@@ -18,7 +18,6 @@ import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,11 +67,7 @@ public class ExhibitionLikeCommandService implements
         exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
-        List<String> tagNames = exhibitionTagQueryPort.findByExhibitionWithTag(exhibition).stream()
-                .map(exhibitionTag -> exhibitionTag.getTag().getName())
-                .toList();
-
-        OutboxEvent outboxEvent = outboxEventFactory.exhibitionUpdated(exhibition, tagNames);
+        OutboxEvent outboxEvent = outboxEventFactory.exhibitionLikeCountUpdated(exhibition);
         outboxEventPort.save(outboxEvent);
     }
 
@@ -98,11 +93,7 @@ public class ExhibitionLikeCommandService implements
                     Exhibition e = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                             .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
-                    List<String> tagNames = exhibitionTagQueryPort.findByExhibitionWithTag(e).stream()
-                            .map(exhibitionTag -> exhibitionTag.getTag().getName())
-                            .toList();
-
-                    OutboxEvent outboxEvent = outboxEventFactory.exhibitionUpdated(e, tagNames);
+                    OutboxEvent outboxEvent = outboxEventFactory.exhibitionLikeCountUpdated(e);
                     outboxEventPort.save(outboxEvent);
                 });
     }
