@@ -60,4 +60,11 @@ public class ExhibitionPayload {
                 .id(exhibitionId)
                 .build();
     }
+
+    public static ExhibitionPayload of(Exhibition exhibition) {
+        return ExhibitionPayload.builder()
+                .id(exhibition.getId())
+                .likeCount(exhibition.getLikeCount())
+                .build();
+    }
 }

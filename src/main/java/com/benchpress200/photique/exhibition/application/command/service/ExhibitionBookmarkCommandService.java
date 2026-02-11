@@ -4,12 +4,10 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.exhibition.application.command.port.in.AddExhibitionBookmarkUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.CancelExhibitionBookmarkUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionBookmarkCommandPort;
-import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionBookmarkQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
-import com.benchpress200.photique.exhibition.domain.event.ExhibitionBookmarkAddEvent;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionAlreadyBookmarkedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
@@ -32,7 +30,6 @@ public class ExhibitionBookmarkCommandService implements
     private final ExhibitionQueryPort exhibitionQueryPort;
     private final ExhibitionBookmarkQueryPort exhibitionBookmarkQueryPort;
     private final ExhibitionBookmarkCommandPort exhibitionBookmarkCommandPort;
-    private final ExhibitionEventPublishPort exhibitionEventPublishPort;
 
     @Override
     public void addExhibitionBookmark(Long exhibitionId) {
@@ -53,10 +50,6 @@ public class ExhibitionBookmarkCommandService implements
         // 북마크 처리
         ExhibitionBookmark exhibitionBookmark = ExhibitionBookmark.of(user, exhibition);
         exhibitionBookmarkCommandPort.save(exhibitionBookmark);
-
-        // 북마크 알림 생성 이벤트 발행
-        ExhibitionBookmarkAddEvent event = ExhibitionBookmarkAddEvent.of(exhibitionId);
-        exhibitionEventPublishPort.publishExhibitionBookmarkAddEvent(event);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.benchpress200.photique.singlework.domain.entity;
 
-import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -76,31 +75,7 @@ public class SingleWorkSearch {
     private LocalDateTime updatedAt;
 
     @Field(type = FieldType.Long)
-    private Long lastProcessedOutboxEventId;
-
-    public void updateWriterDetails(User writer) {
-        // FIXME: 이후 제거
-    }
-
-    public static SingleWorkSearch of(
-            SingleWork singleWork,
-            List<String> tags
-    ) {
-        User writer = singleWork.getWriter();
-
-        return SingleWorkSearch.builder()
-                .id(singleWork.getId())
-                .image(singleWork.getImage())
-                .writer(Writer.from(writer))
-                .title(singleWork.getTitle())
-                .description(singleWork.getDescription())
-                .tags(tags)
-                .category(singleWork.getCategory().getValue())
-                .likeCount(singleWork.getLikeCount())
-                .viewCount(singleWork.getViewCount())
-                .createdAt(singleWork.getCreatedAt())
-                .build();
-    }
+    private Long lastProcessedEventId;
 
     public Long getWriterId() {
         return writer.getId();
@@ -128,12 +103,7 @@ public class SingleWorkSearch {
         @Field(type = FieldType.Keyword, index = false)
         private String profileImage;
 
-        public static Writer from(User writer) {
-            return Writer.builder()
-                    .id(writer.getId())
-                    .nickname(writer.getNickname())
-                    .profileImage(writer.getProfileImage())
-                    .build();
-        }
+        @Field(type = FieldType.Long)
+        private Long lastProcessedEventId;
     }
 }

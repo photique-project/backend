@@ -1,15 +1,16 @@
 package com.benchpress200.photique.user.application.command.service;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.outbox.application.factory.OutboxEventFactory;
+import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
+import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.user.application.command.port.in.FollowUseCase;
 import com.benchpress200.photique.user.application.command.port.in.UnfollowUseCase;
-import com.benchpress200.photique.user.application.command.port.out.event.FollowEventPublishPort;
 import com.benchpress200.photique.user.application.command.port.out.persistence.FollowCommandPort;
 import com.benchpress200.photique.user.application.query.port.out.persistence.FollowQueryPort;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.domain.event.FollowEvent;
 import com.benchpress200.photique.user.domain.exception.DuplicatedFollowException;
 import com.benchpress200.photique.user.domain.exception.InvalidFollowRequestException;
 import com.benchpress200.photique.user.domain.exception.UserNotFoundException;
@@ -23,13 +24,15 @@ import org.springframework.stereotype.Service;
 public class FollowCommandService implements
         FollowUseCase,
         UnfollowUseCase {
+    private final AuthenticationUserProviderPort authenticationUserProviderPort;
+
     private final UserQueryPort userQueryPort;
 
     private final FollowCommandPort followCommandPort;
     private final FollowQueryPort followQueryPort;
-    private final FollowEventPublishPort followEventPublishPort;
 
-    private final AuthenticationUserProviderPort authenticationUserProviderPort;
+    private final OutboxEventFactory outboxEventFactory;
+    private final OutboxEventPort outboxEventPort;
 
 
     public void follow(Long followeeId) {
@@ -59,8 +62,8 @@ public class FollowCommandService implements
         Follow follow = Follow.of(follower, followee);
         followCommandPort.save(follow);
 
-        FollowEvent event = FollowEvent.of(followerId, followeeId);
-        followEventPublishPort.publishFollowEvent(event); // 트랜잭션 커밋 시 팔로우 알림 생성 이벤트 발행
+        OutboxEvent outboxEvent = outboxEventFactory.follow(follow);
+        outboxEventPort.save(outboxEvent);
     }
 
 

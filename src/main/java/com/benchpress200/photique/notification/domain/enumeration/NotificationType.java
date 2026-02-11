@@ -10,7 +10,6 @@ public enum NotificationType {
     EXHIBITION_COMMENT("exhibitionComment"),
     SINGLEWORK_LIKE("singleWorkLike"),
     EXHIBITION_LIKE("exhibitionLike"),
-    EXHIBITION_BOOKMARK("exhibitionBookmark"),
     FOLLOWING_SINGLEWORK("followingSinglework"),
     FOLLOWING_EXHIBITION("followingExhibition"),
     FOLLOW("follow");

@@ -1,6 +1,5 @@
 package com.benchpress200.photique.exhibition.domain.entity;
 
-import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -55,7 +54,7 @@ public class ExhibitionSearch {
 
     @Field(type = FieldType.Text)
     private List<String> tags;
-    
+
     @Field(type = FieldType.Long)
     private Long viewCount;
 
@@ -73,26 +72,8 @@ public class ExhibitionSearch {
     private LocalDateTime updatedAt;
 
     @Field(type = FieldType.Long)
-    private Long lastProcessedOutboxEventId;
+    private Long lastProcessedEventId;
 
-    public static ExhibitionSearch of(
-            Exhibition exhibition,
-            List<String> tags
-    ) {
-        User writer = exhibition.getWriter();
-
-        return ExhibitionSearch.builder()
-                .id(exhibition.getId())
-                .writer(Writer.from(writer))
-                .title(exhibition.getTitle())
-                .cardColor(exhibition.getCardColor())
-                .description(exhibition.getDescription())
-                .tags(tags)
-                .likeCount(exhibition.getLikeCount())
-                .viewCount(exhibition.getViewCount())
-                .createdAt(exhibition.getCreatedAt())
-                .build();
-    }
 
     public Long getWriterId() {
         return writer.getId();
@@ -120,13 +101,8 @@ public class ExhibitionSearch {
         @Field(type = FieldType.Keyword, index = false)
         private String profileImage;
 
-        public static Writer from(User writer) {
-            return Writer.builder()
-                    .id(writer.getId())
-                    .nickname(writer.getNickname())
-                    .profileImage(writer.getProfileImage())
-                    .build();
-        }
+        @Field(type = FieldType.Long)
+        private Long lastProcessedEventId;
     }
 }
 

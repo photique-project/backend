@@ -1,13 +1,19 @@
 package com.benchpress200.photique.outbox.application.factory;
 
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
+import com.benchpress200.photique.outbox.application.payload.ExhibitionCommentPayload;
 import com.benchpress200.photique.outbox.application.payload.ExhibitionPayload;
+import com.benchpress200.photique.outbox.application.payload.FollowPayload;
+import com.benchpress200.photique.outbox.application.payload.SingleWorkCommentPayload;
 import com.benchpress200.photique.outbox.application.payload.SingleWorkPayload;
 import com.benchpress200.photique.outbox.application.payload.UserPayload;
 import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.outbox.domain.enumeration.AggregateType;
 import com.benchpress200.photique.outbox.domain.enumeration.EventType;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
+import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,6 +58,21 @@ public class OutboxEventFactory {
                 .build();
     }
 
+    public OutboxEvent singleWorkLikeCountUpdated(
+            SingleWork singleWork
+    ) {
+        String aggregateId = singleWork.getId().toString();
+        SingleWorkPayload singleWorkPayload = SingleWorkPayload.of(singleWork);
+        JsonNode payload = objectMapper.valueToTree(singleWorkPayload);
+
+        return OutboxEvent.builder()
+                .aggregateType(AggregateType.SINGLEWORK)
+                .aggregateId(aggregateId)
+                .eventType(EventType.LIKE_COUNT_UPDATED)
+                .payload(payload)
+                .build();
+    }
+
     public OutboxEvent singleWorkDeleted(SingleWork singleWork) {
         Long singleWorkId = singleWork.getId();
         String aggregateId = singleWorkId.toString();
@@ -62,6 +83,21 @@ public class OutboxEventFactory {
                 .aggregateType(AggregateType.SINGLEWORK)
                 .aggregateId(aggregateId)
                 .eventType(EventType.DELETED)
+                .payload(payload)
+                .build();
+    }
+
+    public OutboxEvent singleWorkCommentCreated(SingleWorkComment singleWorkComment) {
+        // 댓글은 단일작품의 하위 애그리거트로 취급
+        Long singleWorkId = singleWorkComment.getSingleWork().getId();
+        String aggregateId = singleWorkId.toString();
+        SingleWorkCommentPayload singleWorkCommentPayload = SingleWorkCommentPayload.from(singleWorkComment);
+        JsonNode payload = objectMapper.valueToTree(singleWorkCommentPayload);
+
+        return OutboxEvent.builder()
+                .aggregateType(AggregateType.SINGLEWORK)
+                .aggregateId(aggregateId)
+                .eventType(EventType.COMMENT_CREATED)
                 .payload(payload)
                 .build();
     }
@@ -98,6 +134,21 @@ public class OutboxEventFactory {
                 .build();
     }
 
+    public OutboxEvent exhibitionLikeCountUpdated(
+            Exhibition exhibition
+    ) {
+        String aggregateId = exhibition.getId().toString();
+        ExhibitionPayload exhibitionPayload = ExhibitionPayload.of(exhibition);
+        JsonNode payload = objectMapper.valueToTree(exhibitionPayload);
+
+        return OutboxEvent.builder()
+                .aggregateType(AggregateType.EXHIBITION)
+                .aggregateId(aggregateId)
+                .eventType(EventType.LIKE_COUNT_UPDATED)
+                .payload(payload)
+                .build();
+    }
+
     public OutboxEvent exhibitionDeleted(Exhibition exhibition) {
         Long exhibitionId = exhibition.getId();
         String aggregateId = exhibitionId.toString();
@@ -112,6 +163,21 @@ public class OutboxEventFactory {
                 .build();
     }
 
+    public OutboxEvent exhibitionCommentCreated(ExhibitionComment exhibitionComment) {
+        // 댓글은 전시회 의 하위 애그리거트로 취급
+        Long exhibitionId = exhibitionComment.getExhibition().getId();
+        String aggregateId = exhibitionId.toString();
+        ExhibitionCommentPayload exhibitionCommentPayload = ExhibitionCommentPayload.from(exhibitionComment);
+        JsonNode payload = objectMapper.valueToTree(exhibitionCommentPayload);
+
+        return OutboxEvent.builder()
+                .aggregateType(AggregateType.EXHIBITION)
+                .aggregateId(aggregateId)
+                .eventType(EventType.COMMENT_CREATED)
+                .payload(payload)
+                .build();
+    }
+
     public OutboxEvent userUpdated(User user) {
         String aggregateId = user.getId().toString();
         UserPayload userPayload = UserPayload.from(user);
@@ -121,6 +187,20 @@ public class OutboxEventFactory {
                 .aggregateType(AggregateType.USER)
                 .aggregateId(aggregateId)
                 .eventType(EventType.UPDATED)
+                .payload(payload)
+                .build();
+    }
+
+    public OutboxEvent follow(Follow follow) {
+        // 팔로워만 팔로우 관계를 맺고 끊을 수 있으므로 key로 팔로워 id 사용
+        String aggregateId = follow.getFollower().getId().toString();
+        FollowPayload followPayload = FollowPayload.from(follow);
+        JsonNode payload = objectMapper.valueToTree(followPayload);
+
+        return OutboxEvent.builder()
+                .aggregateType(AggregateType.FOLLOW)
+                .aggregateId(aggregateId)
+                .eventType(EventType.CREATED)
                 .payload(payload)
                 .build();
     }
