@@ -75,18 +75,6 @@ public class Notification {
         isRead = true;
     }
 
-    public static Notification of(
-            User receiver,
-            NotificationType type,
-            Long targetId
-    ) {
-        return Notification.builder()
-                .receiver(receiver)
-                .type(type)
-                .targetId(targetId)
-                .build();
-    }
-
     public void delete() {
         deletedAt = LocalDateTime.now();
     }
