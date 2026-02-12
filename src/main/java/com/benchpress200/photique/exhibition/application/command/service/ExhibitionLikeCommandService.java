@@ -67,7 +67,7 @@ public class ExhibitionLikeCommandService implements
         exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                 .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
-        OutboxEvent outboxEvent = outboxEventFactory.exhibitionLikeCountUpdated(exhibition);
+        OutboxEvent outboxEvent = outboxEventFactory.exhibitionLiked(exhibition);
         outboxEventPort.save(outboxEvent);
     }
 
@@ -93,7 +93,7 @@ public class ExhibitionLikeCommandService implements
                     Exhibition e = exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
                             .orElseThrow(() -> new ExhibitionNotFoundException(exhibitionId));
 
-                    OutboxEvent outboxEvent = outboxEventFactory.exhibitionLikeCountUpdated(e);
+                    OutboxEvent outboxEvent = outboxEventFactory.exhibitionUnliked(e);
                     outboxEventPort.save(outboxEvent);
                 });
     }

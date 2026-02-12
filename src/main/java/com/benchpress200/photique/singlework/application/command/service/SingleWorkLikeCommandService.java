@@ -65,7 +65,7 @@ public class SingleWorkLikeCommandService implements
         singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                 .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
-        OutboxEvent outboxEvent = outboxEventFactory.singleWorkLikeCountUpdated(singleWork);
+        OutboxEvent outboxEvent = outboxEventFactory.singleWorkLiked(singleWork);
         outboxEventPort.save(outboxEvent);
     }
 
@@ -92,7 +92,7 @@ public class SingleWorkLikeCommandService implements
                     SingleWork sw = singleWorkQueryPort.findByIdAndDeletedAtIsNull(singleWorkId)
                             .orElseThrow(() -> new SingleWorkNotFoundException(singleWorkId));
 
-                    OutboxEvent outboxEvent = outboxEventFactory.singleWorkLikeCountUpdated(sw);
+                    OutboxEvent outboxEvent = outboxEventFactory.singleWorkUnliked(sw);
                     outboxEventPort.save(outboxEvent);
                 });
     }
