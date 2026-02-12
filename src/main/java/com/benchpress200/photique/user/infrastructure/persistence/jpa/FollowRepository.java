@@ -2,6 +2,7 @@ package com.benchpress200.photique.user.infrastructure.persistence.jpa;
 
 import com.benchpress200.photique.user.domain.entity.Follow;
 import com.benchpress200.photique.user.domain.entity.User;
+import com.benchpress200.photique.user.domain.entity.id.FollowId;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -12,7 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface FollowRepository extends JpaRepository<Follow, Long> {
+public interface FollowRepository extends JpaRepository<Follow, FollowId> {
     void deleteByFollowerAndFollowee(User follower, User followee);
 
     Page<Follow> findByFolloweeId(Long followeeId, Pageable pageable);

@@ -2,6 +2,7 @@ package com.benchpress200.photique.singlework.infrastructure.persistence.jpa;
 
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
+import com.benchpress200.photique.singlework.domain.entity.id.SingleWorkLikeId;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, Long> {
+public interface SingleWorkLikeRepository extends JpaRepository<SingleWorkLike, SingleWorkLikeId> {
     Long countBySingleWork(SingleWork singleWork);
 
     boolean existsByUserIdAndSingleWorkId(Long userId, Long singleWorkId);
