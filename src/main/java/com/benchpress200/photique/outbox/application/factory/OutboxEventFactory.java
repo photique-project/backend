@@ -58,7 +58,7 @@ public class OutboxEventFactory {
                 .build();
     }
 
-    public OutboxEvent singleWorkLikeCountUpdated(
+    public OutboxEvent singleWorkLiked(
             SingleWork singleWork
     ) {
         String aggregateId = singleWork.getId().toString();
@@ -68,7 +68,22 @@ public class OutboxEventFactory {
         return OutboxEvent.builder()
                 .aggregateType(AggregateType.SINGLEWORK)
                 .aggregateId(aggregateId)
-                .eventType(EventType.LIKE_COUNT_UPDATED)
+                .eventType(EventType.LIKED)
+                .payload(payload)
+                .build();
+    }
+
+    public OutboxEvent singleWorkUnliked(
+            SingleWork singleWork
+    ) {
+        String aggregateId = singleWork.getId().toString();
+        SingleWorkPayload singleWorkPayload = SingleWorkPayload.of(singleWork);
+        JsonNode payload = objectMapper.valueToTree(singleWorkPayload);
+
+        return OutboxEvent.builder()
+                .aggregateType(AggregateType.SINGLEWORK)
+                .aggregateId(aggregateId)
+                .eventType(EventType.UNLIKED)
                 .payload(payload)
                 .build();
     }
@@ -134,7 +149,7 @@ public class OutboxEventFactory {
                 .build();
     }
 
-    public OutboxEvent exhibitionLikeCountUpdated(
+    public OutboxEvent exhibitionLiked(
             Exhibition exhibition
     ) {
         String aggregateId = exhibition.getId().toString();
@@ -144,7 +159,22 @@ public class OutboxEventFactory {
         return OutboxEvent.builder()
                 .aggregateType(AggregateType.EXHIBITION)
                 .aggregateId(aggregateId)
-                .eventType(EventType.LIKE_COUNT_UPDATED)
+                .eventType(EventType.LIKED)
+                .payload(payload)
+                .build();
+    }
+
+    public OutboxEvent exhibitionUnliked(
+            Exhibition exhibition
+    ) {
+        String aggregateId = exhibition.getId().toString();
+        ExhibitionPayload exhibitionPayload = ExhibitionPayload.of(exhibition);
+        JsonNode payload = objectMapper.valueToTree(exhibitionPayload);
+
+        return OutboxEvent.builder()
+                .aggregateType(AggregateType.EXHIBITION)
+                .aggregateId(aggregateId)
+                .eventType(EventType.UNLIKED)
                 .payload(payload)
                 .build();
     }

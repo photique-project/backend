@@ -6,12 +6,14 @@ import lombok.Getter;
 
 @Getter
 public enum NotificationType {
-    SINGLEWORK_COMMENT("singleworkComment"),
-    EXHIBITION_COMMENT("exhibitionComment"),
-    SINGLEWORK_LIKE("singleWorkLike"),
-    EXHIBITION_LIKE("exhibitionLike"),
-    FOLLOWING_SINGLEWORK("followingSinglework"),
-    FOLLOWING_EXHIBITION("followingExhibition"),
+    SINGLEWORK_CREATED("singleworkCreated"),
+    SINGLEWORK_LIKED("singleWorkLiked"),
+    SINGLEWORK_COMMENT_CREATED("singleworkCommentCreated"),
+
+    EXHIBITION_CREATED("ExhibitionCreated"),
+    EXHIBITION_LIKED("exhibitionLiked"),
+    EXHIBITION_COMMENT_CREATED("exhibitionCommentCreated"),
+
     FOLLOW("follow");
 
     private final String value;

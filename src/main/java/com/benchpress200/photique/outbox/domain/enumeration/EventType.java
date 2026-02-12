@@ -7,7 +7,8 @@ public enum EventType {
     CREATED("created"),
     COMMENT_CREATED("commentCreated"),
     UPDATED("updated"),
-    LIKE_COUNT_UPDATED("likeCountUpdated"),
+    LIKED("liked"),
+    UNLIKED("unliked"),
     DELETED("deleted");
 
     private final String value;
