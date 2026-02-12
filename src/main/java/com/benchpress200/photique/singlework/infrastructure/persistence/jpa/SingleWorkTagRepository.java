@@ -2,12 +2,13 @@ package com.benchpress200.photique.singlework.infrastructure.persistence.jpa;
 
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
+import com.benchpress200.photique.singlework.domain.entity.id.SingleWorkTagId;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface SingleWorkTagRepository extends JpaRepository<SingleWorkTag, Long> {
+public interface SingleWorkTagRepository extends JpaRepository<SingleWorkTag, SingleWorkTagId> {
     List<SingleWorkTag> findBySingleWorkId(Long singleWorkId);
 
     @Query("""
