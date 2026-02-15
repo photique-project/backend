@@ -5,7 +5,6 @@ import lombok.Getter;
 @Getter
 public enum EventType {
     CREATED("created"),
-    COMMENT_CREATED("commentCreated"),
     UPDATED("updated"),
     LIKED("liked"),
     UNLIKED("unliked"),
