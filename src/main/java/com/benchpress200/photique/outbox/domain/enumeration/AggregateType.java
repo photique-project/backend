@@ -5,7 +5,9 @@ import lombok.Getter;
 @Getter
 public enum AggregateType {
     SINGLEWORK("singlework"),
+    SINGLEWORK_COMMENT("singlework.comment"),
     EXHIBITION("exhibition"),
+    EXHIBITION_COMMENT("exhibition.comment"),
     FOLLOW("follow"),
     USER("user");
 

@@ -103,16 +103,16 @@ public class OutboxEventFactory {
     }
 
     public OutboxEvent singleWorkCommentCreated(SingleWorkComment singleWorkComment) {
-        // 댓글은 단일작품의 하위 애그리거트로 취급
-        Long singleWorkId = singleWorkComment.getSingleWork().getId();
-        String aggregateId = singleWorkId.toString();
+        Long commentId = singleWorkComment.getId();
+        String aggregateId = commentId.toString();
+
         SingleWorkCommentPayload singleWorkCommentPayload = SingleWorkCommentPayload.from(singleWorkComment);
         JsonNode payload = objectMapper.valueToTree(singleWorkCommentPayload);
 
         return OutboxEvent.builder()
-                .aggregateType(AggregateType.SINGLEWORK)
+                .aggregateType(AggregateType.SINGLEWORK_COMMENT)
                 .aggregateId(aggregateId)
-                .eventType(EventType.COMMENT_CREATED)
+                .eventType(EventType.CREATED)
                 .payload(payload)
                 .build();
     }
@@ -194,16 +194,15 @@ public class OutboxEventFactory {
     }
 
     public OutboxEvent exhibitionCommentCreated(ExhibitionComment exhibitionComment) {
-        // 댓글은 전시회 의 하위 애그리거트로 취급
-        Long exhibitionId = exhibitionComment.getExhibition().getId();
-        String aggregateId = exhibitionId.toString();
+        Long commentId = exhibitionComment.getId();
+        String aggregateId = commentId.toString();
         ExhibitionCommentPayload exhibitionCommentPayload = ExhibitionCommentPayload.from(exhibitionComment);
         JsonNode payload = objectMapper.valueToTree(exhibitionCommentPayload);
 
         return OutboxEvent.builder()
-                .aggregateType(AggregateType.EXHIBITION)
+                .aggregateType(AggregateType.EXHIBITION_COMMENT)
                 .aggregateId(aggregateId)
-                .eventType(EventType.COMMENT_CREATED)
+                .eventType(EventType.CREATED)
                 .payload(payload)
                 .build();
     }

@@ -64,6 +64,7 @@ public class ExhibitionPayload {
     public static ExhibitionPayload of(Exhibition exhibition) {
         return ExhibitionPayload.builder()
                 .id(exhibition.getId())
+                .writer(Writer.from(exhibition.getWriter()))
                 .likeCount(exhibition.getLikeCount())
                 .build();
     }
