@@ -61,7 +61,7 @@
 <br><br>
 
 # 🚀 Architecture
-
-<img src="https://github.com/user-attachments/assets/84e2af0e-c9e5-43c6-96f3-5a0c56756f0f" width="800"/>
-
+<img width="800" alt="Group 260" src="https://github.com/user-attachments/assets/931c687b-26ad-4246-9d1c-7fed0a484066" />
+<img width="800" alt="Group 261" src="https://github.com/user-attachments/assets/047001eb-b503-4656-a80c-6bfa6546be89" />
+<img width="800" alt="Group 262" src="https://github.com/user-attachments/assets/e061fb04-af8a-425b-a190-10b8aa92c151" />
 
