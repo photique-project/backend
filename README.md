@@ -1,9 +1,6 @@
 # 📖 Summary
 
-> photique 프로젝트의 서버입니다.
-
-> [!NOTE]
-> 안전하고 확장 가능한 서버를 위해, 현재 리팩토링과 테스트 코드 작성을 진행하고 있습니다.
+> photique API 서버입니다.
 
 <br>
 
@@ -21,13 +18,16 @@
 ![Gradle](https://img.shields.io/badge/Gradle-02303A?logo=gradle&logoColor=white&style=flat-square)
 ![Spring Boot](https://img.shields.io/badge/SpringBoot-6DB33F?logo=springboot&logoColor=white&style=flat-square)
 ![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white&style=flat-square)
-![STOMP](https://img.shields.io/badge/STOMP-6DB33F?style=flat-square)
 
 ### Database
 
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white&style=flat-square)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white&style=flat-square)
 ![Elasticsearch](https://img.shields.io/badge/Elasticsearch-005571?logo=elasticsearch&logoColor=white&style=flat-square)
+
+### Messaging
+
+![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-231F20?logo=apachekafka&logoColor=white&style=flat-square)
 
 ### Monitoring
 
@@ -37,9 +37,8 @@
 ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=prometheus&logoColor=white&style=flat-square)
 ![Node Exporter](https://img.shields.io/badge/Node%20Exporter-6E7F80?style=flat-square)
 
-### CI/CD
+### Deploy
 
-![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white&style=flat-square)
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=white&style=flat-square)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white&style=flat-square)
 ![AWS EC2](https://img.shields.io/badge/AWS%20EC2-FF9900?logo=amazonaws&logoColor=white&style=flat-square)
@@ -61,23 +60,8 @@
 
 <br><br>
 
-# 🚀 CI/CD Pipeline
+# 🚀 Architecture
 
 <img src="https://github.com/user-attachments/assets/84e2af0e-c9e5-43c6-96f3-5a0c56756f0f" width="800"/>
 
-### 개발 서버 배포 파이프라인 - AWS EC2 free tier
-
-1. 로컬에서 변경사항 commit
-2. main 브랜치로 push
-3. main -> develop 브랜치로 pr 보냄으로써 개발 서버 배포 워크 플로우 실행
-4. 정상 배포되면 merge
-
-### 프로덕트 서버 배포 파이프라인 - GCP VM
-
-1. 로컬에서 변경사항 commit
-2. main 브랜치로 push
-3. main -> release 브랜치로 pr 보냄으로써 개발 서버 배포 워크 플로우 실행
-4. 정상 배포되면 merge
-
-<br><br>
 
