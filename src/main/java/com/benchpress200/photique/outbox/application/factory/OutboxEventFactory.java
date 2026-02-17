@@ -221,7 +221,7 @@ public class OutboxEventFactory {
     }
 
     public OutboxEvent follow(Follow follow) {
-        // 팔로워만 팔로우 관계를 맺고 끊을 수 있으므로 key로 팔로워 id 사용
+        // 팔로워만 팔로우 관계를 맺고 끊을 수 있으므로 파티션 key로 팔로워 id 사용
         String aggregateId = follow.getFollower().getId().toString();
         FollowPayload followPayload = FollowPayload.from(follow);
         JsonNode payload = objectMapper.valueToTree(followPayload);

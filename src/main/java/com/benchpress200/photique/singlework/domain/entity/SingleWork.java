@@ -36,15 +36,15 @@ public class SingleWork {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "writer_id", nullable = false)
+    private User writer;
+
     @Column(length = 30, nullable = false)
     private String title;
 
     @Column(length = 500, nullable = false)
     private String description;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_id", nullable = false)
-    private User writer;
 
     @Column(length = 2048, nullable = false)
     private String image;

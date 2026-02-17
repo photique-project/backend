@@ -12,9 +12,10 @@ public class ExhibitionCommentPayload {
     private final Long id;
     private final Writer writer;
     private final Long exhibitionId;
-    private String content;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private final Long exhibitionWriterId;
+    private final String content;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
     @Getter
     @Builder
@@ -37,6 +38,7 @@ public class ExhibitionCommentPayload {
                 .id(exhibitionComment.getId())
                 .writer(Writer.from(exhibitionComment.getWriter()))
                 .exhibitionId(exhibitionComment.getExhibition().getId())
+                .exhibitionWriterId(exhibitionComment.getExhibition().getWriter().getId())
                 .content(exhibitionComment.getContent())
                 .createdAt(exhibitionComment.getCreatedAt())
                 .updatedAt(exhibitionComment.getUpdatedAt())

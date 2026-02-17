@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class SingleWorkImageUploadEvent {
-    private String imageUrl;
+    private final String imageUrl;
 
     private SingleWorkImageUploadEvent(String imageUrl) {
         this.imageUrl = imageUrl;

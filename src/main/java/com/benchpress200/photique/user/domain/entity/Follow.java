@@ -45,6 +45,11 @@ public class Follow {
     ) {
         this.follower = follower;
         this.followee = followee;
+
+        this.id = new FollowId(
+                follower.getId(),
+                followee.getId()
+        );
     }
 
     public static Follow of(

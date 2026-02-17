@@ -12,9 +12,10 @@ public class SingleWorkCommentPayload {
     private final Long id;
     private final Writer writer;
     private final Long singleWorkId;
-    private String content;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private final Long singleWorkWriterId;
+    private final String content;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
     @Getter
     @Builder
@@ -37,6 +38,7 @@ public class SingleWorkCommentPayload {
                 .id(singleWorkComment.getId())
                 .writer(Writer.from(singleWorkComment.getWriter()))
                 .singleWorkId(singleWorkComment.getSingleWork().getId())
+                .singleWorkWriterId(singleWorkComment.getSingleWork().getWriter().getId())
                 .content(singleWorkComment.getContent())
                 .createdAt(singleWorkComment.getCreatedAt())
                 .updatedAt(singleWorkComment.getUpdatedAt())
