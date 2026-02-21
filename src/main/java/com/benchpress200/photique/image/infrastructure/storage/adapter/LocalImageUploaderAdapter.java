@@ -11,15 +11,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class LocalImageUploaderAdapter implements ImageUploaderPort {
     @Value("${dummy-image-url}")
     private String dummyImageUrl;
-    
+
     @Override
     public String upload(MultipartFile image, String path) {
-        return "https://photique/dummy-image/" + path;
+        return dummyImageUrl + path;
     }
 
     @Override
     public String update(MultipartFile newImage, String oldPath, String newPath) {
-        return "https://photique/dummy-image/" + newPath;
+        return dummyImageUrl + newPath;
     }
 
     @Override
