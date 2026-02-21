@@ -98,10 +98,12 @@ clean {
 processResources.dependsOn('copySecret')
 tasks.register('copySecret', Copy) {
     from('backend-submodule/application') {
-        include '*.yml'
+        include 'application-dev.yml'
+        include 'application-prod.yml'
     }
     from('backend-submodule/logback') {
-        include '*.xml'
+        include 'logback-dev.xml'
+        include 'logback-prod.xml'
     }
     into 'src/main/resources'
 }

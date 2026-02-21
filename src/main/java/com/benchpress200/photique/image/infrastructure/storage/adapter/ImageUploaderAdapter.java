@@ -5,9 +5,11 @@ import com.benchpress200.photique.image.infrastructure.exception.ImageDeleteExce
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploadException;
 import com.benchpress200.photique.image.infrastructure.storage.s3.S3ImageUploader;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+@Profile("!local") // local이 아닐 때만 활성화 (dev, prod 등)
 @Component
 @RequiredArgsConstructor
 public class ImageUploaderAdapter implements ImageUploaderPort {
