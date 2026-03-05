@@ -45,3 +45,4 @@ out/
 !test.yml
 !deployment-dev.yml
 !deployment-prod.yml
+.claude/
