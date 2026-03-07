@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@Disabled("단위 테스트만 진행")
+@Disabled
 @SpringBootTest
 class PhotiqueApplicationTests {
 
