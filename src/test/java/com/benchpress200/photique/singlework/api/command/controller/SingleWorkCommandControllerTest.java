@@ -3,12 +3,15 @@ package com.benchpress200.photique.singlework.api.command.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.common.api.constant.MultipartKey;
 import com.benchpress200.photique.singlework.api.command.request.SingleWorkCreateRequest;
+import com.benchpress200.photique.singlework.api.command.request.SingleWorkUpdateRequest;
 import com.benchpress200.photique.singlework.api.command.support.fixture.SingleWorkCreateRequestFixture;
+import com.benchpress200.photique.singlework.api.command.support.fixture.SingleWorkUpdateRequestFixture;
 import com.benchpress200.photique.singlework.application.command.port.in.DeleteSingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.PostSingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.UpdateSingleWorkDetailsUseCase;
@@ -449,6 +452,234 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("단일작품 수정 요청 시 요청이 유효하면 204를 반환한다")
+    public void updateSingleWorkDetails_whenRequestIsValid() throws Exception {
+        // given
+        SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder().build();
+        doNothing().when(updateSingleWorkDetailsUseCase).updateSingleWorkDetails(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWork(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @ParameterizedTest
+    @DisplayName("단일작품 수정 요청 시 제목이 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidTitleForUpdate")
+    public void updateSingleWorkDetails_whenTitleIsInvalid(String invalidTitle) throws Exception {
+        // given
+        SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder()
+                .updateTitle(true)
+                .title(invalidTitle)
+                .build();
+        doNothing().when(updateSingleWorkDetailsUseCase).updateSingleWorkDetails(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWork(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @DisplayName("단일작품 수정 요청 시 설명이 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidDescriptionForUpdate")
+    public void updateSingleWorkDetails_whenDescriptionIsInvalid(String invalidDescription) throws Exception {
+        // given
+        SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder()
+                .updateDescription(true)
+                .description(invalidDescription)
+                .build();
+        doNothing().when(updateSingleWorkDetailsUseCase).updateSingleWorkDetails(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWork(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @DisplayName("단일작품 수정 요청 시 카메라 이름이 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidCameraForUpdate")
+    public void updateSingleWorkDetails_whenCameraIsInvalid(String invalidCamera) throws Exception {
+        // given
+        SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder()
+                .updateCamera(true)
+                .camera(invalidCamera)
+                .build();
+        doNothing().when(updateSingleWorkDetailsUseCase).updateSingleWorkDetails(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWork(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("단일작품 수정 요청 시 렌즈 이름이 유효하지 않으면 400을 반환한다")
+    public void updateSingleWorkDetails_whenLensIsInvalid() throws Exception {
+        // given
+        SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder()
+                .updateLens(true)
+                .lens("a".repeat(31))
+                .build();
+        doNothing().when(updateSingleWorkDetailsUseCase).updateSingleWorkDetails(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWork(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("단일작품 수정 요청 시 조리개 값이 유효하지 않으면 400을 반환한다")
+    public void updateSingleWorkDetails_whenApertureIsInvalid() throws Exception {
+        // given
+        SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder()
+                .updateAperture(true)
+                .aperture("f/123")
+                .build();
+        doNothing().when(updateSingleWorkDetailsUseCase).updateSingleWorkDetails(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWork(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("단일작품 수정 요청 시 셔터스피드 값이 유효하지 않으면 400을 반환한다")
+    public void updateSingleWorkDetails_whenShutterSpeedIsInvalid() throws Exception {
+        // given
+        SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder()
+                .updateShutterSpeed(true)
+                .shutterSpeed("-50")
+                .build();
+        doNothing().when(updateSingleWorkDetailsUseCase).updateSingleWorkDetails(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWork(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("단일작품 수정 요청 시 ISO 값이 유효하지 않으면 400을 반환한다")
+    public void updateSingleWorkDetails_whenISOIsInvalid() throws Exception {
+        // given
+        SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder()
+                .updateIso(true)
+                .iso("-1000")
+                .build();
+        doNothing().when(updateSingleWorkDetailsUseCase).updateSingleWorkDetails(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWork(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("단일작품 수정 요청 시 카테고리 값이 유효하지 않으면 400을 반환한다")
+    public void updateSingleWorkDetails_whenCategoryIsInvalid() throws Exception {
+        // given
+        SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder()
+                .updateCategory(true)
+                .category("두릅비빔")
+                .build();
+        doNothing().when(updateSingleWorkDetailsUseCase).updateSingleWorkDetails(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWork(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("단일작품 수정 요청 시 장소 이름이 유효하지 않으면 400을 반환한다")
+    public void updateSingleWorkDetails_whenLocationIsInvalid() throws Exception {
+        // given
+        SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder()
+                .updateLocation(true)
+                .location("a".repeat(31))
+                .build();
+        doNothing().when(updateSingleWorkDetailsUseCase).updateSingleWorkDetails(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWork(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @DisplayName("단일작품 수정 요청 시 태그 리스트가 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidTagForUpdate")
+    public void updateSingleWorkDetails_whenTagIsInvalid(List<String> invalidTags) throws Exception {
+        // given
+        SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder()
+                .updateTags(true)
+                .tags(invalidTags)
+                .build();
+        doNothing().when(updateSingleWorkDetailsUseCase).updateSingleWorkDetails(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWork(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    private static Stream<String> invalidTitleForUpdate() {
+        return Stream.of(
+                "",
+                "a".repeat(31)
+        );
+    }
+
+    private static Stream<String> invalidDescriptionForUpdate() {
+        return Stream.of(
+                "",
+                "a".repeat(501)
+        );
+    }
+
+    private static Stream<String> invalidCameraForUpdate() {
+        return Stream.of(
+                "",
+                "a".repeat(31)
+        );
+    }
+
+    private static Stream<List<String>> invalidTagForUpdate() {
+        return Stream.of(
+                List.of("첫번째태그", "두번째태그", "세번째태그", "네번째태그", "다섯번째태그", "여섯번째태그"), // 태그 6개
+                List.of("날아가는 새"), // 공백 포함 태그
+                List.of("아프리카코끼리위에올라탄앵무새") // 11자 이상 태그
+        );
+    }
+
     private static Stream<MockMultipartFile> invalidImage() {
         MockMultipartFile emptyImage = MultipartFileFixture.builder()
                 .key(MultipartKey.IMAGE)
@@ -519,6 +750,14 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
                 null,
                 "",
                 "a".repeat(length)  // 31자
+        );
+    }
+
+    private ResultActions requestUpdateSingleWork(Long singleWorkId, Object request) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.SINGLEWORK_DATA, singleWorkId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
         );
     }
 
