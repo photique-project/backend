@@ -27,6 +27,11 @@ public class SingleWorkTagPersistenceAdapter implements
     }
 
     @Override
+    public List<SingleWorkTag> saveAll(List<SingleWorkTag> singleWorkTags) {
+        return singleWorkTagRepository.saveAll(singleWorkTags);
+    }
+
+    @Override
     public void deleteBySingleWork(SingleWork singleWork) {
         singleWorkTagRepository.deleteBySingleWork(singleWork);
     }

@@ -104,8 +104,6 @@ public class ExhibitionCommandService implements
         // 아웃박스 이벤트 발행 -> ES 동기화 & 팔로워 알림 생성 배치 처리
         OutboxEvent outboxEvent = outboxEventFactory.exhibitionCreated(exhibition, tagNames);
         outboxEventPort.save(outboxEvent);
-
-        // TODO: 이후 알림 아웃박스 이벤트 생성 코드 추가 후 이벤트 발행 포트, 어댑터, 리스너 코드 제거
     }
 
     @Override
@@ -192,7 +190,6 @@ public class ExhibitionCommandService implements
         }
     }
 
-    // FIXME: deletedAt = null 아닌 데이터를 어느 시점에 어떻게 처리할지 고민
     @Override
     public void deleteExhibition(Long exhibitionId) {
         exhibitionQueryPort.findByIdAndDeletedAtIsNull(exhibitionId)
@@ -222,11 +219,10 @@ public class ExhibitionCommandService implements
 
         existingTags = existingTags.merge(savedTags); // 기존에 조회했던 태그와 병합
         List<Tag> allTags = existingTags.values();
+        List<ExhibitionTag> exhibitionTags = allTags.stream()
+                .map(tag -> ExhibitionTag.of(exhibition, tag))
+                .toList();
 
-        for (Tag tag : allTags) {
-            ExhibitionTag exhibitionTag = ExhibitionTag.of(exhibition, tag);
-            exhibitionTagCommandPort.save(exhibitionTag);
-        }
+        exhibitionTagCommandPort.saveAll(exhibitionTags);
     }
-
 }

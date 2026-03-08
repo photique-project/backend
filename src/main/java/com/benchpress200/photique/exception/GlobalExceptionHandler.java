@@ -6,6 +6,7 @@ import com.benchpress200.photique.auth.domain.exception.EmailNotFoundException;
 import com.benchpress200.photique.auth.domain.exception.InvalidRefreshTokenException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeExpirationException;
 import com.benchpress200.photique.auth.domain.exception.MailAuthenticationCodeNotVerifiedException;
+import com.benchpress200.photique.auth.domain.exception.UnauthenticatedException;
 import com.benchpress200.photique.auth.domain.exception.VerificationCodeNotFoundException;
 import com.benchpress200.photique.auth.infrastructure.exception.LoginRequestObjectReadException;
 import com.benchpress200.photique.auth.infrastructure.exception.MailSendException;
@@ -561,6 +562,16 @@ public class GlobalExceptionHandler {
         return ResponseHandler.handleResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 SERVER_ERROR_MESSAGE
+        );
+    }
+
+    @ExceptionHandler(UnauthenticatedException.class)
+    public ResponseEntity<?> handleUnauthenticatedException(UnauthenticatedException e) {
+        String errorMessage = e.getMessage();
+
+        return ResponseHandler.handleResponse(
+                HttpStatus.UNAUTHORIZED,
+                errorMessage
         );
     }
 }
