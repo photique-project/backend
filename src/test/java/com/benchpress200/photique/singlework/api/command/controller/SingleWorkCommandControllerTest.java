@@ -52,7 +52,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("단일작품 생성 요청 시 요청이 유효하면 201을 반환한다")
-    public void postSingleWork_WhenRequestIsValid() throws Exception {
+    public void postSingleWork_whenRequestIsValid() throws Exception {
         // given
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder().build(); // 기본값으로 객체 생성
 
@@ -82,7 +82,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
     @ParameterizedTest
     @DisplayName("단일작품 생성 요청 시 제목이 유효하지 않으면 400을 반환한다")
     @MethodSource("invalidTitle") // null, 빈 문자열, 31자 제목
-    public void postSingleWork_WhenTitleIsInvalid(String invalidTitle) throws Exception {
+    public void postSingleWork_whenTitleIsInvalid(String invalidTitle) throws Exception {
         //given
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder()
                 .title(invalidTitle)
@@ -114,7 +114,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
     @ParameterizedTest
     @DisplayName("단일작품 생성 요청 시 설명이 유효하지 않으면 400을 반환한다")
     @MethodSource("invalidDescriptions") // null, 빈 문자열, 501자 설명
-    public void postSingleWork_WhenDescriptionIsInvalid(String invalidDescription) throws Exception {
+    public void postSingleWork_whenDescriptionIsInvalid(String invalidDescription) throws Exception {
         //given
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder()
                 .description(invalidDescription)
@@ -146,7 +146,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
     @ParameterizedTest
     @DisplayName("단일작품 생성 요청 시 카메라 이름이 유효하지 않으면 400을 반환한다")
     @MethodSource("invalidCamera") // null, 빈 문자열, 31자 카메라 이름
-    public void postSingleWork_WhenCameraIsInvalid(String invalidCamera) throws Exception {
+    public void postSingleWork_whenCameraIsInvalid(String invalidCamera) throws Exception {
         //given
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder()
                 .camera(invalidCamera)
@@ -177,7 +177,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("단일작품 생성 요청 시 렌즈 이름이 유효하지 않으면 400을 반환한다")
-    public void postSingleWork_WhenLensIsInvalid() throws Exception {
+    public void postSingleWork_whenLensIsInvalid() throws Exception {
         // given
         int invalidLength = 31; // 30자 초과
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder()
@@ -209,7 +209,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("단일작품 생성 요청 시 조리개 값이 유효하지 않다면(enum에 속하지 않는 값) 400을 반환한다")
-    public void postSingleWork_WhenApertureIsInvalid() throws Exception {
+    public void postSingleWork_whenApertureIsInvalid() throws Exception {
         //given
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder()
                 .aperture("f/123")
@@ -240,7 +240,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("단일작품 생성 요청 시 셔터스피드 값이 유효하지 않다면(enum에 속하지 않는 값) 400을 반환한다")
-    public void postSingleWork_WhenShutterSpeedIsInvalid() throws Exception {
+    public void postSingleWork_whenShutterSpeedIsInvalid() throws Exception {
         //given
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder()
                 .shutterSpeed("-50")
@@ -271,7 +271,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("단일작품 생성 요청 시 ISO 값이 유효하지 않다면(enum에 속하지 않는 값) 400을 반환한다")
-    public void postSingleWork_WhenISOIsInvalid() throws Exception {
+    public void postSingleWork_whenISOIsInvalid() throws Exception {
         //given
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder()
                 .iso("-1000")
@@ -302,7 +302,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("단일작품 생성 요청 시 카테고리가 유효하지 않다면(enum에 속하지 않는 값) 400을 반환한다")
-    public void postSingleWork_WhenCategoryIsInvalid() throws Exception {
+    public void postSingleWork_whenCategoryIsInvalid() throws Exception {
         //given
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder()
                 .category("두릅비빔")
@@ -333,7 +333,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("단일작품 생성 요청 시 장소 이름이 유효하지 않다면 400을 반환한다")
-    public void postSingleWork_WhenLocationIsInvalid() throws Exception {
+    public void postSingleWork_whenLocationIsInvalid() throws Exception {
         // given
         int invalidLength = 31; // 30자 초과
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder()
@@ -365,7 +365,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("단일작품 생성 요청 시 촬영 날짜 포멧(yyyy-MM-dd)이 유효하지 않다면 400을 반환한다")
-    public void postSingleWork_WhenDateIsInvalid() throws Exception {
+    public void postSingleWork_whenDateIsInvalid() throws Exception {
         // given
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder()
                 .date(null)
@@ -397,7 +397,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
     @ParameterizedTest
     @DisplayName("단일작품 생성 요청 시 태그 리스트가 유효하지 않으면 400을 반환한다")
     @MethodSource("invalidTag") // 태그 개수 5개 초과, 공백 포함 태그, 태그 길이 10자 초과
-    public void postSingleWork_WhenTagIsInvalid(List<String> invalidTag) throws Exception {
+    public void postSingleWork_whenTagIsInvalid(List<String> invalidTag) throws Exception {
         //given
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder()
                 .tags(invalidTag)
@@ -429,7 +429,7 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
     @ParameterizedTest
     @DisplayName("단일작품 생성 요청 시 이미지 파일이 유효하지 않으면 400을 반환한다")
     @MethodSource("invalidImage") // 빈 파일, 5MB초과, 파일 이름 null, 다른 확장자
-    public void postSingleWork_WhenImageIsInvalid(MockMultipartFile invalidImage) throws Exception {
+    public void postSingleWork_whenImageIsInvalid(MockMultipartFile invalidImage) throws Exception {
         // given
         SingleWorkCreateRequest request = SingleWorkCreateRequestFixture.builder().build(); // 기본값으로 객체 생성
 

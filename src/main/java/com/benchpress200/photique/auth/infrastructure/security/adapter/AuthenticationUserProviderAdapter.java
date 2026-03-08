@@ -1,6 +1,7 @@
 package com.benchpress200.photique.auth.infrastructure.security.adapter;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
+import com.benchpress200.photique.auth.domain.exception.UnauthenticatedException;
 import com.benchpress200.photique.auth.domain.result.AuthenticationUserResult;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,7 +18,7 @@ public class AuthenticationUserProviderAdapter implements AuthenticationUserProv
 
         if (authentication == null ||
                 authentication instanceof AnonymousAuthenticationToken) {
-            return null;
+            throw new UnauthenticatedException();
         }
 
         AuthenticationUserResult authenticationUserResult = (AuthenticationUserResult) authentication.getPrincipal();

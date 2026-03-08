@@ -93,8 +93,6 @@ public class SingleWorkCommandService implements
         // 아웃박스 이벤트 발행 -> ES 동기화 & 팔로워 알림 생성 배치 처리
         OutboxEvent outboxEvent = outboxEventFactory.singleWorkCreated(singleWork, tagNames);
         outboxEventPort.save(outboxEvent);
-
-        // TODO: 이후 알림 아웃박스 이벤트 생성 코드 추가 후 이벤트 발행 포트, 어댑터, 리스너 코드 제거
     }
 
     @Override
@@ -193,7 +191,6 @@ public class SingleWorkCommandService implements
         }
     }
 
-    // FIXME: deletedAt = null 아닌 데이터를 어느 시점에 어떻게 처리할지 고민
     @Override
     public void deleteSingleWork(Long singleWorkId) {
         // 작품 조회
@@ -225,10 +222,10 @@ public class SingleWorkCommandService implements
 
         existingTags = existingTags.merge(savedTags); // 기존에 조회했던 태그와 병합
         List<Tag> allTags = existingTags.values();
+        List<SingleWorkTag> singleWorkTags = allTags.stream()
+                .map(tag -> SingleWorkTag.of(singleWork, tag))
+                .toList();
 
-        for (Tag tag : allTags) {
-            SingleWorkTag singleWorkTag = SingleWorkTag.of(singleWork, tag);
-            singleWorkTagCommandPort.save(singleWorkTag);
-        }
+        singleWorkTagCommandPort.saveAll(singleWorkTags);
     }
 }

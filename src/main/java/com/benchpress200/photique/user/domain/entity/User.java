@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,9 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+@Builder
 @Entity
+@AllArgsConstructor
 @NoArgsConstructor
 @Table(
         name = "users",
@@ -69,23 +72,6 @@ public class User {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @Builder
-    public User(
-            String email,
-            String password,
-            String nickname,
-            String profileImage,
-            Provider provider,
-            Role role
-    ) {
-        this.email = email;
-        this.password = password;
-        this.nickname = nickname;
-        this.profileImage = profileImage;
-        this.provider = provider;
-        this.role = role;
-    }
 
     public void updatePassword(String password) {
         this.password = password;
