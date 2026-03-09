@@ -13,6 +13,7 @@ import com.benchpress200.photique.outbox.application.port.out.persistence.Outbox
 import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.outbox.domain.support.OutboxEventFixture;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCreateCommand;
+import com.benchpress200.photique.singlework.application.command.model.SingleWorkUpdateCommand;
 import com.benchpress200.photique.singlework.application.command.port.out.event.SingleWorkEventPublishPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkTagCommandPort;
@@ -20,8 +21,11 @@ import com.benchpress200.photique.singlework.application.command.service.SingleW
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkTagQueryPort;
 import com.benchpress200.photique.singlework.application.support.fixture.SingleWorkCreateCommandFixture;
+import com.benchpress200.photique.singlework.application.support.fixture.SingleWorkUpdateCommandFixture;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkTag;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotOwnedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkWriterNotFoundException;
 import com.benchpress200.photique.support.base.BaseServiceTest;
 import com.benchpress200.photique.tag.application.command.port.out.persistence.TagCommandPort;
@@ -136,6 +140,111 @@ public class SingleWorkCommandServiceTest extends BaseServiceTest {
         assertThrows(
                 SingleWorkWriterNotFoundException.class,
                 () -> singleWorkCommandService.postSingleWork(command)
+        );
+    }
+
+    @Test
+    @DisplayName("단일작품 수정 처리에 성공한다")
+    public void updateSingleWorkDetails_WhenCommandIsValid() {
+        //given
+        User writer = UserFixture.builder().build();
+        String imageUrl = "imageUrl";
+        SingleWorkCreateCommand createCommand = SingleWorkCreateCommandFixture.builder().build();
+        SingleWork singleWork = createCommand.toEntity(writer, imageUrl);
+        SingleWorkUpdateCommand command = SingleWorkUpdateCommandFixture.builder().build();
+        List<SingleWorkTag> singleWorkTags = List.of();
+        OutboxEvent outboxEvent = OutboxEventFixture.builder().build();
+
+        doReturn(Optional.of(singleWork)).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+        doReturn(writer.getId()).when(authenticationUserProviderPort).getCurrentUserId();
+        doReturn(singleWorkTags).when(singleWorkTagQueryPort).findBySingleWorkWithTag(any());
+        doReturn(outboxEvent).when(outboxEventFactory).singleWorkUpdated(any(), any());
+        doReturn(outboxEvent).when(outboxEventPort).save(any());
+
+        //when
+        singleWorkCommandService.updateSingleWorkDetails(command);
+
+        //then
+        verify(singleWorkQueryPort).findByIdAndDeletedAtIsNull(command.getSingleWorkId());
+        verify(authenticationUserProviderPort).getCurrentUserId();
+        verify(singleWorkTagQueryPort).findBySingleWorkWithTag(singleWork);
+        verify(outboxEventFactory).singleWorkUpdated(any(), any());
+        verify(outboxEventPort).save(outboxEvent);
+    }
+
+    @Test
+    @DisplayName("태그 업데이트가 포함된 단일작품 수정 처리에 성공한다")
+    public void updateSingleWorkDetails_WhenCommandIncludesTagUpdate() {
+        //given
+        User writer = UserFixture.builder().build();
+        String imageUrl = "imageUrl";
+        SingleWorkCreateCommand createCommand = SingleWorkCreateCommandFixture.builder().build();
+        SingleWork singleWork = createCommand.toEntity(writer, imageUrl);
+        List<String> tagNames = List.of("tag1", "tag2");
+        List<Tag> tags = tagNames.stream()
+                .map(Tag::of)
+                .toList();
+        List<SingleWorkTag> singleWorkTags = tags.stream()
+                .map(tag -> SingleWorkTag.of(singleWork, tag))
+                .toList();
+        SingleWorkUpdateCommand command = SingleWorkUpdateCommandFixture.builder()
+                .updateTags(true)
+                .tags(tagNames)
+                .build();
+        OutboxEvent outboxEvent = OutboxEventFixture.builder().build();
+
+        doReturn(Optional.of(singleWork)).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+        doReturn(writer.getId()).when(authenticationUserProviderPort).getCurrentUserId();
+        doNothing().when(singleWorkTagCommandPort).deleteBySingleWork(any());
+        doReturn(tags).when(tagQueryPort).findByNameIn(any());
+        doReturn(tags).when(tagCommandPort).saveAll(any());
+        doReturn(singleWorkTags).when(singleWorkTagCommandPort).saveAll(any());
+        doReturn(singleWorkTags).when(singleWorkTagQueryPort).findBySingleWorkWithTag(any());
+        doReturn(outboxEvent).when(outboxEventFactory).singleWorkUpdated(any(), any());
+        doReturn(outboxEvent).when(outboxEventPort).save(any());
+
+        //when
+        singleWorkCommandService.updateSingleWorkDetails(command);
+
+        //then
+        verify(singleWorkTagCommandPort).deleteBySingleWork(singleWork);
+        verify(singleWorkTagCommandPort).saveAll(any());
+        verify(outboxEventFactory).singleWorkUpdated(any(), any());
+        verify(outboxEventPort).save(outboxEvent);
+    }
+
+    @Test
+    @DisplayName("단일작품 수정 시 작품이 존재하지 않으면 SingleWorkNotFoundException를 던진다")
+    public void updateSingleWorkDetails_WhenSingleWorkNotFound() {
+        //given
+        SingleWorkUpdateCommand command = SingleWorkUpdateCommandFixture.builder().build();
+
+        doReturn(Optional.empty()).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+
+        //when & then
+        assertThrows(
+                SingleWorkNotFoundException.class,
+                () -> singleWorkCommandService.updateSingleWorkDetails(command)
+        );
+    }
+
+    @Test
+    @DisplayName("단일작품 수정 시 작품의 소유자가 아니면 SingleWorkNotOwnedException를 던진다")
+    public void updateSingleWorkDetails_WhenNotOwner() {
+        //given
+        User writer = UserFixture.builder().id(1L).build();
+        String imageUrl = "imageUrl";
+        SingleWorkCreateCommand createCommand = SingleWorkCreateCommandFixture.builder().build();
+        SingleWork singleWork = createCommand.toEntity(writer, imageUrl);
+        SingleWorkUpdateCommand command = SingleWorkUpdateCommandFixture.builder().build();
+
+        doReturn(Optional.of(singleWork)).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+        doReturn(2L).when(authenticationUserProviderPort).getCurrentUserId();
+
+        //when & then
+        assertThrows(
+                SingleWorkNotOwnedException.class,
+                () -> singleWorkCommandService.updateSingleWorkDetails(command)
         );
     }
 }
