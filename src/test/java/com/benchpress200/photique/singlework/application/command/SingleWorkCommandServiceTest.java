@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
@@ -245,6 +246,61 @@ public class SingleWorkCommandServiceTest extends BaseServiceTest {
         assertThrows(
                 SingleWorkNotOwnedException.class,
                 () -> singleWorkCommandService.updateSingleWorkDetails(command)
+        );
+    }
+
+    @Test
+    @DisplayName("단일작품 삭제 처리에 성공한다")
+    public void deleteSingleWork_whenSingleWorkExists() {
+        //given
+        User writer = UserFixture.builder().build();
+        String imageUrl = "imageUrl";
+        SingleWorkCreateCommand createCommand = SingleWorkCreateCommandFixture.builder().build();
+        SingleWork singleWork = createCommand.toEntity(writer, imageUrl);
+        OutboxEvent outboxEvent = OutboxEventFixture.builder().build();
+
+        doReturn(Optional.of(singleWork)).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+        doReturn(writer.getId()).when(authenticationUserProviderPort).getCurrentUserId();
+        doReturn(outboxEvent).when(outboxEventFactory).singleWorkDeleted(any());
+        doReturn(outboxEvent).when(outboxEventPort).save(any());
+
+        //when
+        singleWorkCommandService.deleteSingleWork(1L);
+
+        //then
+        verify(outboxEventFactory).singleWorkDeleted(singleWork);
+        verify(outboxEventPort).save(outboxEvent);
+    }
+
+    @Test
+    @DisplayName("단일작품 삭제 시 작품이 존재하지 않으면 아무 처리도 하지 않는다")
+    public void deleteSingleWork_whenSingleWorkNotFound() {
+        //given
+        doReturn(Optional.empty()).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+
+        //when
+        singleWorkCommandService.deleteSingleWork(1L);
+
+        //then
+        verify(outboxEventPort, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("단일작품 삭제 시 작품의 소유자가 아니면 SingleWorkNotOwnedException를 던진다")
+    public void deleteSingleWork_whenNotOwner() {
+        //given
+        User writer = UserFixture.builder().id(1L).build();
+        String imageUrl = "imageUrl";
+        SingleWorkCreateCommand createCommand = SingleWorkCreateCommandFixture.builder().build();
+        SingleWork singleWork = createCommand.toEntity(writer, imageUrl);
+
+        doReturn(Optional.of(singleWork)).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+        doReturn(2L).when(authenticationUserProviderPort).getCurrentUserId();
+
+        //when & then
+        assertThrows(
+                SingleWorkNotOwnedException.class,
+                () -> singleWorkCommandService.deleteSingleWork(1L)
         );
     }
 }
