@@ -2,6 +2,7 @@ package com.benchpress200.photique.singlework.api.command.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -750,6 +751,40 @@ public class SingleWorkCommandControllerTest extends BaseControllerTest {
                 null,
                 "",
                 "a".repeat(length)  // 31자
+        );
+    }
+
+    @Test
+    @DisplayName("단일작품 삭제 요청 시 요청이 유효하면 204를 반환한다")
+    public void deleteSingleWork_whenRequestIsValid() throws Exception {
+        // given
+        doNothing().when(deleteSingleWorkUseCase).deleteSingleWork(any());
+
+        // when
+        ResultActions resultActions = requestDeleteSingleWork("1");
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("단일작품 삭제 요청 시 작품 ID가 숫자가 아니면 400을 반환한다")
+    public void deleteSingleWork_whenSingleWorkIdIsInvalid() throws Exception {
+        // given
+        doNothing().when(deleteSingleWorkUseCase).deleteSingleWork(any());
+
+        // when
+        ResultActions resultActions = requestDeleteSingleWork("invalid");
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    private ResultActions requestDeleteSingleWork(String singleWorkId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.SINGLEWORK_DATA, singleWorkId)
         );
     }
 
