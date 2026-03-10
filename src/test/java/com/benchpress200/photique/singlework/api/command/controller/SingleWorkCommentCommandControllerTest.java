@@ -2,6 +2,7 @@ package com.benchpress200.photique.singlework.api.command.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -113,6 +114,34 @@ public class SingleWorkCommentCommandControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("단일작품 댓글 삭제 요청 시 요청이 유효하면 204를 반환한다")
+    public void deleteSingleWorkComment_whenRequestIsValid() throws Exception {
+        // given
+        doNothing().when(deleteSingleWorkCommentUseCase).deleteSingleWorkComment(any());
+
+        // when
+        ResultActions resultActions = requestDeleteSingleWorkComment("1");
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("단일작품 댓글 삭제 요청 시 댓글 ID가 숫자가 아니면 400을 반환한다")
+    public void deleteSingleWorkComment_whenCommentIdIsInvalid() throws Exception {
+        // given
+        doNothing().when(deleteSingleWorkCommentUseCase).deleteSingleWorkComment(any());
+
+        // when
+        ResultActions resultActions = requestDeleteSingleWorkComment("invalid");
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
     private static Stream<String> invalidContent() {
         return Stream.of(
                 null,
@@ -142,6 +171,12 @@ public class SingleWorkCommentCommandControllerTest extends BaseControllerTest {
                 patch(ApiPath.SINGLEWORK_COMMENT_DATA, commentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    private ResultActions requestDeleteSingleWorkComment(String commentId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.SINGLEWORK_COMMENT_DATA, commentId)
         );
     }
 }
