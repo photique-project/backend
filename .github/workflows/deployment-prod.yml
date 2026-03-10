@@ -1,9 +1,7 @@
 name: 프로덕트 서버 Spring App 배포
 
-#on:
-#  pull_request:
-#    branches:
-#      - release
+on:
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
