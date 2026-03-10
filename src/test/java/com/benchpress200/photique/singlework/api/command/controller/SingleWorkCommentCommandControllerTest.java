@@ -2,12 +2,15 @@ package com.benchpress200.photique.singlework.api.command.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.singlework.api.command.request.SingleWorkCommentCreateRequest;
+import com.benchpress200.photique.singlework.api.command.request.SingleWorkCommentUpdateRequest;
 import com.benchpress200.photique.singlework.api.command.support.fixture.SingleWorkCommentCreateRequestFixture;
+import com.benchpress200.photique.singlework.api.command.support.fixture.SingleWorkCommentUpdateRequestFixture;
 import com.benchpress200.photique.singlework.application.command.port.in.CreateSingleWorkCommentUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.DeleteSingleWorkCommentUseCase;
 import com.benchpress200.photique.singlework.application.command.port.in.UpdateSingleWorkCommentUseCase;
@@ -77,7 +80,48 @@ public class SingleWorkCommentCommandControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("단일작품 댓글 수정 요청 시 요청이 유효하면 204를 반환한다")
+    public void updateSingleWorkComment_whenRequestIsValid() throws Exception {
+        // given
+        SingleWorkCommentUpdateRequest request = SingleWorkCommentUpdateRequestFixture.builder().build();
+        doNothing().when(updateSingleWorkCommentUseCase).updateSingleWorkComment(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWorkComment(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @ParameterizedTest
+    @DisplayName("단일작품 댓글 수정 요청 시 내용이 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidContentForUpdate")
+    public void updateSingleWorkComment_whenContentIsInvalid(String invalidContent) throws Exception {
+        // given
+        SingleWorkCommentUpdateRequest request = SingleWorkCommentUpdateRequestFixture.builder()
+                .content(invalidContent)
+                .build();
+        doNothing().when(updateSingleWorkCommentUseCase).updateSingleWorkComment(any());
+
+        // when
+        ResultActions resultActions = requestUpdateSingleWorkComment(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
     private static Stream<String> invalidContent() {
+        return Stream.of(
+                null,
+                "",
+                "a".repeat(301)
+        );
+    }
+
+    private static Stream<String> invalidContentForUpdate() {
         return Stream.of(
                 null,
                 "",
@@ -88,6 +132,14 @@ public class SingleWorkCommentCommandControllerTest extends BaseControllerTest {
     private ResultActions requestCreateSingleWorkComment(Long singleWorkId, Object request) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.SINGLEWORK_COMMENT, singleWorkId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    private ResultActions requestUpdateSingleWorkComment(Long commentId, Object request) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.SINGLEWORK_COMMENT_DATA, commentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
         );
