@@ -36,10 +36,6 @@ public class SingleWorkLikeCommandControllerTest extends BaseControllerTest {
     @MockitoBean
     private CancelSingleWorkLikeUseCase cancelSingleWorkLikeUseCase;
 
-    /* ===============================
-       좋아요 추가 테스트
-       =============================== */
-
     @Test
     @DisplayName("단일작품 좋아요 추가 요청 시 요청이 유효하면 201을 반환한다")
     void addSingleWorkLike_whenRequestIsValid() throws Exception {
