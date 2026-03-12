@@ -11,7 +11,9 @@ import com.benchpress200.photique.singlework.application.query.port.in.GetSingle
 import com.benchpress200.photique.singlework.application.query.port.in.SearchMySingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.query.port.in.SearchSingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkDetailsResult;
+import com.benchpress200.photique.singlework.application.query.result.MySingleWorkSearchResult;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkSearchResult;
+import com.benchpress200.photique.singlework.application.query.support.fixture.MySingleWorkSearchResultFixture;
 import com.benchpress200.photique.singlework.application.query.support.fixture.SingleWorkSearchResultFixture;
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import java.util.stream.Stream;
@@ -144,6 +146,76 @@ public class SingleWorkQueryControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("내 단일작품 검색 요청 시 요청이 유효하면 200을 반환한다")
+    public void searchMySingleWork_whenRequestIsValid() throws Exception {
+        // given
+        MySingleWorkSearchResult result = MySingleWorkSearchResultFixture.builder().build();
+        doReturn(result).when(searchMySingleWorkUseCase).searchMySingleWork(any());
+
+        // when
+        ResultActions resultActions = requestSearchMySingleWork(null, null, null);
+
+        // then
+        resultActions
+                .andExpect(status().isOk());
+    }
+
+    @ParameterizedTest
+    @DisplayName("내 단일작품 검색 요청 시 키워드가 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidKeywordsForMySingleWorkSearch")
+    public void searchMySingleWork_whenKeywordIsInvalid(String invalidKeyword) throws Exception {
+        // given
+
+        // when
+        ResultActions resultActions = requestSearchMySingleWork(invalidKeyword, null, null);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("내 단일작품 검색 요청 시 페이지 번호가 음수이면 400을 반환한다")
+    public void searchMySingleWork_whenPageIsNegative() throws Exception {
+        // given
+
+        // when
+        ResultActions resultActions = requestSearchMySingleWork(null, -1, null);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @DisplayName("내 단일작품 검색 요청 시 페이지 크기가 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidSizesForMySingleWorkSearch")
+    public void searchMySingleWork_whenSizeIsInvalid(Integer invalidSize) throws Exception {
+        // given
+
+        // when
+        ResultActions resultActions = requestSearchMySingleWork(null, null, invalidSize);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    private static Stream<String> invalidKeywordsForMySingleWorkSearch() {
+        return Stream.of(
+                "a",            // 1자 - 최소 길이 미만
+                "a".repeat(101) // 101자 - 최대 길이 초과
+        );
+    }
+
+    private static Stream<Integer> invalidSizesForMySingleWorkSearch() {
+        return Stream.of(
+                0,  // 최솟값 미만
+                51  // 최댓값 초과
+        );
+    }
+
     private static Stream<String> invalidKeywordsForSearch() {
         return Stream.of(
                 "a",            // 1자 - 최소 길이 미만
@@ -156,6 +228,15 @@ public class SingleWorkQueryControllerTest extends BaseControllerTest {
                 0,  // 최솟값 미만
                 51  // 최댓값 초과
         );
+    }
+
+    private ResultActions requestSearchMySingleWork(
+            String keyword, Integer page, Integer size) throws Exception {
+        MockHttpServletRequestBuilder builder = get(ApiPath.SINGLEWORK_MY_DATA);
+        if (keyword != null) builder = builder.param("keyword", keyword);
+        if (page != null) builder = builder.param("page", String.valueOf(page));
+        if (size != null) builder = builder.param("size", String.valueOf(size));
+        return mockMvc.perform(builder);
     }
 
     private ResultActions requestGetSingleWorkDetails(String singleWorkId) throws Exception {
