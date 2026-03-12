@@ -96,10 +96,14 @@ public class SingleWorkCommentQueryControllerTest extends BaseControllerTest {
     }
 
     private ResultActions requestGetSingleWorkComments(
-            String singleWorkId, Integer page, Integer size) throws Exception {
+            String singleWorkId,
+            int page,
+            int size
+    ) throws Exception {
         MockHttpServletRequestBuilder builder = get(ApiPath.SINGLEWORK_COMMENT, singleWorkId);
-        if (page != null) builder = builder.param("page", String.valueOf(page));
-        if (size != null) builder = builder.param("size", String.valueOf(size));
+        builder = builder.param("page", String.valueOf(page));
+        builder = builder.param("size", String.valueOf(size));
+
         return mockMvc.perform(builder);
     }
 }
