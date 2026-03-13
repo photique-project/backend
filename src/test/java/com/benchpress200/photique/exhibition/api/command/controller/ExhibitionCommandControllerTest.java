@@ -2,6 +2,7 @@ package com.benchpress200.photique.exhibition.api.command.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -850,6 +851,40 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
                 patch(ApiPath.EXHIBITION_DATA, exhibitionId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    @Test
+    @DisplayName("전시회 삭제 요청 시 요청이 유효하면 204를 반환한다")
+    public void deleteExhibition_whenRequestIsValid() throws Exception {
+        // given
+        doNothing().when(deleteExhibitionUseCase).deleteExhibition(any());
+
+        // when
+        ResultActions resultActions = requestDeleteExhibition("1");
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("전시회 삭제 요청 시 전시회 ID가 숫자가 아니면 400을 반환한다")
+    public void deleteExhibition_whenExhibitionIdIsNotNumber() throws Exception {
+        // given
+        doNothing().when(deleteExhibitionUseCase).deleteExhibition(any());
+
+        // when
+        ResultActions resultActions = requestDeleteExhibition("invalid");
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    private ResultActions requestDeleteExhibition(String exhibitionId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_DATA, exhibitionId)
         );
     }
 }
