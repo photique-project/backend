@@ -13,6 +13,8 @@ import com.benchpress200.photique.exhibition.application.query.result.Exhibition
 import com.benchpress200.photique.exhibition.application.query.support.fixture.ExhibitionDetailsResultFixture;
 import com.benchpress200.photique.exhibition.application.query.support.fixture.ExhibitionSearchResultFixture;
 import com.benchpress200.photique.singlework.application.query.port.in.SearchMyExhibitionUseCase;
+import com.benchpress200.photique.singlework.application.query.result.MyExhibitionSearchResult;
+import com.benchpress200.photique.singlework.application.query.support.fixture.MyExhibitionSearchResultFixture;
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -170,6 +172,82 @@ public class ExhibitionQueryControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("내 전시회 검색 요청 시 요청이 유효하면 200을 반환한다")
+    public void searchMyExhibition_whenRequestIsValid() throws Exception {
+        // given
+        MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
+        doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
+
+        // when
+        ResultActions resultActions = requestSearchMyExhibition(
+                get(ApiPath.EXHIBITION_MY_DATA)
+                        .param("keyword", "기본키워드")
+                        .param("page", "0")
+                        .param("size", "10")
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk());
+    }
+
+    @ParameterizedTest
+    @DisplayName("내 전시회 검색 요청 시 keyword가 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidKeywords")
+    public void searchMyExhibition_whenKeywordIsInvalid(String invalidKeyword) throws Exception {
+        // given
+        MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
+        doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
+
+        // when
+        ResultActions resultActions = requestSearchMyExhibition(
+                get(ApiPath.EXHIBITION_MY_DATA)
+                        .param("keyword", invalidKeyword)
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("내 전시회 검색 요청 시 page가 음수이면 400을 반환한다")
+    public void searchMyExhibition_whenPageIsNegative() throws Exception {
+        // given
+        MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
+        doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
+
+        // when
+        ResultActions resultActions = requestSearchMyExhibition(
+                get(ApiPath.EXHIBITION_MY_DATA)
+                        .param("page", "-1")
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @DisplayName("내 전시회 검색 요청 시 size가 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidSizes")
+    public void searchMyExhibition_whenSizeIsInvalid(String invalidSize) throws Exception {
+        // given
+        MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
+        doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
+
+        // when
+        ResultActions resultActions = requestSearchMyExhibition(
+                get(ApiPath.EXHIBITION_MY_DATA)
+                        .param("size", invalidSize)
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
     private static Stream<String> invalidKeywords() {
         return Stream.of(
                 "한",                       // 1자 (최솟값 미만)
@@ -191,6 +269,12 @@ public class ExhibitionQueryControllerTest extends BaseControllerTest {
     }
 
     private ResultActions requestSearchExhibition(
+            MockHttpServletRequestBuilder requestBuilder
+    ) throws Exception {
+        return mockMvc.perform(requestBuilder);
+    }
+
+    private ResultActions requestSearchMyExhibition(
             MockHttpServletRequestBuilder requestBuilder
     ) throws Exception {
         return mockMvc.perform(requestBuilder);
