@@ -2,12 +2,15 @@ package com.benchpress200.photique.exhibition.api.command.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.exhibition.api.command.request.ExhibitionCommentCreateRequest;
+import com.benchpress200.photique.exhibition.api.command.request.ExhibitionCommentUpdateRequest;
 import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionCommentCreateRequestFixture;
+import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionCommentUpdateRequestFixture;
 import com.benchpress200.photique.exhibition.application.command.port.in.CreateExhibitionCommentUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.DeleteExhibitionCommentUseCase;
 import com.benchpress200.photique.exhibition.application.command.port.in.UpdateExhibitionCommentUseCase;
@@ -91,6 +94,59 @@ public class ExhibitionCommentCommandControllerTest extends BaseControllerTest {
     ) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.EXHIBITION_COMMENT, exhibitionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    @Test
+    @DisplayName("전시회 감상평 수정 요청 시 요청이 유효하면 204를 반환한다")
+    public void updateExhibitionComment_whenRequestIsValid() throws Exception {
+        // given
+        ExhibitionCommentUpdateRequest request = ExhibitionCommentUpdateRequestFixture.builder().build();
+        doNothing().when(updateExhibitionCommentUseCase).updateExhibitionComment(any());
+
+        // when
+        ResultActions resultActions = requestUpdateExhibitionComment(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @ParameterizedTest
+    @DisplayName("전시회 감상평 수정 요청 시 내용이 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidContentsForUpdate")
+    public void updateExhibitionComment_whenContentIsInvalid(String invalidContent) throws Exception {
+        // given
+        ExhibitionCommentUpdateRequest request = ExhibitionCommentUpdateRequestFixture.builder()
+                .content(invalidContent)
+                .build();
+        doNothing().when(updateExhibitionCommentUseCase).updateExhibitionComment(any());
+
+        // when
+        ResultActions resultActions = requestUpdateExhibitionComment(1L, request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    private static Stream<String> invalidContentsForUpdate() {
+        return Stream.of(
+                null,
+                "",
+                " ",
+                "a".repeat(301)
+        );
+    }
+
+    private ResultActions requestUpdateExhibitionComment(
+            Long commentId,
+            Object request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.EXHIBITION_COMMENT_DATA, commentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
         );
