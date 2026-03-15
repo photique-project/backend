@@ -2,6 +2,7 @@ package com.benchpress200.photique.exhibition.api.command.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -149,6 +150,40 @@ public class ExhibitionCommentCommandControllerTest extends BaseControllerTest {
                 patch(ApiPath.EXHIBITION_COMMENT_DATA, commentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    @Test
+    @DisplayName("전시회 감상평 삭제 요청 시 요청이 유효하면 204를 반환한다")
+    public void deleteExhibitionComment_whenRequestIsValid() throws Exception {
+        // given
+        doNothing().when(deleteExhibitionCommentUseCase).deleteExhibitionComment(any());
+
+        // when
+        ResultActions resultActions = requestDeleteExhibitionComment("1");
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("전시회 감상평 삭제 요청 시 감상평 ID가 숫자가 아니면 400을 반환한다")
+    public void deleteExhibitionComment_whenCommentIdIsNotNumber() throws Exception {
+        // given
+        doNothing().when(deleteExhibitionCommentUseCase).deleteExhibitionComment(any());
+
+        // when
+        ResultActions resultActions = requestDeleteExhibitionComment("invalid");
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    private ResultActions requestDeleteExhibitionComment(String commentId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_COMMENT_DATA, commentId)
         );
     }
 }
