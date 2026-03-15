@@ -2,6 +2,7 @@ package com.benchpress200.photique.exhibition.api.command.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,9 +62,43 @@ public class ExhibitionBookmarkCommandControllerTest extends BaseControllerTest 
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("전시회 북마크 취소 요청 시 요청이 유효하면 204를 반환한다")
+    public void cancelExhibitionBookmark_whenRequestIsValid() throws Exception {
+        // given
+        doNothing().when(cancelExhibitionBookmarkUseCase).cancelExhibitionBookmark(any());
+
+        // when
+        ResultActions resultActions = requestCancelExhibitionBookmark("1");
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("전시회 북마크 취소 요청 시 전시회 ID가 숫자가 아니면 400을 반환한다")
+    public void cancelExhibitionBookmark_whenExhibitionIdIsNotNumber() throws Exception {
+        // given
+        doNothing().when(cancelExhibitionBookmarkUseCase).cancelExhibitionBookmark(any());
+
+        // when
+        ResultActions resultActions = requestCancelExhibitionBookmark("invalid");
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
     private ResultActions requestAddExhibitionBookmark(String exhibitionId) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.EXHIBITION_BOOKMARK, exhibitionId)
+        );
+    }
+
+    private ResultActions requestCancelExhibitionBookmark(String exhibitionId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_BOOKMARK, exhibitionId)
         );
     }
 }
