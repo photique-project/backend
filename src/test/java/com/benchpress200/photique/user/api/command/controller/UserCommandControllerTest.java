@@ -2,6 +2,7 @@ package com.benchpress200.photique.user.api.command.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -374,6 +375,34 @@ public class UserCommandControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("회원탈퇴 요청 시 요청이 유효하면 204를 반환한다")
+    public void withdraw_whenRequestIsValid() throws Exception {
+        // given
+        doNothing().when(withdrawUseCase).withdraw(any());
+
+        // when
+        ResultActions resultActions = requestWithdraw("1");
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("회원탈퇴 요청 시 userId가 숫자가 아니면 400을 반환한다")
+    public void withdraw_whenUserIdIsNotNumber() throws Exception {
+        // given
+        doNothing().when(withdrawUseCase).withdraw(any());
+
+        // when
+        ResultActions resultActions = requestWithdraw("invalid");
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
     private static Stream<String> invalidEmails() {
         return Stream.of(
                 null,           // @NotNull 위반
@@ -514,5 +543,9 @@ public class UserCommandControllerTest extends BaseControllerTest {
         }
 
         return mockMvc.perform(builder.contentType(MediaType.MULTIPART_FORM_DATA));
+    }
+
+    private ResultActions requestWithdraw(String userId) throws Exception {
+        return mockMvc.perform(delete(ApiPath.USER_DATA, userId));
     }
 }
