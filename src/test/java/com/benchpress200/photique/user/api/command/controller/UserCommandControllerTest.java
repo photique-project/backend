@@ -13,6 +13,7 @@ import com.benchpress200.photique.support.fixture.MultipartJsonFixture;
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import com.benchpress200.photique.user.api.command.support.fixture.ResisterRequestFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.UserDetailsUpdateRequestFixture;
+import com.benchpress200.photique.user.api.command.support.fixture.UserPasswordResetRequestFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.UserPasswordUpdateRequestFixture;
 import com.benchpress200.photique.user.application.command.port.in.ResisterUseCase;
 import com.benchpress200.photique.user.application.command.port.in.ResetUserPasswordUseCase;
@@ -322,6 +323,57 @@ public class UserCommandControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("유저 비밀번호 초기화 요청 시 요청이 유효하면 204를 반환한다")
+    public void resetUserPassword_whenRequestIsValid() throws Exception {
+        // given
+        UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder().build();
+        doNothing().when(resetUserPasswordUseCase).resetUserPassword(any());
+
+        // when
+        ResultActions resultActions = requestResetUserPassword(request);
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @ParameterizedTest
+    @DisplayName("유저 비밀번호 초기화 요청 시 email이 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidEmails")
+    public void resetUserPassword_whenEmailIsInvalid(String invalidEmail) throws Exception {
+        // given
+        UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder()
+                .email(invalidEmail)
+                .build();
+        doNothing().when(resetUserPasswordUseCase).resetUserPassword(any());
+
+        // when
+        ResultActions resultActions = requestResetUserPassword(request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @DisplayName("유저 비밀번호 초기화 요청 시 password가 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidPasswords")
+    public void resetUserPassword_whenPasswordIsInvalid(String invalidPassword) throws Exception {
+        // given
+        UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder()
+                .password(invalidPassword)
+                .build();
+        doNothing().when(resetUserPasswordUseCase).resetUserPassword(any());
+
+        // when
+        ResultActions resultActions = requestResetUserPassword(request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
     private static Stream<String> invalidEmails() {
         return Stream.of(
                 null,           // @NotNull 위반
@@ -427,6 +479,16 @@ public class UserCommandControllerTest extends BaseControllerTest {
         }
 
         return mockMvc.perform(builder.contentType(MediaType.MULTIPART_FORM_DATA));
+    }
+
+    private ResultActions requestResetUserPassword(
+            UserPasswordResetRequestFixture request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.USER_PASSWORD_RESET)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
     }
 
     private ResultActions requestUpdateUserPassword(
