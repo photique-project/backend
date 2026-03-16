@@ -3,6 +3,7 @@ package com.benchpress200.photique.user.api.command.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.common.api.constant.ApiPath;
@@ -12,6 +13,7 @@ import com.benchpress200.photique.support.fixture.MultipartJsonFixture;
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import com.benchpress200.photique.user.api.command.support.fixture.ResisterRequestFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.UserDetailsUpdateRequestFixture;
+import com.benchpress200.photique.user.api.command.support.fixture.UserPasswordUpdateRequestFixture;
 import com.benchpress200.photique.user.application.command.port.in.ResisterUseCase;
 import com.benchpress200.photique.user.application.command.port.in.ResetUserPasswordUseCase;
 import com.benchpress200.photique.user.application.command.port.in.UpdateUserDetailsUseCase;
@@ -272,6 +274,54 @@ public class UserCommandControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("유저 비밀번호 수정 요청 시 요청이 유효하면 204를 반환한다")
+    public void updateUserPassword_whenRequestIsValid() throws Exception {
+        // given
+        UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder().build();
+        doNothing().when(updateUserPasswordUseCase).updateUserPassword(any());
+
+        // when
+        ResultActions resultActions = requestUpdateUserPassword("1", request);
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("유저 비밀번호 수정 요청 시 userId가 숫자가 아니면 400을 반환한다")
+    public void updateUserPassword_whenUserIdIsNotNumber() throws Exception {
+        // given
+        UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder().build();
+        doNothing().when(updateUserPasswordUseCase).updateUserPassword(any());
+
+        // when
+        ResultActions resultActions = requestUpdateUserPassword("invalid", request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @DisplayName("유저 비밀번호 수정 요청 시 password가 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidPasswords")
+    public void updateUserPassword_whenPasswordIsInvalid(String invalidPassword) throws Exception {
+        // given
+        UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder()
+                .password(invalidPassword)
+                .build();
+        doNothing().when(updateUserPasswordUseCase).updateUserPassword(any());
+
+        // when
+        ResultActions resultActions = requestUpdateUserPassword("1", request);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
     private static Stream<String> invalidEmails() {
         return Stream.of(
                 null,           // @NotNull 위반
@@ -377,6 +427,17 @@ public class UserCommandControllerTest extends BaseControllerTest {
         }
 
         return mockMvc.perform(builder.contentType(MediaType.MULTIPART_FORM_DATA));
+    }
+
+    private ResultActions requestUpdateUserPassword(
+            String userId,
+            UserPasswordUpdateRequestFixture request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.USER_PASSWORD, userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
     }
 
     private ResultActions requestUpdateUserDetails(
