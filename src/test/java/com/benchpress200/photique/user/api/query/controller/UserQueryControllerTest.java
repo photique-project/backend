@@ -1,0 +1,95 @@
+package com.benchpress200.photique.user.api.query.controller;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.benchpress200.photique.common.api.constant.ApiPath;
+import com.benchpress200.photique.support.base.BaseControllerTest;
+import com.benchpress200.photique.user.application.query.port.in.GetMyDetailsUseCase;
+import com.benchpress200.photique.user.application.query.port.in.GetUserDetailsUseCase;
+import com.benchpress200.photique.user.application.query.port.in.SearchUserUseCase;
+import com.benchpress200.photique.user.application.query.port.in.ValidateNicknameUseCase;
+import com.benchpress200.photique.user.application.query.result.NicknameValidateResult;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+@WebMvcTest(
+        controllers = UserQueryController.class,
+        excludeAutoConfiguration = {
+                SecurityAutoConfiguration.class,
+                SecurityFilterAutoConfiguration.class
+        }
+)
+@DisplayName("유저 쿼리 컨트롤러 테스트")
+public class UserQueryControllerTest extends BaseControllerTest {
+
+    @MockitoBean
+    private ValidateNicknameUseCase validateNicknameUseCase;
+
+    @MockitoBean
+    private GetUserDetailsUseCase getUserDetailsUseCase;
+
+    @MockitoBean
+    private GetMyDetailsUseCase getMyDetailsUseCase;
+
+    @MockitoBean
+    private SearchUserUseCase searchUserUseCase;
+
+    @Test
+    @DisplayName("닉네임 중복 검사 요청 시 요청이 유효하면 200을 반환한다")
+    public void validateNickname_whenRequestIsValid() throws Exception {
+        // given
+        doReturn(NicknameValidateResult.of(false)).when(validateNicknameUseCase).validateNickname(any());
+
+        // when
+        ResultActions resultActions = requestValidateNickname("테스트닉");
+
+        // then
+        resultActions
+                .andExpect(status().isOk());
+    }
+
+    @ParameterizedTest
+    @DisplayName("닉네임 중복 검사 요청 시 nickname이 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidNicknames")
+    public void validateNickname_whenNicknameIsInvalid(String invalidNickname) throws Exception {
+        // given
+        doReturn(NicknameValidateResult.of(false)).when(validateNicknameUseCase).validateNickname(any());
+
+        // when
+        ResultActions resultActions = requestValidateNickname(invalidNickname);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    private static Stream<String> invalidNicknames() {
+        return Stream.of(
+                null,               // @NotNull 위반
+                "nick name",        // 공백 포함
+                "a".repeat(12)      // 12자 (최댓값 초과)
+        );
+    }
+
+    private ResultActions requestValidateNickname(String nickname) throws Exception {
+        MockHttpServletRequestBuilder builder = get(ApiPath.USER_NICKNAME_EXISTS);
+
+        if (nickname != null) {
+            builder = builder.param("nickname", nickname);
+        }
+
+        return mockMvc.perform(builder);
+    }
+}
