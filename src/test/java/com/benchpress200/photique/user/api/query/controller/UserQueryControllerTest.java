@@ -14,6 +14,7 @@ import com.benchpress200.photique.user.application.query.port.in.ValidateNicknam
 import com.benchpress200.photique.user.application.query.result.MyDetailsResult;
 import com.benchpress200.photique.user.application.query.result.NicknameValidateResult;
 import com.benchpress200.photique.user.application.query.result.UserDetailsResult;
+import com.benchpress200.photique.user.application.query.result.UserSearchResult;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -122,12 +123,111 @@ public class UserQueryControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    @DisplayName("유저 검색 요청 시 요청이 유효하면 200을 반환한다")
+    public void searchUser_whenRequestIsValid() throws Exception {
+        // given
+        UserSearchResult result = UserSearchResult.builder().build();
+        doReturn(result).when(searchUserUseCase).searchUser(any());
+
+        // when
+        ResultActions resultActions = requestSearchUser("테스트닉", null, null);
+
+        // then
+        resultActions
+                .andExpect(status().isOk());
+    }
+
+    @ParameterizedTest
+    @DisplayName("유저 검색 요청 시 keyword가 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidKeywords")
+    public void searchUser_whenKeywordIsInvalid(String invalidKeyword) throws Exception {
+        // given
+        UserSearchResult result = UserSearchResult.builder().build();
+        doReturn(result).when(searchUserUseCase).searchUser(any());
+
+        // when
+        ResultActions resultActions = requestSearchUser(invalidKeyword, null, null);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("유저 검색 요청 시 page가 음수이면 400을 반환한다")
+    public void searchUser_whenPageIsNegative() throws Exception {
+        // given
+        UserSearchResult result = UserSearchResult.builder().build();
+        doReturn(result).when(searchUserUseCase).searchUser(any());
+
+        // when
+        ResultActions resultActions = requestSearchUser("테스트닉", -1, null);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @DisplayName("유저 검색 요청 시 size가 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidSizes")
+    public void searchUser_whenSizeIsInvalid(Integer invalidSize) throws Exception {
+        // given
+        UserSearchResult result = UserSearchResult.builder().build();
+        doReturn(result).when(searchUserUseCase).searchUser(any());
+
+        // when
+        ResultActions resultActions = requestSearchUser("테스트닉", null, invalidSize);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    private static Stream<String> invalidKeywords() {
+        return Stream.of(
+                null,               // @NotNull 위반
+                "key word",         // 공백 포함
+                "a".repeat(12)      // 12자 (최댓값 초과)
+        );
+    }
+
+    private static Stream<Integer> invalidSizes() {
+        return Stream.of(
+                0,  // 최솟값 미만
+                51  // 최댓값 초과
+        );
+    }
+
     private static Stream<String> invalidNicknames() {
         return Stream.of(
                 null,               // @NotNull 위반
                 "nick name",        // 공백 포함
                 "a".repeat(12)      // 12자 (최댓값 초과)
         );
+    }
+
+    private ResultActions requestSearchUser(
+            String keyword,
+            Integer page,
+            Integer size
+    ) throws Exception {
+        MockHttpServletRequestBuilder builder = get(ApiPath.USER_ROOT);
+
+        if (keyword != null) {
+            builder = builder.param("keyword", keyword);
+        }
+
+        if (page != null) {
+            builder = builder.param("page", String.valueOf(page));
+        }
+
+        if (size != null) {
+            builder = builder.param("size", String.valueOf(size));
+        }
+
+        return mockMvc.perform(builder);
     }
 
     private ResultActions requestGetMyDetails() throws Exception {
