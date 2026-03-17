@@ -11,6 +11,7 @@ import com.benchpress200.photique.user.application.query.port.in.GetMyDetailsUse
 import com.benchpress200.photique.user.application.query.port.in.GetUserDetailsUseCase;
 import com.benchpress200.photique.user.application.query.port.in.SearchUserUseCase;
 import com.benchpress200.photique.user.application.query.port.in.ValidateNicknameUseCase;
+import com.benchpress200.photique.user.application.query.result.MyDetailsResult;
 import com.benchpress200.photique.user.application.query.result.NicknameValidateResult;
 import com.benchpress200.photique.user.application.query.result.UserDetailsResult;
 import java.util.stream.Stream;
@@ -106,12 +107,31 @@ public class UserQueryControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("내 정보 조회 요청 시 요청이 유효하면 200을 반환한다")
+    public void getMyDetails_whenRequestIsValid() throws Exception {
+        // given
+        MyDetailsResult result = MyDetailsResult.builder().build();
+        doReturn(result).when(getMyDetailsUseCase).getMyDetails();
+
+        // when
+        ResultActions resultActions = requestGetMyDetails();
+
+        // then
+        resultActions
+                .andExpect(status().isOk());
+    }
+
     private static Stream<String> invalidNicknames() {
         return Stream.of(
                 null,               // @NotNull 위반
                 "nick name",        // 공백 포함
                 "a".repeat(12)      // 12자 (최댓값 초과)
         );
+    }
+
+    private ResultActions requestGetMyDetails() throws Exception {
+        return mockMvc.perform(get(ApiPath.USER_MY_DATA));
     }
 
     private ResultActions requestGetUserDetails(String userId) throws Exception {
