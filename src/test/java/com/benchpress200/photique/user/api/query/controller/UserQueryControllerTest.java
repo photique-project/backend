@@ -12,6 +12,7 @@ import com.benchpress200.photique.user.application.query.port.in.GetUserDetailsU
 import com.benchpress200.photique.user.application.query.port.in.SearchUserUseCase;
 import com.benchpress200.photique.user.application.query.port.in.ValidateNicknameUseCase;
 import com.benchpress200.photique.user.application.query.result.NicknameValidateResult;
+import com.benchpress200.photique.user.application.query.result.UserDetailsResult;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,12 +76,46 @@ public class UserQueryControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("유저 정보 상세 조회 요청 시 요청이 유효하면 200을 반환한다")
+    public void getUserDetails_whenRequestIsValid() throws Exception {
+        // given
+        UserDetailsResult result = UserDetailsResult.builder().build();
+        doReturn(result).when(getUserDetailsUseCase).getUserDetails(any());
+
+        // when
+        ResultActions resultActions = requestGetUserDetails("1");
+
+        // then
+        resultActions
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("유저 정보 상세 조회 요청 시 userId가 숫자가 아니면 400을 반환한다")
+    public void getUserDetails_whenUserIdIsNotNumber() throws Exception {
+        // given
+        UserDetailsResult result = UserDetailsResult.builder().build();
+        doReturn(result).when(getUserDetailsUseCase).getUserDetails(any());
+
+        // when
+        ResultActions resultActions = requestGetUserDetails("invalid");
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
     private static Stream<String> invalidNicknames() {
         return Stream.of(
                 null,               // @NotNull 위반
                 "nick name",        // 공백 포함
                 "a".repeat(12)      // 12자 (최댓값 초과)
         );
+    }
+
+    private ResultActions requestGetUserDetails(String userId) throws Exception {
+        return mockMvc.perform(get(ApiPath.USER_DATA, userId));
     }
 
     private ResultActions requestValidateNickname(String nickname) throws Exception {
