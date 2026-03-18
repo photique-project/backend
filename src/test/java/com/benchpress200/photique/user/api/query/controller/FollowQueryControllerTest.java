@@ -9,6 +9,7 @@ import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import com.benchpress200.photique.user.application.query.port.in.SearchFolloweeUseCase;
 import com.benchpress200.photique.user.application.query.port.in.SearchFollowerUseCase;
+import com.benchpress200.photique.user.application.query.result.FolloweeSearchResult;
 import com.benchpress200.photique.user.application.query.result.FollowerSearchResult;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -99,11 +100,95 @@ public class FollowQueryControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("팔로이 검색 요청 시 요청이 유효하면 200을 반환한다")
+    public void searchFollowee_whenRequestIsValid() throws Exception {
+        // given
+        FolloweeSearchResult result = FolloweeSearchResult.builder().build();
+        doReturn(result).when(searchFolloweeUseCase).searchFollowee(any());
+
+        // when
+        ResultActions resultActions = requestSearchFollowee("1", null, null, null);
+
+        // then
+        resultActions
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("팔로이 검색 요청 시 userId가 숫자가 아니면 400을 반환한다")
+    public void searchFollowee_whenUserIdIsNotNumber() throws Exception {
+        // given
+        FolloweeSearchResult result = FolloweeSearchResult.builder().build();
+        doReturn(result).when(searchFolloweeUseCase).searchFollowee(any());
+
+        // when
+        ResultActions resultActions = requestSearchFollowee("invalid", null, null, null);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("팔로이 검색 요청 시 page가 음수이면 400을 반환한다")
+    public void searchFollowee_whenPageIsNegative() throws Exception {
+        // given
+        FolloweeSearchResult result = FolloweeSearchResult.builder().build();
+        doReturn(result).when(searchFolloweeUseCase).searchFollowee(any());
+
+        // when
+        ResultActions resultActions = requestSearchFollowee("1", null, -1, null);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @DisplayName("팔로이 검색 요청 시 size가 유효하지 않으면 400을 반환한다")
+    @MethodSource("invalidSizes")
+    public void searchFollowee_whenSizeIsInvalid(Integer invalidSize) throws Exception {
+        // given
+        FolloweeSearchResult result = FolloweeSearchResult.builder().build();
+        doReturn(result).when(searchFolloweeUseCase).searchFollowee(any());
+
+        // when
+        ResultActions resultActions = requestSearchFollowee("1", null, null, invalidSize);
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
     private static Stream<Integer> invalidSizes() {
         return Stream.of(
                 0,  // 최솟값 미만
                 51  // 최댓값 초과
         );
+    }
+
+    private ResultActions requestSearchFollowee(
+            String userId,
+            String keyword,
+            Integer page,
+            Integer size
+    ) throws Exception {
+        MockHttpServletRequestBuilder builder = get(ApiPath.FOLLOWEE, userId);
+
+        if (keyword != null) {
+            builder = builder.param("keyword", keyword);
+        }
+
+        if (page != null) {
+            builder = builder.param("page", String.valueOf(page));
+        }
+
+        if (size != null) {
+            builder = builder.param("size", String.valueOf(size));
+        }
+
+        return mockMvc.perform(builder);
     }
 
     private ResultActions requestSearchFollower(
