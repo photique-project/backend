@@ -65,9 +65,29 @@ public class NotificationCommandControllerTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("알림 전체 읽음 표시 요청 시 요청이 유효하면 204를 반환한다")
+    public void markAllAsRead_whenRequestIsValid() throws Exception {
+        // given
+        doNothing().when(markAllAsReadUseCase).markAllAsRead();
+
+        // when
+        ResultActions resultActions = requestMarkAllAsRead();
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
     private ResultActions requestMarkAsRead(String notificationId) throws Exception {
         return mockMvc.perform(
                 patch(ApiPath.NOTIFICATION_DATA, notificationId)
+        );
+    }
+
+    private ResultActions requestMarkAllAsRead() throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.NOTIFICATION_ROOT)
         );
     }
 }
