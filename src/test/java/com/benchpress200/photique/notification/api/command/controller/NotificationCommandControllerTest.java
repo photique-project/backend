@@ -2,6 +2,7 @@ package com.benchpress200.photique.notification.api.command.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -79,6 +80,34 @@ public class NotificationCommandControllerTest extends BaseControllerTest {
                 .andExpect(status().isNoContent());
     }
 
+    @Test
+    @DisplayName("알림 삭제 요청 시 요청이 유효하면 204를 반환한다")
+    public void deleteNotification_whenRequestIsValid() throws Exception {
+        // given
+        doNothing().when(deleteNotificationUseCase).deleteNotification(any());
+
+        // when
+        ResultActions resultActions = requestDeleteNotification("1");
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("알림 삭제 요청 시 알림 ID가 숫자가 아니면 400을 반환한다")
+    public void deleteNotification_whenNotificationIdIsNotNumber() throws Exception {
+        // given
+        doNothing().when(deleteNotificationUseCase).deleteNotification(any());
+
+        // when
+        ResultActions resultActions = requestDeleteNotification("invalid");
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
     private ResultActions requestMarkAsRead(String notificationId) throws Exception {
         return mockMvc.perform(
                 patch(ApiPath.NOTIFICATION_DATA, notificationId)
@@ -88,6 +117,12 @@ public class NotificationCommandControllerTest extends BaseControllerTest {
     private ResultActions requestMarkAllAsRead() throws Exception {
         return mockMvc.perform(
                 patch(ApiPath.NOTIFICATION_ROOT)
+        );
+    }
+
+    private ResultActions requestDeleteNotification(String notificationId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.NOTIFICATION_DATA, notificationId)
         );
     }
 }
