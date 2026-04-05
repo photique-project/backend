@@ -2,7 +2,7 @@
 
 > photique API 서버입니다.
 
-[![CI](https://github.com/photique-project/backend/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/photique-project/backend/actions/workflows/ci.yml)
+[![CI](https://github.com/photique-project/backend/actions/workflows/ci.yml/badge.svg)](https://github.com/photique-project/backend/actions/workflows/ci.yml)
 
 [![Organization](https://img.shields.io/badge/GitHub-Organization-white?logo=github&style=flat)](https://github.com/photique-project)<br>
 [![Frontend](https://img.shields.io/badge/GitHub-Frontend-blue?logo=github&style=flat)](https://github.com/photique-project/frontend)<br>
