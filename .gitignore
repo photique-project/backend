@@ -42,7 +42,7 @@ out/
 .env.prod
 !docker/docker-compose.backend.dev.yml
 !docker-compose.backend.prod.yml
-!test.yml
+!ci.yml
 !deployment-dev.yml
 !deployment-prod.yml
 .claude/

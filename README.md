@@ -2,6 +2,8 @@
 
 > photique API 서버입니다.
 
+## 🚀 CI Status
+
 <br>
 
 [![Organization](https://img.shields.io/badge/GitHub-Organization-white?logo=github&style=flat)](https://github.com/photique-project)<br>
@@ -61,6 +63,7 @@
 <br><br>
 
 # 🚀 Architecture
+
 <img width="800" alt="Group 260" src="https://github.com/user-attachments/assets/931c687b-26ad-4246-9d1c-7fed0a484066" />
 <img width="800" alt="Group 261" src="https://github.com/user-attachments/assets/047001eb-b503-4656-a80c-6bfa6546be89" />
 <img width="800" alt="Group 262" src="https://github.com/user-attachments/assets/e061fb04-af8a-425b-a190-10b8aa92c151" />

@@ -1,4 +1,4 @@
-name: Photique API 서버 테스트 코드 검증
+name: CI
 
 on:
   pull_request:
