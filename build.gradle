@@ -117,6 +117,9 @@ tasks.register('copyTestSecret', Copy) {
     from('backend-submodule/application') {
         include 'application-test.yml'
     }
+    from('backend-submodule/logback') {
+        include 'logback-test.xml'
+    }
     into 'src/test/resources'
 }
 
