@@ -9,20 +9,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.common.api.constant.MultipartKey;
+import com.benchpress200.photique.support.base.BaseControllerTest;
 import com.benchpress200.photique.support.fixture.MultipartFileFixture;
 import com.benchpress200.photique.support.fixture.MultipartJsonFixture;
-import com.benchpress200.photique.support.base.BaseControllerTest;
 import com.benchpress200.photique.user.api.command.support.fixture.ResisterRequestFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.UserDetailsUpdateRequestFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.UserPasswordResetRequestFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.UserPasswordUpdateRequestFixture;
-import com.benchpress200.photique.user.application.command.port.in.ResisterUseCase;
 import com.benchpress200.photique.user.application.command.port.in.ResetUserPasswordUseCase;
+import com.benchpress200.photique.user.application.command.port.in.ResisterUseCase;
 import com.benchpress200.photique.user.application.command.port.in.UpdateUserDetailsUseCase;
 import com.benchpress200.photique.user.application.command.port.in.UpdateUserPasswordUseCase;
 import com.benchpress200.photique.user.application.command.port.in.WithdrawUseCase;
 import java.util.stream.Stream;
-import org.springframework.http.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,10 +29,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 
 @WebMvcTest(
         controllers = UserCommandController.class,
@@ -501,7 +502,7 @@ public class UserCommandControllerTest extends BaseControllerTest {
             MockMultipartFile userPart,
             MockMultipartFile profileImagePart
     ) throws Exception {
-        var builder = multipart(ApiPath.USER_ROOT).file(userPart);
+        MockMultipartHttpServletRequestBuilder builder = multipart(ApiPath.USER_ROOT).file(userPart);
 
         if (profileImagePart != null) {
             builder = builder.file(profileImagePart);
