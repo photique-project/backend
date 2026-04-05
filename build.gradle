@@ -94,6 +94,7 @@ clean {
     delete file('src/main/generated')
 }
 
+// main 리소스 처리 gradle task
 processResources.dependsOn('copySecret')
 
 tasks.register('copySecret', Copy) {
@@ -106,6 +107,17 @@ tasks.register('copySecret', Copy) {
         include 'logback-prod.xml'
     }
     into 'src/main/resources'
+}
+
+
+// test 리소스 처리 gradle task
+processTestResources.dependsOn('copyTestSecret')
+
+tasks.register('copyTestSecret', Copy) {
+    from('backend-submodule/application') {
+        include 'application-test.yml'
+    }
+    into 'src/test/resources'
 }
 
 tasks.named('test') {
