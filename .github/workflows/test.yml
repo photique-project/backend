@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ACTION_TOKEN }}
+          submodules: true
 
       - name: JDK 설정
         uses: actions/setup-java@v4
