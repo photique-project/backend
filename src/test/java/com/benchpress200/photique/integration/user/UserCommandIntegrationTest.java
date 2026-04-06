@@ -3,16 +3,16 @@ package com.benchpress200.photique.integration.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.benchpress200.photique.auth.application.command.port.out.persistence.AuthMailCodeCommandPort;
 import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
-import com.benchpress200.photique.auth.infrastructure.persistence.redis.AuthMailCodeRepository;
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.common.api.constant.MultipartKey;
 import com.benchpress200.photique.integration.auth.support.fixture.AuthMailCodeFixture;
 import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.support.fixture.MultipartJsonFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.ResisterRequestFixture;
+import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
-import com.benchpress200.photique.user.infrastructure.persistence.jpa.UserRepository;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -27,10 +27,10 @@ import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequ
 @DisplayName("유저 커맨드 API 통합 테스트")
 public class UserCommandIntegrationTest extends BaseIntegrationTest {
     @Autowired
-    private UserRepository userRepository;
+    private UserQueryPort userQueryPort;
 
     @Autowired
-    private AuthMailCodeRepository authMailCodeRepository;
+    private AuthMailCodeCommandPort authMailCodeCommandPort;
 
     @Test
     @DisplayName("회원가입 요청 시 요청이 유효하면 DB에 회원을 저장하고 201을 반환한다")
@@ -51,11 +51,11 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
                 .isVerified(true)
                 .build();
 
-        authMailCodeRepository.save(authMailCode);
+        authMailCodeCommandPort.save(authMailCode);
 
         // when
         ResultActions resultActions = requestRegister(userPart, null);
-        Optional<User> user = userRepository.findByEmailAndDeletedAtIsNull(email);
+        Optional<User> user = userQueryPort.findByEmailAndDeletedAtIsNull(email);
 
         // then
         resultActions
