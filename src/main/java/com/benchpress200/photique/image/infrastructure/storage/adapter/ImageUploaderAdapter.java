@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-@Profile("!local") // local이 아닐 때만 활성화 (dev, prod 등)
+@Profile({"dev", "prod"}) // local이 아닐 때만 활성화 (dev, prod 등)
 @Component
 @RequiredArgsConstructor
 public class ImageUploaderAdapter implements ImageUploaderPort {

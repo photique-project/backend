@@ -14,7 +14,7 @@ public class UserFixture {
     }
 
     public static class Builder {
-        private Long id = 1L;
+        private Long id;
         private String email = "test@example.com"; // RFC 2606에 권장된 예시 TLD 사용
         private String password = "test-password";
         private String nickname = "테스트유저";
