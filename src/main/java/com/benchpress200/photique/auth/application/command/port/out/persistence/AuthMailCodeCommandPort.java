@@ -4,4 +4,6 @@ import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
 
 public interface AuthMailCodeCommandPort {
     AuthMailCode save(AuthMailCode authMailCode);
+
+    void deleteAll();
 }

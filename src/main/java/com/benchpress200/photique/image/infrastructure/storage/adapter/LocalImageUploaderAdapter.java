@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-@Profile("local")
+@Profile({"local", "test"})
 @Component
 public class LocalImageUploaderAdapter implements ImageUploaderPort {
     @Value("${dummy-image-url}")

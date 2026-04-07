@@ -24,4 +24,9 @@ public class AuthMailCodePersistenceAdapter implements
     public AuthMailCode save(AuthMailCode authMailCode) {
         return authMailCodeRepository.save(authMailCode);
     }
+
+    @Override
+    public void deleteAll() {
+        authMailCodeRepository.deleteAll();
+    }
 }

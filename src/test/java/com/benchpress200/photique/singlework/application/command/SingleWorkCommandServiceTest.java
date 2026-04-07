@@ -148,7 +148,9 @@ public class SingleWorkCommandServiceTest extends BaseServiceTest {
     @DisplayName("단일작품 수정 처리에 성공한다")
     public void updateSingleWorkDetails_WhenCommandIsValid() {
         //given
-        User writer = UserFixture.builder().build();
+        User writer = UserFixture.builder()
+                .id(1L)
+                .build();
         String imageUrl = "imageUrl";
         SingleWorkCreateCommand createCommand = SingleWorkCreateCommandFixture.builder().build();
         SingleWork singleWork = createCommand.toEntity(writer, imageUrl);
@@ -177,7 +179,9 @@ public class SingleWorkCommandServiceTest extends BaseServiceTest {
     @DisplayName("태그 업데이트가 포함된 단일작품 수정 처리에 성공한다")
     public void updateSingleWorkDetails_WhenCommandIncludesTagUpdate() {
         //given
-        User writer = UserFixture.builder().build();
+        User writer = UserFixture.builder()
+                .id(1L)
+                .build();
         String imageUrl = "imageUrl";
         SingleWorkCreateCommand createCommand = SingleWorkCreateCommandFixture.builder().build();
         SingleWork singleWork = createCommand.toEntity(writer, imageUrl);
@@ -253,7 +257,9 @@ public class SingleWorkCommandServiceTest extends BaseServiceTest {
     @DisplayName("단일작품 삭제 처리에 성공한다")
     public void deleteSingleWork_whenSingleWorkExists() {
         //given
-        User writer = UserFixture.builder().build();
+        User writer = UserFixture.builder()
+                .id(1L)
+                .build();
         String imageUrl = "imageUrl";
         SingleWorkCreateCommand createCommand = SingleWorkCreateCommandFixture.builder().build();
         SingleWork singleWork = createCommand.toEntity(writer, imageUrl);
