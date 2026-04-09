@@ -18,6 +18,7 @@ import com.benchpress200.photique.singlework.application.query.support.fixture.M
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -47,205 +48,217 @@ public class ExhibitionQueryControllerTest extends BaseControllerTest {
     @MockitoBean
     private SearchMyExhibitionUseCase searchMyExhibitionUseCase;
 
-    @Test
-    @DisplayName("전시회 상세조회 요청 시 요청이 유효하면 200을 반환한다")
-    public void getExhibitionDetails_whenRequestIsValid() throws Exception {
-        // given
-        ExhibitionDetailsResult result = ExhibitionDetailsResultFixture.builder().build();
-        doReturn(result).when(getExhibitionDetailsUseCase).getExhibitionDetails(any());
+    @Nested
+    @DisplayName("전시회 상세 조회")
+    class GetExhibitionDetailsTest {
+        @Test
+        @DisplayName("요청이 유효하면 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            ExhibitionDetailsResult result = ExhibitionDetailsResultFixture.builder().build();
+            doReturn(result).when(getExhibitionDetailsUseCase).getExhibitionDetails(any());
 
-        // when
-        ResultActions resultActions = requestGetExhibitionDetails("1");
+            // when
+            ResultActions resultActions = requestGetExhibitionDetails("1");
 
-        // then
-        resultActions
-                .andExpect(status().isOk());
+            // then
+            resultActions
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("전시회 ID가 유효하지 않다면 400을 반환한다")
+        public void whenExhibitionIdInvalid() throws Exception {
+            // given
+            ExhibitionDetailsResult result = ExhibitionDetailsResultFixture.builder().build();
+            doReturn(result).when(getExhibitionDetailsUseCase).getExhibitionDetails(any());
+
+            // when
+            ResultActions resultActions = requestGetExhibitionDetails("invalid");
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @Test
-    @DisplayName("전시회 상세조회 요청 시 전시회 ID가 숫자가 아니면 400을 반환한다")
-    public void getExhibitionDetails_whenExhibitionIdIsNotNumber() throws Exception {
-        // given
-        ExhibitionDetailsResult result = ExhibitionDetailsResultFixture.builder().build();
-        doReturn(result).when(getExhibitionDetailsUseCase).getExhibitionDetails(any());
+    @Nested
+    @DisplayName("전시회 검색")
+    class SearchExhibitionTest {
+        @Test
+        @DisplayName("요청이 유효하면 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            ExhibitionSearchResult result = ExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchExhibitionUseCase).searchExhibition(any());
 
-        // when
-        ResultActions resultActions = requestGetExhibitionDetails("invalid");
+            // when
+            ResultActions resultActions = requestSearchExhibition(
+                    get(ApiPath.EXHIBITION_ROOT)
+                            .param("target", "work")
+                            .param("keyword", "기본키워드")
+                            .param("page", "0")
+                            .param("size", "10")
+            );
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("검색 대상이 유효하지 않으면 400을 반환한다")
+        public void whenTargetInvalid() throws Exception {
+            // given
+            ExhibitionSearchResult result = ExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchExhibitionUseCase).searchExhibition(any());
+
+            // when
+            ResultActions resultActions = requestSearchExhibition(
+                    get(ApiPath.EXHIBITION_ROOT)
+                            .param("target", "invalid")
+            );
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("키워드가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.query.controller.ExhibitionQueryControllerTest#invalidKeywords")
+        public void whenKeywordInvalid(String invalidKeyword) throws Exception {
+            // given
+            ExhibitionSearchResult result = ExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchExhibitionUseCase).searchExhibition(any());
+
+            // when
+            ResultActions resultActions = requestSearchExhibition(
+                    get(ApiPath.EXHIBITION_ROOT)
+                            .param("keyword", invalidKeyword)
+            );
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("페이지 번호가 유효하지 않다면 400을 반환한다")
+        public void whenPageInvalid() throws Exception {
+            // given
+            ExhibitionSearchResult result = ExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchExhibitionUseCase).searchExhibition(any());
+
+            // when
+            ResultActions resultActions = requestSearchExhibition(
+                    get(ApiPath.EXHIBITION_ROOT)
+                            .param("page", "-1")
+            );
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("페이지 사이즈가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.query.controller.ExhibitionQueryControllerTest#invalidSizes")
+        public void whenSizeInvalid(String invalidSize) throws Exception {
+            // given
+            ExhibitionSearchResult result = ExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchExhibitionUseCase).searchExhibition(any());
+
+            // when
+            ResultActions resultActions = requestSearchExhibition(
+                    get(ApiPath.EXHIBITION_ROOT)
+                            .param("size", invalidSize)
+            );
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @Test
-    @DisplayName("전시회 검색 요청 시 요청이 유효하면 200을 반환한다")
-    public void searchExhibition_whenRequestIsValid() throws Exception {
-        // given
-        ExhibitionSearchResult result = ExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchExhibitionUseCase).searchExhibition(any());
+    @Nested
+    @DisplayName("내 전시회 검색")
+    class SearchMyExhibitionTest {
+        @Test
+        @DisplayName("요청이 유효하면 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchExhibition(
-                get(ApiPath.EXHIBITION_ROOT)
-                        .param("target", "work")
-                        .param("keyword", "기본키워드")
-                        .param("page", "0")
-                        .param("size", "10")
-        );
+            // when
+            ResultActions resultActions = requestSearchMyExhibition(
+                    get(ApiPath.EXHIBITION_MY_DATA)
+                            .param("keyword", "기본키워드")
+                            .param("page", "0")
+                            .param("size", "10")
+            );
 
-        // then
-        resultActions
-                .andExpect(status().isOk());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isOk());
+        }
 
-    @Test
-    @DisplayName("전시회 검색 요청 시 target이 유효하지 않으면 400을 반환한다")
-    public void searchExhibition_whenTargetIsInvalid() throws Exception {
-        // given
-        ExhibitionSearchResult result = ExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchExhibitionUseCase).searchExhibition(any());
+        @ParameterizedTest
+        @DisplayName("키워드가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.query.controller.ExhibitionQueryControllerTest#invalidKeywords")
+        public void whenKeywordInvalid(String invalidKeyword) throws Exception {
+            // given
+            MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchExhibition(
-                get(ApiPath.EXHIBITION_ROOT)
-                        .param("target", "invalid")
-        );
+            // when
+            ResultActions resultActions = requestSearchMyExhibition(
+                    get(ApiPath.EXHIBITION_MY_DATA)
+                            .param("keyword", invalidKeyword)
+            );
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @ParameterizedTest
-    @DisplayName("전시회 검색 요청 시 keyword가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidKeywords")
-    public void searchExhibition_whenKeywordIsInvalid(String invalidKeyword) throws Exception {
-        // given
-        ExhibitionSearchResult result = ExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchExhibitionUseCase).searchExhibition(any());
+        @Test
+        @DisplayName("페이지 번호가 유효하지 않다면 400을 반환한다")
+        public void whenPageInvalid() throws Exception {
+            // given
+            MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchExhibition(
-                get(ApiPath.EXHIBITION_ROOT)
-                        .param("keyword", invalidKeyword)
-        );
+            // when
+            ResultActions resultActions = requestSearchMyExhibition(
+                    get(ApiPath.EXHIBITION_MY_DATA)
+                            .param("page", "-1")
+            );
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    @DisplayName("전시회 검색 요청 시 page가 음수이면 400을 반환한다")
-    public void searchExhibition_whenPageIsNegative() throws Exception {
-        // given
-        ExhibitionSearchResult result = ExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchExhibitionUseCase).searchExhibition(any());
+        @ParameterizedTest
+        @DisplayName("페이지 사이즈가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.query.controller.ExhibitionQueryControllerTest#invalidSizes")
+        public void whenSizeInvalid(String invalidSize) throws Exception {
+            // given
+            MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchExhibition(
-                get(ApiPath.EXHIBITION_ROOT)
-                        .param("page", "-1")
-        );
+            // when
+            ResultActions resultActions = requestSearchMyExhibition(
+                    get(ApiPath.EXHIBITION_MY_DATA)
+                            .param("size", invalidSize)
+            );
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 검색 요청 시 size가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidSizes")
-    public void searchExhibition_whenSizeIsInvalid(String invalidSize) throws Exception {
-        // given
-        ExhibitionSearchResult result = ExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchExhibitionUseCase).searchExhibition(any());
-
-        // when
-        ResultActions resultActions = requestSearchExhibition(
-                get(ApiPath.EXHIBITION_ROOT)
-                        .param("size", invalidSize)
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("내 전시회 검색 요청 시 요청이 유효하면 200을 반환한다")
-    public void searchMyExhibition_whenRequestIsValid() throws Exception {
-        // given
-        MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
-
-        // when
-        ResultActions resultActions = requestSearchMyExhibition(
-                get(ApiPath.EXHIBITION_MY_DATA)
-                        .param("keyword", "기본키워드")
-                        .param("page", "0")
-                        .param("size", "10")
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isOk());
-    }
-
-    @ParameterizedTest
-    @DisplayName("내 전시회 검색 요청 시 keyword가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidKeywords")
-    public void searchMyExhibition_whenKeywordIsInvalid(String invalidKeyword) throws Exception {
-        // given
-        MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
-
-        // when
-        ResultActions resultActions = requestSearchMyExhibition(
-                get(ApiPath.EXHIBITION_MY_DATA)
-                        .param("keyword", invalidKeyword)
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("내 전시회 검색 요청 시 page가 음수이면 400을 반환한다")
-    public void searchMyExhibition_whenPageIsNegative() throws Exception {
-        // given
-        MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
-
-        // when
-        ResultActions resultActions = requestSearchMyExhibition(
-                get(ApiPath.EXHIBITION_MY_DATA)
-                        .param("page", "-1")
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("내 전시회 검색 요청 시 size가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidSizes")
-    public void searchMyExhibition_whenSizeIsInvalid(String invalidSize) throws Exception {
-        // given
-        MyExhibitionSearchResult result = MyExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchMyExhibitionUseCase).searchMyExhibition(any());
-
-        // when
-        ResultActions resultActions = requestSearchMyExhibition(
-                get(ApiPath.EXHIBITION_MY_DATA)
-                        .param("size", invalidSize)
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private static Stream<String> invalidKeywords() {

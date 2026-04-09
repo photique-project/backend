@@ -12,6 +12,7 @@ import com.benchpress200.photique.notification.application.command.port.in.MarkA
 import com.benchpress200.photique.notification.application.command.port.in.MarkAsReadUseCase;
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
@@ -38,74 +39,86 @@ public class NotificationCommandControllerTest extends BaseControllerTest {
     @MockitoBean
     private DeleteNotificationUseCase deleteNotificationUseCase;
 
-    @Test
-    @DisplayName("알림 읽음 표시 요청 시 요청이 유효하면 204를 반환한다")
-    public void markAsRead_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(markAsReadUseCase).markAsRead(any());
+    @Nested
+    @DisplayName("알림 읽음 표시")
+    class MarkAsReadTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(markAsReadUseCase).markAsRead(any());
 
-        // when
-        ResultActions resultActions = requestMarkAsRead("1");
+            // when
+            ResultActions resultActions = requestMarkAsRead("1");
 
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("알림 ID가 숫자가 아니면 400을 반환한다")
+        public void whenNotificationIdInvalid() throws Exception {
+            // given
+            doNothing().when(markAsReadUseCase).markAsRead(any());
+
+            // when
+            ResultActions resultActions = requestMarkAsRead("invalid");
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @Test
-    @DisplayName("알림 읽음 표시 요청 시 알림 ID가 숫자가 아니면 400을 반환한다")
-    public void markAsRead_whenNotificationIdIsNotNumber() throws Exception {
-        // given
-        doNothing().when(markAsReadUseCase).markAsRead(any());
+    @Nested
+    @DisplayName("알림 전체 읽음 표시")
+    class MarkAllAsReadTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(markAllAsReadUseCase).markAllAsRead();
 
-        // when
-        ResultActions resultActions = requestMarkAsRead("invalid");
+            // when
+            ResultActions resultActions = requestMarkAllAsRead();
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
     }
 
-    @Test
-    @DisplayName("알림 전체 읽음 표시 요청 시 요청이 유효하면 204를 반환한다")
-    public void markAllAsRead_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(markAllAsReadUseCase).markAllAsRead();
+    @Nested
+    @DisplayName("알림 전체 읽음 표시")
+    class DeleteNotificationTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(deleteNotificationUseCase).deleteNotification(any());
 
-        // when
-        ResultActions resultActions = requestMarkAllAsRead();
+            // when
+            ResultActions resultActions = requestDeleteNotification("1");
 
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
 
-    @Test
-    @DisplayName("알림 삭제 요청 시 요청이 유효하면 204를 반환한다")
-    public void deleteNotification_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(deleteNotificationUseCase).deleteNotification(any());
+        @Test
+        @DisplayName("알림 ID가 숫자가 아니면 400을 반환한다")
+        public void whenNotificationIdInvalid() throws Exception {
+            // given
+            doNothing().when(deleteNotificationUseCase).deleteNotification(any());
 
-        // when
-        ResultActions resultActions = requestDeleteNotification("1");
+            // when
+            ResultActions resultActions = requestDeleteNotification("invalid");
 
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("알림 삭제 요청 시 알림 ID가 숫자가 아니면 400을 반환한다")
-    public void deleteNotification_whenNotificationIdIsNotNumber() throws Exception {
-        // given
-        doNothing().when(deleteNotificationUseCase).deleteNotification(any());
-
-        // when
-        ResultActions resultActions = requestDeleteNotification("invalid");
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private ResultActions requestMarkAsRead(String notificationId) throws Exception {

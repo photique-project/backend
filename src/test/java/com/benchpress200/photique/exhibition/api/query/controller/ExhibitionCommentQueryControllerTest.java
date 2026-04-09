@@ -12,6 +12,7 @@ import com.benchpress200.photique.exhibition.application.query.support.fixture.E
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,65 +35,69 @@ public class ExhibitionCommentQueryControllerTest extends BaseControllerTest {
     @MockitoBean
     private GetExhibitionCommentsUseCase getExhibitionCommentsUseCase;
 
-    @Test
-    @DisplayName("전시회 감상평 조회 요청 시 요청이 유효하면 200을 반환한다")
-    public void getExhibitionComments_whenRequestIsValid() throws Exception {
-        // given
-        ExhibitionCommentsResult result = ExhibitionCommentsResultFixture.builder().build();
-        doReturn(result).when(getExhibitionCommentsUseCase).getExhibitionComments(any());
+    @Nested
+    @DisplayName("전시회 감상평 페이지 조회")
+    class GetExhibitionCommentsTest {
+        @Test
+        @DisplayName("요청이 유효하면 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            ExhibitionCommentsResult result = ExhibitionCommentsResultFixture.builder().build();
+            doReturn(result).when(getExhibitionCommentsUseCase).getExhibitionComments(any());
 
-        // when
-        ResultActions resultActions = requestGetExhibitionComments("1", null, null);
+            // when
+            ResultActions resultActions = requestGetExhibitionComments("1", null, null);
 
-        // then
-        resultActions
-                .andExpect(status().isOk());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isOk());
+        }
 
-    @Test
-    @DisplayName("전시회 감상평 조회 요청 시 전시회 ID가 숫자가 아니면 400을 반환한다")
-    public void getExhibitionComments_whenExhibitionIdIsNotNumber() throws Exception {
-        // given
-        ExhibitionCommentsResult result = ExhibitionCommentsResultFixture.builder().build();
-        doReturn(result).when(getExhibitionCommentsUseCase).getExhibitionComments(any());
+        @Test
+        @DisplayName("전시회 ID가 유효하지 않다면 400을 반환한다")
+        public void whenExhibitionIdInvalid() throws Exception {
+            // given
+            ExhibitionCommentsResult result = ExhibitionCommentsResultFixture.builder().build();
+            doReturn(result).when(getExhibitionCommentsUseCase).getExhibitionComments(any());
 
-        // when
-        ResultActions resultActions = requestGetExhibitionComments("invalid", null, null);
+            // when
+            ResultActions resultActions = requestGetExhibitionComments("invalid", null, null);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    @DisplayName("전시회 감상평 조회 요청 시 page가 음수이면 400을 반환한다")
-    public void getExhibitionComments_whenPageIsNegative() throws Exception {
-        // given
-        ExhibitionCommentsResult result = ExhibitionCommentsResultFixture.builder().build();
-        doReturn(result).when(getExhibitionCommentsUseCase).getExhibitionComments(any());
+        @Test
+        @DisplayName("페이지 번호가 유효하지 않다면 400을 반환한다")
+        public void whenPageInvalid() throws Exception {
+            // given
+            ExhibitionCommentsResult result = ExhibitionCommentsResultFixture.builder().build();
+            doReturn(result).when(getExhibitionCommentsUseCase).getExhibitionComments(any());
 
-        // when
-        ResultActions resultActions = requestGetExhibitionComments("1", "-1", null);
+            // when
+            ResultActions resultActions = requestGetExhibitionComments("1", "-1", null);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @ParameterizedTest
-    @DisplayName("전시회 감상평 조회 요청 시 size가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidSizes")
-    public void getExhibitionComments_whenSizeIsInvalid(String invalidSize) throws Exception {
-        // given
-        ExhibitionCommentsResult result = ExhibitionCommentsResultFixture.builder().build();
-        doReturn(result).when(getExhibitionCommentsUseCase).getExhibitionComments(any());
+        @ParameterizedTest
+        @DisplayName("페이지 사이즈가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.query.controller.ExhibitionCommentQueryControllerTest#invalidSizes")
+        public void whenSizeInvalid(String invalidSize) throws Exception {
+            // given
+            ExhibitionCommentsResult result = ExhibitionCommentsResultFixture.builder().build();
+            doReturn(result).when(getExhibitionCommentsUseCase).getExhibitionComments(any());
 
-        // when
-        ResultActions resultActions = requestGetExhibitionComments("1", null, invalidSize);
+            // when
+            ResultActions resultActions = requestGetExhibitionComments("1", null, invalidSize);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private static Stream<String> invalidSizes() {

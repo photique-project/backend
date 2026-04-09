@@ -12,6 +12,7 @@ import com.benchpress200.photique.exhibition.application.query.support.fixture.L
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,66 +35,70 @@ public class ExhibitionLikeQueryControllerTest extends BaseControllerTest {
     @MockitoBean
     private SearchLikedExhibitionUseCase searchLikedExhibitionUseCase;
 
-    @Test
-    @DisplayName("좋아요 전시회 검색 요청 시 요청이 유효하면 200을 반환한다")
-    public void searchLikedExhibition_whenRequestIsValid() throws Exception {
-        // given
-        LikedExhibitionSearchResult result = LikedExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchLikedExhibitionUseCase).searchLikedExhibition(any());
+    @Nested
+    @DisplayName("좋아요한 전시회 검색")
+    class SearchLikedExhibitionTest {
+        @Test
+        @DisplayName("요청이 유효하면 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            LikedExhibitionSearchResult result = LikedExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchLikedExhibitionUseCase).searchLikedExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchLikedExhibition(null, null, null);
+            // when
+            ResultActions resultActions = requestSearchLikedExhibition(null, null, null);
 
-        // then
-        resultActions
-                .andExpect(status().isOk());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isOk());
+        }
 
-    @ParameterizedTest
-    @DisplayName("좋아요 전시회 검색 요청 시 keyword가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidKeywords")
-    public void searchLikedExhibition_whenKeywordIsInvalid(String invalidKeyword) throws Exception {
-        // given
-        LikedExhibitionSearchResult result = LikedExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchLikedExhibitionUseCase).searchLikedExhibition(any());
+        @ParameterizedTest
+        @DisplayName("키워드가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.query.controller.ExhibitionLikeQueryControllerTest#invalidKeywords")
+        public void whenKeywordInvalid(String invalidKeyword) throws Exception {
+            // given
+            LikedExhibitionSearchResult result = LikedExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchLikedExhibitionUseCase).searchLikedExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchLikedExhibition(invalidKeyword, null, null);
+            // when
+            ResultActions resultActions = requestSearchLikedExhibition(invalidKeyword, null, null);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    @DisplayName("좋아요 전시회 검색 요청 시 page가 음수이면 400을 반환한다")
-    public void searchLikedExhibition_whenPageIsNegative() throws Exception {
-        // given
-        LikedExhibitionSearchResult result = LikedExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchLikedExhibitionUseCase).searchLikedExhibition(any());
+        @Test
+        @DisplayName("페이지 번호가 유효하지 않다면 400을 반환한다")
+        public void whenPageInvalid() throws Exception {
+            // given
+            LikedExhibitionSearchResult result = LikedExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchLikedExhibitionUseCase).searchLikedExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchLikedExhibition(null, "-1", null);
+            // when
+            ResultActions resultActions = requestSearchLikedExhibition(null, "-1", null);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @ParameterizedTest
-    @DisplayName("좋아요 전시회 검색 요청 시 size가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidSizes")
-    public void searchLikedExhibition_whenSizeIsInvalid(String invalidSize) throws Exception {
-        // given
-        LikedExhibitionSearchResult result = LikedExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchLikedExhibitionUseCase).searchLikedExhibition(any());
+        @ParameterizedTest
+        @DisplayName("페이지 사이즈가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.query.controller.ExhibitionLikeQueryControllerTest#invalidSizes")
+        public void whenSizeInvalid(String invalidSize) throws Exception {
+            // given
+            LikedExhibitionSearchResult result = LikedExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchLikedExhibitionUseCase).searchLikedExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchLikedExhibition(null, null, invalidSize);
+            // when
+            ResultActions resultActions = requestSearchLikedExhibition(null, null, invalidSize);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private static Stream<String> invalidKeywords() {

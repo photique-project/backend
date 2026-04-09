@@ -18,6 +18,7 @@ import com.benchpress200.photique.singlework.application.command.port.in.UpdateS
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -47,99 +48,110 @@ public class SingleWorkCommentCommandControllerTest extends BaseControllerTest {
     @MockitoBean
     private DeleteSingleWorkCommentUseCase deleteSingleWorkCommentUseCase;
 
+    @Nested
+    @DisplayName("단일작품 댓글 생성")
+    class CreateSingleWorkCommentTest {
+        @Test
+        @DisplayName("요청이 유효하면 201을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            SingleWorkCommentCreateRequest request = SingleWorkCommentCreateRequestFixture.builder().build();
+            doNothing().when(createSingleWorkCommentUseCase).createSingleWorkComment(any());
 
-    @Test
-    @DisplayName("단일작품 댓글 생성 요청 시 요청이 유효하면 201을 반환한다")
-    public void createSingleWorkComment_whenRequestIsValid() throws Exception {
-        // given
-        SingleWorkCommentCreateRequest request = SingleWorkCommentCreateRequestFixture.builder().build();
-        doNothing().when(createSingleWorkCommentUseCase).createSingleWorkComment(any());
+            // when
+            ResultActions resultActions = requestCreateSingleWorkComment(1L, request);
 
-        // when
-        ResultActions resultActions = requestCreateSingleWorkComment(1L, request);
+            // then
+            resultActions
+                    .andExpect(status().isCreated());
+        }
 
-        // then
-        resultActions
-                .andExpect(status().isCreated());
+        @ParameterizedTest
+        @DisplayName("내용이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.singlework.api.command.controller.SingleWorkCommentCommandControllerTest#invalidContent")
+        public void whenContentInvalid(String invalidContent) throws Exception {
+            // given
+            SingleWorkCommentCreateRequest request = SingleWorkCommentCreateRequestFixture.builder()
+                    .content(invalidContent)
+                    .build();
+            doNothing().when(createSingleWorkCommentUseCase).createSingleWorkComment(any());
+
+            // when
+            ResultActions resultActions = requestCreateSingleWorkComment(1L, request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @ParameterizedTest
-    @DisplayName("단일작품 댓글 생성 요청 시 내용이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidContent")
-    public void createSingleWorkComment_whenContentIsInvalid(String invalidContent) throws Exception {
-        // given
-        SingleWorkCommentCreateRequest request = SingleWorkCommentCreateRequestFixture.builder()
-                .content(invalidContent)
-                .build();
-        doNothing().when(createSingleWorkCommentUseCase).createSingleWorkComment(any());
+    @Nested
+    @DisplayName("단일작품 댓글 수정")
+    class UpdateSingleWorkCommentTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            SingleWorkCommentUpdateRequest request = SingleWorkCommentUpdateRequestFixture.builder().build();
+            doNothing().when(updateSingleWorkCommentUseCase).updateSingleWorkComment(any());
 
-        // when
-        ResultActions resultActions = requestCreateSingleWorkComment(1L, request);
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkComment(1L, request);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
+
+        @ParameterizedTest
+        @DisplayName("내용이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.singlework.api.command.controller.SingleWorkCommentCommandControllerTest#invalidContentForUpdate")
+        public void whenContentInvalid(String invalidContent) throws Exception {
+            // given
+            SingleWorkCommentUpdateRequest request = SingleWorkCommentUpdateRequestFixture.builder()
+                    .content(invalidContent)
+                    .build();
+            doNothing().when(updateSingleWorkCommentUseCase).updateSingleWorkComment(any());
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkComment(1L, request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @Test
-    @DisplayName("단일작품 댓글 수정 요청 시 요청이 유효하면 204를 반환한다")
-    public void updateSingleWorkComment_whenRequestIsValid() throws Exception {
-        // given
-        SingleWorkCommentUpdateRequest request = SingleWorkCommentUpdateRequestFixture.builder().build();
-        doNothing().when(updateSingleWorkCommentUseCase).updateSingleWorkComment(any());
+    @Nested
+    @DisplayName("단일작품 댓글 삭제")
+    class DeleteSingleWorkCommentTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(deleteSingleWorkCommentUseCase).deleteSingleWorkComment(any());
 
-        // when
-        ResultActions resultActions = requestUpdateSingleWorkComment(1L, request);
+            // when
+            ResultActions resultActions = requestDeleteSingleWorkComment("1");
 
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
 
-    @ParameterizedTest
-    @DisplayName("단일작품 댓글 수정 요청 시 내용이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidContentForUpdate")
-    public void updateSingleWorkComment_whenContentIsInvalid(String invalidContent) throws Exception {
-        // given
-        SingleWorkCommentUpdateRequest request = SingleWorkCommentUpdateRequestFixture.builder()
-                .content(invalidContent)
-                .build();
-        doNothing().when(updateSingleWorkCommentUseCase).updateSingleWorkComment(any());
+        @Test
+        @DisplayName("댓글 ID가 숫자가 아니면 400을 반환한다")
+        public void whenCommentIdInvalid() throws Exception {
+            // given
+            doNothing().when(deleteSingleWorkCommentUseCase).deleteSingleWorkComment(any());
 
-        // when
-        ResultActions resultActions = requestUpdateSingleWorkComment(1L, request);
+            // when
+            ResultActions resultActions = requestDeleteSingleWorkComment("invalid");
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("단일작품 댓글 삭제 요청 시 요청이 유효하면 204를 반환한다")
-    public void deleteSingleWorkComment_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(deleteSingleWorkCommentUseCase).deleteSingleWorkComment(any());
-
-        // when
-        ResultActions resultActions = requestDeleteSingleWorkComment("1");
-
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("단일작품 댓글 삭제 요청 시 댓글 ID가 숫자가 아니면 400을 반환한다")
-    public void deleteSingleWorkComment_whenCommentIdIsInvalid() throws Exception {
-        // given
-        doNothing().when(deleteSingleWorkCommentUseCase).deleteSingleWorkComment(any());
-
-        // when
-        ResultActions resultActions = requestDeleteSingleWorkComment("invalid");
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private static Stream<String> invalidContent() {

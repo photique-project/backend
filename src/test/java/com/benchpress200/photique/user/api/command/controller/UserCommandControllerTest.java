@@ -23,6 +23,7 @@ import com.benchpress200.photique.user.application.command.port.in.UpdateUserPas
 import com.benchpress200.photique.user.application.command.port.in.WithdrawUseCase;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -61,347 +62,368 @@ public class UserCommandControllerTest extends BaseControllerTest {
     @MockitoBean
     private WithdrawUseCase withdrawUseCase;
 
-    @Test
-    @DisplayName("회원가입 요청 시 요청이 유효하면 201을 반환한다")
-    public void register_whenRequestIsValid() throws Exception {
-        // given
-        ResisterRequestFixture request = ResisterRequestFixture.builder().build();
-        MockMultipartFile userPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.USER)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-        doNothing().when(resisterUseCase).resister(any());
+    @Nested
+    @DisplayName("회원가입")
+    class RegisterTest {
+        @Test
+        @DisplayName("요청이 유효하면 201을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            ResisterRequestFixture request = ResisterRequestFixture.builder().build();
+            MockMultipartFile userPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.USER)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+            doNothing().when(resisterUseCase).resister(any());
 
-        // when
-        ResultActions resultActions = requestRegister(userPart, null);
+            // when
+            ResultActions resultActions = requestRegister(userPart, null);
 
-        // then
-        resultActions
-                .andExpect(status().isCreated());
+            // then
+            resultActions
+                    .andExpect(status().isCreated());
+        }
+
+        @ParameterizedTest
+        @DisplayName("이메일이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.user.api.command.controller.UserCommandControllerTest#invalidEmails")
+        public void whenEmailInvalid(String invalidEmail) throws Exception {
+            // given
+            ResisterRequestFixture request = ResisterRequestFixture.builder()
+                    .email(invalidEmail)
+                    .build();
+            MockMultipartFile userPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.USER)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+            doNothing().when(resisterUseCase).resister(any());
+
+            // when
+            ResultActions resultActions = requestRegister(userPart, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("비밀번호가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.user.api.command.controller.UserCommandControllerTest#invalidPasswords")
+        public void whenPasswordInvalid(String invalidPassword) throws Exception {
+            // given
+            ResisterRequestFixture request = ResisterRequestFixture.builder()
+                    .password(invalidPassword)
+                    .build();
+            MockMultipartFile userPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.USER)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+            doNothing().when(resisterUseCase).resister(any());
+
+            // when
+            ResultActions resultActions = requestRegister(userPart, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("닉네임이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.user.api.command.controller.UserCommandControllerTest#invalidNicknames")
+        public void whenNicknameInvalid(String invalidNickname) throws Exception {
+            // given
+            ResisterRequestFixture request = ResisterRequestFixture.builder()
+                    .nickname(invalidNickname)
+                    .build();
+            MockMultipartFile userPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.USER)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+            doNothing().when(resisterUseCase).resister(any());
+
+            // when
+            ResultActions resultActions = requestRegister(userPart, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("프로필 사진이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.user.api.command.controller.UserCommandControllerTest#invalidProfileImages")
+        public void register_whenProfileImageIsInvalid(MockMultipartFile invalidProfileImage) throws Exception {
+            // given
+            ResisterRequestFixture request = ResisterRequestFixture.builder().build();
+            MockMultipartFile userPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.USER)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+            doNothing().when(resisterUseCase).resister(any());
+
+            // when
+            ResultActions resultActions = requestRegister(userPart, invalidProfileImage);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @ParameterizedTest
-    @DisplayName("회원가입 요청 시 email이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidEmails")
-    public void register_whenEmailIsInvalid(String invalidEmail) throws Exception {
-        // given
-        ResisterRequestFixture request = ResisterRequestFixture.builder()
-                .email(invalidEmail)
-                .build();
-        MockMultipartFile userPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.USER)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-        doNothing().when(resisterUseCase).resister(any());
+    @Nested
+    @DisplayName("유저 정보 수정")
+    class UpdateUserDetailsTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            UserDetailsUpdateRequestFixture request = UserDetailsUpdateRequestFixture.builder().build();
+            MockMultipartFile userPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.USER)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+            doNothing().when(updateUserDetailsUseCase).updateUserDetails(any());
 
-        // when
-        ResultActions resultActions = requestRegister(userPart, null);
+            // when
+            ResultActions resultActions = requestUpdateUserDetails("1", userPart, null);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("userId가 숫자가 아니면 400을 반환한다")
+        public void whenUserIdInvalid() throws Exception {
+            // given
+            UserDetailsUpdateRequestFixture request = UserDetailsUpdateRequestFixture.builder().build();
+            MockMultipartFile userPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.USER)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+            doNothing().when(updateUserDetailsUseCase).updateUserDetails(any());
+
+            // when
+            ResultActions resultActions = requestUpdateUserDetails("invalid", userPart, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("닉네임이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.user.api.command.controller.UserCommandControllerTest#invalidNicknamesForUpdate")
+        public void whenNicknameInvalid(String invalidNickname) throws Exception {
+            // given
+            UserDetailsUpdateRequestFixture request = UserDetailsUpdateRequestFixture.builder()
+                    .nickname(invalidNickname)
+                    .build();
+            MockMultipartFile userPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.USER)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+            doNothing().when(updateUserDetailsUseCase).updateUserDetails(any());
+
+            // when
+            ResultActions resultActions = requestUpdateUserDetails("1", userPart, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("소개가 유효하지 않으면 400을 반환한다")
+        public void whenIntroductionInvalid() throws Exception {
+            // given
+            UserDetailsUpdateRequestFixture request = UserDetailsUpdateRequestFixture.builder()
+                    .introduction("a".repeat(51))
+                    .build();
+            MockMultipartFile userPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.USER)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+            doNothing().when(updateUserDetailsUseCase).updateUserDetails(any());
+
+            // when
+            ResultActions resultActions = requestUpdateUserDetails("1", userPart, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("프로필 사진이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.user.api.command.controller.UserCommandControllerTest#invalidProfileImagesForUpdate")
+        public void whenProfileImageInvalid(MockMultipartFile invalidProfileImage)
+                throws Exception {
+            // given
+            UserDetailsUpdateRequestFixture request = UserDetailsUpdateRequestFixture.builder().build();
+            MockMultipartFile userPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.USER)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+            doNothing().when(updateUserDetailsUseCase).updateUserDetails(any());
+
+            // when
+            ResultActions resultActions = requestUpdateUserDetails("1", userPart, invalidProfileImage);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @ParameterizedTest
-    @DisplayName("회원가입 요청 시 password가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidPasswords")
-    public void register_whenPasswordIsInvalid(String invalidPassword) throws Exception {
-        // given
-        ResisterRequestFixture request = ResisterRequestFixture.builder()
-                .password(invalidPassword)
-                .build();
-        MockMultipartFile userPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.USER)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-        doNothing().when(resisterUseCase).resister(any());
+    @Nested
+    @DisplayName("유저 비밀번호 수정")
+    class UpdateUserPasswordTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder().build();
+            doNothing().when(updateUserPasswordUseCase).updateUserPassword(any());
 
-        // when
-        ResultActions resultActions = requestRegister(userPart, null);
+            // when
+            ResultActions resultActions = requestUpdateUserPassword("1", request);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("userId가 숫자가 아니면 400을 반환한다")
+        public void whenUserIdInvalid() throws Exception {
+            // given
+            UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder().build();
+            doNothing().when(updateUserPasswordUseCase).updateUserPassword(any());
+
+            // when
+            ResultActions resultActions = requestUpdateUserPassword("invalid", request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("비밀번호가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.user.api.command.controller.UserCommandControllerTest#invalidPasswords")
+        public void whenPasswordInvalid(String invalidPassword) throws Exception {
+            // given
+            UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder()
+                    .password(invalidPassword)
+                    .build();
+            doNothing().when(updateUserPasswordUseCase).updateUserPassword(any());
+
+            // when
+            ResultActions resultActions = requestUpdateUserPassword("1", request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @ParameterizedTest
-    @DisplayName("회원가입 요청 시 nickname이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidNicknames")
-    public void register_whenNicknameIsInvalid(String invalidNickname) throws Exception {
-        // given
-        ResisterRequestFixture request = ResisterRequestFixture.builder()
-                .nickname(invalidNickname)
-                .build();
-        MockMultipartFile userPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.USER)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-        doNothing().when(resisterUseCase).resister(any());
+    @Nested
+    @DisplayName("유저 비밀번호 초기화")
+    class ResetUserPasswordTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder().build();
+            doNothing().when(resetUserPasswordUseCase).resetUserPassword(any());
 
-        // when
-        ResultActions resultActions = requestRegister(userPart, null);
+            // when
+            ResultActions resultActions = requestResetUserPassword(request);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
+
+        @ParameterizedTest
+        @DisplayName("이메일이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.user.api.command.controller.UserCommandControllerTest#invalidEmails")
+        public void whenEmailInvalid(String invalidEmail) throws Exception {
+            // given
+            UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder()
+                    .email(invalidEmail)
+                    .build();
+            doNothing().when(resetUserPasswordUseCase).resetUserPassword(any());
+
+            // when
+            ResultActions resultActions = requestResetUserPassword(request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("비밀번호가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.user.api.command.controller.UserCommandControllerTest#invalidPasswords")
+        public void whenPasswordInvalid(String invalidPassword) throws Exception {
+            // given
+            UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder()
+                    .password(invalidPassword)
+                    .build();
+            doNothing().when(resetUserPasswordUseCase).resetUserPassword(any());
+
+            // when
+            ResultActions resultActions = requestResetUserPassword(request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @ParameterizedTest
-    @DisplayName("회원가입 요청 시 profileImage가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidProfileImages")
-    public void register_whenProfileImageIsInvalid(MockMultipartFile invalidProfileImage) throws Exception {
-        // given
-        ResisterRequestFixture request = ResisterRequestFixture.builder().build();
-        MockMultipartFile userPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.USER)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-        doNothing().when(resisterUseCase).resister(any());
+    @Nested
+    @DisplayName("회원탈퇴")
+    class WithdrawTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(withdrawUseCase).withdraw(any());
 
-        // when
-        ResultActions resultActions = requestRegister(userPart, invalidProfileImage);
+            // when
+            ResultActions resultActions = requestWithdraw("1");
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
 
-    @Test
-    @DisplayName("유저 정보 수정 요청 시 요청이 유효하면 204를 반환한다")
-    public void updateUserDetails_whenRequestIsValid() throws Exception {
-        // given
-        UserDetailsUpdateRequestFixture request = UserDetailsUpdateRequestFixture.builder().build();
-        MockMultipartFile userPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.USER)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-        doNothing().when(updateUserDetailsUseCase).updateUserDetails(any());
+        @Test
+        @DisplayName("userId가 숫자가 아니면 400을 반환한다")
+        public void whenUserIdInvalid() throws Exception {
+            // given
+            doNothing().when(withdrawUseCase).withdraw(any());
 
-        // when
-        ResultActions resultActions = requestUpdateUserDetails("1", userPart, null);
+            // when
+            ResultActions resultActions = requestWithdraw("invalid");
 
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("유저 정보 수정 요청 시 userId가 숫자가 아니면 400을 반환한다")
-    public void updateUserDetails_whenUserIdIsNotNumber() throws Exception {
-        // given
-        UserDetailsUpdateRequestFixture request = UserDetailsUpdateRequestFixture.builder().build();
-        MockMultipartFile userPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.USER)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-        doNothing().when(updateUserDetailsUseCase).updateUserDetails(any());
-
-        // when
-        ResultActions resultActions = requestUpdateUserDetails("invalid", userPart, null);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("유저 정보 수정 요청 시 nickname이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidNicknamesForUpdate")
-    public void updateUserDetails_whenNicknameIsInvalid(String invalidNickname) throws Exception {
-        // given
-        UserDetailsUpdateRequestFixture request = UserDetailsUpdateRequestFixture.builder()
-                .nickname(invalidNickname)
-                .build();
-        MockMultipartFile userPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.USER)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-        doNothing().when(updateUserDetailsUseCase).updateUserDetails(any());
-
-        // when
-        ResultActions resultActions = requestUpdateUserDetails("1", userPart, null);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("유저 정보 수정 요청 시 introduction이 유효하지 않으면 400을 반환한다")
-    public void updateUserDetails_whenIntroductionIsInvalid() throws Exception {
-        // given
-        UserDetailsUpdateRequestFixture request = UserDetailsUpdateRequestFixture.builder()
-                .introduction("a".repeat(51))
-                .build();
-        MockMultipartFile userPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.USER)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-        doNothing().when(updateUserDetailsUseCase).updateUserDetails(any());
-
-        // when
-        ResultActions resultActions = requestUpdateUserDetails("1", userPart, null);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("유저 정보 수정 요청 시 profileImage가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidProfileImagesForUpdate")
-    public void updateUserDetails_whenProfileImageIsInvalid(MockMultipartFile invalidProfileImage) throws Exception {
-        // given
-        UserDetailsUpdateRequestFixture request = UserDetailsUpdateRequestFixture.builder().build();
-        MockMultipartFile userPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.USER)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-        doNothing().when(updateUserDetailsUseCase).updateUserDetails(any());
-
-        // when
-        ResultActions resultActions = requestUpdateUserDetails("1", userPart, invalidProfileImage);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("유저 비밀번호 수정 요청 시 요청이 유효하면 204를 반환한다")
-    public void updateUserPassword_whenRequestIsValid() throws Exception {
-        // given
-        UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder().build();
-        doNothing().when(updateUserPasswordUseCase).updateUserPassword(any());
-
-        // when
-        ResultActions resultActions = requestUpdateUserPassword("1", request);
-
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("유저 비밀번호 수정 요청 시 userId가 숫자가 아니면 400을 반환한다")
-    public void updateUserPassword_whenUserIdIsNotNumber() throws Exception {
-        // given
-        UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder().build();
-        doNothing().when(updateUserPasswordUseCase).updateUserPassword(any());
-
-        // when
-        ResultActions resultActions = requestUpdateUserPassword("invalid", request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("유저 비밀번호 수정 요청 시 password가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidPasswords")
-    public void updateUserPassword_whenPasswordIsInvalid(String invalidPassword) throws Exception {
-        // given
-        UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder()
-                .password(invalidPassword)
-                .build();
-        doNothing().when(updateUserPasswordUseCase).updateUserPassword(any());
-
-        // when
-        ResultActions resultActions = requestUpdateUserPassword("1", request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("유저 비밀번호 초기화 요청 시 요청이 유효하면 204를 반환한다")
-    public void resetUserPassword_whenRequestIsValid() throws Exception {
-        // given
-        UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder().build();
-        doNothing().when(resetUserPasswordUseCase).resetUserPassword(any());
-
-        // when
-        ResultActions resultActions = requestResetUserPassword(request);
-
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
-
-    @ParameterizedTest
-    @DisplayName("유저 비밀번호 초기화 요청 시 email이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidEmails")
-    public void resetUserPassword_whenEmailIsInvalid(String invalidEmail) throws Exception {
-        // given
-        UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder()
-                .email(invalidEmail)
-                .build();
-        doNothing().when(resetUserPasswordUseCase).resetUserPassword(any());
-
-        // when
-        ResultActions resultActions = requestResetUserPassword(request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("유저 비밀번호 초기화 요청 시 password가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidPasswords")
-    public void resetUserPassword_whenPasswordIsInvalid(String invalidPassword) throws Exception {
-        // given
-        UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder()
-                .password(invalidPassword)
-                .build();
-        doNothing().when(resetUserPasswordUseCase).resetUserPassword(any());
-
-        // when
-        ResultActions resultActions = requestResetUserPassword(request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("회원탈퇴 요청 시 요청이 유효하면 204를 반환한다")
-    public void withdraw_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(withdrawUseCase).withdraw(any());
-
-        // when
-        ResultActions resultActions = requestWithdraw("1");
-
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("회원탈퇴 요청 시 userId가 숫자가 아니면 400을 반환한다")
-    public void withdraw_whenUserIdIsNotNumber() throws Exception {
-        // given
-        doNothing().when(withdrawUseCase).withdraw(any());
-
-        // when
-        ResultActions resultActions = requestWithdraw("invalid");
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private static Stream<String> invalidEmails() {

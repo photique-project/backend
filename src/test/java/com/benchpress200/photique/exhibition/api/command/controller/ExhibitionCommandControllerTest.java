@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -56,622 +57,664 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
     @MockitoBean
     private DeleteExhibitionUseCase deleteExhibitionUseCase;
 
-    @Test
-    @DisplayName("전시회 생성 요청 시 요청이 유효하면 201을 반환한다")
-    public void openExhibition_whenRequestIsValid() throws Exception {
-        // given
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder().build();
+    @Nested
+    @DisplayName("전시회 생성")
+    class OpenExhibitionTest {
+        @Test
+        @DisplayName("요청이 유효하면 201을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder().build();
 
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
 
-        MockMultipartFile imagePart = MultipartFileFixture.builder()
-                .key(MultipartKey.IMAGES)
-                .fileName("test.jpg")
-                .contentType(MediaType.IMAGE_JPEG_VALUE)
-                .content(new byte[]{0})
-                .build();
+            MockMultipartFile imagePart = MultipartFileFixture.builder()
+                    .key(MultipartKey.IMAGES)
+                    .fileName("test.jpg")
+                    .contentType(MediaType.IMAGE_JPEG_VALUE)
+                    .content(new byte[]{0})
+                    .build();
 
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
 
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
 
-        // then
-        resultActions
-                .andExpect(status().isCreated());
+            // then
+            resultActions
+                    .andExpect(status().isCreated());
+        }
+
+        @ParameterizedTest
+        @DisplayName("제목이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidTitles")
+        public void whenTitleInvalid(String invalidTitle) throws Exception {
+            // given
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
+                    .title(invalidTitle)
+                    .build();
+
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+
+            MockMultipartFile imagePart = MultipartFileFixture.builder()
+                    .key(MultipartKey.IMAGES)
+                    .fileName("test.jpg")
+                    .contentType(MediaType.IMAGE_JPEG_VALUE)
+                    .content(new byte[]{0})
+                    .build();
+
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
+
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("설명이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidDescriptions")
+        public void whenDescriptionInvalid(String invalidDescription) throws Exception {
+            // given
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
+                    .description(invalidDescription)
+                    .build();
+
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+
+            MockMultipartFile imagePart = MultipartFileFixture.builder()
+                    .key(MultipartKey.IMAGES)
+                    .fileName("test.jpg")
+                    .contentType(MediaType.IMAGE_JPEG_VALUE)
+                    .content(new byte[]{0})
+                    .build();
+
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
+
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("카드 색상이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidCardColors")
+        public void whenCardColorInvalid(String invalidCardColor) throws Exception {
+            // given
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
+                    .cardColor(invalidCardColor)
+                    .build();
+
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+
+            MockMultipartFile imagePart = MultipartFileFixture.builder()
+                    .key(MultipartKey.IMAGES)
+                    .fileName("test.jpg")
+                    .contentType(MediaType.IMAGE_JPEG_VALUE)
+                    .content(new byte[]{0})
+                    .build();
+
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
+
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("태그 리스트가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidTags")
+        public void whenTagsInvalid(List<String> invalidTags) throws Exception {
+            // given
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
+                    .tags(invalidTags)
+                    .build();
+
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+
+            MockMultipartFile imagePart = MultipartFileFixture.builder()
+                    .key(MultipartKey.IMAGES)
+                    .fileName("test.jpg")
+                    .contentType(MediaType.IMAGE_JPEG_VALUE)
+                    .content(new byte[]{0})
+                    .build();
+
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
+
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("작품 목록이 null이면 400을 반환한다")
+        public void whenWorksNull() throws Exception {
+            // given
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
+                    .works(null)
+                    .build();
+
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+
+            MockMultipartFile imagePart = MultipartFileFixture.builder()
+                    .key(MultipartKey.IMAGES)
+                    .fileName("test.jpg")
+                    .contentType(MediaType.IMAGE_JPEG_VALUE)
+                    .content(new byte[]{0})
+                    .build();
+
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
+
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("작품 목록이 비어있으면 400을 반환한다")
+        public void whenWorksEmpty() throws Exception {
+            // given
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
+                    .works(List.of())
+                    .build();
+
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+
+            MockMultipartFile imagePart = MultipartFileFixture.builder()
+                    .key(MultipartKey.IMAGES)
+                    .fileName("test.jpg")
+                    .contentType(MediaType.IMAGE_JPEG_VALUE)
+                    .content(new byte[]{0})
+                    .build();
+
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
+
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("작품 순서가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidDisplayOrders")
+        public void whenWorkDisplayOrderInvalid(Integer invalidDisplayOrder) throws Exception {
+            // given
+            ExhibitionWorkCreateRequest work = ExhibitionWorkCreateRequestFixture.builder()
+                    .displayOrder(invalidDisplayOrder)
+                    .build();
+
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
+                    .works(List.of(work))
+                    .build();
+
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+
+            MockMultipartFile imagePart = MultipartFileFixture.builder()
+                    .key(MultipartKey.IMAGES)
+                    .fileName("test.jpg")
+                    .contentType(MediaType.IMAGE_JPEG_VALUE)
+                    .content(new byte[]{0})
+                    .build();
+
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
+
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("작품 제목이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidWorkTitles")
+        public void whenWorkTitleInvalid(String invalidWorkTitle) throws Exception {
+            // given
+            ExhibitionWorkCreateRequest work = ExhibitionWorkCreateRequestFixture.builder()
+                    .title(invalidWorkTitle)
+                    .build();
+
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
+                    .works(List.of(work))
+                    .build();
+
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+
+            MockMultipartFile imagePart = MultipartFileFixture.builder()
+                    .key(MultipartKey.IMAGES)
+                    .fileName("test.jpg")
+                    .contentType(MediaType.IMAGE_JPEG_VALUE)
+                    .content(new byte[]{0})
+                    .build();
+
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
+
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("작품 설명이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidWorkDescriptions")
+        public void whenWorkDescriptionInvalid(String invalidWorkDescription) throws Exception {
+            // given
+            ExhibitionWorkCreateRequest work = ExhibitionWorkCreateRequestFixture.builder()
+                    .description(invalidWorkDescription)
+                    .build();
+
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
+                    .works(List.of(work))
+                    .build();
+
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+
+            MockMultipartFile imagePart = MultipartFileFixture.builder()
+                    .key(MultipartKey.IMAGES)
+                    .fileName("test.jpg")
+                    .contentType(MediaType.IMAGE_JPEG_VALUE)
+                    .content(new byte[]{0})
+                    .build();
+
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
+
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("작품 순서가 중복되면 400을 반환한다")
+        public void whenWorkDisplayOrderDuplicated() throws Exception {
+            // given
+            ExhibitionWorkCreateRequest work1 = ExhibitionWorkCreateRequestFixture.builder()
+                    .displayOrder(0)
+                    .build();
+
+            ExhibitionWorkCreateRequest work2 = ExhibitionWorkCreateRequestFixture.builder()
+                    .displayOrder(0)
+                    .build();
+
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
+                    .works(List.of(work1, work2))
+                    .build();
+
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+
+            MockMultipartFile imagePart = MultipartFileFixture.builder()
+                    .key(MultipartKey.IMAGES)
+                    .fileName("test.jpg")
+                    .contentType(MediaType.IMAGE_JPEG_VALUE)
+                    .content(new byte[]{0})
+                    .build();
+
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
+
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("이미지 파일이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidImages")
+        public void whenImageInvalid(MockMultipartFile invalidImage) throws Exception {
+            // given
+            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder().build();
+
+            MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
+                    .key(MultipartKey.EXHIBITION)
+                    .object(request)
+                    .objectMapper(objectMapper)
+                    .build();
+
+            doNothing().when(openExhibitionUseCase).openExhibition(any());
+
+            // when
+            ResultActions resultActions = requestOpenExhibition(exhibitionPart, invalidImage);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @ParameterizedTest
-    @DisplayName("전시회 생성 요청 시 제목이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidTitles")
-    public void openExhibition_whenTitleIsInvalid(String invalidTitle) throws Exception {
-        // given
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
-                .title(invalidTitle)
-                .build();
+    @Nested
+    @DisplayName("전시회 수정")
+    class UpdateExhibitionDetailsTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder().build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
 
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
 
-        MockMultipartFile imagePart = MultipartFileFixture.builder()
-                .key(MultipartKey.IMAGES)
-                .fileName("test.jpg")
-                .contentType(MediaType.IMAGE_JPEG_VALUE)
-                .content(new byte[]{0})
-                .build();
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
 
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
+        @ParameterizedTest
+        @DisplayName("제목이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidTitlesForUpdate")
+        public void whenTitleInvalid(String invalidTitle) throws Exception {
+            // given
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+                    .updateTitle(true)
+                    .title(invalidTitle)
+                    .build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
 
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("설명이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidDescriptionsForUpdate")
+        public void whenDescriptionInvalid(String invalidDescription) throws Exception {
+            // given
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+                    .updateDescription(true)
+                    .description(invalidDescription)
+                    .build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("카드 색상이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidCardColorsForUpdate")
+        public void whenCardColorInvalid(String invalidCardColor) throws Exception {
+            // given
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+                    .updateCardColor(true)
+                    .cardColor(invalidCardColor)
+                    .build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("태그 리스트가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidTagsForUpdate")
+        public void whenTagsInvalid(List<String> invalidTags) throws Exception {
+            // given
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+                    .updateTags(true)
+                    .tags(invalidTags)
+                    .build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("작품 목록이 null이면 400을 반환한다")
+        public void whenWorksNull() throws Exception {
+            // given
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+                    .updateWorks(true)
+                    .works(null)
+                    .build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("작품 목록이 비어있으면 400을 반환한다")
+        public void whenWorksEmpty() throws Exception {
+            // given
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+                    .updateWorks(true)
+                    .works(List.of())
+                    .build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("작품 ID가 유효하지 않다면 400을 반환한다")
+        public void whenWorkIdInvalid() throws Exception {
+            // given
+            ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
+                    .id(null)
+                    .build();
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+                    .updateWorks(true)
+                    .works(List.of(work))
+                    .build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("작품 순서가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidDisplayOrdersForUpdate")
+        public void whenWorkDisplayOrderInvalid(Integer invalidDisplayOrder)
+                throws Exception {
+            // given
+            ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
+                    .displayOrder(invalidDisplayOrder)
+                    .build();
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+                    .updateWorks(true)
+                    .works(List.of(work))
+                    .build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("제목이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidWorkTitlesForUpdate")
+        public void whenWorkTitleInvalid(String invalidWorkTitle) throws Exception {
+            // given
+            ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
+                    .title(invalidWorkTitle)
+                    .build();
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+                    .updateWorks(true)
+                    .works(List.of(work))
+                    .build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("작품 설명이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidWorkDescriptionsForUpdate")
+        public void whenWorkDescriptionInvalid(String invalidWorkDescription)
+                throws Exception {
+            // given
+            ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
+                    .description(invalidWorkDescription)
+                    .build();
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+                    .updateWorks(true)
+                    .works(List.of(work))
+                    .build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("전시회 ID가 유효하지 않으면 400을 반환한다")
+        public void whenExhibitionIdInvalid() throws Exception {
+            // given
+            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder().build();
+            doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails("invalid", request);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @ParameterizedTest
-    @DisplayName("전시회 생성 요청 시 설명이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidDescriptions")
-    public void openExhibition_whenDescriptionIsInvalid(String invalidDescription) throws Exception {
-        // given
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
-                .description(invalidDescription)
-                .build();
-
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-
-        MockMultipartFile imagePart = MultipartFileFixture.builder()
-                .key(MultipartKey.IMAGES)
-                .fileName("test.jpg")
-                .contentType(MediaType.IMAGE_JPEG_VALUE)
-                .content(new byte[]{0})
-                .build();
-
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
-
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 생성 요청 시 카드 색상이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidCardColors")
-    public void openExhibition_whenCardColorIsInvalid(String invalidCardColor) throws Exception {
-        // given
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
-                .cardColor(invalidCardColor)
-                .build();
-
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-
-        MockMultipartFile imagePart = MultipartFileFixture.builder()
-                .key(MultipartKey.IMAGES)
-                .fileName("test.jpg")
-                .contentType(MediaType.IMAGE_JPEG_VALUE)
-                .content(new byte[]{0})
-                .build();
-
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
-
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 생성 요청 시 태그 리스트가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidTags")
-    public void openExhibition_whenTagsIsInvalid(List<String> invalidTags) throws Exception {
-        // given
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
-                .tags(invalidTags)
-                .build();
-
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-
-        MockMultipartFile imagePart = MultipartFileFixture.builder()
-                .key(MultipartKey.IMAGES)
-                .fileName("test.jpg")
-                .contentType(MediaType.IMAGE_JPEG_VALUE)
-                .content(new byte[]{0})
-                .build();
-
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
-
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("전시회 생성 요청 시 작품 목록이 null이면 400을 반환한다")
-    public void openExhibition_whenWorksIsNull() throws Exception {
-        // given
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
-                .works(null)
-                .build();
-
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-
-        MockMultipartFile imagePart = MultipartFileFixture.builder()
-                .key(MultipartKey.IMAGES)
-                .fileName("test.jpg")
-                .contentType(MediaType.IMAGE_JPEG_VALUE)
-                .content(new byte[]{0})
-                .build();
-
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
-
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("전시회 생성 요청 시 작품 목록이 비어있으면 400을 반환한다")
-    public void openExhibition_whenWorksIsEmpty() throws Exception {
-        // given
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
-                .works(List.of())
-                .build();
-
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-
-        MockMultipartFile imagePart = MultipartFileFixture.builder()
-                .key(MultipartKey.IMAGES)
-                .fileName("test.jpg")
-                .contentType(MediaType.IMAGE_JPEG_VALUE)
-                .content(new byte[]{0})
-                .build();
-
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
-
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 생성 요청 시 작품 순서가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidDisplayOrders")
-    public void openExhibition_whenWorkDisplayOrderIsInvalid(Integer invalidDisplayOrder) throws Exception {
-        // given
-        ExhibitionWorkCreateRequest work = ExhibitionWorkCreateRequestFixture.builder()
-                .displayOrder(invalidDisplayOrder)
-                .build();
-
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
-                .works(List.of(work))
-                .build();
-
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-
-        MockMultipartFile imagePart = MultipartFileFixture.builder()
-                .key(MultipartKey.IMAGES)
-                .fileName("test.jpg")
-                .contentType(MediaType.IMAGE_JPEG_VALUE)
-                .content(new byte[]{0})
-                .build();
-
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
-
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 생성 요청 시 작품 제목이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidWorkTitles")
-    public void openExhibition_whenWorkTitleIsInvalid(String invalidWorkTitle) throws Exception {
-        // given
-        ExhibitionWorkCreateRequest work = ExhibitionWorkCreateRequestFixture.builder()
-                .title(invalidWorkTitle)
-                .build();
-
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
-                .works(List.of(work))
-                .build();
-
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-
-        MockMultipartFile imagePart = MultipartFileFixture.builder()
-                .key(MultipartKey.IMAGES)
-                .fileName("test.jpg")
-                .contentType(MediaType.IMAGE_JPEG_VALUE)
-                .content(new byte[]{0})
-                .build();
-
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
-
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 생성 요청 시 작품 설명이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidWorkDescriptions")
-    public void openExhibition_whenWorkDescriptionIsInvalid(String invalidWorkDescription) throws Exception {
-        // given
-        ExhibitionWorkCreateRequest work = ExhibitionWorkCreateRequestFixture.builder()
-                .description(invalidWorkDescription)
-                .build();
-
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
-                .works(List.of(work))
-                .build();
-
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-
-        MockMultipartFile imagePart = MultipartFileFixture.builder()
-                .key(MultipartKey.IMAGES)
-                .fileName("test.jpg")
-                .contentType(MediaType.IMAGE_JPEG_VALUE)
-                .content(new byte[]{0})
-                .build();
-
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
-
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("전시회 생성 요청 시 작품 순서가 중복되면 400을 반환한다")
-    public void openExhibition_whenWorkDisplayOrderIsDuplicated() throws Exception {
-        // given
-        ExhibitionWorkCreateRequest work1 = ExhibitionWorkCreateRequestFixture.builder()
-                .displayOrder(0)
-                .build();
-
-        ExhibitionWorkCreateRequest work2 = ExhibitionWorkCreateRequestFixture.builder()
-                .displayOrder(0)
-                .build();
-
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder()
-                .works(List.of(work1, work2))
-                .build();
-
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-
-        MockMultipartFile imagePart = MultipartFileFixture.builder()
-                .key(MultipartKey.IMAGES)
-                .fileName("test.jpg")
-                .contentType(MediaType.IMAGE_JPEG_VALUE)
-                .content(new byte[]{0})
-                .build();
-
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
-
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, imagePart);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 생성 요청 시 이미지 파일이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidImages")
-    public void openExhibition_whenImageIsInvalid(MockMultipartFile invalidImage) throws Exception {
-        // given
-        ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder().build();
-
-        MockMultipartFile exhibitionPart = MultipartJsonFixture.builder()
-                .key(MultipartKey.EXHIBITION)
-                .object(request)
-                .objectMapper(objectMapper)
-                .build();
-
-        doNothing().when(openExhibitionUseCase).openExhibition(any());
-
-        // when
-        ResultActions resultActions = requestOpenExhibition(exhibitionPart, invalidImage);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("전시회 수정 요청 시 요청이 유효하면 204를 반환한다")
-    public void updateExhibitionDetails_whenRequestIsValid() throws Exception {
-        // given
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder().build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
-
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 수정 요청 시 제목이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidTitlesForUpdate")
-    public void updateExhibitionDetails_whenTitleIsInvalid(String invalidTitle) throws Exception {
-        // given
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
-                .updateTitle(true)
-                .title(invalidTitle)
-                .build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 수정 요청 시 설명이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidDescriptionsForUpdate")
-    public void updateExhibitionDetails_whenDescriptionIsInvalid(String invalidDescription) throws Exception {
-        // given
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
-                .updateDescription(true)
-                .description(invalidDescription)
-                .build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 수정 요청 시 카드 색상이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidCardColorsForUpdate")
-    public void updateExhibitionDetails_whenCardColorIsInvalid(String invalidCardColor) throws Exception {
-        // given
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
-                .updateCardColor(true)
-                .cardColor(invalidCardColor)
-                .build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 수정 요청 시 태그 리스트가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidTagsForUpdate")
-    public void updateExhibitionDetails_whenTagsIsInvalid(List<String> invalidTags) throws Exception {
-        // given
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
-                .updateTags(true)
-                .tags(invalidTags)
-                .build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("전시회 수정 요청 시 작품 목록이 null이면 400을 반환한다")
-    public void updateExhibitionDetails_whenWorksIsNull() throws Exception {
-        // given
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
-                .updateWorks(true)
-                .works(null)
-                .build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("전시회 수정 요청 시 작품 목록이 비어있으면 400을 반환한다")
-    public void updateExhibitionDetails_whenWorksIsEmpty() throws Exception {
-        // given
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
-                .updateWorks(true)
-                .works(List.of())
-                .build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("전시회 수정 요청 시 작품 ID가 null이면 400을 반환한다")
-    public void updateExhibitionDetails_whenWorkIdIsNull() throws Exception {
-        // given
-        ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
-                .id(null)
-                .build();
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
-                .updateWorks(true)
-                .works(List.of(work))
-                .build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 수정 요청 시 작품 순서가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidDisplayOrdersForUpdate")
-    public void updateExhibitionDetails_whenWorkDisplayOrderIsInvalid(Integer invalidDisplayOrder) throws Exception {
-        // given
-        ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
-                .displayOrder(invalidDisplayOrder)
-                .build();
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
-                .updateWorks(true)
-                .works(List.of(work))
-                .build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 수정 요청 시 작품 제목이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidWorkTitlesForUpdate")
-    public void updateExhibitionDetails_whenWorkTitleIsInvalid(String invalidWorkTitle) throws Exception {
-        // given
-        ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
-                .title(invalidWorkTitle)
-                .build();
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
-                .updateWorks(true)
-                .works(List.of(work))
-                .build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("전시회 수정 요청 시 작품 설명이 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidWorkDescriptionsForUpdate")
-    public void updateExhibitionDetails_whenWorkDescriptionIsInvalid(String invalidWorkDescription) throws Exception {
-        // given
-        ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
-                .description(invalidWorkDescription)
-                .build();
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
-                .updateWorks(true)
-                .works(List.of(work))
-                .build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails(1L, request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("전시회 수정 요청 시 전시회 ID가 숫자가 아니면 400을 반환한다")
-    public void updateExhibitionDetails_whenExhibitionIdIsNotNumber() throws Exception {
-        // given
-        Map<String, Object> request = ExhibitionUpdateRequestFixture.builder().build();
-        doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
-
-        // when
-        ResultActions resultActions = requestUpdateExhibitionDetails("invalid", request);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+    @Nested
+    @DisplayName("전시회 삭제")
+    class DeleteExhibitionTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(deleteExhibitionUseCase).deleteExhibition(any());
+
+            // when
+            ResultActions resultActions = requestDeleteExhibition("1");
+
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("전시회 ID가 유효하지 않다면 400을 반환한다")
+        public void whenExhibitionIdInvalid() throws Exception {
+            // given
+            doNothing().when(deleteExhibitionUseCase).deleteExhibition(any());
+
+            // when
+            ResultActions resultActions = requestDeleteExhibition("invalid");
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private static Stream<String> invalidTitles() {
@@ -852,34 +895,6 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
         );
-    }
-
-    @Test
-    @DisplayName("전시회 삭제 요청 시 요청이 유효하면 204를 반환한다")
-    public void deleteExhibition_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(deleteExhibitionUseCase).deleteExhibition(any());
-
-        // when
-        ResultActions resultActions = requestDeleteExhibition("1");
-
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("전시회 삭제 요청 시 전시회 ID가 숫자가 아니면 400을 반환한다")
-    public void deleteExhibition_whenExhibitionIdIsNotNumber() throws Exception {
-        // given
-        doNothing().when(deleteExhibitionUseCase).deleteExhibition(any());
-
-        // when
-        ResultActions resultActions = requestDeleteExhibition("invalid");
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
     }
 
     private ResultActions requestDeleteExhibition(String exhibitionId) throws Exception {

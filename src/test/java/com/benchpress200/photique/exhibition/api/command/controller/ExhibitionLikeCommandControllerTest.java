@@ -11,6 +11,7 @@ import com.benchpress200.photique.exhibition.application.command.port.in.AddExhi
 import com.benchpress200.photique.exhibition.application.command.port.in.CancelExhibitionLikeUseCase;
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
@@ -34,60 +35,68 @@ public class ExhibitionLikeCommandControllerTest extends BaseControllerTest {
     @MockitoBean
     private CancelExhibitionLikeUseCase cancelExhibitionLikeUseCase;
 
-    @Test
-    @DisplayName("전시회 좋아요 추가 요청 시 요청이 유효하면 201을 반환한다")
-    public void addExhibitionLike_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(addExhibitionLikeUseCase).addExhibitionLike(any());
+    @Nested
+    @DisplayName("전시회 좋아요 추가")
+    class AddExhibitionLikeTest {
+        @Test
+        @DisplayName("요청이 유효하면 201을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(addExhibitionLikeUseCase).addExhibitionLike(any());
 
-        // when
-        ResultActions resultActions = requestAddExhibitionLike("1");
+            // when
+            ResultActions resultActions = requestAddExhibitionLike("1");
 
-        // then
-        resultActions
-                .andExpect(status().isCreated());
+            // then
+            resultActions
+                    .andExpect(status().isCreated());
+        }
+
+        @Test
+        @DisplayName("전시회 ID가 유효하지 않다면 400을 반환한다")
+        public void whenExhibitionIdInvalid() throws Exception {
+            // given
+            doNothing().when(addExhibitionLikeUseCase).addExhibitionLike(any());
+
+            // when
+            ResultActions resultActions = requestAddExhibitionLike("invalid");
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @Test
-    @DisplayName("전시회 좋아요 추가 요청 시 전시회 ID가 숫자가 아니면 400을 반환한다")
-    public void addExhibitionLike_whenExhibitionIdIsNotNumber() throws Exception {
-        // given
-        doNothing().when(addExhibitionLikeUseCase).addExhibitionLike(any());
+    @Nested
+    @DisplayName("전시회 좋아요 취소")
+    class CancelExhibitionLikeTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(cancelExhibitionLikeUseCase).cancelExhibitionLike(any());
 
-        // when
-        ResultActions resultActions = requestAddExhibitionLike("invalid");
+            // when
+            ResultActions resultActions = requestCancelExhibitionLike("1");
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
 
-    @Test
-    @DisplayName("전시회 좋아요 취소 요청 시 요청이 유효하면 204를 반환한다")
-    public void cancelExhibitionLike_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(cancelExhibitionLikeUseCase).cancelExhibitionLike(any());
+        @Test
+        @DisplayName("전시회 ID가 숫자가 아니면 400을 반환한다")
+        public void whenExhibitionIdInvalid() throws Exception {
+            // given
+            doNothing().when(cancelExhibitionLikeUseCase).cancelExhibitionLike(any());
 
-        // when
-        ResultActions resultActions = requestCancelExhibitionLike("1");
+            // when
+            ResultActions resultActions = requestCancelExhibitionLike("invalid");
 
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("전시회 좋아요 취소 요청 시 전시회 ID가 숫자가 아니면 400을 반환한다")
-    public void cancelExhibitionLike_whenExhibitionIdIsNotNumber() throws Exception {
-        // given
-        doNothing().when(cancelExhibitionLikeUseCase).cancelExhibitionLike(any());
-
-        // when
-        ResultActions resultActions = requestCancelExhibitionLike("invalid");
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private ResultActions requestAddExhibitionLike(String exhibitionId) throws Exception {
