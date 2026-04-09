@@ -13,6 +13,7 @@ import com.benchpress200.photique.singlework.application.command.port.in.CancelS
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkAlreadyLikedException;
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
@@ -36,70 +37,78 @@ public class SingleWorkLikeCommandControllerTest extends BaseControllerTest {
     @MockitoBean
     private CancelSingleWorkLikeUseCase cancelSingleWorkLikeUseCase;
 
-    @Test
-    @DisplayName("단일작품 좋아요 추가 요청 시 요청이 유효하면 201을 반환한다")
-    void addSingleWorkLike_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(addSingleWorkLikeUseCase).addSingleWorkLike(any());
+    @Nested
+    @DisplayName("단일작품 좋아요 추가")
+    class AddSingleWorkLikeTest {
+        @Test
+        @DisplayName("요청이 유효하면 201을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(addSingleWorkLikeUseCase).addSingleWorkLike(any());
 
-        // when
-        ResultActions resultActions = requestAddSingleWorkLike("1");
+            // when
+            ResultActions resultActions = requestAddSingleWorkLike("1");
 
-        // then
-        resultActions.andExpect(status().isCreated());
+            // then
+            resultActions.andExpect(status().isCreated());
+        }
+
+        @Test
+        @DisplayName("작품 ID가 숫자가 아니면 400을 반환한다")
+        public void whenSingleWorkIdInvalid() throws Exception {
+            // given
+            doNothing().when(addSingleWorkLikeUseCase).addSingleWorkLike(any());
+
+            // when
+            ResultActions resultActions = requestAddSingleWorkLike("invalid");
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("이미 좋아요를 눌렀으면 409를 반환한다")
+        public void whenAlreadyLiked() throws Exception {
+            // given
+            doThrow(new SingleWorkAlreadyLikedException(1L, 1L))
+                    .when(addSingleWorkLikeUseCase).addSingleWorkLike(any());
+
+            // when
+            ResultActions resultActions = requestAddSingleWorkLike("1");
+
+            // then
+            resultActions.andExpect(status().isConflict());
+        }
     }
 
-    @Test
-    @DisplayName("단일작품 좋아요 추가 요청 시 작품 ID가 숫자가 아니면 400을 반환한다")
-    void addSingleWorkLike_whenSingleWorkIdIsNotNumber() throws Exception {
-        // given
-        doNothing().when(addSingleWorkLikeUseCase).addSingleWorkLike(any());
+    @Nested
+    @DisplayName("단일작품 좋아요 취소")
+    class CancelSingleWorkLikeTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(cancelSingleWorkLikeUseCase).cancelSingleWorkLike(any());
 
-        // when
-        ResultActions resultActions = requestAddSingleWorkLike("invalid");
+            // when
+            ResultActions resultActions = requestCancelSingleWorkLike("1");
 
-        // then
-        resultActions.andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions.andExpect(status().isNoContent());
+        }
 
-    @Test
-    @DisplayName("단일작품 좋아요 추가 요청 시 이미 좋아요를 눌렀으면 409를 반환한다")
-    void addSingleWorkLike_whenAlreadyLiked() throws Exception {
-        // given
-        doThrow(new SingleWorkAlreadyLikedException(1L, 1L))
-                .when(addSingleWorkLikeUseCase).addSingleWorkLike(any());
+        @Test
+        @DisplayName("작품 ID가 숫자가 아니면 400을 반환한다")
+        public void whenSingleWorkIdInvalid() throws Exception {
+            // given
+            doNothing().when(cancelSingleWorkLikeUseCase).cancelSingleWorkLike(any());
 
-        // when
-        ResultActions resultActions = requestAddSingleWorkLike("1");
+            // when
+            ResultActions resultActions = requestCancelSingleWorkLike("invalid");
 
-        // then
-        resultActions.andExpect(status().isConflict());
-    }
-
-    @Test
-    @DisplayName("단일작품 좋아요 취소 요청 시 요청이 유효하면 204를 반환한다")
-    void cancelSingleWorkLike_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(cancelSingleWorkLikeUseCase).cancelSingleWorkLike(any());
-
-        // when
-        ResultActions resultActions = requestCancelSingleWorkLike("1");
-
-        // then
-        resultActions.andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("단일작품 좋아요 취소 요청 시 작품 ID가 숫자가 아니면 400을 반환한다")
-    void cancelSingleWorkLike_whenSingleWorkIdIsInvalid() throws Exception {
-        // given
-        doNothing().when(cancelSingleWorkLikeUseCase).cancelSingleWorkLike(any());
-
-        // when
-        ResultActions resultActions = requestCancelSingleWorkLike("invalid");
-
-        // then
-        resultActions.andExpect(status().isBadRequest());
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
     }
 
     private ResultActions requestAddSingleWorkLike(String singleWorkId) throws Exception {

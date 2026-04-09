@@ -12,6 +12,7 @@ import com.benchpress200.photique.exhibition.application.query.support.fixture.B
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,66 +35,70 @@ public class ExhibitionBookmarkQueryControllerTest extends BaseControllerTest {
     @MockitoBean
     private SearchBookmarkedExhibitionUseCase searchBookmarkedExhibitionUseCase;
 
-    @Test
-    @DisplayName("북마크 전시회 검색 요청 시 요청이 유효하면 200을 반환한다")
-    public void searchBookmarkedExhibition_whenRequestIsValid() throws Exception {
-        // given
-        BookmarkedExhibitionSearchResult result = BookmarkedExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchBookmarkedExhibitionUseCase).searchBookmarkedExhibition(any());
+    @Nested
+    @DisplayName("북마크 전시회 검색")
+    class SearchBookmarkedExhibitionTest {
+        @Test
+        @DisplayName("요청이 유효하면 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            BookmarkedExhibitionSearchResult result = BookmarkedExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchBookmarkedExhibitionUseCase).searchBookmarkedExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchBookmarkedExhibition(null, null, null);
+            // when
+            ResultActions resultActions = requestSearchBookmarkedExhibition(null, null, null);
 
-        // then
-        resultActions
-                .andExpect(status().isOk());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isOk());
+        }
 
-    @ParameterizedTest
-    @DisplayName("북마크 전시회 검색 요청 시 keyword가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidKeywords")
-    public void searchBookmarkedExhibition_whenKeywordIsInvalid(String invalidKeyword) throws Exception {
-        // given
-        BookmarkedExhibitionSearchResult result = BookmarkedExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchBookmarkedExhibitionUseCase).searchBookmarkedExhibition(any());
+        @ParameterizedTest
+        @DisplayName("키워드가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.query.controller.ExhibitionBookmarkQueryControllerTest#invalidKeywords")
+        public void whenKeywordInvalid(String invalidKeyword) throws Exception {
+            // given
+            BookmarkedExhibitionSearchResult result = BookmarkedExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchBookmarkedExhibitionUseCase).searchBookmarkedExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchBookmarkedExhibition(invalidKeyword, null, null);
+            // when
+            ResultActions resultActions = requestSearchBookmarkedExhibition(invalidKeyword, null, null);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    @DisplayName("북마크 전시회 검색 요청 시 page가 음수이면 400을 반환한다")
-    public void searchBookmarkedExhibition_whenPageIsNegative() throws Exception {
-        // given
-        BookmarkedExhibitionSearchResult result = BookmarkedExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchBookmarkedExhibitionUseCase).searchBookmarkedExhibition(any());
+        @Test
+        @DisplayName("페이지 번호가 유효하지 않다면 400을 반환한다")
+        public void whenPageInvalid() throws Exception {
+            // given
+            BookmarkedExhibitionSearchResult result = BookmarkedExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchBookmarkedExhibitionUseCase).searchBookmarkedExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchBookmarkedExhibition(null, "-1", null);
+            // when
+            ResultActions resultActions = requestSearchBookmarkedExhibition(null, "-1", null);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @ParameterizedTest
-    @DisplayName("북마크 전시회 검색 요청 시 size가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidSizes")
-    public void searchBookmarkedExhibition_whenSizeIsInvalid(String invalidSize) throws Exception {
-        // given
-        BookmarkedExhibitionSearchResult result = BookmarkedExhibitionSearchResultFixture.builder().build();
-        doReturn(result).when(searchBookmarkedExhibitionUseCase).searchBookmarkedExhibition(any());
+        @ParameterizedTest
+        @DisplayName("페이지 사이즈가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.exhibition.api.query.controller.ExhibitionBookmarkQueryControllerTest#invalidSizes")
+        public void whenSizeInvalid(String invalidSize) throws Exception {
+            // given
+            BookmarkedExhibitionSearchResult result = BookmarkedExhibitionSearchResultFixture.builder().build();
+            doReturn(result).when(searchBookmarkedExhibitionUseCase).searchBookmarkedExhibition(any());
 
-        // when
-        ResultActions resultActions = requestSearchBookmarkedExhibition(null, null, invalidSize);
+            // when
+            ResultActions resultActions = requestSearchBookmarkedExhibition(null, null, invalidSize);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private static Stream<String> invalidKeywords() {

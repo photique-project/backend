@@ -11,6 +11,7 @@ import com.benchpress200.photique.singlework.application.query.result.SingleWork
 import com.benchpress200.photique.singlework.application.query.support.fixture.SingleWorkCommentsResultFixture;
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -34,65 +35,69 @@ public class SingleWorkCommentQueryControllerTest extends BaseControllerTest {
     @MockitoBean
     private GetSingleWorkCommentsUseCase getSingleWorkCommentsUseCase;
 
-    @Test
-    @DisplayName("단일작품 댓글 목록 조회 요청 시 요청이 유효하면 200을 반환한다")
-    public void getSingleWorkComments_whenRequestIsValid() throws Exception {
-        // given
-        SingleWorkCommentsResult result = SingleWorkCommentsResultFixture.builder().build();
-        doReturn(result).when(getSingleWorkCommentsUseCase).getSingleWorkComments(any());
+    @Nested
+    @DisplayName("단일작품 댓글 페이지 조회")
+    class GetSingleWorkCommentsTest {
+        @Test
+        @DisplayName("요청이 유효하면 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            SingleWorkCommentsResult result = SingleWorkCommentsResultFixture.builder().build();
+            doReturn(result).when(getSingleWorkCommentsUseCase).getSingleWorkComments(any());
 
-        // when
-        ResultActions resultActions = requestGetSingleWorkComments("1", 0, 5);
+            // when
+            ResultActions resultActions = requestGetSingleWorkComments("1", 0, 5);
 
-        // then
-        resultActions
-                .andExpect(status().isOk());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isOk());
+        }
 
-    @Test
-    @DisplayName("단일작품 댓글 목록 조회 요청 시 작품 ID가 숫자가 아니면 400을 반환한다")
-    public void getSingleWorkComments_whenSingleWorkIdIsInvalid() throws Exception {
-        // given
-        SingleWorkCommentsResult result = SingleWorkCommentsResultFixture.builder().build();
-        doReturn(result).when(getSingleWorkCommentsUseCase).getSingleWorkComments(any());
+        @Test
+        @DisplayName("작품 ID가 숫자가 아니면 400을 반환한다")
+        public void whenSingleWorkIdInvalid() throws Exception {
+            // given
+            SingleWorkCommentsResult result = SingleWorkCommentsResultFixture.builder().build();
+            doReturn(result).when(getSingleWorkCommentsUseCase).getSingleWorkComments(any());
 
-        // when
-        ResultActions resultActions = requestGetSingleWorkComments("invalid", 0, 5);
+            // when
+            ResultActions resultActions = requestGetSingleWorkComments("invalid", 0, 5);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    @DisplayName("단일작품 댓글 목록 조회 요청 시 페이지가 음수이면 400을 반환한다")
-    public void getSingleWorkComments_whenPageIsNegative() throws Exception {
-        // given
-        SingleWorkCommentsResult result = SingleWorkCommentsResultFixture.builder().build();
-        doReturn(result).when(getSingleWorkCommentsUseCase).getSingleWorkComments(any());
+        @Test
+        @DisplayName("페이지 번호가 음수면 400을 반환한다")
+        public void whenPageInvalid() throws Exception {
+            // given
+            SingleWorkCommentsResult result = SingleWorkCommentsResultFixture.builder().build();
+            doReturn(result).when(getSingleWorkCommentsUseCase).getSingleWorkComments(any());
 
-        // when
-        ResultActions resultActions = requestGetSingleWorkComments("1", -1, 5);
+            // when
+            ResultActions resultActions = requestGetSingleWorkComments("1", -1, 5);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @ParameterizedTest
-    @ValueSource(ints = {0, 11})
-    @DisplayName("단일작품 댓글 목록 조회 요청 시 사이즈가 유효하지 않으면 400을 반환한다")
-    public void getSingleWorkComments_whenSizeIsInvalid(int invalidSize) throws Exception {
-        // given
-        SingleWorkCommentsResult result = SingleWorkCommentsResultFixture.builder().build();
-        doReturn(result).when(getSingleWorkCommentsUseCase).getSingleWorkComments(any());
+        @ParameterizedTest
+        @ValueSource(ints = {0, 11})
+        @DisplayName("페이지 사이즈가 유효하지 않으면 400을 반환한다")
+        public void whenSizeInvalid(int invalidSize) throws Exception {
+            // given
+            SingleWorkCommentsResult result = SingleWorkCommentsResultFixture.builder().build();
+            doReturn(result).when(getSingleWorkCommentsUseCase).getSingleWorkComments(any());
 
-        // when
-        ResultActions resultActions = requestGetSingleWorkComments("1", 0, invalidSize);
+            // when
+            ResultActions resultActions = requestGetSingleWorkComments("1", 0, invalidSize);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private ResultActions requestGetSingleWorkComments(

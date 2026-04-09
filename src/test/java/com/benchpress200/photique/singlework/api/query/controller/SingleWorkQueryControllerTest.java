@@ -10,14 +10,15 @@ import com.benchpress200.photique.singlework.api.query.support.fixture.SingleWor
 import com.benchpress200.photique.singlework.application.query.port.in.GetSingleWorkDetailsUseCase;
 import com.benchpress200.photique.singlework.application.query.port.in.SearchMySingleWorkUseCase;
 import com.benchpress200.photique.singlework.application.query.port.in.SearchSingleWorkUseCase;
-import com.benchpress200.photique.singlework.application.query.result.SingleWorkDetailsResult;
 import com.benchpress200.photique.singlework.application.query.result.MySingleWorkSearchResult;
+import com.benchpress200.photique.singlework.application.query.result.SingleWorkDetailsResult;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkSearchResult;
 import com.benchpress200.photique.singlework.application.query.support.fixture.MySingleWorkSearchResultFixture;
 import com.benchpress200.photique.singlework.application.query.support.fixture.SingleWorkSearchResultFixture;
 import com.benchpress200.photique.support.base.BaseControllerTest;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -47,159 +48,176 @@ public class SingleWorkQueryControllerTest extends BaseControllerTest {
     @MockitoBean
     private SearchMySingleWorkUseCase searchMySingleWorkUseCase;
 
-    @Test
-    @DisplayName("단일작품 상세조회 요청 시 요청이 유효하면 200을 반환한다")
-    public void getSingleWorkDetails_whenRequestIsValid() throws Exception {
-        // given
-        SingleWorkDetailsResult result = SingleWorkDetailsResultFixture.builder().build();
-        doReturn(result).when(getSingleWorkDetailsUseCase).getSingleWorkDetails(any());
+    @Nested
+    @DisplayName("단일작품 상세 조회")
+    class GetSingleWorkDetailsTest {
+        @Test
+        @DisplayName("요청이 유효하면 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            SingleWorkDetailsResult result = SingleWorkDetailsResultFixture.builder().build();
+            doReturn(result).when(getSingleWorkDetailsUseCase).getSingleWorkDetails(any());
 
-        // when
-        ResultActions resultActions = requestGetSingleWorkDetails("1");
+            // when
+            ResultActions resultActions = requestGetSingleWorkDetails("1");
 
-        // then
-        resultActions
-                .andExpect(status().isOk());
+            // then
+            resultActions
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("작품 ID가 숫자가 아니면 400을 반환한다")
+        public void whenSingleWorkIdInvalid() throws Exception {
+            // given
+            SingleWorkDetailsResult result = SingleWorkDetailsResultFixture.builder().build();
+            doReturn(result).when(getSingleWorkDetailsUseCase).getSingleWorkDetails(any());
+
+            // when
+            ResultActions resultActions = requestGetSingleWorkDetails("invalid");
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @Test
-    @DisplayName("단일작품 상세조회 요청 시 작품 ID가 숫자가 아니면 400을 반환한다")
-    public void getSingleWorkDetails_whenSingleWorkIdIsInvalid() throws Exception {
-        // given
-        SingleWorkDetailsResult result = SingleWorkDetailsResultFixture.builder().build();
-        doReturn(result).when(getSingleWorkDetailsUseCase).getSingleWorkDetails(any());
+    @Nested
+    @DisplayName("단일작품 검색")
+    class SearchSingleWorkTest {
 
-        // when
-        ResultActions resultActions = requestGetSingleWorkDetails("invalid");
+        @Test
+        @DisplayName("요청이 유효하면 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            SingleWorkSearchResult result = SingleWorkSearchResultFixture.builder().build();
+            doReturn(result).when(searchSingleWorkUseCase).searchSingleWork(any());
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // when
+            ResultActions resultActions = requestSearchSingleWork("work", null, null, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("검색 대상이 유효하지 않으면 400을 반환한다")
+        public void whenTargetInvalid() throws Exception {
+            // given
+            String target = "invalid";
+
+            // when
+            ResultActions resultActions = requestSearchSingleWork(target, null, null, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("키워드가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.singlework.api.query.controller.SingleWorkQueryControllerTest#invalidKeywordsForSearch")
+        public void whenKeywordInvalid(String invalidKeyword) throws Exception {
+            // given
+            String target = "work";
+
+            // when
+            ResultActions resultActions = requestSearchSingleWork(target, invalidKeyword, null, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("페이지 번호가 음수이면 400을 반환한다")
+        public void whenPageInvalid() throws Exception {
+            // given
+            String target = "work";
+
+            // when
+            ResultActions resultActions = requestSearchSingleWork(target, null, -1, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("페이지 사이즈가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.singlework.api.query.controller.SingleWorkQueryControllerTest#invalidSizesForSearch")
+        public void whenSizeInvalid(Integer invalidSize) throws Exception {
+            // given
+            String target = "work";
+
+            // when
+            ResultActions resultActions = requestSearchSingleWork(target, null, null, invalidSize);
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @Test
-    @DisplayName("단일작품 검색 요청 시 요청이 유효하면 200을 반환한다")
-    public void searchSingleWork_whenRequestIsValid() throws Exception {
-        // given
-        SingleWorkSearchResult result = SingleWorkSearchResultFixture.builder().build();
-        doReturn(result).when(searchSingleWorkUseCase).searchSingleWork(any());
+    @Nested
+    @DisplayName("내 단일작품 검색")
+    class SearchMySingleWork {
+        @Test
+        @DisplayName("요청이 유효하면 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            MySingleWorkSearchResult result = MySingleWorkSearchResultFixture.builder().build();
+            doReturn(result).when(searchMySingleWorkUseCase).searchMySingleWork(any());
 
-        // when
-        ResultActions resultActions = requestSearchSingleWork("work", null, null, null);
+            // when
+            ResultActions resultActions = requestSearchMySingleWork(null, null, null);
 
-        // then
-        resultActions
-                .andExpect(status().isOk());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isOk());
+        }
 
-    @Test
-    @DisplayName("단일작품 검색 요청 시 검색 대상이 유효하지 않으면 400을 반환한다")
-    public void searchSingleWork_whenTargetIsInvalid() throws Exception {
-        // given
+        @ParameterizedTest
+        @DisplayName("키워드가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.singlework.api.query.controller.SingleWorkQueryControllerTest#invalidKeywordsForMySingleWorkSearch")
+        public void whenKeywordInvalid(String invalidKeyword) throws Exception {
+            // given
 
-        // when
-        ResultActions resultActions = requestSearchSingleWork("invalid", null, null, null);
+            // when
+            ResultActions resultActions = requestSearchMySingleWork(invalidKeyword, null, null);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @ParameterizedTest
-    @DisplayName("단일작품 검색 요청 시 키워드가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidKeywordsForSearch")
-    public void searchSingleWork_whenKeywordIsInvalid(String invalidKeyword) throws Exception {
-        // given
+        @Test
+        @DisplayName("페이지 번호가 음수이면 400을 반환한다")
+        public void whenPageInvalid() throws Exception {
+            // given
 
-        // when
-        ResultActions resultActions = requestSearchSingleWork(null, invalidKeyword, null, null);
+            // when
+            ResultActions resultActions = requestSearchMySingleWork(null, -1, null);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    @DisplayName("단일작품 검색 요청 시 페이지 번호가 음수이면 400을 반환한다")
-    public void searchSingleWork_whenPageIsNegative() throws Exception {
-        // given
+        @ParameterizedTest
+        @DisplayName("페이지 사이즈가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.singlework.api.query.controller.SingleWorkQueryControllerTest#invalidSizesForMySingleWorkSearch")
+        public void whenSizeInvalid(Integer invalidSize) throws Exception {
+            // given
 
-        // when
-        ResultActions resultActions = requestSearchSingleWork(null, null, -1, null);
+            // when
+            ResultActions resultActions = requestSearchMySingleWork(null, null, invalidSize);
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("단일작품 검색 요청 시 페이지 크기가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidSizesForSearch")
-    public void searchSingleWork_whenSizeIsInvalid(Integer invalidSize) throws Exception {
-        // given
-
-        // when
-        ResultActions resultActions = requestSearchSingleWork(null, null, null, invalidSize);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("내 단일작품 검색 요청 시 요청이 유효하면 200을 반환한다")
-    public void searchMySingleWork_whenRequestIsValid() throws Exception {
-        // given
-        MySingleWorkSearchResult result = MySingleWorkSearchResultFixture.builder().build();
-        doReturn(result).when(searchMySingleWorkUseCase).searchMySingleWork(any());
-
-        // when
-        ResultActions resultActions = requestSearchMySingleWork(null, null, null);
-
-        // then
-        resultActions
-                .andExpect(status().isOk());
-    }
-
-    @ParameterizedTest
-    @DisplayName("내 단일작품 검색 요청 시 키워드가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidKeywordsForMySingleWorkSearch")
-    public void searchMySingleWork_whenKeywordIsInvalid(String invalidKeyword) throws Exception {
-        // given
-
-        // when
-        ResultActions resultActions = requestSearchMySingleWork(invalidKeyword, null, null);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("내 단일작품 검색 요청 시 페이지 번호가 음수이면 400을 반환한다")
-    public void searchMySingleWork_whenPageIsNegative() throws Exception {
-        // given
-
-        // when
-        ResultActions resultActions = requestSearchMySingleWork(null, -1, null);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @DisplayName("내 단일작품 검색 요청 시 페이지 크기가 유효하지 않으면 400을 반환한다")
-    @MethodSource("invalidSizesForMySingleWorkSearch")
-    public void searchMySingleWork_whenSizeIsInvalid(Integer invalidSize) throws Exception {
-        // given
-
-        // when
-        ResultActions resultActions = requestSearchMySingleWork(null, null, invalidSize);
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private static Stream<String> invalidKeywordsForMySingleWorkSearch() {
@@ -233,9 +251,15 @@ public class SingleWorkQueryControllerTest extends BaseControllerTest {
     private ResultActions requestSearchMySingleWork(
             String keyword, Integer page, Integer size) throws Exception {
         MockHttpServletRequestBuilder builder = get(ApiPath.SINGLEWORK_MY_DATA);
-        if (keyword != null) builder = builder.param("keyword", keyword);
-        if (page != null) builder = builder.param("page", String.valueOf(page));
-        if (size != null) builder = builder.param("size", String.valueOf(size));
+        if (keyword != null) {
+            builder = builder.param("keyword", keyword);
+        }
+        if (page != null) {
+            builder = builder.param("page", String.valueOf(page));
+        }
+        if (size != null) {
+            builder = builder.param("size", String.valueOf(size));
+        }
         return mockMvc.perform(builder);
     }
 
@@ -248,10 +272,18 @@ public class SingleWorkQueryControllerTest extends BaseControllerTest {
     private ResultActions requestSearchSingleWork(
             String target, String keyword, Integer page, Integer size) throws Exception {
         MockHttpServletRequestBuilder builder = get(ApiPath.SINGLEWORK_ROOT);
-        if (target != null) builder = builder.param("target", target);
-        if (keyword != null) builder = builder.param("keyword", keyword);
-        if (page != null) builder = builder.param("page", String.valueOf(page));
-        if (size != null) builder = builder.param("size", String.valueOf(size));
+        if (target != null) {
+            builder = builder.param("target", target);
+        }
+        if (keyword != null) {
+            builder = builder.param("keyword", keyword);
+        }
+        if (page != null) {
+            builder = builder.param("page", String.valueOf(page));
+        }
+        if (size != null) {
+            builder = builder.param("size", String.valueOf(size));
+        }
         return mockMvc.perform(builder);
     }
 }

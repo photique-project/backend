@@ -11,6 +11,7 @@ import com.benchpress200.photique.support.base.BaseControllerTest;
 import com.benchpress200.photique.user.application.command.port.in.FollowUseCase;
 import com.benchpress200.photique.user.application.command.port.in.UnfollowUseCase;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
@@ -34,60 +35,68 @@ public class FollowCommandControllerTest extends BaseControllerTest {
     @MockitoBean
     private UnfollowUseCase unfollowUseCase;
 
-    @Test
-    @DisplayName("팔로우 요청 시 요청이 유효하면 201을 반환한다")
-    public void follow_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(followUseCase).follow(any());
+    @Nested
+    @DisplayName("팔로우")
+    class FollowTest {
+        @Test
+        @DisplayName("요청이 유효하면 201을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(followUseCase).follow(any());
 
-        // when
-        ResultActions resultActions = requestFollow("1");
+            // when
+            ResultActions resultActions = requestFollow("1");
 
-        // then
-        resultActions
-                .andExpect(status().isCreated());
+            // then
+            resultActions
+                    .andExpect(status().isCreated());
+        }
+
+        @Test
+        @DisplayName("followeeId가 숫자가 아니면 400을 반환한다")
+        public void whenFolloweeIdInvalid() throws Exception {
+            // given
+            doNothing().when(followUseCase).follow(any());
+
+            // when
+            ResultActions resultActions = requestFollow("invalid");
+
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
-    @Test
-    @DisplayName("팔로우 요청 시 followeeId가 숫자가 아니면 400을 반환한다")
-    public void follow_whenFolloweeIdIsNotNumber() throws Exception {
-        // given
-        doNothing().when(followUseCase).follow(any());
+    @Nested
+    @DisplayName("언팔로우")
+    class UnfollowTest {
+        @Test
+        @DisplayName("요청이 유효하면 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            doNothing().when(unfollowUseCase).unfollow(any());
 
-        // when
-        ResultActions resultActions = requestFollow("invalid");
+            // when
+            ResultActions resultActions = requestUnfollow("1");
 
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
-    }
+            // then
+            resultActions
+                    .andExpect(status().isNoContent());
+        }
 
-    @Test
-    @DisplayName("팔로우 취소 요청 시 요청이 유효하면 204를 반환한다")
-    public void unfollow_whenRequestIsValid() throws Exception {
-        // given
-        doNothing().when(unfollowUseCase).unfollow(any());
+        @Test
+        @DisplayName("followeeId가 숫자가 아니면 400을 반환한다")
+        public void whenFolloweeIdInvalid() throws Exception {
+            // given
+            doNothing().when(unfollowUseCase).unfollow(any());
 
-        // when
-        ResultActions resultActions = requestUnfollow("1");
+            // when
+            ResultActions resultActions = requestUnfollow("invalid");
 
-        // then
-        resultActions
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("팔로우 취소 요청 시 followeeId가 숫자가 아니면 400을 반환한다")
-    public void unfollow_whenFolloweeIdIsNotNumber() throws Exception {
-        // given
-        doNothing().when(unfollowUseCase).unfollow(any());
-
-        // when
-        ResultActions resultActions = requestUnfollow("invalid");
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest());
+            // then
+            resultActions
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     private ResultActions requestFollow(String followeeId) throws Exception {
