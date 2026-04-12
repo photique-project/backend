@@ -19,6 +19,7 @@ import com.benchpress200.photique.auth.application.query.port.out.persistence.Au
 import com.benchpress200.photique.auth.application.support.fixture.AuthMailCodeValidateCommandFixture;
 import com.benchpress200.photique.auth.application.support.fixture.AuthMailCommandFixture;
 import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
+import com.benchpress200.photique.auth.domain.exception.EmailAlreadyInUseException;
 import com.benchpress200.photique.auth.domain.exception.EmailNotFoundException;
 import com.benchpress200.photique.auth.domain.exception.VerificationCodeNotFoundException;
 import com.benchpress200.photique.integration.auth.support.fixture.AuthMailCodeFixture;
@@ -50,6 +51,44 @@ public class AuthCommandServiceTest extends BaseServiceTest {
 
     @Mock
     private AuthenticationTokenManagerPort authenticationTokenManagerPort;
+
+    @Nested
+    @DisplayName("회원가입 인증 메일 전송")
+    class SendJoinAuthMailTest {
+        @Test
+        @DisplayName("이메일이 사용 중이지 않으면 인증 메일을 전송하고 인증 코드를 저장한다")
+        public void whenEmailNotInUse() {
+            // given
+            AuthMailCommand command = AuthMailCommandFixture.builder().build();
+
+            doReturn(false).when(userQueryPort).existsByEmail(any());
+            doNothing().when(mailSenderPort).sendMail(any());
+
+            // when
+            authCommandService.sendJoinAuthMail(command);
+
+            // then
+            verify(userQueryPort).existsByEmail(command.getEmail());
+            verify(mailSenderPort).sendMail(any());
+            verify(authMailCodeCommandPort).save(any());
+        }
+
+        @Test
+        @DisplayName("이메일이 이미 사용 중이면 EmailAlreadyInUseException을 던진다")
+        public void whenEmailAlreadyInUse() {
+            // given
+            AuthMailCommand command = AuthMailCommandFixture.builder().build();
+
+            doReturn(true).when(userQueryPort).existsByEmail(any());
+
+            // when & then
+            assertThrows(
+                    EmailAlreadyInUseException.class,
+                    () -> authCommandService.sendJoinAuthMail(command)
+            );
+            verify(mailSenderPort, never()).sendMail(any());
+        }
+    }
 
     @Nested
     @DisplayName("인증 메일 코드 검증")
