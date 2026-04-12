@@ -1,12 +1,11 @@
 package com.benchpress200.photique;
 
-import org.junit.jupiter.api.Disabled;
+import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@Disabled
 @SpringBootTest
-class PhotiqueApplicationTests {
+class PhotiqueApplicationTests extends BaseIntegrationTest {
 
     @Test
     void contextLoads() {
