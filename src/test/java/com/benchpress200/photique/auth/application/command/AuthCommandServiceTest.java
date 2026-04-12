@@ -3,11 +3,13 @@ package com.benchpress200.photique.auth.application.command;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.benchpress200.photique.auth.application.command.model.AuthMailCodeValidateCommand;
+import com.benchpress200.photique.auth.application.command.model.AuthMailCommand;
 import com.benchpress200.photique.auth.application.command.port.out.mail.MailSenderPort;
 import com.benchpress200.photique.auth.application.command.port.out.persistence.AuthMailCodeCommandPort;
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
@@ -15,7 +17,9 @@ import com.benchpress200.photique.auth.application.command.result.AuthMailCodeVa
 import com.benchpress200.photique.auth.application.command.service.AuthCommandService;
 import com.benchpress200.photique.auth.application.query.port.out.persistence.AuthMailCodeQueryPort;
 import com.benchpress200.photique.auth.application.support.fixture.AuthMailCodeValidateCommandFixture;
+import com.benchpress200.photique.auth.application.support.fixture.AuthMailCommandFixture;
 import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
+import com.benchpress200.photique.auth.domain.exception.EmailNotFoundException;
 import com.benchpress200.photique.auth.domain.exception.VerificationCodeNotFoundException;
 import com.benchpress200.photique.integration.auth.support.fixture.AuthMailCodeFixture;
 import com.benchpress200.photique.support.base.BaseServiceTest;
@@ -111,6 +115,44 @@ public class AuthCommandServiceTest extends BaseServiceTest {
                     VerificationCodeNotFoundException.class,
                     () -> authCommandService.validateAuthMailCode(command)
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("비밀번호 초기화 인증 메일 전송")
+    class SendPasswordAuthMailTest {
+        @Test
+        @DisplayName("유저가 존재하면 인증 메일을 전송하고 인증 코드를 저장한다")
+        public void whenUserExists() {
+            // given
+            AuthMailCommand command = AuthMailCommandFixture.builder().build();
+
+            doReturn(true).when(userQueryPort).existsByEmail(any());
+            doNothing().when(mailSenderPort).sendMail(any());
+
+            // when
+            authCommandService.sendPasswordAuthMail(command);
+
+            // then
+            verify(userQueryPort).existsByEmail(command.getEmail());
+            verify(mailSenderPort).sendMail(any());
+            verify(authMailCodeCommandPort).save(any());
+        }
+
+        @Test
+        @DisplayName("유저가 존재하지 않으면 EmailNotFoundException을 던진다")
+        public void whenUserNotFound() {
+            // given
+            AuthMailCommand command = AuthMailCommandFixture.builder().build();
+
+            doReturn(false).when(userQueryPort).existsByEmail(any());
+
+            // when & then
+            assertThrows(
+                    EmailNotFoundException.class,
+                    () -> authCommandService.sendPasswordAuthMail(command)
+            );
+            verify(mailSenderPort, never()).sendMail(any());
         }
     }
 }
