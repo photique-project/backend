@@ -402,7 +402,8 @@ public class ExhibitionCommandServiceTest extends BaseServiceTest {
                     .updateWorks(true)
                     .update(false)
                     .build();
-            ExhibitionWork work = ExhibitionWorkFixture.builder().displayOrder(1).build();
+            ExhibitionWork work = ExhibitionWorkFixture.builder().displayOrder(1)
+                    .build(); // 업데이트 커맨드를 통해 order가 0으로 설정됨
             ExhibitionWork anotherWork = ExhibitionWorkFixture.builder().displayOrder(0).build();
 
             doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
