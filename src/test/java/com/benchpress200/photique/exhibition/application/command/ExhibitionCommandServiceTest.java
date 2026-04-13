@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionCreateCommand;
+import com.benchpress200.photique.exhibition.application.command.model.ExhibitionUpdateCommand;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionEventPublishPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionTagCommandPort;
@@ -19,8 +20,15 @@ import com.benchpress200.photique.exhibition.application.query.port.out.persiste
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionTagQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionWorkQueryPort;
 import com.benchpress200.photique.exhibition.application.support.fixture.ExhibitionCreateCommandFixture;
+import com.benchpress200.photique.exhibition.application.support.fixture.ExhibitionUpdateCommandFixture;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotOwnedException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionWorkDuplicatedDisplayOrderException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionWorkNotFoundException;
 import com.benchpress200.photique.exhibition.domain.support.ExhibitionFixture;
+import com.benchpress200.photique.exhibition.domain.support.ExhibitionWorkFixture;
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
 import com.benchpress200.photique.outbox.application.factory.OutboxEventFactory;
 import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
@@ -280,6 +288,161 @@ public class ExhibitionCommandServiceTest extends BaseServiceTest {
             verify(exhibitionWorkCommandPort).save(any());
             verify(exhibitionTagCommandPort).saveAll(any());
             verify(outboxEventPort).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("전시회 수정")
+    class UpdateExhibitionDetailsTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            User writer = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).writerId(1L).build();
+            ExhibitionUpdateCommand command = ExhibitionUpdateCommandFixture.builder().build();
+            ExhibitionWork work = ExhibitionWorkFixture.builder().displayOrder(0).build();
+            OutboxEvent outboxEvent = OutboxEventFixture.builder().build();
+
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(writer.getId()).when(authenticationUserProviderPort).getCurrentUserId();
+            doNothing().when(exhibitionTagCommandPort).deleteByExhibition(any());
+            doReturn(List.of()).when(tagQueryPort).findByNameIn(any());
+            doReturn(List.of()).when(tagCommandPort).saveAll(any());
+            doReturn(List.of()).when(exhibitionTagCommandPort).saveAll(any());
+            doReturn(Optional.of(work)).when(exhibitionWorkQueryPort).findById(any());
+            doReturn(List.of(work)).when(exhibitionWorkQueryPort).findByExhibition(any());
+            doReturn(List.of()).when(exhibitionTagQueryPort).findByExhibitionWithTag(any());
+            doReturn(outboxEvent).when(outboxEventFactory).exhibitionUpdated(any(), any());
+            doReturn(outboxEvent).when(outboxEventPort).save(any());
+
+            // when
+            exhibitionCommandService.updateExhibitionDetailsUpdate(command);
+
+            // then
+            verify(exhibitionTagCommandPort).deleteByExhibition(exhibition);
+            verify(exhibitionTagCommandPort).saveAll(any());
+            verify(exhibitionWorkQueryPort).findById(any());
+            verify(exhibitionWorkQueryPort).findByExhibition(exhibition);
+            verify(outboxEventPort).save(outboxEvent);
+        }
+
+        @Test
+        @DisplayName("전시회가 존재하지 않으면 ExhibitionNotFoundException을 던진다")
+        public void whenExhibitionNotFound() {
+            // given
+            ExhibitionUpdateCommand command = ExhibitionUpdateCommandFixture.builder().build();
+
+            doReturn(Optional.empty()).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    ExhibitionNotFoundException.class,
+                    () -> exhibitionCommandService.updateExhibitionDetailsUpdate(command)
+            );
+            verify(outboxEventPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("전시회의 소유자가 아니면 ExhibitionNotOwnedException을 던진다")
+        public void whenNotOwner() {
+            // given
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).writerId(1L).build();
+            ExhibitionUpdateCommand command = ExhibitionUpdateCommandFixture.builder().build();
+
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(2L).when(authenticationUserProviderPort).getCurrentUserId();
+
+            // when & then
+            assertThrows(
+                    ExhibitionNotOwnedException.class,
+                    () -> exhibitionCommandService.updateExhibitionDetailsUpdate(command)
+            );
+            verify(outboxEventPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("전시회 개별 작품이 존재하지 않으면 ExhibitionWorkNotFoundException을 던진다")
+        public void whenExhibitionWorkNotFound() {
+            // given
+            User writer = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).writerId(1L).build();
+            ExhibitionUpdateCommand command = ExhibitionUpdateCommandFixture.builder()
+                    .updateTitle(false)
+                    .updateDescription(false)
+                    .updateCardColor(false)
+                    .updateTags(false)
+                    .updateWorks(true)
+                    .update(false)
+                    .build();
+
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(writer.getId()).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(Optional.empty()).when(exhibitionWorkQueryPort).findById(any());
+
+            // when & then
+            assertThrows(
+                    ExhibitionWorkNotFoundException.class,
+                    () -> exhibitionCommandService.updateExhibitionDetailsUpdate(command)
+            );
+            verify(outboxEventPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("전시회 개별 작품의 displayOrder가 중복이면 ExhibitionWorkDuplicatedDisplayOrderException을 던진다")
+        public void whenDuplicatedDisplayOrder() {
+            // given
+            User writer = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).writerId(1L).build();
+            ExhibitionUpdateCommand command = ExhibitionUpdateCommandFixture.builder()
+                    .updateTitle(false)
+                    .updateDescription(false)
+                    .updateCardColor(false)
+                    .updateTags(false)
+                    .updateWorks(true)
+                    .update(false)
+                    .build();
+            ExhibitionWork work = ExhibitionWorkFixture.builder().displayOrder(1)
+                    .build(); // 업데이트 커맨드를 통해 order가 0으로 설정됨
+            ExhibitionWork anotherWork = ExhibitionWorkFixture.builder().displayOrder(0).build();
+
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(writer.getId()).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(Optional.of(work)).when(exhibitionWorkQueryPort).findById(any());
+            doReturn(List.of(work, anotherWork)).when(exhibitionWorkQueryPort).findByExhibition(any());
+
+            // when & then
+            assertThrows(
+                    ExhibitionWorkDuplicatedDisplayOrderException.class,
+                    () -> exhibitionCommandService.updateExhibitionDetailsUpdate(command)
+            );
+            verify(outboxEventPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("업데이트 사항이 없으면 아웃박스 이벤트 저장을 진행하지 않는다")
+        public void whenNoUpdates() {
+            // given
+            User writer = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).writerId(1L).build();
+            ExhibitionUpdateCommand command = ExhibitionUpdateCommandFixture.builder()
+                    .updateTitle(false)
+                    .updateDescription(false)
+                    .updateCardColor(false)
+                    .updateTags(false)
+                    .updateWorks(false)
+                    .update(false)
+                    .build();
+
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(writer.getId()).when(authenticationUserProviderPort).getCurrentUserId();
+
+            // when
+            exhibitionCommandService.updateExhibitionDetailsUpdate(command);
+
+            // then
+            verify(exhibitionTagCommandPort, never()).deleteByExhibition(any());
+            verify(outboxEventPort, never()).save(any());
         }
     }
 }
