@@ -12,6 +12,7 @@ import com.benchpress200.photique.exhibition.application.command.service.Exhibit
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionBookmarkQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionAlreadyBookmarkedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
 import com.benchpress200.photique.exhibition.domain.support.ExhibitionFixture;
@@ -127,6 +128,88 @@ public class ExhibitionBookmarkCommandServiceTest extends BaseServiceTest {
                     () -> exhibitionBookmarkCommandService.addExhibitionBookmark(exhibition.getId())
             );
             verify(exhibitionBookmarkCommandPort, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("전시회 북마크 취소")
+    class CancelExhibitionBookmarkTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).build();
+            ExhibitionBookmark exhibitionBookmark = ExhibitionBookmark.of(user, exhibition);
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibitionBookmark)).when(exhibitionBookmarkQueryPort).findByUserAndExhibition(any(), any());
+
+            // when
+            exhibitionBookmarkCommandService.cancelExhibitionBookmark(exhibition.getId());
+
+            // then
+            verify(userQueryPort).findByIdAndDeletedAtIsNull(user.getId());
+            verify(exhibitionQueryPort).findByIdAndDeletedAtIsNull(exhibition.getId());
+            verify(exhibitionBookmarkQueryPort).findByUserAndExhibition(user, exhibition);
+            verify(exhibitionBookmarkCommandPort).delete(exhibitionBookmark);
+        }
+
+        @Test
+        @DisplayName("유저가 존재하지 않으면 UserNotFoundException을 던진다")
+        public void whenUserNotFound() {
+            // given
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).build();
+
+            doReturn(1L).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.empty()).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    UserNotFoundException.class,
+                    () -> exhibitionBookmarkCommandService.cancelExhibitionBookmark(exhibition.getId())
+            );
+            verify(exhibitionBookmarkCommandPort, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("전시회가 존재하지 않으면 ExhibitionNotFoundException을 던진다")
+        public void whenExhibitionNotFound() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).build();
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.empty()).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    ExhibitionNotFoundException.class,
+                    () -> exhibitionBookmarkCommandService.cancelExhibitionBookmark(exhibition.getId())
+            );
+            verify(exhibitionBookmarkCommandPort, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("북마크가 존재하지 않으면 delete를 호출하지 않는다")
+        public void whenBookmarkNotFound() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).build();
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.empty()).when(exhibitionBookmarkQueryPort).findByUserAndExhibition(any(), any());
+
+            // when
+            exhibitionBookmarkCommandService.cancelExhibitionBookmark(exhibition.getId());
+
+            // then
+            verify(exhibitionBookmarkCommandPort, never()).delete(any());
         }
     }
 }
