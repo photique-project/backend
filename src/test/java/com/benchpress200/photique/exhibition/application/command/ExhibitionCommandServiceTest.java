@@ -445,4 +445,59 @@ public class ExhibitionCommandServiceTest extends BaseServiceTest {
             verify(outboxEventPort, never()).save(any());
         }
     }
+
+    @Nested
+    @DisplayName("전시회 삭제")
+    class DeleteExhibitionTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            User writer = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).writerId(1L).build();
+            OutboxEvent outboxEvent = OutboxEventFixture.builder().build();
+
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(writer.getId()).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(outboxEvent).when(outboxEventFactory).exhibitionDeleted(any());
+            doReturn(outboxEvent).when(outboxEventPort).save(any());
+
+            // when
+            exhibitionCommandService.deleteExhibition(exhibition.getId());
+
+            // then
+            verify(outboxEventFactory).exhibitionDeleted(exhibition);
+            verify(outboxEventPort).save(outboxEvent);
+        }
+
+        @Test
+        @DisplayName("전시회가 존재하지 않으면 아무 처리도 하지 않는다")
+        public void whenExhibitionNotFound() {
+            // given
+            doReturn(Optional.empty()).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when
+            exhibitionCommandService.deleteExhibition(1L);
+
+            // then
+            verify(outboxEventPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("전시회 소유자가 아니면 ExhibitionNotOwnedException을 던진다")
+        public void whenNotOwner() {
+            // given
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).writerId(1L).build();
+
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(2L).when(authenticationUserProviderPort).getCurrentUserId();
+
+            // when & then
+            assertThrows(
+                    ExhibitionNotOwnedException.class,
+                    () -> exhibitionCommandService.deleteExhibition(exhibition.getId())
+            );
+            verify(outboxEventPort, never()).save(any());
+        }
+    }
 }
