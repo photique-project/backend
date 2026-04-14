@@ -208,4 +208,56 @@ public class ExhibitionCommentCommandServiceTest extends BaseServiceTest {
             );
         }
     }
+
+    @Nested
+    @DisplayName("전시회 감상평 삭제")
+    class DeleteExhibitionCommentTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            User writer = UserFixture.builder().id(1L).build();
+            ExhibitionComment exhibitionComment = ExhibitionCommentFixture.builder().writer(writer).build();
+
+            doReturn(Optional.of(exhibitionComment)).when(exhibitionCommentQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(writer.getId()).when(authenticationUserProvider).getCurrentUserId();
+
+            // when
+            exhibitionCommentCommandService.deleteExhibitionComment(1L);
+
+            // then
+            verify(exhibitionCommentQueryPort).findByIdAndDeletedAtIsNull(1L);
+            verify(authenticationUserProvider).getCurrentUserId();
+        }
+
+        @Test
+        @DisplayName("감상평이 존재하지 않으면 아무 처리도 하지 않는다")
+        public void whenCommentNotFound() {
+            // given
+            doReturn(Optional.empty()).when(exhibitionCommentQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when
+            exhibitionCommentCommandService.deleteExhibitionComment(1L);
+
+            // then
+            verify(authenticationUserProvider, never()).getCurrentUserId();
+        }
+
+        @Test
+        @DisplayName("감상평 소유자가 아니면 ExhibitionCommentNotOwnedException을 던진다")
+        public void whenNotOwner() {
+            // given
+            User writer = UserFixture.builder().id(1L).build();
+            ExhibitionComment exhibitionComment = ExhibitionCommentFixture.builder().writer(writer).build();
+
+            doReturn(Optional.of(exhibitionComment)).when(exhibitionCommentQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(2L).when(authenticationUserProvider).getCurrentUserId();
+
+            // when & then
+            assertThrows(
+                    ExhibitionCommentNotOwnedException.class,
+                    () -> exhibitionCommentCommandService.deleteExhibitionComment(1L)
+            );
+        }
+    }
 }
