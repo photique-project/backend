@@ -15,6 +15,7 @@ import com.benchpress200.photique.exhibition.application.query.port.out.persiste
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionTagQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionAlreadyLikedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
 import com.benchpress200.photique.exhibition.domain.support.ExhibitionFixture;
@@ -212,6 +213,154 @@ public class ExhibitionLikeCommandServiceTest extends BaseServiceTest {
             assertThrows(
                     RuntimeException.class,
                     () -> exhibitionLikeCommandService.addExhibitionLike(exhibition.getId())
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("전시회 좋아요 취소")
+    class CancelExhibitionLikeTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).build();
+            ExhibitionLike exhibitionLike = ExhibitionLike.of(user, exhibition);
+            OutboxEvent outboxEvent = OutboxEventFixture.builder().build();
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibitionLike)).when(exhibitionLikeQueryPort).findByUserAndExhibition(any(), any());
+            doReturn(outboxEvent).when(outboxEventFactory).exhibitionUnliked(any());
+            doReturn(outboxEvent).when(outboxEventPort).save(any());
+
+            // when
+            exhibitionLikeCommandService.cancelExhibitionLike(exhibition.getId());
+
+            // then
+            verify(exhibitionLikeCommandPort).delete(exhibitionLike);
+            verify(exhibitionCommandPort).decrementLikeCount(exhibition.getId());
+            verify(outboxEventFactory).exhibitionUnliked(any());
+            verify(outboxEventPort).save(outboxEvent);
+        }
+
+        @Test
+        @DisplayName("유저가 존재하지 않으면 UserNotFoundException을 던진다")
+        public void whenUserNotFound() {
+            // given
+            doReturn(1L).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.empty()).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    UserNotFoundException.class,
+                    () -> exhibitionLikeCommandService.cancelExhibitionLike(1L)
+            );
+            verify(exhibitionLikeCommandPort, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("전시회가 존재하지 않으면 ExhibitionNotFoundException을 던진다")
+        public void whenExhibitionNotFound() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.empty()).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    ExhibitionNotFoundException.class,
+                    () -> exhibitionLikeCommandService.cancelExhibitionLike(1L)
+            );
+            verify(exhibitionLikeCommandPort, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("좋아요가 존재하지 않으면 아무 처리도 하지 않는다")
+        public void whenLikeNotFound() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).build();
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.empty()).when(exhibitionLikeQueryPort).findByUserAndExhibition(any(), any());
+
+            // when
+            exhibitionLikeCommandService.cancelExhibitionLike(exhibition.getId());
+
+            // then
+            verify(exhibitionLikeCommandPort, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("좋아요 삭제에 실패하면 예외를 던진다")
+        public void whenDeleteFails() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).build();
+            ExhibitionLike exhibitionLike = ExhibitionLike.of(user, exhibition);
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibitionLike)).when(exhibitionLikeQueryPort).findByUserAndExhibition(any(), any());
+            doThrow(new RuntimeException()).when(exhibitionLikeCommandPort).delete(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> exhibitionLikeCommandService.cancelExhibitionLike(exhibition.getId())
+            );
+            verify(outboxEventPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("좋아요 수 감소에 실패하면 예외를 던진다")
+        public void whenDecrementFails() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).build();
+            ExhibitionLike exhibitionLike = ExhibitionLike.of(user, exhibition);
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibitionLike)).when(exhibitionLikeQueryPort).findByUserAndExhibition(any(), any());
+            doThrow(new RuntimeException()).when(exhibitionCommandPort).decrementLikeCount(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> exhibitionLikeCommandService.cancelExhibitionLike(exhibition.getId())
+            );
+            verify(outboxEventPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("아웃박스 이벤트 저장에 실패하면 예외를 던진다")
+        public void whenOutboxEventSaveFails() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            Exhibition exhibition = ExhibitionFixture.builder().id(1L).build();
+            ExhibitionLike exhibitionLike = ExhibitionLike.of(user, exhibition);
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibition)).when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(exhibitionLike)).when(exhibitionLikeQueryPort).findByUserAndExhibition(any(), any());
+            doReturn(null).when(outboxEventFactory).exhibitionUnliked(any());
+            doThrow(new RuntimeException()).when(outboxEventPort).save(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> exhibitionLikeCommandService.cancelExhibitionLike(exhibition.getId())
             );
         }
     }
