@@ -9,13 +9,19 @@ import static org.mockito.Mockito.verify;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.exhibition.application.command.model.ExhibitionCommentCreateCommand;
+import com.benchpress200.photique.exhibition.application.command.model.ExhibitionCommentUpdateCommand;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommentCommandPort;
 import com.benchpress200.photique.exhibition.application.command.service.ExhibitionCommentCommandService;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionCommentQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.application.support.fixture.ExhibitionCommentCreateCommandFixture;
+import com.benchpress200.photique.exhibition.application.support.fixture.ExhibitionCommentUpdateCommandFixture;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionCommentNotFoundException;
+import com.benchpress200.photique.exhibition.domain.exception.ExhibitionCommentNotOwnedException;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
+import com.benchpress200.photique.exhibition.domain.support.ExhibitionCommentFixture;
 import com.benchpress200.photique.exhibition.domain.support.ExhibitionFixture;
 import com.benchpress200.photique.outbox.application.factory.OutboxEventFactory;
 import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
@@ -144,6 +150,62 @@ public class ExhibitionCommentCommandServiceTest extends BaseServiceTest {
                     () -> exhibitionCommentCommandService.createExhibitionComment(command)
             );
             verify(exhibitionCommentCommandPort, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("전시회 감상평 수정")
+    class UpdateExhibitionCommentTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            User writer = UserFixture.builder().id(1L).build();
+            ExhibitionComment exhibitionComment = ExhibitionCommentFixture.builder().writer(writer).build();
+            ExhibitionCommentUpdateCommand command = ExhibitionCommentUpdateCommandFixture.builder().build();
+
+            doReturn(Optional.of(exhibitionComment)).when(exhibitionCommentQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(writer.getId()).when(authenticationUserProvider).getCurrentUserId();
+
+            // when
+            exhibitionCommentCommandService.updateExhibitionComment(command);
+
+            // then
+            verify(exhibitionCommentQueryPort).findByIdAndDeletedAtIsNull(command.getCommentId());
+            verify(authenticationUserProvider).getCurrentUserId();
+        }
+
+        @Test
+        @DisplayName("감상평이 존재하지 않으면 ExhibitionCommentNotFoundException을 던진다")
+        public void whenCommentNotFound() {
+            // given
+            ExhibitionCommentUpdateCommand command = ExhibitionCommentUpdateCommandFixture.builder().build();
+
+            doReturn(Optional.empty()).when(exhibitionCommentQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    ExhibitionCommentNotFoundException.class,
+                    () -> exhibitionCommentCommandService.updateExhibitionComment(command)
+            );
+        }
+
+        @Test
+        @DisplayName("감상평 소유자가 아니면 ExhibitionCommentNotOwnedException을 던진다")
+        public void whenNotOwner() {
+            // given
+            User writer = UserFixture.builder().id(1L).build();
+            ExhibitionComment exhibitionComment = ExhibitionCommentFixture.builder().writer(writer).build();
+            ExhibitionCommentUpdateCommand command = ExhibitionCommentUpdateCommandFixture.builder().build();
+
+            doReturn(Optional.of(exhibitionComment)).when(exhibitionCommentQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(2L).when(authenticationUserProvider).getCurrentUserId();
+
+            // when & then
+            assertThrows(
+                    ExhibitionCommentNotOwnedException.class,
+                    () -> exhibitionCommentCommandService.updateExhibitionComment(command)
+            );
         }
     }
 }
