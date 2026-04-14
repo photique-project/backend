@@ -16,8 +16,11 @@ import com.benchpress200.photique.exhibition.application.query.port.out.persiste
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionTagQueryPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionWorkQueryPort;
+import com.benchpress200.photique.exhibition.application.query.model.ExhibitionSearchQuery;
 import com.benchpress200.photique.exhibition.application.query.result.ExhibitionDetailsResult;
+import com.benchpress200.photique.exhibition.application.query.result.ExhibitionSearchResult;
 import com.benchpress200.photique.exhibition.application.query.service.ExhibitionQueryService;
+import com.benchpress200.photique.exhibition.application.query.support.fixture.ExhibitionSearchQueryFixture;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.exception.ExhibitionNotFoundException;
 import com.benchpress200.photique.exhibition.domain.support.ExhibitionFixture;
@@ -257,6 +260,105 @@ public class ExhibitionQueryServiceTest extends BaseServiceTest {
             assertThrows(
                     RuntimeException.class,
                     () -> exhibitionQueryService.getExhibitionDetails(exhibition.getId())
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("전시회 검색")
+    class SearchExhibitionTest {
+        @Test
+        @DisplayName("인증된 유저이면 좋아요/북마크 정보가 포함된 검색 결과를 반환한다")
+        public void whenAuthenticated() {
+            // given
+            ExhibitionSearchQuery query = ExhibitionSearchQueryFixture.builder().build();
+
+            doReturn(Page.empty()).when(exhibitionQueryPort).searchExhibition(any(), any(), any());
+            doReturn(true).when(authenticationUserProviderPort).isAuthenticated();
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(Set.of()).when(exhibitionLikeQueryPort).findExhibitionIds(any(), any());
+            doReturn(Set.of()).when(exhibitionBookmarkQueryPort).findExhibitionIds(any(), any());
+
+            // when
+            ExhibitionSearchResult result = exhibitionQueryService.searchExhibition(query);
+
+            // then
+            verify(exhibitionQueryPort).searchExhibition(any(), any(), any());
+            verify(exhibitionLikeQueryPort).findExhibitionIds(any(), any());
+            verify(exhibitionBookmarkQueryPort).findExhibitionIds(any(), any());
+            assertThat(result).isNotNull();
+        }
+
+        @Test
+        @DisplayName("인증되지 않은 유저이면 좋아요/북마크 조회 없이 검색 결과를 반환한다")
+        public void whenNotAuthenticated() {
+            // given
+            ExhibitionSearchQuery query = ExhibitionSearchQueryFixture.builder().build();
+
+            doReturn(Page.empty()).when(exhibitionQueryPort).searchExhibition(any(), any(), any());
+            doReturn(false).when(authenticationUserProviderPort).isAuthenticated();
+
+            // when
+            ExhibitionSearchResult result = exhibitionQueryService.searchExhibition(query);
+
+            // then
+            verify(exhibitionQueryPort).searchExhibition(any(), any(), any());
+            verify(exhibitionLikeQueryPort, never()).findExhibitionIds(any(), any());
+            verify(exhibitionBookmarkQueryPort, never()).findExhibitionIds(any(), any());
+            assertThat(result).isNotNull();
+        }
+
+        @Test
+        @DisplayName("전시회 검색에 실패하면 예외를 던진다")
+        public void whenExhibitionSearchFails() {
+            // given
+            ExhibitionSearchQuery query = ExhibitionSearchQueryFixture.builder().build();
+
+            doThrow(new RuntimeException()).when(exhibitionQueryPort).searchExhibition(any(), any(), any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> exhibitionQueryService.searchExhibition(query)
+            );
+            verify(exhibitionLikeQueryPort, never()).findExhibitionIds(any(), any());
+        }
+
+        @Test
+        @DisplayName("좋아요 조회에 실패하면 예외를 던진다")
+        public void whenLikeQueryFails() {
+            // given
+            ExhibitionSearchQuery query = ExhibitionSearchQueryFixture.builder().build();
+
+            doReturn(Page.empty()).when(exhibitionQueryPort).searchExhibition(any(), any(), any());
+            doReturn(true).when(authenticationUserProviderPort).isAuthenticated();
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doThrow(new RuntimeException()).when(exhibitionLikeQueryPort).findExhibitionIds(any(), any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> exhibitionQueryService.searchExhibition(query)
+            );
+            verify(exhibitionBookmarkQueryPort, never()).findExhibitionIds(any(), any());
+        }
+
+        @Test
+        @DisplayName("북마크 조회에 실패하면 예외를 던진다")
+        public void whenBookmarkQueryFails() {
+            // given
+            ExhibitionSearchQuery query = ExhibitionSearchQueryFixture.builder().build();
+
+            doReturn(Page.empty()).when(exhibitionQueryPort).searchExhibition(any(), any(), any());
+            doReturn(true).when(authenticationUserProviderPort).isAuthenticated();
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(Set.of()).when(exhibitionLikeQueryPort).findExhibitionIds(any(), any());
+            doThrow(new RuntimeException()).when(exhibitionBookmarkQueryPort).findExhibitionIds(any(), any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> exhibitionQueryService.searchExhibition(query)
             );
         }
     }
