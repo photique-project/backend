@@ -18,6 +18,7 @@ import com.benchpress200.photique.singlework.application.command.service.SingleW
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.singlework.domain.entity.SingleWorkLike;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkAlreadyLikedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.support.SingleWorkFixture;
@@ -208,6 +209,154 @@ public class SingleWorkLikeCommandServiceTest extends BaseServiceTest {
             assertThrows(
                     RuntimeException.class,
                     () -> singleWorkLikeCommandService.addSingleWorkLike(1L)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("단일작품 좋아요 취소")
+    class CancelSingleWorkLikeTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            SingleWork singleWork = SingleWorkFixture.builder().build();
+            SingleWorkLike singleWorkLike = SingleWorkLike.of(user, singleWork);
+            OutboxEvent outboxEvent = OutboxEventFixture.builder().build();
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(singleWork)).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(singleWorkLike)).when(singleWorkLikeQueryPort).findByUserAndSingleWork(any(), any());
+            doReturn(outboxEvent).when(outboxEventFactory).singleWorkUnliked(any());
+            doReturn(outboxEvent).when(outboxEventPort).save(any());
+
+            // when
+            singleWorkLikeCommandService.cancelSingleWorkLike(1L);
+
+            // then
+            verify(singleWorkLikeCommandPort).delete(singleWorkLike);
+            verify(singleWorkCommandPort).decrementLikeCount(1L);
+            verify(outboxEventFactory).singleWorkUnliked(any());
+            verify(outboxEventPort).save(outboxEvent);
+        }
+
+        @Test
+        @DisplayName("유저가 존재하지 않으면 UserNotFoundException을 던진다")
+        public void whenUserNotFound() {
+            // given
+            doReturn(1L).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.empty()).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    UserNotFoundException.class,
+                    () -> singleWorkLikeCommandService.cancelSingleWorkLike(1L)
+            );
+            verify(singleWorkLikeCommandPort, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("단일작품이 존재하지 않으면 SingleWorkNotFoundException을 던진다")
+        public void whenSingleWorkNotFound() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.empty()).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    SingleWorkNotFoundException.class,
+                    () -> singleWorkLikeCommandService.cancelSingleWorkLike(1L)
+            );
+            verify(singleWorkLikeCommandPort, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("좋아요가 존재하지 않으면 아무 처리도 하지 않는다")
+        public void whenLikeNotFound() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            SingleWork singleWork = SingleWorkFixture.builder().build();
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(singleWork)).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.empty()).when(singleWorkLikeQueryPort).findByUserAndSingleWork(any(), any());
+
+            // when
+            singleWorkLikeCommandService.cancelSingleWorkLike(1L);
+
+            // then
+            verify(singleWorkLikeCommandPort, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("좋아요 삭제에 실패하면 예외를 던진다")
+        public void whenDeleteFails() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            SingleWork singleWork = SingleWorkFixture.builder().build();
+            SingleWorkLike singleWorkLike = SingleWorkLike.of(user, singleWork);
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(singleWork)).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(singleWorkLike)).when(singleWorkLikeQueryPort).findByUserAndSingleWork(any(), any());
+            doThrow(new RuntimeException()).when(singleWorkLikeCommandPort).delete(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> singleWorkLikeCommandService.cancelSingleWorkLike(1L)
+            );
+            verify(outboxEventPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("좋아요 수 감소에 실패하면 예외를 던진다")
+        public void whenDecrementLikeCountFails() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            SingleWork singleWork = SingleWorkFixture.builder().build();
+            SingleWorkLike singleWorkLike = SingleWorkLike.of(user, singleWork);
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(singleWork)).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(singleWorkLike)).when(singleWorkLikeQueryPort).findByUserAndSingleWork(any(), any());
+            doThrow(new RuntimeException()).when(singleWorkCommandPort).decrementLikeCount(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> singleWorkLikeCommandService.cancelSingleWorkLike(1L)
+            );
+            verify(outboxEventPort, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("아웃박스 이벤트 저장에 실패하면 예외를 던진다")
+        public void whenOutboxEventSaveFails() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            SingleWork singleWork = SingleWorkFixture.builder().build();
+            SingleWorkLike singleWorkLike = SingleWorkLike.of(user, singleWork);
+
+            doReturn(user.getId()).when(authenticationUserProvider).getCurrentUserId();
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(singleWork)).when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(Optional.of(singleWorkLike)).when(singleWorkLikeQueryPort).findByUserAndSingleWork(any(), any());
+            doReturn(null).when(outboxEventFactory).singleWorkUnliked(any());
+            doThrow(new RuntimeException()).when(outboxEventPort).save(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> singleWorkLikeCommandService.cancelSingleWorkLike(1L)
             );
         }
     }
