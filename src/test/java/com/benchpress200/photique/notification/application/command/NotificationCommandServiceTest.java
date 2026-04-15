@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
@@ -76,6 +77,38 @@ public class NotificationCommandServiceTest extends BaseServiceTest {
             assertThrows(
                     RuntimeException.class,
                     () -> notificationCommandService.markAsRead(1L)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("전체 알림 읽음 표시")
+    class MarkAllAsReadTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+
+            // when
+            notificationCommandService.markAllAsRead();
+
+            // then
+            verify(authenticationUserProviderPort).getCurrentUserId();
+            verify(notificationCommandPort).markAllAsReadByReceiverIdAndDeletedAtIsNull(1L);
+        }
+
+        @Test
+        @DisplayName("전체 읽음 처리에 실패하면 예외를 던진다")
+        public void whenMarkAllAsReadFails() {
+            // given
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doThrow(new RuntimeException()).when(notificationCommandPort).markAllAsReadByReceiverIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> notificationCommandService.markAllAsRead()
             );
         }
     }
