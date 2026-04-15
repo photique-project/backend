@@ -112,4 +112,49 @@ public class NotificationCommandServiceTest extends BaseServiceTest {
             );
         }
     }
+
+    @Nested
+    @DisplayName("알림 삭제")
+    class DeleteNotificationTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            Notification notification = NotificationFixture.builder().build();
+
+            doReturn(Optional.of(notification)).when(notificationQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when
+            notificationCommandService.deleteNotification(1L);
+
+            // then
+            verify(notificationQueryPort).findByIdAndDeletedAtIsNull(1L);
+        }
+
+        @Test
+        @DisplayName("알림이 존재하지 않으면 아무 처리도 하지 않는다")
+        public void whenNotificationNotFound() {
+            // given
+            doReturn(Optional.empty()).when(notificationQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when
+            notificationCommandService.deleteNotification(1L);
+
+            // then
+            verify(notificationQueryPort).findByIdAndDeletedAtIsNull(1L);
+        }
+
+        @Test
+        @DisplayName("알림 조회에 실패하면 예외를 던진다")
+        public void whenNotificationQueryFails() {
+            // given
+            doThrow(new RuntimeException()).when(notificationQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> notificationCommandService.deleteNotification(1L)
+            );
+        }
+    }
 }
