@@ -13,13 +13,19 @@ import com.benchpress200.photique.outbox.application.port.out.persistence.Outbox
 import com.benchpress200.photique.outbox.domain.entity.OutboxEvent;
 import com.benchpress200.photique.outbox.domain.support.OutboxEventFixture;
 import com.benchpress200.photique.singlework.application.command.model.SingleWorkCommentCreateCommand;
+import com.benchpress200.photique.singlework.application.command.model.SingleWorkCommentUpdateCommand;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommentCommandPort;
 import com.benchpress200.photique.singlework.application.command.service.SingleWorkCommentCommandService;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkCommentQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.singlework.application.support.fixture.SingleWorkCommentCreateCommandFixture;
+import com.benchpress200.photique.singlework.application.support.fixture.SingleWorkCommentUpdateCommandFixture;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkCommentNotFoundException;
+import com.benchpress200.photique.singlework.domain.exception.SingleWorkCommentNotOwnedException;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
+import com.benchpress200.photique.singlework.domain.support.SingleWorkCommentFixture;
 import com.benchpress200.photique.singlework.domain.support.SingleWorkFixture;
 import com.benchpress200.photique.support.base.BaseServiceTest;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
@@ -165,6 +171,62 @@ public class SingleWorkCommentCommandServiceTest extends BaseServiceTest {
             assertThrows(
                     RuntimeException.class,
                     () -> singleWorkCommentCommandService.createSingleWorkComment(command)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("단일작품 댓글 수정")
+    class UpdateSingleWorkCommentTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            User writer = UserFixture.builder().id(1L).build();
+            SingleWorkComment singleWorkComment = SingleWorkCommentFixture.builder().writer(writer).build();
+            SingleWorkCommentUpdateCommand command = SingleWorkCommentUpdateCommandFixture.builder().build();
+
+            doReturn(Optional.of(singleWorkComment)).when(singleWorkCommentQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(writer.getId()).when(authenticationUserProvider).getCurrentUserId();
+
+            // when
+            singleWorkCommentCommandService.updateSingleWorkComment(command);
+
+            // then
+            verify(singleWorkCommentQueryPort).findByIdAndDeletedAtIsNull(command.getCommentId());
+            verify(authenticationUserProvider).getCurrentUserId();
+        }
+
+        @Test
+        @DisplayName("댓글이 존재하지 않으면 SingleWorkCommentNotFoundException을 던진다")
+        public void whenCommentNotFound() {
+            // given
+            SingleWorkCommentUpdateCommand command = SingleWorkCommentUpdateCommandFixture.builder().build();
+
+            doReturn(Optional.empty()).when(singleWorkCommentQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    SingleWorkCommentNotFoundException.class,
+                    () -> singleWorkCommentCommandService.updateSingleWorkComment(command)
+            );
+        }
+
+        @Test
+        @DisplayName("댓글 소유자가 아니면 SingleWorkCommentNotOwnedException을 던진다")
+        public void whenNotOwner() {
+            // given
+            User writer = UserFixture.builder().id(1L).build();
+            SingleWorkComment singleWorkComment = SingleWorkCommentFixture.builder().writer(writer).build();
+            SingleWorkCommentUpdateCommand command = SingleWorkCommentUpdateCommandFixture.builder().build();
+
+            doReturn(Optional.of(singleWorkComment)).when(singleWorkCommentQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn(2L).when(authenticationUserProvider).getCurrentUserId();
+
+            // when & then
+            assertThrows(
+                    SingleWorkCommentNotOwnedException.class,
+                    () -> singleWorkCommentCommandService.updateSingleWorkComment(command)
             );
         }
     }
