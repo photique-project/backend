@@ -11,24 +11,32 @@ import static org.mockito.Mockito.verify;
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.event.SingleWorkViewCountPort;
+import com.benchpress200.photique.singlework.application.query.model.SingleWorkSearchQuery;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkTagQueryPort;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkDetailsResult;
+import com.benchpress200.photique.singlework.application.query.result.SingleWorkSearchResult;
 import com.benchpress200.photique.singlework.application.query.service.SingleWorkQueryService;
+import com.benchpress200.photique.singlework.application.query.support.fixture.SingleWorkSearchQueryFixture;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.domain.exception.SingleWorkNotFoundException;
 import com.benchpress200.photique.singlework.domain.support.SingleWorkFixture;
 import com.benchpress200.photique.support.base.BaseServiceTest;
 import com.benchpress200.photique.user.application.query.port.out.persistence.FollowQueryPort;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @DisplayName("단일작품 쿼리 서비스 테스트")
 public class SingleWorkQueryServiceTest extends BaseServiceTest {
@@ -211,6 +219,84 @@ public class SingleWorkQueryServiceTest extends BaseServiceTest {
             assertThrows(
                     RuntimeException.class,
                     () -> singleWorkQueryService.getSingleWorkDetails(1L)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("단일작품 검색")
+    class SearchSingleWorkTest {
+        @Test
+        @DisplayName("인증된 유저 요청 시 처리에 성공한다")
+        public void whenAuthenticated() {
+            // given
+            SingleWorkSearchQuery query = SingleWorkSearchQueryFixture.builder().build();
+            Page<SingleWorkSearch> singleWorkSearchPage = new PageImpl<>(List.of(), PageRequest.of(0, 30), 0);
+
+            doReturn(singleWorkSearchPage).when(singleWorkQueryPort).searchSingleWork(any(), any(), any(), any());
+            doReturn(true).when(authenticationUserProviderPort).isAuthenticated();
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(Set.of()).when(singleWorkLikeQueryPort).findSingleWorkIds(any(), any());
+
+            // when
+            SingleWorkSearchResult result = singleWorkQueryService.searchSingleWork(query);
+
+            // then
+            verify(singleWorkQueryPort).searchSingleWork(query.getTarget(), query.getKeyword(), query.getCategories(), query.getPageable());
+            verify(singleWorkLikeQueryPort).findSingleWorkIds(any(), any());
+            assertNotNull(result);
+        }
+
+        @Test
+        @DisplayName("비인증 유저 요청 시 처리에 성공한다")
+        public void whenNotAuthenticated() {
+            // given
+            SingleWorkSearchQuery query = SingleWorkSearchQueryFixture.builder().build();
+            Page<SingleWorkSearch> singleWorkSearchPage = new PageImpl<>(List.of(), PageRequest.of(0, 30), 0);
+
+            doReturn(singleWorkSearchPage).when(singleWorkQueryPort).searchSingleWork(any(), any(), any(), any());
+            doReturn(false).when(authenticationUserProviderPort).isAuthenticated();
+
+            // when
+            SingleWorkSearchResult result = singleWorkQueryService.searchSingleWork(query);
+
+            // then
+            verify(singleWorkLikeQueryPort, never()).findSingleWorkIds(any(), any());
+            assertNotNull(result);
+        }
+
+        @Test
+        @DisplayName("단일작품 검색에 실패하면 예외를 던진다")
+        public void whenSearchFails() {
+            // given
+            SingleWorkSearchQuery query = SingleWorkSearchQueryFixture.builder().build();
+
+            doThrow(new RuntimeException()).when(singleWorkQueryPort).searchSingleWork(any(), any(), any(), any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> singleWorkQueryService.searchSingleWork(query)
+            );
+            verify(singleWorkLikeQueryPort, never()).findSingleWorkIds(any(), any());
+        }
+
+        @Test
+        @DisplayName("좋아요한 작품 아이디 조회에 실패하면 예외를 던진다")
+        public void whenFindLikedIdsFails() {
+            // given
+            SingleWorkSearchQuery query = SingleWorkSearchQueryFixture.builder().build();
+            Page<SingleWorkSearch> singleWorkSearchPage = new PageImpl<>(List.of(), PageRequest.of(0, 30), 0);
+
+            doReturn(singleWorkSearchPage).when(singleWorkQueryPort).searchSingleWork(any(), any(), any(), any());
+            doReturn(true).when(authenticationUserProviderPort).isAuthenticated();
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doThrow(new RuntimeException()).when(singleWorkLikeQueryPort).findSingleWorkIds(any(), any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> singleWorkQueryService.searchSingleWork(query)
             );
         }
     }
