@@ -1,7 +1,9 @@
 package com.benchpress200.photique.user.application.query;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -12,10 +14,13 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.support.base.BaseServiceTest;
+import com.benchpress200.photique.user.application.query.model.NicknameValidateQuery;
 import com.benchpress200.photique.user.application.query.model.UserSearchQuery;
 import com.benchpress200.photique.user.application.query.port.out.persistence.FollowQueryPort;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.application.query.result.MyDetailsResult;
+import com.benchpress200.photique.user.application.query.result.NicknameValidateResult;
+import com.benchpress200.photique.user.application.query.support.fixture.NicknameValidateQueryFixture;
 import com.benchpress200.photique.user.application.query.result.UserDetailsResult;
 import com.benchpress200.photique.user.application.query.result.UserSearchResult;
 import com.benchpress200.photique.user.application.query.service.UserQueryService;
@@ -374,6 +379,59 @@ public class UserQueryServiceTest extends BaseServiceTest {
             assertThrows(
                     RuntimeException.class,
                     () -> userQueryService.getUserDetails(user.getId())
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("유저 닉네임 중복 검사")
+    class ValidateNicknameTest {
+        @Test
+        @DisplayName("닉네임이 중복되지 않으면 isDuplicated가 false인 결과를 반환한다")
+        public void whenNicknameNotDuplicated() {
+            // given
+            NicknameValidateQuery query = NicknameValidateQueryFixture.builder().build();
+
+            doReturn(false).when(userQueryPort).existsByNickname(any());
+
+            // when
+            NicknameValidateResult result = userQueryService.validateNickname(query);
+
+            // then
+            verify(userQueryPort).existsByNickname(query.getNickname());
+            assertNotNull(result);
+            assertFalse(result.isDuplicated());
+        }
+
+        @Test
+        @DisplayName("닉네임이 중복되면 isDuplicated가 true인 결과를 반환한다")
+        public void whenNicknameDuplicated() {
+            // given
+            NicknameValidateQuery query = NicknameValidateQueryFixture.builder().build();
+
+            doReturn(true).when(userQueryPort).existsByNickname(any());
+
+            // when
+            NicknameValidateResult result = userQueryService.validateNickname(query);
+
+            // then
+            verify(userQueryPort).existsByNickname(query.getNickname());
+            assertNotNull(result);
+            assertTrue(result.isDuplicated());
+        }
+
+        @Test
+        @DisplayName("닉네임 중복 조회에 실패하면 예외를 던진다")
+        public void whenExistsByNicknameFails() {
+            // given
+            NicknameValidateQuery query = NicknameValidateQueryFixture.builder().build();
+
+            doThrow(new RuntimeException()).when(userQueryPort).existsByNickname(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> userQueryService.validateNickname(query)
             );
         }
     }
