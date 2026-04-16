@@ -26,8 +26,10 @@ import com.benchpress200.photique.user.application.command.port.out.persistence.
 import com.benchpress200.photique.user.application.command.port.out.security.PasswordEncoderPort;
 import com.benchpress200.photique.user.application.command.service.UserCommandService;
 import com.benchpress200.photique.user.application.command.support.fixture.ResisterCommandFixture;
+import com.benchpress200.photique.user.application.command.model.UserPasswordResetCommand;
 import com.benchpress200.photique.user.application.command.model.UserPasswordUpdateCommand;
 import com.benchpress200.photique.user.application.command.support.fixture.UserDetailsUpdateCommandFixture;
+import com.benchpress200.photique.user.application.command.support.fixture.UserPasswordResetCommandFixture;
 import com.benchpress200.photique.user.application.command.support.fixture.UserPasswordUpdateCommandFixture;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -458,6 +460,104 @@ public class UserCommandServiceTest extends BaseServiceTest {
             assertThrows(
                     RuntimeException.class,
                     () -> userCommandService.updateUserPassword(command)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("유저 비밀번호 초기화")
+    class ResetUserPasswordTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            User user = UserFixture.builder().build();
+            AuthMailCode authMailCode = AuthMailCodeFixture.builder().isVerified(true).build();
+            UserPasswordResetCommand command = UserPasswordResetCommandFixture.builder().build();
+
+            doReturn(Optional.of(user)).when(userQueryPort).findByEmailAndDeletedAtIsNull(any());
+            doReturn(Optional.of(authMailCode)).when(authMailCodeQueryPort).findById(any());
+            doReturn("encodedPassword").when(passwordEncoderPort).encode(any());
+
+            // when
+            userCommandService.resetUserPassword(command);
+
+            // then
+            verify(userQueryPort).findByEmailAndDeletedAtIsNull(command.getEmail());
+            verify(authMailCodeQueryPort).findById(command.getEmail());
+            verify(passwordEncoderPort).encode(command.getPassword());
+        }
+
+        @Test
+        @DisplayName("유저가 존재하지 않으면 UserNotFoundException을 던진다")
+        public void whenUserNotFound() {
+            // given
+            UserPasswordResetCommand command = UserPasswordResetCommandFixture.builder().build();
+
+            doReturn(Optional.empty()).when(userQueryPort).findByEmailAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    UserNotFoundException.class,
+                    () -> userCommandService.resetUserPassword(command)
+            );
+            verify(authMailCodeQueryPort, never()).findById(any());
+            verify(passwordEncoderPort, never()).encode(any());
+        }
+
+        @Test
+        @DisplayName("인증 코드가 만료되었으면 MailAuthenticationCodeExpirationException을 던진다")
+        public void whenAuthMailCodeExpired() {
+            // given
+            User user = UserFixture.builder().build();
+            UserPasswordResetCommand command = UserPasswordResetCommandFixture.builder().build();
+
+            doReturn(Optional.of(user)).when(userQueryPort).findByEmailAndDeletedAtIsNull(any());
+            doReturn(Optional.empty()).when(authMailCodeQueryPort).findById(any());
+
+            // when & then
+            assertThrows(
+                    MailAuthenticationCodeExpirationException.class,
+                    () -> userCommandService.resetUserPassword(command)
+            );
+            verify(passwordEncoderPort, never()).encode(any());
+        }
+
+        @Test
+        @DisplayName("인증이 완료되지 않은 코드이면 MailAuthenticationCodeNotVerifiedException을 던진다")
+        public void whenNotVerified() {
+            // given
+            User user = UserFixture.builder().build();
+            AuthMailCode authMailCode = AuthMailCodeFixture.builder().isVerified(false).build();
+            UserPasswordResetCommand command = UserPasswordResetCommandFixture.builder().build();
+
+            doReturn(Optional.of(user)).when(userQueryPort).findByEmailAndDeletedAtIsNull(any());
+            doReturn(Optional.of(authMailCode)).when(authMailCodeQueryPort).findById(any());
+
+            // when & then
+            assertThrows(
+                    MailAuthenticationCodeNotVerifiedException.class,
+                    () -> userCommandService.resetUserPassword(command)
+            );
+            verify(passwordEncoderPort, never()).encode(any());
+        }
+
+        @Test
+        @DisplayName("비밀번호 인코딩에 실패하면 예외를 던진다")
+        public void whenPasswordEncodeFails() {
+            // given
+            User user = UserFixture.builder().build();
+            AuthMailCode authMailCode = AuthMailCodeFixture.builder().isVerified(true).build();
+            UserPasswordResetCommand command = UserPasswordResetCommandFixture.builder().build();
+
+            doReturn(Optional.of(user)).when(userQueryPort).findByEmailAndDeletedAtIsNull(any());
+            doReturn(Optional.of(authMailCode)).when(authMailCodeQueryPort).findById(any());
+            doThrow(new RuntimeException()).when(passwordEncoderPort).encode(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> userCommandService.resetUserPassword(command)
             );
         }
     }
