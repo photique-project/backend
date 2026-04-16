@@ -6,18 +6,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.event.SingleWorkViewCountPort;
+import com.benchpress200.photique.singlework.application.query.model.MySingleWorkSearchQuery;
 import com.benchpress200.photique.singlework.application.query.model.SingleWorkSearchQuery;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkLikeQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkTagQueryPort;
+import com.benchpress200.photique.singlework.application.query.result.MySingleWorkSearchResult;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkDetailsResult;
 import com.benchpress200.photique.singlework.application.query.result.SingleWorkSearchResult;
 import com.benchpress200.photique.singlework.application.query.service.SingleWorkQueryService;
+import com.benchpress200.photique.singlework.application.query.support.fixture.MySingleWorkSearchQueryFixture;
 import com.benchpress200.photique.singlework.application.query.support.fixture.SingleWorkSearchQueryFixture;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
@@ -297,6 +301,68 @@ public class SingleWorkQueryServiceTest extends BaseServiceTest {
             assertThrows(
                     RuntimeException.class,
                     () -> singleWorkQueryService.searchSingleWork(query)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("내 단일작품 검색")
+    class SearchMySingleWorkTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenQueryValid() {
+            // given
+            MySingleWorkSearchQuery query = MySingleWorkSearchQueryFixture.builder().build();
+            Page<SingleWork> singleWorkPage = new PageImpl<>(List.of(), PageRequest.of(0, 30), 0);
+
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(singleWorkPage).when(singleWorkQueryPort).searchMySingleWorkByDeletedAtIsNull(any(), any(), any());
+            doReturn(true).when(authenticationUserProviderPort).isAuthenticated();
+            doReturn(Set.of()).when(singleWorkLikeQueryPort).findSingleWorkIds(any(), any());
+
+            // when
+            MySingleWorkSearchResult result = singleWorkQueryService.searchMySingleWork(query);
+
+            // then
+            verify(authenticationUserProviderPort, times(2)).getCurrentUserId();
+            verify(singleWorkQueryPort).searchMySingleWorkByDeletedAtIsNull(1L, query.getKeyword(), query.getPageable());
+            verify(singleWorkLikeQueryPort).findSingleWorkIds(any(), any());
+            assertNotNull(result);
+        }
+
+        @Test
+        @DisplayName("단일작품 검색에 실패하면 예외를 던진다")
+        public void whenSearchFails() {
+            // given
+            MySingleWorkSearchQuery query = MySingleWorkSearchQueryFixture.builder().build();
+
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doThrow(new RuntimeException()).when(singleWorkQueryPort).searchMySingleWorkByDeletedAtIsNull(any(), any(), any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> singleWorkQueryService.searchMySingleWork(query)
+            );
+            verify(singleWorkLikeQueryPort, never()).findSingleWorkIds(any(), any());
+        }
+
+        @Test
+        @DisplayName("좋아요한 작품 아이디 조회에 실패하면 예외를 던진다")
+        public void whenFindLikedIdsFails() {
+            // given
+            MySingleWorkSearchQuery query = MySingleWorkSearchQueryFixture.builder().build();
+            Page<SingleWork> singleWorkPage = new PageImpl<>(List.of(), PageRequest.of(0, 30), 0);
+
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(singleWorkPage).when(singleWorkQueryPort).searchMySingleWorkByDeletedAtIsNull(any(), any(), any());
+            doReturn(true).when(authenticationUserProviderPort).isAuthenticated();
+            doThrow(new RuntimeException()).when(singleWorkLikeQueryPort).findSingleWorkIds(any(), any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> singleWorkQueryService.searchMySingleWork(query)
             );
         }
     }
