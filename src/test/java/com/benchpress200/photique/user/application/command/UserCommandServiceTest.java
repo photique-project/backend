@@ -26,7 +26,9 @@ import com.benchpress200.photique.user.application.command.port.out.persistence.
 import com.benchpress200.photique.user.application.command.port.out.security.PasswordEncoderPort;
 import com.benchpress200.photique.user.application.command.service.UserCommandService;
 import com.benchpress200.photique.user.application.command.support.fixture.ResisterCommandFixture;
+import com.benchpress200.photique.user.application.command.model.UserPasswordUpdateCommand;
 import com.benchpress200.photique.user.application.command.support.fixture.UserDetailsUpdateCommandFixture;
+import com.benchpress200.photique.user.application.command.support.fixture.UserPasswordUpdateCommandFixture;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.exception.DuplicatedUserException;
@@ -401,6 +403,61 @@ public class UserCommandServiceTest extends BaseServiceTest {
             assertThrows(
                     RuntimeException.class,
                     () -> userCommandService.updateUserDetails(command)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("유저 비밀번호 수정")
+    class UpdateUserPasswordTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            UserPasswordUpdateCommand command = UserPasswordUpdateCommandFixture.builder().build();
+
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doReturn("encodedPassword").when(passwordEncoderPort).encode(any());
+
+            // when
+            userCommandService.updateUserPassword(command);
+
+            // then
+            verify(userQueryPort).findByIdAndDeletedAtIsNull(command.getUserId());
+            verify(passwordEncoderPort).encode(command.getPassword());
+        }
+
+        @Test
+        @DisplayName("유저가 존재하지 않으면 UserNotFoundException을 던진다")
+        public void whenUserNotFound() {
+            // given
+            UserPasswordUpdateCommand command = UserPasswordUpdateCommandFixture.builder().build();
+
+            doReturn(Optional.empty()).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    UserNotFoundException.class,
+                    () -> userCommandService.updateUserPassword(command)
+            );
+            verify(passwordEncoderPort, never()).encode(any());
+        }
+
+        @Test
+        @DisplayName("비밀번호 인코딩에 실패하면 예외를 던진다")
+        public void whenPasswordEncodeFails() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+            UserPasswordUpdateCommand command = UserPasswordUpdateCommandFixture.builder().build();
+
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+            doThrow(new RuntimeException()).when(passwordEncoderPort).encode(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> userCommandService.updateUserPassword(command)
             );
         }
     }
