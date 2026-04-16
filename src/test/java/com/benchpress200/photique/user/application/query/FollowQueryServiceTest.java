@@ -11,10 +11,13 @@ import static org.mockito.Mockito.verify;
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationUserProviderPort;
 import com.benchpress200.photique.support.base.BaseServiceTest;
 import com.benchpress200.photique.user.application.query.model.FolloweeSearchQuery;
+import com.benchpress200.photique.user.application.query.model.FollowerSearchQuery;
 import com.benchpress200.photique.user.application.query.port.out.persistence.FollowQueryPort;
 import com.benchpress200.photique.user.application.query.result.FolloweeSearchResult;
+import com.benchpress200.photique.user.application.query.result.FollowerSearchResult;
 import com.benchpress200.photique.user.application.query.service.FollowQueryService;
 import com.benchpress200.photique.user.application.query.support.fixture.FolloweeSearchQueryFixture;
+import com.benchpress200.photique.user.application.query.support.fixture.FollowerSearchQueryFixture;
 import com.benchpress200.photique.user.domain.entity.User;
 import java.util.List;
 import java.util.Set;
@@ -94,6 +97,66 @@ public class FollowQueryServiceTest extends BaseServiceTest {
             assertThrows(
                     RuntimeException.class,
                     () -> followQueryService.searchFollowee(query)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("팔로워 검색")
+    class SearchFollowerTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenQueryValid() {
+            // given
+            FollowerSearchQuery query = FollowerSearchQueryFixture.builder().build();
+            Page<User> followerPage = new PageImpl<>(List.of(), PageRequest.of(0, 30), 0);
+
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(followerPage).when(followQueryPort).searchFollower(any(), any(), any());
+            doReturn(Set.of()).when(followQueryPort).findFolloweeIds(any(), any());
+
+            // when
+            FollowerSearchResult result = followQueryService.searchFollower(query);
+
+            // then
+            verify(authenticationUserProviderPort).getCurrentUserId();
+            verify(followQueryPort).searchFollower(query.getUserId(), query.getKeyword(), query.getPageable());
+            verify(followQueryPort).findFolloweeIds(any(), any());
+            assertNotNull(result);
+        }
+
+        @Test
+        @DisplayName("팔로워 검색에 실패하면 예외를 던진다")
+        public void whenSearchFollowerFails() {
+            // given
+            FollowerSearchQuery query = FollowerSearchQueryFixture.builder().build();
+
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doThrow(new RuntimeException()).when(followQueryPort).searchFollower(any(), any(), any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> followQueryService.searchFollower(query)
+            );
+            verify(followQueryPort, never()).findFolloweeIds(any(), any());
+        }
+
+        @Test
+        @DisplayName("팔로이 아이디 조회에 실패하면 예외를 던진다")
+        public void whenFindFolloweeIdsFails() {
+            // given
+            FollowerSearchQuery query = FollowerSearchQueryFixture.builder().build();
+            Page<User> followerPage = new PageImpl<>(List.of(), PageRequest.of(0, 30), 0);
+
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(followerPage).when(followQueryPort).searchFollower(any(), any(), any());
+            doThrow(new RuntimeException()).when(followQueryPort).findFolloweeIds(any(), any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> followQueryService.searchFollower(query)
             );
         }
     }
