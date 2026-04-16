@@ -561,4 +561,49 @@ public class UserCommandServiceTest extends BaseServiceTest {
             );
         }
     }
+
+    @Nested
+    @DisplayName("회원탈퇴")
+    class WithdrawTest {
+        @Test
+        @DisplayName("유저가 존재하면 소프트 딜리트 처리에 성공한다")
+        public void whenUserExists() {
+            // given
+            User user = UserFixture.builder().id(1L).build();
+
+            doReturn(Optional.of(user)).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when
+            userCommandService.withdraw(1L);
+
+            // then
+            verify(userQueryPort).findByIdAndDeletedAtIsNull(1L);
+        }
+
+        @Test
+        @DisplayName("유저가 존재하지 않으면 아무 처리도 하지 않는다")
+        public void whenUserNotFound() {
+            // given
+            doReturn(Optional.empty()).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when
+            userCommandService.withdraw(1L);
+
+            // then
+            verify(userQueryPort).findByIdAndDeletedAtIsNull(1L);
+        }
+
+        @Test
+        @DisplayName("유저 조회에 실패하면 예외를 던진다")
+        public void whenFindUserFails() {
+            // given
+            doThrow(new RuntimeException()).when(userQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> userCommandService.withdraw(1L)
+            );
+        }
+    }
 }
