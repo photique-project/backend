@@ -197,4 +197,74 @@ public class FollowCommandServiceTest extends BaseServiceTest {
             );
         }
     }
+
+    @Nested
+    @DisplayName("언팔로우")
+    class UnfollowTest {
+        @Test
+        @DisplayName("처리에 성공한다")
+        public void whenCommandValid() {
+            // given
+            User follower = UserFixture.builder().id(1L).build();
+            User followee = UserFixture.builder().id(2L).build();
+            Follow follow = FollowFixture.builder().follower(follower).followee(followee).build();
+
+            doReturn(follower.getId()).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(Optional.of(follow)).when(followQueryPort).findByFollowerIdAndFolloweeId(any(), any());
+
+            // when
+            followCommandService.unfollow(followee.getId());
+
+            // then
+            verify(followQueryPort).findByFollowerIdAndFolloweeId(follower.getId(), followee.getId());
+            verify(followCommandPort).delete(follow);
+        }
+
+        @Test
+        @DisplayName("본인을 언팔로우하면 InvalidFollowRequestException을 던진다")
+        public void whenSelfUnfollow() {
+            // given
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+
+            // when & then
+            assertThrows(
+                    InvalidFollowRequestException.class,
+                    () -> followCommandService.unfollow(1L)
+            );
+            verify(followCommandPort, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("팔로우가 존재하지 않으면 아무 처리도 하지 않는다")
+        public void whenFollowNotFound() {
+            // given
+            doReturn(1L).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(Optional.empty()).when(followQueryPort).findByFollowerIdAndFolloweeId(any(), any());
+
+            // when
+            followCommandService.unfollow(2L);
+
+            // then
+            verify(followCommandPort, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("팔로우 삭제에 실패하면 예외를 던진다")
+        public void whenDeleteFails() {
+            // given
+            User follower = UserFixture.builder().id(1L).build();
+            User followee = UserFixture.builder().id(2L).build();
+            Follow follow = FollowFixture.builder().follower(follower).followee(followee).build();
+
+            doReturn(follower.getId()).when(authenticationUserProviderPort).getCurrentUserId();
+            doReturn(Optional.of(follow)).when(followQueryPort).findByFollowerIdAndFolloweeId(any(), any());
+            doThrow(new RuntimeException()).when(followCommandPort).delete(any());
+
+            // when & then
+            assertThrows(
+                    RuntimeException.class,
+                    () -> followCommandService.unfollow(followee.getId())
+            );
+        }
+    }
 }
