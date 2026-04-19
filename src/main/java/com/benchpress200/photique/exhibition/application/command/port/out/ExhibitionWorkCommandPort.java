@@ -4,4 +4,6 @@ import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 
 public interface ExhibitionWorkCommandPort {
     ExhibitionWork save(ExhibitionWork work);
+
+    void deleteAll();
 }

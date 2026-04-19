@@ -23,6 +23,11 @@ public class UserPersistenceAdapter implements
     }
 
     @Override
+    public void deleteAll() {
+        userRepository.deleteAll();
+    }
+
+    @Override
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }

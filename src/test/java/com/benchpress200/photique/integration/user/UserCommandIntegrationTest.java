@@ -55,6 +55,7 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
     @BeforeEach
     void cleanAuthMailCode() {
         authMailCodeCommandPort.deleteAll();
+        userCommandPort.deleteAll();
     }
 
     @Nested

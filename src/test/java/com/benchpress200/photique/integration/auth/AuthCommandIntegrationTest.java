@@ -49,6 +49,7 @@ public class AuthCommandIntegrationTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        userCommandPort.deleteAll();
         authMailCodeCommandPort.deleteAll();
         Mockito.doNothing().when(mailSenderPort).sendMail(any());
     }

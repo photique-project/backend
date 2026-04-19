@@ -24,6 +24,11 @@ public class ExhibitionWorkPersistenceAdapter implements
     }
 
     @Override
+    public void deleteAll() {
+        exhibitionWorkRepository.deleteAll();
+    }
+
+    @Override
     public Optional<ExhibitionWork> findById(Long id) {
         return exhibitionWorkRepository.findById(id);
     }

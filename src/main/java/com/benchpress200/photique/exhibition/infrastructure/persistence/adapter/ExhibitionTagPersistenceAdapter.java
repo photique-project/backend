@@ -34,6 +34,11 @@ public class ExhibitionTagPersistenceAdapter implements
     }
 
     @Override
+    public void deleteAll() {
+        exhibitionTagRepository.deleteAll();
+    }
+
+    @Override
     public List<ExhibitionTag> findByExhibitionWithTag(Exhibition exhibition) {
         return exhibitionTagRepository.findByExhibitionWithTag(exhibition);
     }

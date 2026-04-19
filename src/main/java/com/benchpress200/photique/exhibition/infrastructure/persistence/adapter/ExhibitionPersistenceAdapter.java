@@ -70,4 +70,9 @@ public class ExhibitionPersistenceAdapter implements
     public void decrementLikeCount(Long exhibitionId) {
         exhibitionRepository.decrementLikeCount(exhibitionId);
     }
+
+    @Override
+    public void deleteAll() {
+        exhibitionRepository.deleteAll();
+    }
 }
