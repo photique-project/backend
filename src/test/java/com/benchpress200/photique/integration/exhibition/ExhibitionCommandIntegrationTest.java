@@ -79,6 +79,11 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        exhibitionTagCommandPort.deleteAll();
+        exhibitionWorkCommandPort.deleteAll();
+        exhibitionCommandPort.deleteAll();
+        userCommandPort.deleteAll();
+
         User user = UserFixture.builder().build();
         savedUser = userCommandPort.save(user);
 
@@ -261,6 +266,7 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
 
             // then
             resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(exhibitionQueryPort.countByWriter(savedUser)).isEqualTo(0L);
         }
 
         @Test
@@ -317,6 +323,7 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
 
             // then
             resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(exhibitionQueryPort.countByWriter(savedUser)).isEqualTo(0L);
         }
 
         @Test
@@ -334,6 +341,7 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
 
             // then
             resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(exhibitionQueryPort.countByWriter(savedUser)).isEqualTo(0L);
         }
 
         @Test
@@ -351,6 +359,7 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
 
             // then
             resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(exhibitionQueryPort.countByWriter(savedUser)).isEqualTo(0L);
         }
     }
 

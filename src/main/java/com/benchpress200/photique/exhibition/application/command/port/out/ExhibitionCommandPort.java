@@ -10,4 +10,6 @@ public interface ExhibitionCommandPort {
     void incrementLikeCount(Long exhibitionId);
 
     void decrementLikeCount(Long exhibitionId);
+
+    void deleteAll();
 }

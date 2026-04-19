@@ -10,4 +10,6 @@ public interface ExhibitionTagCommandPort {
     List<ExhibitionTag> saveAll(List<ExhibitionTag> exhibitionTags);
 
     void deleteByExhibition(Exhibition exhibition);
+
+    void deleteAll();
 }
