@@ -21,6 +21,8 @@ public class ExhibitionCreateCommand {
                 .title(title)
                 .description(description)
                 .cardColor(cardColor)
+                .viewCount(0L)
+                .likeCount(0L)
                 .build();
     }
 }
