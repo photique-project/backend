@@ -62,21 +62,6 @@ public class Exhibition {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Builder
-    public Exhibition(
-            User writer,
-            String title,
-            String description,
-            String cardColor
-    ) {
-        this.writer = writer;
-        this.title = title;
-        this.description = description;
-        this.cardColor = cardColor;
-        this.viewCount = 0L;
-        this.likeCount = 0L;
-    }
-
     public boolean isOwnedBy(Long writerId) {
         return writer.getId().equals(writerId);
     }
