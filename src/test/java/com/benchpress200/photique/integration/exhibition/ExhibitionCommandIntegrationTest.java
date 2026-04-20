@@ -2,6 +2,7 @@ package com.benchpress200.photique.integration.exhibition;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
@@ -10,11 +11,16 @@ import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.common.api.constant.MultipartKey;
 import com.benchpress200.photique.exhibition.api.command.request.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionCreateRequestFixture;
+import com.benchpress200.photique.exhibition.api.command.request.ExhibitionUpdateRequest;
+import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionUpdateRequestFixture;
 import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionWorkCreateRequestFixture;
+import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionWorkUpdateRequestFixture;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionTagCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionWorkCommandPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
+import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
 import com.benchpress200.photique.image.infrastructure.exception.ImageUploadException;
 import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
@@ -26,6 +32,7 @@ import com.benchpress200.photique.user.application.query.port.out.persistence.Us
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.support.UserFixture;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -361,6 +368,368 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
             resultActions.andExpect(status().isInternalServerError());
             Assertions.assertThat(exhibitionQueryPort.countByWriter(savedUser)).isEqualTo(0L);
         }
+    }
+
+    @Nested
+    @DisplayName("전시회 수정")
+    class UpdateExhibitionDetailsTest {
+        private Exhibition savedExhibition;
+        private ExhibitionWork savedWork;
+        private ExhibitionWork savedWork2;
+
+        @BeforeEach
+        void setUpExhibition() {
+            Exhibition exhibition = Exhibition.builder()
+                    .writer(savedUser)
+                    .title("원본 전시회 제목")
+                    .description("원본 설명")
+                    .cardColor("#FFFFFF")
+                    .viewCount(0L)
+                    .likeCount(0L)
+                    .build();
+            savedExhibition = exhibitionCommandPort.save(exhibition);
+
+            ExhibitionWork work = ExhibitionWork.builder()
+                    .exhibition(savedExhibition)
+                    .displayOrder(0)
+                    .title("원본 작품 제목")
+                    .description("원본 작품 설명")
+                    .image("https://test-image.jpg")
+                    .build();
+            savedWork = exhibitionWorkCommandPort.save(work);
+
+            ExhibitionWork work2 = ExhibitionWork.builder()
+                    .exhibition(savedExhibition)
+                    .displayOrder(1)
+                    .title("원본 작품 제목2")
+                    .description("원본 작품 설명2")
+                    .image("https://test-image2.jpg")
+                    .build();
+            savedWork2 = exhibitionWorkCommandPort.save(work2);
+        }
+
+        @Test
+        @DisplayName("요청이 유효하면 전시회를 수정하고 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetailsAuthenticated(
+                    savedExhibition.getId(),
+                    request
+            );
+            Optional<Exhibition> updatedExhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(updatedExhibition)
+                    .isPresent()
+                    .get()
+                    .satisfies(e -> Assertions.assertThat(e.getTitle()).isEqualTo("수정된 전시회 제목"));
+        }
+
+        @Test
+        @DisplayName("인증되지 않은 사용자면 전시회를 수정하지 않고 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetails(savedExhibition.getId(), request);
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 전시회면 404를 반환한다")
+        public void whenExhibitionNotFound() throws Exception {
+            // given
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetailsAuthenticated(
+                    savedExhibition.getId() + 999L,
+                    request
+            );
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("전시회 소유자가 아니면 전시회를 수정하지 않고 403을 반환한다")
+        public void whenNotOwned() throws Exception {
+            // given
+            User otherUser = UserFixture.builder()
+                    .email("other@example.com")
+                    .nickname("다른유저")
+                    .build();
+            User savedOtherUser = userCommandPort.save(otherUser);
+            AuthenticationTokens otherTokens = authenticationTokenManagerPort.issueTokens(
+                    savedOtherUser.getId(),
+                    savedOtherUser.getRole().name()
+            );
+
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetailsWithToken(
+                    savedExhibition.getId(),
+                    request,
+                    otherTokens.getAccessToken()
+            );
+            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isForbidden());
+            Assertions.assertThat(exhibition)
+                    .isPresent()
+                    .get()
+                    .satisfies(e -> Assertions.assertThat(e.getTitle()).isEqualTo("원본 전시회 제목"));
+        }
+
+        @ParameterizedTest
+        @DisplayName("제목이 유효하지 않으면 전시회를 수정하지 않고 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.integration.exhibition.ExhibitionCommandIntegrationTest#invalidUpdateTitles")
+        public void whenTitleInvalid(String invalidTitle) throws Exception {
+            // given
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
+                    .updateTitle(true)
+                    .title(invalidTitle)
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetailsAuthenticated(
+                    savedExhibition.getId(),
+                    request
+            );
+            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+            Assertions.assertThat(exhibition)
+                    .isPresent()
+                    .get()
+                    .satisfies(e -> Assertions.assertThat(e.getTitle()).isEqualTo("원본 전시회 제목"));
+        }
+
+        @ParameterizedTest
+        @DisplayName("설명이 유효하지 않으면 전시회를 수정하지 않고 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.integration.exhibition.ExhibitionCommandIntegrationTest#invalidUpdateDescriptions")
+        public void whenDescriptionInvalid(String invalidDescription) throws Exception {
+            // given
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
+                    .updateTitle(false)
+                    .updateDescription(true)
+                    .description(invalidDescription)
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetailsAuthenticated(
+                    savedExhibition.getId(),
+                    request
+            );
+            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+            Assertions.assertThat(exhibition)
+                    .isPresent()
+                    .get()
+                    .satisfies(e -> Assertions.assertThat(e.getDescription()).isEqualTo("원본 설명"));
+        }
+
+        @Test
+        @DisplayName("카드 색상이 유효하지 않으면 전시회를 수정하지 않고 400을 반환한다")
+        public void whenCardColorInvalid() throws Exception {
+            // given
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
+                    .updateTitle(false)
+                    .updateCardColor(true)
+                    .cardColor("a".repeat(21))
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetailsAuthenticated(
+                    savedExhibition.getId(),
+                    request
+            );
+            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+            Assertions.assertThat(exhibition)
+                    .isPresent()
+                    .get()
+                    .satisfies(e -> Assertions.assertThat(e.getCardColor()).isEqualTo("#FFFFFF"));
+        }
+
+        @Test
+        @DisplayName("수정 플래그가 true이나 해당 필드가 null이면 전시회를 수정하지 않고 400을 반환한다")
+        public void whenUpdateFlagTrueButFieldNull() throws Exception {
+            // given
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
+                    .updateTitle(true)
+                    .title(null)
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetailsAuthenticated(
+                    savedExhibition.getId(),
+                    request
+            );
+            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+            Assertions.assertThat(exhibition)
+                    .isPresent()
+                    .get()
+                    .satisfies(e -> Assertions.assertThat(e.getTitle()).isEqualTo("원본 전시회 제목"));
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 작품을 수정하려 하면 전시회를 수정하지 않고 404를 반환한다")
+        public void whenWorkNotFound() throws Exception {
+            // given
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
+                    .updateTitle(false)
+                    .updateWorks(true)
+                    .works(List.of(
+                            ExhibitionWorkUpdateRequestFixture.builder()
+                                    .id(savedWork.getId() + 999L)
+                                    .build()
+                    ))
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetailsAuthenticated(
+                    savedExhibition.getId(),
+                    request
+            );
+            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+            Assertions.assertThat(exhibition)
+                    .isPresent()
+                    .get()
+                    .satisfies(e -> Assertions.assertThat(e.getTitle()).isEqualTo("원본 전시회 제목"));
+        }
+
+        @Test
+        @DisplayName("작품 순서가 중복되면 전시회를 수정하지 않고 400을 반환한다")
+        public void whenWorkDisplayOrderDuplicated() throws Exception {
+            // given
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
+                    .updateTitle(false)
+                    .updateWorks(true)
+                    .works(List.of(
+                            ExhibitionWorkUpdateRequestFixture.builder()
+                                    .id(savedWork.getId())
+                                    .displayOrder(0)
+                                    .build(),
+                            ExhibitionWorkUpdateRequestFixture.builder()
+                                    .id(savedWork2.getId())
+                                    .displayOrder(0)
+                                    .build()
+                    ))
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetailsAuthenticated(
+                    savedExhibition.getId(),
+                    request
+            );
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("아웃박스 이벤트 저장에 실패하면 500을 반환한다")
+        public void whenOutboxEventSaveFails() throws Exception {
+            // given
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder().build();
+
+            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
+                    .when(outboxEventPort).save(any());
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionDetailsAuthenticated(
+                    savedExhibition.getId(),
+                    request
+            );
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+        }
+    }
+
+    private static Stream<String> invalidUpdateTitles() {
+        return Stream.of(
+                "",                 // @Size min 위반
+                "a".repeat(31)      // @Size max 초과
+        );
+    }
+
+    private static Stream<String> invalidUpdateDescriptions() {
+        return Stream.of(
+                "",                 // @Size min 위반
+                "a".repeat(501)     // @Size max 초과
+        );
+    }
+
+    private ResultActions requestUpdateExhibitionDetails(
+            Long exhibitionId,
+            ExhibitionUpdateRequest request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.EXHIBITION_DATA, exhibitionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    private ResultActions requestUpdateExhibitionDetailsWithToken(
+            Long exhibitionId,
+            ExhibitionUpdateRequest request,
+            String token
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.EXHIBITION_DATA, exhibitionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer " + token)
+        );
+    }
+
+    private ResultActions requestUpdateExhibitionDetailsAuthenticated(
+            Long exhibitionId,
+            ExhibitionUpdateRequest request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.EXHIBITION_DATA, exhibitionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer " + accessToken)
+        );
     }
 
     private static Stream<String> invalidTitles() {

@@ -1,9 +1,8 @@
 package com.benchpress200.photique.exhibition.api.command.support.fixture;
 
+import com.benchpress200.photique.exhibition.api.command.request.ExhibitionUpdateRequest;
 import com.benchpress200.photique.exhibition.api.command.request.ExhibitionWorkUpdateRequest;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ExhibitionUpdateRequestFixture {
     private ExhibitionUpdateRequestFixture() {
@@ -75,19 +74,19 @@ public class ExhibitionUpdateRequestFixture {
             return this;
         }
 
-        public Map<String, Object> build() {
-            Map<String, Object> map = new HashMap<>();
-            map.put("updateTitle", updateTitle);
-            map.put("title", title);
-            map.put("updateDescription", updateDescription);
-            map.put("description", description);
-            map.put("updateCardColor", updateCardColor);
-            map.put("cardColor", cardColor);
-            map.put("updateTags", updateTags);
-            map.put("tags", tags);
-            map.put("updateWorks", updateWorks);
-            map.put("works", works);
-            return map;
+        public ExhibitionUpdateRequest build() {
+            ExhibitionUpdateRequest request = new ExhibitionUpdateRequest();
+            request.setUpdateTitle(updateTitle);
+            request.setTitle(title);
+            request.setUpdateDescription(updateDescription);
+            request.setDescription(description);
+            request.setUpdateCardColor(updateCardColor);
+            request.setCardColor(cardColor);
+            request.setUpdateTags(updateTags);
+            request.setTags(tags);
+            request.setUpdateWorks(updateWorks);
+            request.setWorks(works);
+            return request;
         }
     }
 }

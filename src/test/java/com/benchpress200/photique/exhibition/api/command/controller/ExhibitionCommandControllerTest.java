@@ -11,6 +11,7 @@ import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.common.api.constant.MultipartKey;
 import com.benchpress200.photique.exhibition.api.command.request.ExhibitionCreateRequest;
 import com.benchpress200.photique.exhibition.api.command.request.ExhibitionWorkCreateRequest;
+import com.benchpress200.photique.exhibition.api.command.request.ExhibitionUpdateRequest;
 import com.benchpress200.photique.exhibition.api.command.request.ExhibitionWorkUpdateRequest;
 import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionCreateRequestFixture;
 import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionUpdateRequestFixture;
@@ -23,7 +24,6 @@ import com.benchpress200.photique.support.base.BaseControllerTest;
 import com.benchpress200.photique.support.fixture.MultipartFileFixture;
 import com.benchpress200.photique.support.fixture.MultipartJsonFixture;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -457,7 +457,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
         @DisplayName("요청이 유효하면 204를 반환한다")
         public void whenRequestValid() throws Exception {
             // given
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder().build();
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder().build();
             doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
 
             // when
@@ -473,7 +473,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
         @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidTitlesForUpdate")
         public void whenTitleInvalid(String invalidTitle) throws Exception {
             // given
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
                     .updateTitle(true)
                     .title(invalidTitle)
                     .build();
@@ -492,7 +492,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
         @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidDescriptionsForUpdate")
         public void whenDescriptionInvalid(String invalidDescription) throws Exception {
             // given
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
                     .updateDescription(true)
                     .description(invalidDescription)
                     .build();
@@ -511,7 +511,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
         @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidCardColorsForUpdate")
         public void whenCardColorInvalid(String invalidCardColor) throws Exception {
             // given
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
                     .updateCardColor(true)
                     .cardColor(invalidCardColor)
                     .build();
@@ -530,7 +530,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
         @MethodSource("com.benchpress200.photique.exhibition.api.command.controller.ExhibitionCommandControllerTest#invalidTagsForUpdate")
         public void whenTagsInvalid(List<String> invalidTags) throws Exception {
             // given
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
                     .updateTags(true)
                     .tags(invalidTags)
                     .build();
@@ -548,7 +548,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
         @DisplayName("작품 목록이 null이면 400을 반환한다")
         public void whenWorksNull() throws Exception {
             // given
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
                     .updateWorks(true)
                     .works(null)
                     .build();
@@ -566,7 +566,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
         @DisplayName("작품 목록이 비어있으면 400을 반환한다")
         public void whenWorksEmpty() throws Exception {
             // given
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
                     .updateWorks(true)
                     .works(List.of())
                     .build();
@@ -587,7 +587,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
             ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
                     .id(null)
                     .build();
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
                     .updateWorks(true)
                     .works(List.of(work))
                     .build();
@@ -610,7 +610,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
             ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
                     .displayOrder(invalidDisplayOrder)
                     .build();
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
                     .updateWorks(true)
                     .works(List.of(work))
                     .build();
@@ -632,7 +632,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
             ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
                     .title(invalidWorkTitle)
                     .build();
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
                     .updateWorks(true)
                     .works(List.of(work))
                     .build();
@@ -655,7 +655,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
             ExhibitionWorkUpdateRequest work = ExhibitionWorkUpdateRequestFixture.builder()
                     .description(invalidWorkDescription)
                     .build();
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder()
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder()
                     .updateWorks(true)
                     .works(List.of(work))
                     .build();
@@ -673,7 +673,7 @@ public class ExhibitionCommandControllerTest extends BaseControllerTest {
         @DisplayName("전시회 ID가 유효하지 않으면 400을 반환한다")
         public void whenExhibitionIdInvalid() throws Exception {
             // given
-            Map<String, Object> request = ExhibitionUpdateRequestFixture.builder().build();
+            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder().build();
             doNothing().when(updateExhibitionDetailsUseCase).updateExhibitionDetailsUpdate(any());
 
             // when
