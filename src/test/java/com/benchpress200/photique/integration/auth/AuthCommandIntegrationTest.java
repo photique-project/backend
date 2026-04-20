@@ -2,16 +2,21 @@ package com.benchpress200.photique.integration.auth;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.benchpress200.photique.auth.api.command.request.AuthMailCodeValidateRequest;
 import com.benchpress200.photique.auth.api.command.request.AuthMailRequest;
+import com.benchpress200.photique.auth.api.command.support.fixture.AuthMailCodeValidateRequestFixture;
 import com.benchpress200.photique.auth.api.command.support.fixture.AuthMailRequestFixture;
 import com.benchpress200.photique.auth.application.command.port.out.mail.MailSenderPort;
 import com.benchpress200.photique.auth.application.command.port.out.persistence.AuthMailCodeCommandPort;
 import com.benchpress200.photique.auth.application.query.port.out.persistence.AuthMailCodeQueryPort;
 import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
+import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
 import com.benchpress200.photique.auth.infrastructure.exception.MailSendException;
 import com.benchpress200.photique.common.api.constant.ApiPath;
+import com.benchpress200.photique.integration.auth.support.fixture.AuthMailCodeFixture;
 import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -271,10 +276,151 @@ public class AuthCommandIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("메일 인증 코드 검증")
+    class ValidateAuthMailCodeTest {
+        @Test
+        @DisplayName("요청 코드가 일치하면 검증 성공 처리하고 200을 반환한다")
+        public void whenCodeMatches() throws Exception {
+            // given
+            String code = "123456";
+            AuthMailCode authMailCode = AuthMailCodeFixture.builder()
+                    .code(code)
+                    .build();
+            authMailCodeCommandPort.save(authMailCode);
+
+            AuthMailCodeValidateRequest request = AuthMailCodeValidateRequestFixture.builder()
+                    .code(code)
+                    .build();
+
+            // when
+            ResultActions resultActions = requestValidateAuthMailCode(request);
+            Optional<AuthMailCode> savedCode = authMailCodeQueryPort.findById(authMailCode.getEmail());
+
+            // then
+            resultActions.andExpect(status().isOk());
+            Assertions.assertThat(savedCode)
+                    .isPresent()
+                    .get()
+                    .satisfies(c -> Assertions.assertThat(c.isVerified()).isTrue());
+        }
+
+        @Test
+        @DisplayName("요청 코드가 일치하지 않으면 검증 실패 처리하고 200을 반환한다")
+        public void whenCodeMismatches() throws Exception {
+            // given
+            AuthMailCode authMailCode = AuthMailCodeFixture.builder()
+                    .code("123456")
+                    .build();
+            authMailCodeCommandPort.save(authMailCode);
+
+            AuthMailCodeValidateRequest request = AuthMailCodeValidateRequestFixture.builder()
+                    .code("999999")
+                    .build();
+
+            // when
+            ResultActions resultActions = requestValidateAuthMailCode(request);
+            Optional<AuthMailCode> savedCode = authMailCodeQueryPort.findById(authMailCode.getEmail());
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.success").value(false));
+            Assertions.assertThat(savedCode)
+                    .isPresent()
+                    .get()
+                    .satisfies(c -> Assertions.assertThat(c.isVerified()).isFalse());
+        }
+
+        @ParameterizedTest
+        @DisplayName("이메일이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.integration.auth.AuthCommandIntegrationTest#invalidEmails")
+        public void whenEmailInvalid(String invalidEmail) throws Exception {
+            // given
+            AuthMailCodeValidateRequest request = AuthMailCodeValidateRequestFixture.builder()
+                    .email(invalidEmail)
+                    .build();
+
+            // when
+            ResultActions resultActions = requestValidateAuthMailCode(request);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("코드가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.integration.auth.AuthCommandIntegrationTest#invalidCodes")
+        public void whenCodeBlank(String invalidCode) throws Exception {
+            // given
+            AuthMailCodeValidateRequest request = AuthMailCodeValidateRequestFixture.builder()
+                    .code(invalidCode)
+                    .build();
+
+            // when
+            ResultActions resultActions = requestValidateAuthMailCode(request);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("인증 코드가 존재하지 않으면 410을 반환한다")
+        public void whenCodeNotFound() throws Exception {
+            // given
+            AuthMailCodeValidateRequest request = AuthMailCodeValidateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestValidateAuthMailCode(request);
+
+            // then
+            resultActions.andExpect(status().isGone());
+        }
+
+        @Test
+        @DisplayName("인증 코드 저장에 실패하면 500을 반환한다")
+        public void whenSaveFails() throws Exception {
+            // given
+            String code = "123456";
+            AuthMailCode authMailCode = AuthMailCodeFixture.builder()
+                    .code(code)
+                    .build();
+            authMailCodeCommandPort.save(authMailCode);
+
+            AuthMailCodeValidateRequest request = AuthMailCodeValidateRequestFixture.builder()
+                    .code(code)
+                    .build();
+
+            Mockito.doThrow(new DataAccessResourceFailureException("Redis 에러"))
+                    .when(authMailCodeCommandPort).save(any());
+
+            // when
+            ResultActions resultActions = requestValidateAuthMailCode(request);
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+        }
+    }
+
     private static Stream<String> invalidEmails() {
         return Stream.of(
                 null,           // @NotNull 위반
                 "invalid-email" // 이메일 형식 위반
+        );
+    }
+
+    private static Stream<String> invalidCodes() {
+        return Stream.of(
+                null,   // @NotBlank 위반
+                ""      // @NotBlank 위반
+        );
+    }
+
+    private ResultActions requestValidateAuthMailCode(AuthMailCodeValidateRequest request) throws Exception {
+        return mockMvc.perform(
+                post(ApiPath.AUTH_CODE)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
         );
     }
 
