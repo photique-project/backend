@@ -64,11 +64,13 @@ public class Notification {
     public Notification(
             User receiver,
             NotificationType type,
-            Long targetId
+            Long targetId,
+            Long eventId
     ) {
         this.receiver = receiver;
         this.type = type;
         this.targetId = targetId;
+        this.eventId = eventId;
     }
 
     public void read() {

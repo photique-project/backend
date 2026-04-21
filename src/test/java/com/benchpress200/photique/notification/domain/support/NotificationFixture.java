@@ -17,6 +17,7 @@ public class NotificationFixture {
         private User receiver = UserFixture.builder().id(1L).build();
         private NotificationType type = NotificationType.FOLLOW;
         private Long targetId = 1L;
+        private Long eventId = 1L;
 
         public Builder receiver(User receiver) {
             this.receiver = receiver;
@@ -33,11 +34,17 @@ public class NotificationFixture {
             return this;
         }
 
+        public Builder eventId(Long eventId) {
+            this.eventId = eventId;
+            return this;
+        }
+
         public Notification build() {
             return Notification.builder()
                     .receiver(receiver)
                     .type(type)
                     .targetId(targetId)
+                    .eventId(eventId)
                     .build();
         }
     }

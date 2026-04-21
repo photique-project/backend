@@ -9,4 +9,6 @@ public interface NotificationCommandPort {
     List<Notification> saveAll(List<Notification> notifications);
 
     void markAllAsReadByReceiverIdAndDeletedAtIsNull(Long receiverId);
+
+    void deleteAll();
 }
