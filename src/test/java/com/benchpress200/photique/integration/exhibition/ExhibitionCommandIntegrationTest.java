@@ -1,6 +1,7 @@
 package com.benchpress200.photique.integration.exhibition;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -862,5 +863,133 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
                 .header("Authorization", "Bearer " + accessToken);
 
         return mockMvc.perform(httpBuilder);
+    }
+
+    @Nested
+    @DisplayName("전시회 삭제")
+    class DeleteExhibitionTest {
+        private Exhibition savedExhibition;
+
+        @BeforeEach
+        void setUpExhibition() {
+            Exhibition exhibition = Exhibition.builder()
+                    .writer(savedUser)
+                    .title("삭제할 전시회 제목")
+                    .description("삭제할 전시회 설명")
+                    .cardColor("#FFFFFF")
+                    .viewCount(0L)
+                    .likeCount(0L)
+                    .build();
+            savedExhibition = exhibitionCommandPort.save(exhibition);
+        }
+
+        @Test
+        @DisplayName("요청이 유효하면 전시회를 삭제하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // when
+            ResultActions resultActions = requestDeleteExhibitionAuthenticated(savedExhibition.getId());
+            Optional<Exhibition> deletedExhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(deletedExhibition).isNotPresent();
+        }
+
+        @Test
+        @DisplayName("인증되지 않은 사용자면 전시회를 삭제하지 않고 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // when
+            ResultActions resultActions = requestDeleteExhibition(savedExhibition.getId());
+            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+            Assertions.assertThat(exhibition).isPresent();
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 전시회면 전시회를 삭제하지 않고 204를 반환한다")
+        public void whenExhibitionNotFound() throws Exception {
+            // when
+            ResultActions resultActions = requestDeleteExhibitionAuthenticated(
+                    savedExhibition.getId() + 999L
+            );
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("전시회 소유자가 아니면 전시회를 삭제하지 않고 403을 반환한다")
+        public void whenNotOwned() throws Exception {
+            // given
+            User otherUser = UserFixture.builder()
+                    .email("other@example.com")
+                    .nickname("다른유저")
+                    .build();
+            User savedOtherUser = userCommandPort.save(otherUser);
+            AuthenticationTokens otherTokens = authenticationTokenManagerPort.issueTokens(
+                    savedOtherUser.getId(),
+                    savedOtherUser.getRole().name()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteExhibitionWithToken(
+                    savedExhibition.getId(),
+                    otherTokens.getAccessToken()
+            );
+            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isForbidden());
+            Assertions.assertThat(exhibition).isPresent();
+        }
+
+        @Test
+        @DisplayName("아웃박스 이벤트 저장에 실패하면 전시회를 삭제하지 않고 500을 반환한다")
+        public void whenOutboxEventSaveFails() throws Exception {
+            // given
+            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
+                    .when(outboxEventPort).save(any());
+
+            // when
+            ResultActions resultActions = requestDeleteExhibitionAuthenticated(savedExhibition.getId());
+            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(exhibition).isPresent();
+        }
+    }
+
+    private ResultActions requestDeleteExhibition(Long exhibitionId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_DATA, exhibitionId)
+        );
+    }
+
+    private ResultActions requestDeleteExhibitionWithToken(
+            Long exhibitionId,
+            String token
+    ) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_DATA, exhibitionId)
+                        .header("Authorization", "Bearer " + token)
+        );
+    }
+
+    private ResultActions requestDeleteExhibitionAuthenticated(Long exhibitionId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_DATA, exhibitionId)
+                        .header("Authorization", "Bearer " + accessToken)
+        );
     }
 }
