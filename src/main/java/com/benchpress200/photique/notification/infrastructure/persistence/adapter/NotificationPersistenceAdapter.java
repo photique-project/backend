@@ -47,4 +47,9 @@ public class NotificationPersistenceAdapter implements
     public Optional<Notification> findByIdAndDeletedAtIsNull(Long id) {
         return notificationRepository.findByIdAndDeletedAtIsNull(id);
     }
+
+    @Override
+    public void deleteAll() {
+        notificationRepository.deleteAll();
+    }
 }
