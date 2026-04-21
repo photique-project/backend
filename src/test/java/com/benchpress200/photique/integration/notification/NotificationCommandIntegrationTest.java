@@ -1,5 +1,6 @@
 package com.benchpress200.photique.integration.notification;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -20,8 +21,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 @DisplayName("알림 커맨드 API 통합 테스트")
@@ -30,7 +34,7 @@ public class NotificationCommandIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private NotificationCommandPort notificationCommandPort;
 
-    @Autowired
+    @MockitoSpyBean
     private NotificationQueryPort notificationQueryPort;
 
     @Autowired
@@ -120,6 +124,35 @@ public class NotificationCommandIntegrationTest extends BaseIntegrationTest {
 
             // then
             resultActions.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("알림 조회 중 DB 예외가 발생하면 500을 반환한다")
+        public void whenQueryFails() throws Exception {
+            // given
+            Notification savedNotification = notificationCommandPort.save(
+                    NotificationFixture.builder()
+                            .receiver(savedUser)
+                            .build()
+            );
+            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
+                    .when(notificationQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when
+            ResultActions resultActions = requestMarkAsReadAuthenticated(savedNotification.getId());
+
+            // 스파이 복원 후 DB 상태 검증
+            Mockito.doCallRealMethod().when(notificationQueryPort).findByIdAndDeletedAtIsNull(any());
+            Optional<Notification> notification = notificationQueryPort.findByIdAndDeletedAtIsNull(
+                    savedNotification.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(notification)
+                    .isPresent()
+                    .get()
+                    .satisfies(n -> Assertions.assertThat(n.isRead()).isFalse());
         }
     }
 
