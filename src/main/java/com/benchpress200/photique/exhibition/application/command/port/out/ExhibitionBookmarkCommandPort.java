@@ -6,4 +6,6 @@ public interface ExhibitionBookmarkCommandPort {
     ExhibitionBookmark save(ExhibitionBookmark exhibitionBookmark);
 
     void delete(ExhibitionBookmark exhibitionBookmark);
+
+    void deleteAll();
 }

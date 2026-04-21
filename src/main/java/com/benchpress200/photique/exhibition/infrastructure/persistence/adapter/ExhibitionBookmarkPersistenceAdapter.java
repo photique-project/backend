@@ -59,4 +59,9 @@ public class ExhibitionBookmarkPersistenceAdapter implements
     public void delete(ExhibitionBookmark exhibitionBookmark) {
         exhibitionBookmarkRepository.delete(exhibitionBookmark);
     }
+
+    @Override
+    public void deleteAll() {
+        exhibitionBookmarkRepository.deleteAll();
+    }
 }
