@@ -15,6 +15,7 @@ public class ExhibitionFixture {
     public static class Builder {
         private Long id;
         private Long writerId = 1L;
+        private User writer = null;
         private String title = "기본 전시회 제목";
         private String description = "기본 전시회 설명";
         private String cardColor = "#FFFFFF";
@@ -26,6 +27,11 @@ public class ExhibitionFixture {
 
         public Builder writerId(Long writerId) {
             this.writerId = writerId;
+            return this;
+        }
+
+        public Builder writer(User writer) {
+            this.writer = writer;
             return this;
         }
 
@@ -45,11 +51,11 @@ public class ExhibitionFixture {
         }
 
         public Exhibition build() {
-            User writer = UserFixture.builder().id(writerId).build();
+            User resolvedWriter = (writer != null) ? writer : UserFixture.builder().id(writerId).build();
 
             return Exhibition.builder()
                     .id(id)
-                    .writer(writer)
+                    .writer(resolvedWriter)
                     .title(title)
                     .description(description)
                     .cardColor(cardColor)
