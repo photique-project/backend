@@ -1,6 +1,7 @@
 package com.benchpress200.photique.integration.exhibition;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -170,6 +171,112 @@ public class ExhibitionBookmarkCommandIntegrationTest extends BaseIntegrationTes
         }
     }
 
+    @Nested
+    @DisplayName("전시회 북마크 취소")
+    class CancelExhibitionBookmarkTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 북마크를 삭제하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            exhibitionBookmarkCommandPort.save(ExhibitionBookmark.of(savedUser, exhibition));
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionBookmarkAuthenticated(exhibition.getId());
+            boolean exists = exhibitionBookmarkQueryPort.existsByUserIdAndExhibitionId(
+                    savedUser.getId(),
+                    exhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(exists).isFalse();
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            exhibitionBookmarkCommandPort.save(ExhibitionBookmark.of(savedUser, exhibition));
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionBookmark(exhibition.getId());
+            boolean exists = exhibitionBookmarkQueryPort.existsByUserIdAndExhibitionId(
+                    savedUser.getId(),
+                    exhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+            Assertions.assertThat(exists).isTrue();
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 전시회이면 404를 반환한다")
+        public void whenExhibitionNotFound() throws Exception {
+            // given
+            Long nonExistentId = 9999L;
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionBookmarkAuthenticated(nonExistentId);
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("북마크가 없는 전시회이면 204를 반환한다")
+        public void whenBookmarkNotExists() throws Exception {
+            // given
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionBookmarkAuthenticated(exhibition.getId());
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("북마크 삭제 중 DB 예외가 발생하면 500을 반환한다")
+        public void whenBookmarkDeleteFails() throws Exception {
+            // given
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            exhibitionBookmarkCommandPort.save(ExhibitionBookmark.of(savedUser, exhibition));
+            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
+                    .when(exhibitionBookmarkCommandPort).delete(any());
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionBookmarkAuthenticated(exhibition.getId());
+            boolean exists = exhibitionBookmarkQueryPort.existsByUserIdAndExhibitionId(
+                    savedUser.getId(),
+                    exhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(exists).isTrue();
+        }
+    }
+
     private ResultActions requestAddExhibitionBookmark(Long exhibitionId) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.EXHIBITION_BOOKMARK, exhibitionId)
@@ -179,6 +286,19 @@ public class ExhibitionBookmarkCommandIntegrationTest extends BaseIntegrationTes
     private ResultActions requestAddExhibitionBookmarkAuthenticated(Long exhibitionId) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.EXHIBITION_BOOKMARK, exhibitionId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        );
+    }
+
+    private ResultActions requestCancelExhibitionBookmark(Long exhibitionId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_BOOKMARK, exhibitionId)
+        );
+    }
+
+    private ResultActions requestCancelExhibitionBookmarkAuthenticated(Long exhibitionId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_BOOKMARK, exhibitionId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         );
     }
