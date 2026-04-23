@@ -6,4 +6,6 @@ public interface ExhibitionCommentCommandPort {
     ExhibitionComment save(ExhibitionComment exhibitionComment);
 
     void delete(ExhibitionComment exhibitionComment);
+
+    void deleteAll();
 }
