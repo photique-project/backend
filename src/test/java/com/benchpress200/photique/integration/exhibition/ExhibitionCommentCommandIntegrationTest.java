@@ -1,6 +1,7 @@
 package com.benchpress200.photique.integration.exhibition;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -8,7 +9,11 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.exhibition.api.command.request.ExhibitionCommentCreateRequest;
+import com.benchpress200.photique.exhibition.api.command.request.ExhibitionCommentUpdateRequest;
 import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionCommentCreateRequestFixture;
+import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionCommentUpdateRequestFixture;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionComment;
+import com.benchpress200.photique.exhibition.domain.support.ExhibitionCommentFixture;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommentCommandPort;
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionCommentQueryPort;
@@ -238,6 +243,181 @@ public class ExhibitionCommentCommandIntegrationTest extends BaseIntegrationTest
         }
     }
 
+    @Nested
+    @DisplayName("전시회 감상평 수정")
+    class UpdateExhibitionCommentTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 감상평을 수정하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            ExhibitionComment savedComment = exhibitionCommentCommandPort.save(
+                    ExhibitionCommentFixture.builder()
+                            .writer(savedUser)
+                            .exhibition(exhibition)
+                            .build()
+            );
+            ExhibitionCommentUpdateRequest request = ExhibitionCommentUpdateRequestFixture.builder()
+                    .content("수정된 감상평")
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionCommentAuthenticated(savedComment.getId(), request);
+            ExhibitionComment updatedComment = exhibitionCommentQueryPort
+                    .findByIdAndDeletedAtIsNull(savedComment.getId())
+                    .orElseThrow();
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(updatedComment.getContent()).isEqualTo("수정된 감상평");
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            ExhibitionComment savedComment = exhibitionCommentCommandPort.save(
+                    ExhibitionCommentFixture.builder()
+                            .writer(savedUser)
+                            .exhibition(exhibition)
+                            .build()
+            );
+            ExhibitionCommentUpdateRequest request = ExhibitionCommentUpdateRequestFixture.builder()
+                    .content("수정된 감상평")
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionComment(savedComment.getId(), request);
+            ExhibitionComment comment = exhibitionCommentQueryPort
+                    .findByIdAndDeletedAtIsNull(savedComment.getId())
+                    .orElseThrow();
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+            Assertions.assertThat(comment.getContent()).isEqualTo(savedComment.getContent());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 감상평이면 404를 반환한다")
+        public void whenCommentNotFound() throws Exception {
+            // given
+            Long nonExistentId = 9999L;
+            ExhibitionCommentUpdateRequest request = ExhibitionCommentUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionCommentAuthenticated(nonExistentId, request);
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("감상평 작성자가 아니면 403을 반환한다")
+        public void whenNotOwner() throws Exception {
+            // given
+            User otherUser = userCommandPort.save(
+                    UserFixture.builder()
+                            .email("other@example.com")
+                            .nickname("다른유저")
+                            .build()
+            );
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            ExhibitionComment savedComment = exhibitionCommentCommandPort.save(
+                    ExhibitionCommentFixture.builder()
+                            .writer(otherUser)
+                            .exhibition(exhibition)
+                            .build()
+            );
+            ExhibitionCommentUpdateRequest request = ExhibitionCommentUpdateRequestFixture.builder()
+                    .content("수정된 감상평")
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionCommentAuthenticated(savedComment.getId(), request);
+            ExhibitionComment comment = exhibitionCommentQueryPort
+                    .findByIdAndDeletedAtIsNull(savedComment.getId())
+                    .orElseThrow();
+
+            // then
+            resultActions.andExpect(status().isForbidden());
+            Assertions.assertThat(comment.getContent()).isEqualTo(savedComment.getContent());
+        }
+
+        @Test
+        @DisplayName("감상평 내용이 빈 문자열이면 400을 반환한다")
+        public void whenContentBlank() throws Exception {
+            // given
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            ExhibitionComment savedComment = exhibitionCommentCommandPort.save(
+                    ExhibitionCommentFixture.builder()
+                            .writer(savedUser)
+                            .exhibition(exhibition)
+                            .build()
+            );
+            ExhibitionCommentUpdateRequest request = ExhibitionCommentUpdateRequestFixture.builder()
+                    .content("")
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionCommentAuthenticated(savedComment.getId(), request);
+            ExhibitionComment comment = exhibitionCommentQueryPort
+                    .findByIdAndDeletedAtIsNull(savedComment.getId())
+                    .orElseThrow();
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+            Assertions.assertThat(comment.getContent()).isEqualTo(savedComment.getContent());
+        }
+
+        @Test
+        @DisplayName("감상평 내용이 300자를 초과하면 400을 반환한다")
+        public void whenContentTooLong() throws Exception {
+            // given
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            ExhibitionComment savedComment = exhibitionCommentCommandPort.save(
+                    ExhibitionCommentFixture.builder()
+                            .writer(savedUser)
+                            .exhibition(exhibition)
+                            .build()
+            );
+            ExhibitionCommentUpdateRequest request = ExhibitionCommentUpdateRequestFixture.builder()
+                    .content("a".repeat(301))
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateExhibitionCommentAuthenticated(savedComment.getId(), request);
+            ExhibitionComment comment = exhibitionCommentQueryPort
+                    .findByIdAndDeletedAtIsNull(savedComment.getId())
+                    .orElseThrow();
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+            Assertions.assertThat(comment.getContent()).isEqualTo(savedComment.getContent());
+        }
+    }
+
     private ResultActions requestCreateExhibitionComment(
             Long exhibitionId,
             ExhibitionCommentCreateRequest request
@@ -255,6 +435,29 @@ public class ExhibitionCommentCommandIntegrationTest extends BaseIntegrationTest
     ) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.EXHIBITION_COMMENT, exhibitionId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        );
+    }
+
+    private ResultActions requestUpdateExhibitionComment(
+            Long commentId,
+            ExhibitionCommentUpdateRequest request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.EXHIBITION_COMMENT_DATA, commentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    private ResultActions requestUpdateExhibitionCommentAuthenticated(
+            Long commentId,
+            ExhibitionCommentUpdateRequest request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.EXHIBITION_COMMENT_DATA, commentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
