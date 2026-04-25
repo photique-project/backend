@@ -1,6 +1,7 @@
 package com.benchpress200.photique.integration.exhibition;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -441,6 +442,111 @@ public class ExhibitionCommentCommandIntegrationTest extends BaseIntegrationTest
         );
     }
 
+    @Nested
+    @DisplayName("전시회 감상평 삭제")
+    class DeleteExhibitionCommentTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 감상평을 삭제하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            ExhibitionComment savedComment = exhibitionCommentCommandPort.save(
+                    ExhibitionCommentFixture.builder()
+                            .writer(savedUser)
+                            .exhibition(exhibition)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteExhibitionCommentAuthenticated(savedComment.getId());
+            boolean exists = exhibitionCommentQueryPort
+                    .findByIdAndDeletedAtIsNull(savedComment.getId())
+                    .isPresent();
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(exists).isFalse();
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            ExhibitionComment savedComment = exhibitionCommentCommandPort.save(
+                    ExhibitionCommentFixture.builder()
+                            .writer(savedUser)
+                            .exhibition(exhibition)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteExhibitionComment(savedComment.getId());
+            boolean exists = exhibitionCommentQueryPort
+                    .findByIdAndDeletedAtIsNull(savedComment.getId())
+                    .isPresent();
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+            Assertions.assertThat(exists).isTrue();
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 감상평이면 204를 반환한다")
+        public void whenCommentNotFound() throws Exception {
+            // given
+            Long nonExistentId = 9999L;
+
+            // when
+            ResultActions resultActions = requestDeleteExhibitionCommentAuthenticated(nonExistentId);
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("감상평 작성자가 아니면 403을 반환한다")
+        public void whenNotOwner() throws Exception {
+            // given
+            User otherUser = userCommandPort.save(
+                    UserFixture.builder()
+                            .email("other@example.com")
+                            .nickname("다른유저")
+                            .build()
+            );
+            Exhibition exhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            ExhibitionComment savedComment = exhibitionCommentCommandPort.save(
+                    ExhibitionCommentFixture.builder()
+                            .writer(otherUser)
+                            .exhibition(exhibition)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteExhibitionCommentAuthenticated(savedComment.getId());
+            boolean exists = exhibitionCommentQueryPort
+                    .findByIdAndDeletedAtIsNull(savedComment.getId())
+                    .isPresent();
+
+            // then
+            resultActions.andExpect(status().isForbidden());
+            Assertions.assertThat(exists).isTrue();
+        }
+    }
+
     private ResultActions requestUpdateExhibitionComment(
             Long commentId,
             ExhibitionCommentUpdateRequest request
@@ -460,6 +566,19 @@ public class ExhibitionCommentCommandIntegrationTest extends BaseIntegrationTest
                 patch(ApiPath.EXHIBITION_COMMENT_DATA, commentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        );
+    }
+
+    private ResultActions requestDeleteExhibitionComment(Long commentId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_COMMENT_DATA, commentId)
+        );
+    }
+
+    private ResultActions requestDeleteExhibitionCommentAuthenticated(Long commentId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_COMMENT_DATA, commentId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         );
     }
