@@ -1,6 +1,7 @@
 package com.benchpress200.photique.integration.notification;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -156,6 +157,92 @@ public class NotificationCommandIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("알림 삭제")
+    class DeleteNotificationTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 알림을 삭제하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            Notification savedNotification = notificationCommandPort.save(
+                    NotificationFixture.builder()
+                            .receiver(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteNotificationAuthenticated(savedNotification.getId());
+            Optional<Notification> notification = notificationQueryPort.findByIdAndDeletedAtIsNull(
+                    savedNotification.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(notification).isEmpty();
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            Notification savedNotification = notificationCommandPort.save(
+                    NotificationFixture.builder()
+                            .receiver(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteNotification(savedNotification.getId());
+            Optional<Notification> notification = notificationQueryPort.findByIdAndDeletedAtIsNull(
+                    savedNotification.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+            Assertions.assertThat(notification).isPresent();
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 알림이면 아무 처리 없이 204를 반환한다")
+        public void whenNotificationNotFound() throws Exception {
+            // given
+            Long nonExistentId = 9999L;
+
+            // when
+            ResultActions resultActions = requestDeleteNotificationAuthenticated(nonExistentId);
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("알림 조회 중 DB 예외가 발생하면 500을 반환한다")
+        public void whenQueryFails() throws Exception {
+            // given
+            Notification savedNotification = notificationCommandPort.save(
+                    NotificationFixture.builder()
+                            .receiver(savedUser)
+                            .build()
+            );
+            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
+                    .when(notificationQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when
+            ResultActions resultActions = requestDeleteNotificationAuthenticated(savedNotification.getId());
+
+            // 스파이 복원 후 DB 상태 검증
+            Mockito.doCallRealMethod().when(notificationQueryPort).findByIdAndDeletedAtIsNull(any());
+            Optional<Notification> notification = notificationQueryPort.findByIdAndDeletedAtIsNull(
+                    savedNotification.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(notification).isPresent();
+        }
+    }
+
     private ResultActions requestMarkAsRead(Long notificationId) throws Exception {
         return mockMvc.perform(
                 patch(ApiPath.NOTIFICATION_DATA, notificationId)
@@ -165,6 +252,19 @@ public class NotificationCommandIntegrationTest extends BaseIntegrationTest {
     private ResultActions requestMarkAsReadAuthenticated(Long notificationId) throws Exception {
         return mockMvc.perform(
                 patch(ApiPath.NOTIFICATION_DATA, notificationId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        );
+    }
+
+    private ResultActions requestDeleteNotification(Long notificationId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.NOTIFICATION_DATA, notificationId)
+        );
+    }
+
+    private ResultActions requestDeleteNotificationAuthenticated(Long notificationId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.NOTIFICATION_DATA, notificationId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         );
     }
