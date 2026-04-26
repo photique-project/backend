@@ -77,4 +77,9 @@ public class SingleWorkPersistenceAdapter implements
     public Optional<SingleWork> findByIdAndDeletedAtIsNull(Long id) {
         return singleWorkRepository.findByIdAndDeletedAtIsNull(id);
     }
+
+    @Override
+    public void deleteAll() {
+        singleWorkRepository.deleteAll();
+    }
 }

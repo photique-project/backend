@@ -35,4 +35,9 @@ public class SingleWorkTagPersistenceAdapter implements
     public void deleteBySingleWork(SingleWork singleWork) {
         singleWorkTagRepository.deleteBySingleWork(singleWork);
     }
+
+    @Override
+    public void deleteAll() {
+        singleWorkTagRepository.deleteAll();
+    }
 }
