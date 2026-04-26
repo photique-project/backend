@@ -10,4 +10,6 @@ public interface SingleWorkCommandPort {
     void incrementLikeCount(Long singleWorkId);
 
     void decrementLikeCount(Long singleWorkId);
+
+    void deleteAll();
 }

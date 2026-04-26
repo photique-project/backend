@@ -11,4 +11,6 @@ public interface SingleWorkTagCommandPort {
     List<SingleWorkTag> saveAll(List<SingleWorkTag> singleWorkTags);
 
     void deleteBySingleWork(SingleWork singleWork);
+
+    void deleteAll();
 }
