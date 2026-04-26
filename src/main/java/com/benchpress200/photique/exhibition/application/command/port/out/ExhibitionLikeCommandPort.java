@@ -6,4 +6,6 @@ public interface ExhibitionLikeCommandPort {
     ExhibitionLike save(ExhibitionLike exhibitionLike);
 
     void delete(ExhibitionLike exhibitionLike);
+
+    void deleteAll();
 }
