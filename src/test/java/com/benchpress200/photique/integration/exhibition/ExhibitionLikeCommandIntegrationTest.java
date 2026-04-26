@@ -1,6 +1,7 @@
 package com.benchpress200.photique.integration.exhibition;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -230,6 +231,160 @@ public class ExhibitionLikeCommandIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("전시회 좋아요 취소")
+    class CancelExhibitionLikeTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 좋아요를 삭제하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            Exhibition savedExhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            requestAddExhibitionLikeAuthenticated(savedExhibition.getId());
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionLikeAuthenticated(savedExhibition.getId());
+            boolean likeExists = exhibitionLikeQueryPort.existsByUserIdAndExhibitionId(
+                    savedUser.getId(),
+                    savedExhibition.getId()
+            );
+            long likeCount = exhibitionQueryPort.findByIdAndDeletedAtIsNull(savedExhibition.getId())
+                    .orElseThrow()
+                    .getLikeCount();
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(likeExists).isFalse();
+            Assertions.assertThat(likeCount).isZero();
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            Exhibition savedExhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionLike(savedExhibition.getId());
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 전시회이면 404를 반환한다")
+        public void whenExhibitionNotFound() throws Exception {
+            // given
+            Long nonExistentId = 9999L;
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionLikeAuthenticated(nonExistentId);
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("좋아요하지 않은 전시회이면 아무 처리 없이 204를 반환한다")
+        public void whenNotLiked() throws Exception {
+            // given
+            Exhibition savedExhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionLikeAuthenticated(savedExhibition.getId());
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("좋아요 삭제에 실패하면 롤백하고 500을 반환한다")
+        public void whenLikeDeleteFails() throws Exception {
+            // given
+            Exhibition savedExhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            requestAddExhibitionLikeAuthenticated(savedExhibition.getId());
+            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
+                    .when(exhibitionLikeCommandPort).delete(any());
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionLikeAuthenticated(savedExhibition.getId());
+            boolean likeExists = exhibitionLikeQueryPort.existsByUserIdAndExhibitionId(
+                    savedUser.getId(),
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(likeExists).isTrue();
+        }
+
+        @Test
+        @DisplayName("좋아요 수 감소에 실패하면 롤백하고 500을 반환한다")
+        public void whenDecrementLikeCountFails() throws Exception {
+            // given
+            Exhibition savedExhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            requestAddExhibitionLikeAuthenticated(savedExhibition.getId());
+            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
+                    .when(exhibitionCommandPort).decrementLikeCount(any());
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionLikeAuthenticated(savedExhibition.getId());
+            boolean likeExists = exhibitionLikeQueryPort.existsByUserIdAndExhibitionId(
+                    savedUser.getId(),
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(likeExists).isTrue();
+        }
+
+        @Test
+        @DisplayName("아웃박스 이벤트 저장에 실패하면 롤백하고 500을 반환한다")
+        public void whenOutboxSaveFails() throws Exception {
+            // given
+            Exhibition savedExhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            requestAddExhibitionLikeAuthenticated(savedExhibition.getId());
+            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
+                    .when(outboxEventPort).save(any());
+
+            // when
+            ResultActions resultActions = requestCancelExhibitionLikeAuthenticated(savedExhibition.getId());
+            boolean likeExists = exhibitionLikeQueryPort.existsByUserIdAndExhibitionId(
+                    savedUser.getId(),
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(likeExists).isTrue();
+        }
+    }
+
     private ResultActions requestAddExhibitionLike(Long exhibitionId) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.EXHIBITION_LIKE, exhibitionId)
@@ -239,6 +394,19 @@ public class ExhibitionLikeCommandIntegrationTest extends BaseIntegrationTest {
     private ResultActions requestAddExhibitionLikeAuthenticated(Long exhibitionId) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.EXHIBITION_LIKE, exhibitionId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        );
+    }
+
+    private ResultActions requestCancelExhibitionLike(Long exhibitionId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_LIKE, exhibitionId)
+        );
+    }
+
+    private ResultActions requestCancelExhibitionLikeAuthenticated(Long exhibitionId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.EXHIBITION_LIKE, exhibitionId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         );
     }
