@@ -54,4 +54,9 @@ public class ExhibitionLikePersistenceAdapter implements
     public void delete(ExhibitionLike exhibitionLike) {
         exhibitionLikeRepository.delete(exhibitionLike);
     }
+
+    @Override
+    public void deleteAll() {
+        exhibitionLikeRepository.deleteAll();
+    }
 }
