@@ -16,6 +16,7 @@ import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.support.UserFixture;
+import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.ResultActions;
@@ -32,7 +34,7 @@ import org.springframework.test.web.servlet.ResultActions;
 @DisplayName("알림 커맨드 API 통합 테스트")
 public class NotificationCommandIntegrationTest extends BaseIntegrationTest {
 
-    @Autowired
+    @MockitoSpyBean
     private NotificationCommandPort notificationCommandPort;
 
     @MockitoSpyBean
@@ -243,6 +245,104 @@ public class NotificationCommandIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("알림 전체 읽음 처리")
+    class MarkAllAsReadTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 모든 알림을 읽음 처리하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            notificationCommandPort.save(
+                    NotificationFixture.builder()
+                            .receiver(savedUser)
+                            .build()
+            );
+            notificationCommandPort.save(
+                    NotificationFixture.builder()
+                            .receiver(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestMarkAllAsReadAuthenticated();
+            List<Notification> notifications = notificationQueryPort.findByReceiverIdAndDeletedAtIsNull(
+                    savedUser.getId(),
+                    Pageable.unpaged()
+            ).getContent();
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(notifications)
+                    .hasSize(2)
+                    .allSatisfy(n -> Assertions.assertThat(n.isRead()).isTrue());
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            notificationCommandPort.save(
+                    NotificationFixture.builder()
+                            .receiver(savedUser)
+                            .build()
+            );
+            notificationCommandPort.save(
+                    NotificationFixture.builder()
+                            .receiver(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestMarkAllAsRead();
+            List<Notification> notifications = notificationQueryPort.findByReceiverIdAndDeletedAtIsNull(
+                    savedUser.getId(),
+                    Pageable.unpaged()
+            ).getContent();
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+            Assertions.assertThat(notifications)
+                    .hasSize(2)
+                    .allSatisfy(n -> Assertions.assertThat(n.isRead()).isFalse());
+        }
+
+        @Test
+        @DisplayName("전체 읽음 처리 중 DB 예외가 발생하면 500을 반환한다")
+        public void whenMarkAllAsReadFails() throws Exception {
+            // given
+            notificationCommandPort.save(
+                    NotificationFixture.builder()
+                            .receiver(savedUser)
+                            .build()
+            );
+            notificationCommandPort.save(
+                    NotificationFixture.builder()
+                            .receiver(savedUser)
+                            .build()
+            );
+            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
+                    .when(notificationCommandPort).markAllAsReadByReceiverIdAndDeletedAtIsNull(any());
+
+            // when
+            ResultActions resultActions = requestMarkAllAsReadAuthenticated();
+
+            // 스파이 복원 후 DB 상태 검증
+            Mockito.doCallRealMethod()
+                    .when(notificationCommandPort).markAllAsReadByReceiverIdAndDeletedAtIsNull(any());
+            List<Notification> notifications = notificationQueryPort.findByReceiverIdAndDeletedAtIsNull(
+                    savedUser.getId(),
+                    Pageable.unpaged()
+            ).getContent();
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(notifications)
+                    .hasSize(2)
+                    .allSatisfy(n -> Assertions.assertThat(n.isRead()).isFalse());
+        }
+    }
+
     private ResultActions requestMarkAsRead(Long notificationId) throws Exception {
         return mockMvc.perform(
                 patch(ApiPath.NOTIFICATION_DATA, notificationId)
@@ -265,6 +365,19 @@ public class NotificationCommandIntegrationTest extends BaseIntegrationTest {
     private ResultActions requestDeleteNotificationAuthenticated(Long notificationId) throws Exception {
         return mockMvc.perform(
                 delete(ApiPath.NOTIFICATION_DATA, notificationId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        );
+    }
+
+    private ResultActions requestMarkAllAsRead() throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.NOTIFICATION_ROOT)
+        );
+    }
+
+    private ResultActions requestMarkAllAsReadAuthenticated() throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.NOTIFICATION_ROOT)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         );
     }
