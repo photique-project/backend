@@ -3,6 +3,7 @@ package com.benchpress200.photique.integration.singlework;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
@@ -11,25 +12,32 @@ import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
 import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
 import com.benchpress200.photique.singlework.api.command.request.SingleWorkCreateRequest;
+import com.benchpress200.photique.singlework.api.command.request.SingleWorkUpdateRequest;
 import com.benchpress200.photique.singlework.api.command.support.fixture.SingleWorkCreateRequestFixture;
+import com.benchpress200.photique.singlework.api.command.support.fixture.SingleWorkUpdateRequestFixture;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkTagCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkQueryPort;
+import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.singlework.domain.support.SingleWorkFixture;
 import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.support.fixture.MultipartFileFixture;
 import com.benchpress200.photique.support.fixture.MultipartJsonFixture;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.support.UserFixture;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.ResultActions;
@@ -43,7 +51,7 @@ public class SingleWorkCommandIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private SingleWorkTagCommandPort singleWorkTagCommandPort;
 
-    @Autowired
+    @MockitoSpyBean
     private SingleWorkQueryPort singleWorkQueryPort;
 
     @Autowired
@@ -252,6 +260,174 @@ public class SingleWorkCommandIntegrationTest extends BaseIntegrationTest {
             resultActions.andExpect(status().isInternalServerError());
             Assertions.assertThat(workCount).isZero();
         }
+    }
+
+    @Nested
+    @DisplayName("단일작품 수정")
+    class UpdateSingleWorkDetailsTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 단일작품을 수정하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkAuthenticated(savedSingleWork.getId(), request);
+            Optional<SingleWork> singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(savedSingleWork.getId());
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(singleWork)
+                    .isPresent()
+                    .get()
+                    .satisfies(w -> Assertions.assertThat(w.getTitle()).isEqualTo(request.getTitle()));
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWork(savedSingleWork.getId(), request);
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 단일작품이면 404를 반환한다")
+        public void whenSingleWorkNotFound() throws Exception {
+            // given
+            Long nonExistentId = 9999L;
+            SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkAuthenticated(nonExistentId, request);
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("본인 소유가 아닌 단일작품이면 403을 반환한다")
+        public void whenNotOwned() throws Exception {
+            // given
+            User otherUser = userCommandPort.save(
+                    UserFixture.builder()
+                            .email("other@example.com")
+                            .nickname("다른유저")
+                            .build()
+            );
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(otherUser)
+                            .build()
+            );
+            SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkAuthenticated(savedSingleWork.getId(), request);
+
+            // then
+            resultActions.andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("제목이 최대 길이를 초과하면 400을 반환한다")
+        public void whenTitleTooLong() throws Exception {
+            // given
+            SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder()
+                    .title("가".repeat(31))
+                    .updateTitle(true)
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkAuthenticated(1L, request);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("단일작품 조회 중 DB 예외가 발생하면 500을 반환한다")
+        public void whenQueryFails() throws Exception {
+            // given
+            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
+                    .when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkAuthenticated(
+                    1L,
+                    SingleWorkUpdateRequestFixture.builder().build()
+            );
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+        }
+
+        @Test
+        @DisplayName("아웃박스 이벤트 저장에 실패하면 단일작품을 수정하지 않고 500을 반환한다")
+        public void whenOutboxSaveFails() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder().build();
+            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
+                    .when(outboxEventPort).save(any());
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkAuthenticated(savedSingleWork.getId(), request);
+
+            // 스파이 복원 후 DB 상태 검증
+            Mockito.doCallRealMethod().when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
+            Optional<SingleWork> singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(savedSingleWork.getId());
+
+            // then
+            resultActions.andExpect(status().isInternalServerError());
+            Assertions.assertThat(singleWork)
+                    .isPresent()
+                    .get()
+                    .satisfies(w -> Assertions.assertThat(w.getTitle()).isEqualTo(savedSingleWork.getTitle()));
+        }
+    }
+
+    private ResultActions requestUpdateSingleWork(
+            Long singleWorkId,
+            SingleWorkUpdateRequest request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.SINGLEWORK_DATA, singleWorkId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    private ResultActions requestUpdateSingleWorkAuthenticated(
+            Long singleWorkId,
+            SingleWorkUpdateRequest request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.SINGLEWORK_DATA, singleWorkId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
     }
 
     private ResultActions requestPostSingleWork(SingleWorkCreateRequest request) throws Exception {
