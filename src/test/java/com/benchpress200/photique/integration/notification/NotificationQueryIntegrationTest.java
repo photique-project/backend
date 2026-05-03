@@ -1,4 +1,4 @@
-package com.benchpress200.photique.integration.exhibition;
+package com.benchpress200.photique.integration.notification;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -7,11 +7,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.benchpress200.photique.auth.application.command.port.out.security.AuthenticationTokenManagerPort;
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.common.api.constant.ApiPath;
-import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
-import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionLikeCommandPort;
-import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
-import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
-import com.benchpress200.photique.exhibition.domain.support.ExhibitionFixture;
+import com.benchpress200.photique.notification.application.command.port.out.persistence.NotificationCommandPort;
+import com.benchpress200.photique.notification.application.query.port.out.persistence.NotificationQueryPort;
+import com.benchpress200.photique.notification.domain.entity.Notification;
+import com.benchpress200.photique.notification.domain.support.NotificationFixture;
 import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -26,8 +25,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-@DisplayName("전시회 좋아요 쿼리 API 통합 테스트")
-public class ExhibitionLikeQueryIntegrationTest extends BaseIntegrationTest {
+@DisplayName("알림 쿼리 API 통합 테스트")
+public class NotificationQueryIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private UserCommandPort userCommandPort;
@@ -36,10 +35,10 @@ public class ExhibitionLikeQueryIntegrationTest extends BaseIntegrationTest {
     private AuthenticationTokenManagerPort authenticationTokenManagerPort;
 
     @Autowired
-    private ExhibitionCommandPort exhibitionCommandPort;
+    private NotificationCommandPort notificationCommandPort;
 
     @Autowired
-    private ExhibitionLikeCommandPort exhibitionLikeCommandPort;
+    private NotificationQueryPort notificationQueryPort;
 
     private User savedUser;
     private String accessToken;
@@ -58,80 +57,60 @@ public class ExhibitionLikeQueryIntegrationTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanUp() {
-        exhibitionLikeCommandPort.deleteAll();
-        exhibitionCommandPort.deleteAll();
+        notificationCommandPort.deleteAll();
         userCommandPort.deleteAll();
     }
 
     @Nested
-    @DisplayName("좋아요한 전시회 검색")
-    class SearchLikedExhibitionTest {
+    @DisplayName("알림 페이지 조회")
+    class GetNotificationPageTest {
 
         @Test
-        @DisplayName("요청이 유효하면 좋아요한 전시회 목록을 반환하고 200을 반환한다")
+        @DisplayName("요청이 유효하면 알림 페이지를 반환하고 200을 반환한다")
         public void whenRequestValid() throws Exception {
             // given
-            Exhibition savedExhibition = exhibitionCommandPort.save(
-                    ExhibitionFixture.builder()
-                            .writer(savedUser)
+            Notification savedNotification = notificationCommandPort.save(
+                    NotificationFixture.builder()
+                            .receiver(savedUser)
                             .build()
             );
-            exhibitionLikeCommandPort.save(ExhibitionLike.of(savedUser, savedExhibition));
 
             // when
-            ResultActions resultActions = requestSearchLikedExhibitionAuthenticated(null, 0, 10);
+            ResultActions resultActions = requestGetNotificationPageAuthenticated(0, 30);
 
             // then
             resultActions
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data.page").value(0))
-                    .andExpect(jsonPath("$.data.size").value(10))
+                    .andExpect(jsonPath("$.data.size").value(30))
                     .andExpect(jsonPath("$.data.totalElements").value(1))
                     .andExpect(jsonPath("$.data.totalPages").value(1))
                     .andExpect(jsonPath("$.data.isFirst").value(true))
                     .andExpect(jsonPath("$.data.isLast").value(true))
                     .andExpect(jsonPath("$.data.hasNext").value(false))
                     .andExpect(jsonPath("$.data.hasPrevious").value(false))
-                    .andExpect(jsonPath("$.data.exhibitions.length()").value(1))
-                    .andExpect(jsonPath("$.data.exhibitions[0].id").value(savedExhibition.getId()))
-                    .andExpect(jsonPath("$.data.exhibitions[0].writer.id").value(savedUser.getId()))
-                    .andExpect(jsonPath("$.data.exhibitions[0].writer.nickname").value(savedUser.getNickname()))
-                    .andExpect(jsonPath("$.data.exhibitions[0].writer.profileImage").value(savedUser.getProfileImage()))
-                    .andExpect(jsonPath("$.data.exhibitions[0].writer.introduction").value(savedUser.getIntroduction()))
-                    .andExpect(jsonPath("$.data.exhibitions[0].title").value(savedExhibition.getTitle()))
-                    .andExpect(jsonPath("$.data.exhibitions[0].description").value(savedExhibition.getDescription()))
-                    .andExpect(jsonPath("$.data.exhibitions[0].cardColor").value(savedExhibition.getCardColor()))
-                    .andExpect(jsonPath("$.data.exhibitions[0].likeCount").value(savedExhibition.getLikeCount()))
-                    .andExpect(jsonPath("$.data.exhibitions[0].viewCount").value(savedExhibition.getViewCount()))
-                    .andExpect(jsonPath("$.data.exhibitions[0].isLiked").value(true))
-                    .andExpect(jsonPath("$.data.exhibitions[0].isBookmarked").value(false));
+                    .andExpect(jsonPath("$.data.notifications.length()").value(1))
+                    .andExpect(jsonPath("$.data.notifications[0].id").value(savedNotification.getId()))
+                    .andExpect(jsonPath("$.data.notifications[0].type").value(savedNotification.getType().getValue()))
+                    .andExpect(jsonPath("$.data.notifications[0].isRead").value(false))
+                    .andExpect(jsonPath("$.data.unread").value(true));
         }
 
         @Test
         @DisplayName("인증 토큰이 없으면 401을 반환한다")
         public void whenNotAuthenticated() throws Exception {
             // when
-            ResultActions resultActions = requestSearchLikedExhibition(null, 0, 10);
+            ResultActions resultActions = requestGetNotificationPage(0, 30);
 
             // then
             resultActions.andExpect(status().isUnauthorized());
         }
 
         @Test
-        @DisplayName("키워드 길이가 2 미만이면 400을 반환한다")
-        public void whenKeywordTooShort() throws Exception {
-            // when
-            ResultActions resultActions = requestSearchLikedExhibitionAuthenticated("가", 0, 10);
-
-            // then
-            resultActions.andExpect(status().isBadRequest());
-        }
-
-        @Test
         @DisplayName("페이지 번호가 음수이면 400을 반환한다")
         public void whenPageNegative() throws Exception {
             // when
-            ResultActions resultActions = requestSearchLikedExhibitionAuthenticated(null, -1, 10);
+            ResultActions resultActions = requestGetNotificationPageAuthenticated(-1, 30);
 
             // then
             resultActions.andExpect(status().isBadRequest());
@@ -141,22 +120,18 @@ public class ExhibitionLikeQueryIntegrationTest extends BaseIntegrationTest {
         @DisplayName("페이지 사이즈가 유효 범위를 벗어나면 400을 반환한다")
         public void whenSizeOutOfRange() throws Exception {
             // when
-            ResultActions resultActions = requestSearchLikedExhibitionAuthenticated(null, 0, 0);
+            ResultActions resultActions = requestGetNotificationPageAuthenticated(0, 0);
 
             // then
             resultActions.andExpect(status().isBadRequest());
         }
     }
 
-    private ResultActions requestSearchLikedExhibition(
-            String keyword,
+    private ResultActions requestGetNotificationPage(
             Integer page,
             Integer size
     ) throws Exception {
-        MockHttpServletRequestBuilder builder = get(ApiPath.EXHIBITION_MY_LIKE);
-        if (keyword != null) {
-            builder = builder.param("keyword", keyword);
-        }
+        MockHttpServletRequestBuilder builder = get(ApiPath.NOTIFICATION_ROOT);
         if (page != null) {
             builder = builder.param("page", String.valueOf(page));
         }
@@ -166,16 +141,12 @@ public class ExhibitionLikeQueryIntegrationTest extends BaseIntegrationTest {
         return mockMvc.perform(builder);
     }
 
-    private ResultActions requestSearchLikedExhibitionAuthenticated(
-            String keyword,
+    private ResultActions requestGetNotificationPageAuthenticated(
             Integer page,
             Integer size
     ) throws Exception {
-        MockHttpServletRequestBuilder builder = get(ApiPath.EXHIBITION_MY_LIKE)
+        MockHttpServletRequestBuilder builder = get(ApiPath.NOTIFICATION_ROOT)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-        if (keyword != null) {
-            builder = builder.param("keyword", keyword);
-        }
         if (page != null) {
             builder = builder.param("page", String.valueOf(page));
         }

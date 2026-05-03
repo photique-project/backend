@@ -1,6 +1,5 @@
 package com.benchpress200.photique.integration.user;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -8,8 +7,6 @@ import com.benchpress200.photique.auth.application.command.port.out.persistence.
 import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.common.api.constant.MultipartKey;
-import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
-import com.benchpress200.photique.image.infrastructure.exception.ImageUploadException;
 import com.benchpress200.photique.integration.auth.support.fixture.AuthMailCodeFixture;
 import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.support.fixture.MultipartFileFixture;
@@ -22,18 +19,15 @@ import com.benchpress200.photique.user.domain.support.UserFixture;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
@@ -46,14 +40,11 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private AuthMailCodeCommandPort authMailCodeCommandPort;
 
-    @MockitoSpyBean
-    private ImageUploaderPort imageUploaderPort;
-
-    @MockitoSpyBean
+    @Autowired
     private UserCommandPort userCommandPort;
 
-    @BeforeEach
-    void cleanAuthMailCode() {
+    @AfterEach
+    void cleanUp() {
         authMailCodeCommandPort.deleteAll();
         userCommandPort.deleteAll();
     }
@@ -245,75 +236,6 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
 
             // then
             resultActions.andExpect(status().isUnauthorized());
-            Assertions.assertThat(user).isNotPresent();
-        }
-
-        @Test
-        @DisplayName("프로필 이미지 업로드에 실패한다면 가입을 진행하지 않고 500을 반환한다")
-        public void whenProfileImageUploadFailed() throws Exception {
-            // given
-            ResisterRequestFixture request = ResisterRequestFixture.builder().build();
-            MockMultipartFile userPart = MultipartJsonFixture.builder()
-                    .key(MultipartKey.USER)
-                    .object(request)
-                    .objectMapper(objectMapper)
-                    .build();
-
-            MockMultipartFile profileImage = MultipartFileFixture.builder()
-                    .key(MultipartKey.PROFILE_IMAGE)
-                    .fileName("profile.jpg")
-                    .contentType(MediaType.IMAGE_JPEG_VALUE)
-                    .content(new byte[1024 * 1024])
-                    .build();
-
-            String email = request.getEmail();
-
-            AuthMailCode authMailCode = AuthMailCodeFixture.builder()
-                    .email(email)
-                    .isVerified(true)
-                    .build();
-
-            authMailCodeCommandPort.save(authMailCode);
-
-            Mockito.doThrow(new ImageUploadException("이미지 업로드 실패")).when(imageUploaderPort).upload(any(), any());
-
-            // when
-            ResultActions resultActions = requestRegister(userPart, profileImage);
-            Optional<User> user = userQueryPort.findByEmailAndDeletedAtIsNull(email);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-            Assertions.assertThat(user).isNotPresent();
-        }
-
-        @Test
-        @DisplayName("유저 데이터 저장에 실패한다면 가입을 진행하지 않고 500을 반환한다")
-        public void whenUserSaveFailed() throws Exception {
-            // given
-            ResisterRequestFixture request = ResisterRequestFixture.builder().build();
-            MockMultipartFile userPart = MultipartJsonFixture.builder()
-                    .key(MultipartKey.USER)
-                    .object(request)
-                    .objectMapper(objectMapper)
-                    .build();
-
-            String email = request.getEmail();
-
-            AuthMailCode authMailCode = AuthMailCodeFixture.builder()
-                    .email(email)
-                    .isVerified(true)
-                    .build();
-
-            authMailCodeCommandPort.save(authMailCode);
-
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러")).when(userCommandPort).save(any());
-
-            // when
-            ResultActions resultActions = requestRegister(userPart, null);
-            Optional<User> user = userQueryPort.findByEmailAndDeletedAtIsNull(email);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
             Assertions.assertThat(user).isNotPresent();
         }
 

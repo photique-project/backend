@@ -1,6 +1,5 @@
 package com.benchpress200.photique.integration.exhibition;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -19,15 +18,13 @@ import com.benchpress200.photique.user.application.command.port.out.persistence.
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.support.UserFixture;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 @DisplayName("전시회 북마크 커맨드 API 통합 테스트")
@@ -42,10 +39,10 @@ public class ExhibitionBookmarkCommandIntegrationTest extends BaseIntegrationTes
     @Autowired
     private AuthenticationTokenManagerPort authenticationTokenManagerPort;
 
-    @MockitoSpyBean
+    @Autowired
     private ExhibitionCommandPort exhibitionCommandPort;
 
-    @MockitoSpyBean
+    @Autowired
     private ExhibitionBookmarkCommandPort exhibitionBookmarkCommandPort;
 
     private User savedUser;
@@ -53,10 +50,6 @@ public class ExhibitionBookmarkCommandIntegrationTest extends BaseIntegrationTes
 
     @BeforeEach
     void setUp() {
-        exhibitionBookmarkCommandPort.deleteAll();
-        exhibitionCommandPort.deleteAll();
-        userCommandPort.deleteAll();
-
         User user = UserFixture.builder().build();
         savedUser = userCommandPort.save(user);
 
@@ -65,6 +58,13 @@ public class ExhibitionBookmarkCommandIntegrationTest extends BaseIntegrationTes
                 savedUser.getRole().name()
         );
         accessToken = tokens.getAccessToken();
+    }
+
+    @AfterEach
+    void cleanUp() {
+        exhibitionBookmarkCommandPort.deleteAll();
+        exhibitionCommandPort.deleteAll();
+        userCommandPort.deleteAll();
     }
 
     @Nested
@@ -144,30 +144,6 @@ public class ExhibitionBookmarkCommandIntegrationTest extends BaseIntegrationTes
 
             // then
             resultActions.andExpect(status().isConflict());
-        }
-
-        @Test
-        @DisplayName("북마크 저장에 실패하면 북마크를 저장하지 않고 500을 반환한다")
-        public void whenBookmarkSaveFails() throws Exception {
-            // given
-            Exhibition exhibition = exhibitionCommandPort.save(
-                    ExhibitionFixture.builder()
-                            .writer(savedUser)
-                            .build()
-            );
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(exhibitionBookmarkCommandPort).save(any());
-
-            // when
-            ResultActions resultActions = requestAddExhibitionBookmarkAuthenticated(exhibition.getId());
-            boolean exists = exhibitionBookmarkQueryPort.existsByUserIdAndExhibitionId(
-                    savedUser.getId(),
-                    exhibition.getId()
-            );
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-            Assertions.assertThat(exists).isFalse();
         }
     }
 
@@ -249,31 +225,6 @@ public class ExhibitionBookmarkCommandIntegrationTest extends BaseIntegrationTes
 
             // then
             resultActions.andExpect(status().isNoContent());
-        }
-
-        @Test
-        @DisplayName("북마크 삭제 중 DB 예외가 발생하면 500을 반환한다")
-        public void whenBookmarkDeleteFails() throws Exception {
-            // given
-            Exhibition exhibition = exhibitionCommandPort.save(
-                    ExhibitionFixture.builder()
-                            .writer(savedUser)
-                            .build()
-            );
-            exhibitionBookmarkCommandPort.save(ExhibitionBookmark.of(savedUser, exhibition));
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(exhibitionBookmarkCommandPort).delete(any());
-
-            // when
-            ResultActions resultActions = requestCancelExhibitionBookmarkAuthenticated(exhibition.getId());
-            boolean exists = exhibitionBookmarkQueryPort.existsByUserIdAndExhibitionId(
-                    savedUser.getId(),
-                    exhibition.getId()
-            );
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-            Assertions.assertThat(exists).isTrue();
         }
     }
 

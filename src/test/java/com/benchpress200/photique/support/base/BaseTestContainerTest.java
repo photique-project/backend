@@ -5,7 +5,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
@@ -15,19 +14,16 @@ public abstract class BaseTestContainerTest {
     private final static String IMAGE_ELASTICSEARCH = "docker.elastic.co/elasticsearch/elasticsearch:8.6.0";
 
 
-    @Container
     static MySQLContainer<?> mysql = new MySQLContainer<>(IMAGE_MYSQL)
             .withDatabaseName("photique_test")
             .withUsername("test")
             .withPassword("test")
             .withReuse(true);
 
-    @Container
     static GenericContainer<?> redis = new GenericContainer<>(IMAGE_REDIS)
             .withExposedPorts(6379)
             .withReuse(true);
 
-    @Container
     static ElasticsearchContainer elasticsearch = new ElasticsearchContainer(IMAGE_ELASTICSEARCH)
             .withEnv("xpack.security.enabled", "false")
             .withEnv("xpack.security.http.ssl.enabled", "false")
@@ -54,4 +50,9 @@ public abstract class BaseTestContainerTest {
         registry.add("spring.elasticsearch.password", () -> "test");
     }
 
+    static {
+        mysql.start();
+        redis.start();
+        elasticsearch.start();
+    }
 }
