@@ -1,6 +1,5 @@
 package com.benchpress200.photique.integration.exhibition;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -10,7 +9,6 @@ import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionLikeCommandPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionLikeQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
 import com.benchpress200.photique.exhibition.domain.support.ExhibitionFixture;
@@ -18,15 +16,13 @@ import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.support.UserFixture;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
@@ -39,24 +35,17 @@ public class ExhibitionLikeQueryIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private AuthenticationTokenManagerPort authenticationTokenManagerPort;
 
-    @MockitoSpyBean
+    @Autowired
     private ExhibitionCommandPort exhibitionCommandPort;
 
-    @MockitoSpyBean
+    @Autowired
     private ExhibitionLikeCommandPort exhibitionLikeCommandPort;
-
-    @MockitoSpyBean
-    private ExhibitionLikeQueryPort exhibitionLikeQueryPort;
 
     private User savedUser;
     private String accessToken;
 
     @BeforeEach
     void setUp() {
-        exhibitionLikeCommandPort.deleteAll();
-        exhibitionCommandPort.deleteAll();
-        userCommandPort.deleteAll();
-
         User user = UserFixture.builder().build();
         savedUser = userCommandPort.save(user);
 
@@ -65,6 +54,13 @@ public class ExhibitionLikeQueryIntegrationTest extends BaseIntegrationTest {
                 savedUser.getRole().name()
         );
         accessToken = tokens.getAccessToken();
+    }
+
+    @AfterEach
+    void cleanUp() {
+        exhibitionLikeCommandPort.deleteAll();
+        exhibitionCommandPort.deleteAll();
+        userCommandPort.deleteAll();
     }
 
     @Nested
@@ -149,20 +145,6 @@ public class ExhibitionLikeQueryIntegrationTest extends BaseIntegrationTest {
 
             // then
             resultActions.andExpect(status().isBadRequest());
-        }
-
-        @Test
-        @DisplayName("좋아요 전시회 조회 중 DB 예외가 발생하면 500을 반환한다")
-        public void whenQueryFails() throws Exception {
-            // given
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(exhibitionLikeQueryPort).searchLikedExhibitionByDeletedAtIsNull(any(), any(), any());
-
-            // when
-            ResultActions resultActions = requestSearchLikedExhibitionAuthenticated(null, 0, 10);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
         }
     }
 

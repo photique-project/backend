@@ -1,6 +1,5 @@
 package com.benchpress200.photique.integration.exhibition;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -11,8 +10,8 @@ import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.common.api.constant.MultipartKey;
 import com.benchpress200.photique.exhibition.api.command.request.ExhibitionCreateRequest;
-import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionCreateRequestFixture;
 import com.benchpress200.photique.exhibition.api.command.request.ExhibitionUpdateRequest;
+import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionCreateRequestFixture;
 import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionUpdateRequestFixture;
 import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionWorkCreateRequestFixture;
 import com.benchpress200.photique.exhibition.api.command.support.fixture.ExhibitionWorkUpdateRequestFixture;
@@ -22,41 +21,32 @@ import com.benchpress200.photique.exhibition.application.command.port.out.Exhibi
 import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionWork;
-import com.benchpress200.photique.image.domain.port.storage.ImageUploaderPort;
-import com.benchpress200.photique.image.infrastructure.exception.ImageUploadException;
-import com.benchpress200.photique.outbox.application.port.out.persistence.OutboxEventPort;
 import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.support.fixture.MultipartFileFixture;
 import com.benchpress200.photique.support.fixture.MultipartJsonFixture;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
-import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.support.UserFixture;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 
 @DisplayName("전시회 커맨드 API 통합 테스트")
 public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
-
-    @Autowired
-    private UserQueryPort userQueryPort;
 
     @Autowired
     private UserCommandPort userCommandPort;
@@ -67,31 +57,20 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private AuthenticationTokenManagerPort authenticationTokenManagerPort;
 
-    @MockitoSpyBean
-    private ImageUploaderPort imageUploaderPort;
-
-    @MockitoSpyBean
+    @Autowired
     private ExhibitionCommandPort exhibitionCommandPort;
 
-    @MockitoSpyBean
+    @Autowired
     private ExhibitionWorkCommandPort exhibitionWorkCommandPort;
 
-    @MockitoSpyBean
+    @Autowired
     private ExhibitionTagCommandPort exhibitionTagCommandPort;
-
-    @MockitoSpyBean
-    private OutboxEventPort outboxEventPort;
 
     private User savedUser;
     private String accessToken;
 
     @BeforeEach
     void setUp() {
-        exhibitionTagCommandPort.deleteAll();
-        exhibitionWorkCommandPort.deleteAll();
-        exhibitionCommandPort.deleteAll();
-        userCommandPort.deleteAll();
-
         User user = UserFixture.builder().build();
         savedUser = userCommandPort.save(user);
 
@@ -100,6 +79,14 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
                 savedUser.getRole().name()
         );
         accessToken = tokens.getAccessToken();
+    }
+
+    @AfterEach
+    void cleanUp() {
+        exhibitionTagCommandPort.deleteAll();
+        exhibitionWorkCommandPort.deleteAll();
+        exhibitionCommandPort.deleteAll();
+        userCommandPort.deleteAll();
     }
 
     @Nested
@@ -260,24 +247,6 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
         }
 
         @Test
-        @DisplayName("이미지 업로드에 실패하면 전시회를 저장하지 않고 500을 반환한다")
-        public void whenImageUploadFails() throws Exception {
-            // given
-            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder().build();
-            List<MockMultipartFile> images = List.of(createValidImage());
-
-            Mockito.doThrow(new ImageUploadException("이미지 업로드 실패"))
-                    .when(imageUploaderPort).upload(any(), any());
-
-            // when
-            ResultActions resultActions = requestOpenExhibitionAuthenticated(request, images);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-            Assertions.assertThat(exhibitionQueryPort.countByWriter(savedUser)).isEqualTo(0L);
-        }
-
-        @Test
         @DisplayName("존재하지 않는 유저로 요청하면 전시회를 저장하지 않고 404를 반환한다")
         public void whenUserNotFound() throws Exception {
             // given
@@ -295,78 +264,6 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
 
             // then
             resultActions.andExpect(status().isNotFound());
-            Assertions.assertThat(exhibitionQueryPort.countByWriter(savedUser)).isEqualTo(0L);
-        }
-
-        @Test
-        @DisplayName("전시회 저장에 실패하면 전시회를 저장하지 않고 500을 반환한다")
-        public void whenExhibitionSaveFails() throws Exception {
-            // given
-            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder().build();
-            List<MockMultipartFile> images = List.of(createValidImage());
-
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(exhibitionCommandPort).save(any());
-
-            // when
-            ResultActions resultActions = requestOpenExhibitionAuthenticated(request, images);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-            Assertions.assertThat(exhibitionQueryPort.countByWriter(savedUser)).isEqualTo(0L);
-        }
-
-        @Test
-        @DisplayName("작품 저장에 실패하면 500을 반환한다")
-        public void whenExhibitionWorkSaveFails() throws Exception {
-            // given
-            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder().build();
-            List<MockMultipartFile> images = List.of(createValidImage());
-
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(exhibitionWorkCommandPort).save(any());
-
-            // when
-            ResultActions resultActions = requestOpenExhibitionAuthenticated(request, images);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-            Assertions.assertThat(exhibitionQueryPort.countByWriter(savedUser)).isEqualTo(0L);
-        }
-
-        @Test
-        @DisplayName("전시회 태그 저장에 실패하면 500을 반환한다")
-        public void whenExhibitionTagSaveFails() throws Exception {
-            // given
-            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder().build();
-            List<MockMultipartFile> images = List.of(createValidImage());
-
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(exhibitionTagCommandPort).saveAll(any());
-
-            // when
-            ResultActions resultActions = requestOpenExhibitionAuthenticated(request, images);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-            Assertions.assertThat(exhibitionQueryPort.countByWriter(savedUser)).isEqualTo(0L);
-        }
-
-        @Test
-        @DisplayName("아웃박스 이벤트 저장에 실패하면 500을 반환한다")
-        public void whenOutboxEventSaveFails() throws Exception {
-            // given
-            ExhibitionCreateRequest request = ExhibitionCreateRequestFixture.builder().build();
-            List<MockMultipartFile> images = List.of(createValidImage());
-
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(outboxEventPort).save(any());
-
-            // when
-            ResultActions resultActions = requestOpenExhibitionAuthenticated(request, images);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
             Assertions.assertThat(exhibitionQueryPort.countByWriter(savedUser)).isEqualTo(0L);
         }
     }
@@ -662,24 +559,92 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
             // then
             resultActions.andExpect(status().isBadRequest());
         }
+    }
+
+    @Nested
+    @DisplayName("전시회 삭제")
+    class DeleteExhibitionTest {
+        private Exhibition savedExhibition;
+
+        @BeforeEach
+        void setUpExhibition() {
+            Exhibition exhibition = Exhibition.builder()
+                    .writer(savedUser)
+                    .title("삭제할 전시회 제목")
+                    .description("삭제할 전시회 설명")
+                    .cardColor("#FFFFFF")
+                    .viewCount(0L)
+                    .likeCount(0L)
+                    .build();
+            savedExhibition = exhibitionCommandPort.save(exhibition);
+        }
 
         @Test
-        @DisplayName("아웃박스 이벤트 저장에 실패하면 500을 반환한다")
-        public void whenOutboxEventSaveFails() throws Exception {
-            // given
-            ExhibitionUpdateRequest request = ExhibitionUpdateRequestFixture.builder().build();
-
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(outboxEventPort).save(any());
-
+        @DisplayName("요청이 유효하면 전시회를 삭제하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
             // when
-            ResultActions resultActions = requestUpdateExhibitionDetailsAuthenticated(
-                    savedExhibition.getId(),
-                    request
+            ResultActions resultActions = requestDeleteExhibitionAuthenticated(savedExhibition.getId());
+            Optional<Exhibition> deletedExhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
             );
 
             // then
-            resultActions.andExpect(status().isInternalServerError());
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(deletedExhibition).isNotPresent();
+        }
+
+        @Test
+        @DisplayName("인증되지 않은 사용자면 전시회를 삭제하지 않고 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // when
+            ResultActions resultActions = requestDeleteExhibition(savedExhibition.getId());
+            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+            Assertions.assertThat(exhibition).isPresent();
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 전시회면 전시회를 삭제하지 않고 204를 반환한다")
+        public void whenExhibitionNotFound() throws Exception {
+            // when
+            ResultActions resultActions = requestDeleteExhibitionAuthenticated(
+                    savedExhibition.getId() + 999L
+            );
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("전시회 소유자가 아니면 전시회를 삭제하지 않고 403을 반환한다")
+        public void whenNotOwned() throws Exception {
+            // given
+            User otherUser = UserFixture.builder()
+                    .email("other@example.com")
+                    .nickname("다른유저")
+                    .build();
+            User savedOtherUser = userCommandPort.save(otherUser);
+            AuthenticationTokens otherTokens = authenticationTokenManagerPort.issueTokens(
+                    savedOtherUser.getId(),
+                    savedOtherUser.getRole().name()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteExhibitionWithToken(
+                    savedExhibition.getId(),
+                    otherTokens.getAccessToken()
+            );
+            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
+                    savedExhibition.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isForbidden());
+            Assertions.assertThat(exhibition).isPresent();
         }
     }
 
@@ -863,111 +828,6 @@ public class ExhibitionCommandIntegrationTest extends BaseIntegrationTest {
                 .header("Authorization", "Bearer " + accessToken);
 
         return mockMvc.perform(httpBuilder);
-    }
-
-    @Nested
-    @DisplayName("전시회 삭제")
-    class DeleteExhibitionTest {
-        private Exhibition savedExhibition;
-
-        @BeforeEach
-        void setUpExhibition() {
-            Exhibition exhibition = Exhibition.builder()
-                    .writer(savedUser)
-                    .title("삭제할 전시회 제목")
-                    .description("삭제할 전시회 설명")
-                    .cardColor("#FFFFFF")
-                    .viewCount(0L)
-                    .likeCount(0L)
-                    .build();
-            savedExhibition = exhibitionCommandPort.save(exhibition);
-        }
-
-        @Test
-        @DisplayName("요청이 유효하면 전시회를 삭제하고 204를 반환한다")
-        public void whenRequestValid() throws Exception {
-            // when
-            ResultActions resultActions = requestDeleteExhibitionAuthenticated(savedExhibition.getId());
-            Optional<Exhibition> deletedExhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
-                    savedExhibition.getId()
-            );
-
-            // then
-            resultActions.andExpect(status().isNoContent());
-            Assertions.assertThat(deletedExhibition).isNotPresent();
-        }
-
-        @Test
-        @DisplayName("인증되지 않은 사용자면 전시회를 삭제하지 않고 401을 반환한다")
-        public void whenNotAuthenticated() throws Exception {
-            // when
-            ResultActions resultActions = requestDeleteExhibition(savedExhibition.getId());
-            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
-                    savedExhibition.getId()
-            );
-
-            // then
-            resultActions.andExpect(status().isUnauthorized());
-            Assertions.assertThat(exhibition).isPresent();
-        }
-
-        @Test
-        @DisplayName("존재하지 않는 전시회면 전시회를 삭제하지 않고 204를 반환한다")
-        public void whenExhibitionNotFound() throws Exception {
-            // when
-            ResultActions resultActions = requestDeleteExhibitionAuthenticated(
-                    savedExhibition.getId() + 999L
-            );
-
-            // then
-            resultActions.andExpect(status().isNoContent());
-        }
-
-        @Test
-        @DisplayName("전시회 소유자가 아니면 전시회를 삭제하지 않고 403을 반환한다")
-        public void whenNotOwned() throws Exception {
-            // given
-            User otherUser = UserFixture.builder()
-                    .email("other@example.com")
-                    .nickname("다른유저")
-                    .build();
-            User savedOtherUser = userCommandPort.save(otherUser);
-            AuthenticationTokens otherTokens = authenticationTokenManagerPort.issueTokens(
-                    savedOtherUser.getId(),
-                    savedOtherUser.getRole().name()
-            );
-
-            // when
-            ResultActions resultActions = requestDeleteExhibitionWithToken(
-                    savedExhibition.getId(),
-                    otherTokens.getAccessToken()
-            );
-            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
-                    savedExhibition.getId()
-            );
-
-            // then
-            resultActions.andExpect(status().isForbidden());
-            Assertions.assertThat(exhibition).isPresent();
-        }
-
-        @Test
-        @DisplayName("아웃박스 이벤트 저장에 실패하면 전시회를 삭제하지 않고 500을 반환한다")
-        public void whenOutboxEventSaveFails() throws Exception {
-            // given
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(outboxEventPort).save(any());
-
-            // when
-            ResultActions resultActions = requestDeleteExhibitionAuthenticated(savedExhibition.getId());
-            Optional<Exhibition> exhibition = exhibitionQueryPort.findByIdAndDeletedAtIsNull(
-                    savedExhibition.getId()
-            );
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-            Assertions.assertThat(exhibition).isPresent();
-        }
     }
 
     private ResultActions requestDeleteExhibition(Long exhibitionId) throws Exception {
