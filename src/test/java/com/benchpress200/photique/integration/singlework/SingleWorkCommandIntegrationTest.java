@@ -29,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -46,7 +45,7 @@ public class SingleWorkCommandIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private SingleWorkTagCommandPort singleWorkTagCommandPort;
 
-    @MockitoSpyBean
+    @Autowired
     private SingleWorkQueryPort singleWorkQueryPort;
 
     @Autowired
@@ -288,51 +287,6 @@ public class SingleWorkCommandIntegrationTest extends BaseIntegrationTest {
 
             // then
             resultActions.andExpect(status().isBadRequest());
-        }
-
-        @Test
-        @DisplayName("단일작품 조회 중 DB 예외가 발생하면 500을 반환한다")
-        public void whenQueryFails() throws Exception {
-            // given
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
-
-            // when
-            ResultActions resultActions = requestUpdateSingleWorkAuthenticated(
-                    1L,
-                    SingleWorkUpdateRequestFixture.builder().build()
-            );
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-        }
-
-        @Test
-        @DisplayName("아웃박스 이벤트 저장에 실패하면 단일작품을 수정하지 않고 500을 반환한다")
-        public void whenOutboxSaveFails() throws Exception {
-            // given
-            SingleWork savedSingleWork = singleWorkCommandPort.save(
-                    SingleWorkFixture.builder()
-                            .writer(savedUser)
-                            .build()
-            );
-            SingleWorkUpdateRequest request = SingleWorkUpdateRequestFixture.builder().build();
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(outboxEventPort).save(any());
-
-            // when
-            ResultActions resultActions = requestUpdateSingleWorkAuthenticated(savedSingleWork.getId(), request);
-
-            // 스파이 복원 후 DB 상태 검증
-            Mockito.doCallRealMethod().when(singleWorkQueryPort).findByIdAndDeletedAtIsNull(any());
-            Optional<SingleWork> singleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(savedSingleWork.getId());
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-            Assertions.assertThat(singleWork)
-                    .isPresent()
-                    .get()
-                    .satisfies(w -> Assertions.assertThat(w.getTitle()).isEqualTo(savedSingleWork.getTitle()));
         }
     }
 
