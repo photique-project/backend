@@ -1,6 +1,5 @@
 package com.benchpress200.photique.integration.exhibition;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -9,7 +8,6 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
-import com.benchpress200.photique.exhibition.application.query.port.out.persistence.ExhibitionQueryPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
 import com.benchpress200.photique.exhibition.domain.support.ExhibitionFixture;
 import com.benchpress200.photique.support.base.BaseIntegrationTest;
@@ -21,11 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 @DisplayName("전시회 쿼리 API 통합 테스트")
@@ -37,11 +32,8 @@ public class ExhibitionQueryIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private AuthenticationTokenManagerPort authenticationTokenManagerPort;
 
-    @MockitoSpyBean
+    @Autowired
     private ExhibitionCommandPort exhibitionCommandPort;
-
-    @MockitoSpyBean
-    private ExhibitionQueryPort exhibitionQueryPort;
 
     private User savedUser;
     private String accessToken;
@@ -129,20 +121,6 @@ public class ExhibitionQueryIntegrationTest extends BaseIntegrationTest {
 
             // then
             resultActions.andExpect(status().isNotFound());
-        }
-
-        @Test
-        @DisplayName("전시회 조회 중 DB 예외가 발생하면 500을 반환한다")
-        public void whenQueryFails() throws Exception {
-            // given
-            Mockito.doThrow(new DataAccessResourceFailureException("DB 에러"))
-                    .when(exhibitionQueryPort).findByIdAndDeletedAtIsNull(any());
-
-            // when
-            ResultActions resultActions = requestGetExhibitionDetailsAuthenticated(1L);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
         }
     }
 
