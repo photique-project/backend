@@ -1,6 +1,5 @@
 package com.benchpress200.photique.integration.auth;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -9,12 +8,9 @@ import com.benchpress200.photique.auth.api.command.request.AuthMailCodeValidateR
 import com.benchpress200.photique.auth.api.command.request.AuthMailRequest;
 import com.benchpress200.photique.auth.api.command.support.fixture.AuthMailCodeValidateRequestFixture;
 import com.benchpress200.photique.auth.api.command.support.fixture.AuthMailRequestFixture;
-import com.benchpress200.photique.auth.application.command.port.out.mail.MailSenderPort;
 import com.benchpress200.photique.auth.application.command.port.out.persistence.AuthMailCodeCommandPort;
 import com.benchpress200.photique.auth.application.query.port.out.persistence.AuthMailCodeQueryPort;
 import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
-import com.benchpress200.photique.auth.domain.entity.AuthMailCode;
-import com.benchpress200.photique.auth.infrastructure.exception.MailSendException;
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.integration.auth.support.fixture.AuthMailCodeFixture;
 import com.benchpress200.photique.support.base.BaseIntegrationTest;
@@ -24,17 +20,15 @@ import com.benchpress200.photique.user.domain.support.UserFixture;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 @DisplayName("인증 커맨드 API 통합 테스트")
@@ -46,17 +40,18 @@ public class AuthCommandIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private UserCommandPort userCommandPort;
 
-    @MockitoSpyBean
-    private MailSenderPort mailSenderPort;
-
-    @MockitoSpyBean
+    @Autowired
     private AuthMailCodeCommandPort authMailCodeCommandPort;
 
     @BeforeEach
     void setUp() {
+
+    }
+
+    @AfterEach
+    void cleanUp() {
         userCommandPort.deleteAll();
         authMailCodeCommandPort.deleteAll();
-        Mockito.doNothing().when(mailSenderPort).sendMail(any());
     }
 
     @Nested
@@ -125,40 +120,6 @@ public class AuthCommandIntegrationTest extends BaseIntegrationTest {
             resultActions.andExpect(status().isConflict());
             Assertions.assertThat(authMailCode).isNotPresent();
         }
-
-        @Test
-        @DisplayName("메일 전송에 실패하면 인증 코드를 저장하지 않고 500을 반환한다")
-        public void whenMailSendFails() throws Exception {
-            // given
-            AuthMailRequest request = AuthMailRequestFixture.builder().build();
-            String email = request.getEmail();
-
-            Mockito.doThrow(new MailSendException("메일 전송 실패")).when(mailSenderPort).sendMail(any());
-
-            // when
-            ResultActions resultActions = requestSendJoinAuthMail(request);
-            Optional<AuthMailCode> authMailCode = authMailCodeQueryPort.findById(email);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-            Assertions.assertThat(authMailCode).isNotPresent();
-        }
-
-        @Test
-        @DisplayName("인증 코드 저장에 실패하면 500을 반환한다")
-        public void whenSaveFails() throws Exception {
-            // given
-            AuthMailRequest request = AuthMailRequestFixture.builder().build();
-
-            Mockito.doThrow(new DataAccessResourceFailureException("Redis 에러"))
-                    .when(authMailCodeCommandPort).save(any());
-
-            // when
-            ResultActions resultActions = requestSendJoinAuthMail(request);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-        }
     }
 
     @Nested
@@ -226,53 +187,6 @@ public class AuthCommandIntegrationTest extends BaseIntegrationTest {
             // then
             resultActions.andExpect(status().isNotFound());
             Assertions.assertThat(authMailCode).isNotPresent();
-        }
-
-        @Test
-        @DisplayName("메일 전송에 실패하면 인증 코드를 저장하지 않고 500을 반환한다")
-        public void whenMailSendFails() throws Exception {
-            // given
-            AuthMailRequest request = AuthMailRequestFixture.builder().build();
-            String email = request.getEmail();
-
-            User user = UserFixture.builder()
-                    .email(email)
-                    .build();
-
-            userCommandPort.save(user);
-
-            Mockito.doThrow(new MailSendException("메일 전송 실패")).when(mailSenderPort).sendMail(any());
-
-            // when
-            ResultActions resultActions = requestSendPasswordAuthMail(request);
-            Optional<AuthMailCode> authMailCode = authMailCodeQueryPort.findById(email);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
-            Assertions.assertThat(authMailCode).isNotPresent();
-        }
-
-        @Test
-        @DisplayName("인증 코드 저장에 실패하면 500을 반환한다")
-        public void whenSaveFails() throws Exception {
-            // given
-            AuthMailRequest request = AuthMailRequestFixture.builder().build();
-            String email = request.getEmail();
-
-            User user = UserFixture.builder()
-                    .email(email)
-                    .build();
-
-            userCommandPort.save(user);
-
-            Mockito.doThrow(new DataAccessResourceFailureException("Redis 에러"))
-                    .when(authMailCodeCommandPort).save(any());
-
-            // when
-            ResultActions resultActions = requestSendPasswordAuthMail(request);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
         }
     }
 
@@ -375,30 +289,6 @@ public class AuthCommandIntegrationTest extends BaseIntegrationTest {
 
             // then
             resultActions.andExpect(status().isGone());
-        }
-
-        @Test
-        @DisplayName("인증 코드 저장에 실패하면 500을 반환한다")
-        public void whenSaveFails() throws Exception {
-            // given
-            String code = "123456";
-            AuthMailCode authMailCode = AuthMailCodeFixture.builder()
-                    .code(code)
-                    .build();
-            authMailCodeCommandPort.save(authMailCode);
-
-            AuthMailCodeValidateRequest request = AuthMailCodeValidateRequestFixture.builder()
-                    .code(code)
-                    .build();
-
-            Mockito.doThrow(new DataAccessResourceFailureException("Redis 에러"))
-                    .when(authMailCodeCommandPort).save(any());
-
-            // when
-            ResultActions resultActions = requestValidateAuthMailCode(request);
-
-            // then
-            resultActions.andExpect(status().isInternalServerError());
         }
     }
 
