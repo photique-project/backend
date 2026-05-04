@@ -16,6 +16,7 @@ import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.support.UserFixture;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -47,9 +48,6 @@ public class ExhibitionQueryIntegrationTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        exhibitionCommandPort.deleteAll();
-        userCommandPort.deleteAll();
-
         User user = UserFixture.builder().build();
         savedUser = userCommandPort.save(user);
 
@@ -58,6 +56,12 @@ public class ExhibitionQueryIntegrationTest extends BaseIntegrationTest {
                 savedUser.getRole().name()
         );
         accessToken = tokens.getAccessToken();
+    }
+
+    @AfterEach
+    void cleanUp() {
+        exhibitionCommandPort.deleteAll();
+        userCommandPort.deleteAll();
     }
 
     @Nested
