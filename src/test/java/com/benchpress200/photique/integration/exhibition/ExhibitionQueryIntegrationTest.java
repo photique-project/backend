@@ -11,6 +11,8 @@ import com.benchpress200.photique.exhibition.application.command.port.out.Exhibi
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionCommandPort;
 import com.benchpress200.photique.exhibition.application.command.port.out.ExhibitionLikeCommandPort;
 import com.benchpress200.photique.exhibition.domain.entity.Exhibition;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionBookmark;
+import com.benchpress200.photique.exhibition.domain.entity.ExhibitionLike;
 import com.benchpress200.photique.exhibition.domain.entity.ExhibitionSearch;
 import com.benchpress200.photique.exhibition.domain.support.ExhibitionFixture;
 import com.benchpress200.photique.exhibition.domain.support.ExhibitionSearchFixture;
@@ -321,6 +323,201 @@ public class ExhibitionQueryIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("내 전시회 검색")
+    class SearchMyExhibitionTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 내 전시회 목록을 반환하고 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            Exhibition savedExhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestSearchMyExhibitionAuthenticated(null, null, null, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.page").value(0))
+                    .andExpect(jsonPath("$.data.size").value(30))
+                    .andExpect(jsonPath("$.data.totalElements").value(1))
+                    .andExpect(jsonPath("$.data.totalPages").value(1))
+                    .andExpect(jsonPath("$.data.isFirst").value(true))
+                    .andExpect(jsonPath("$.data.isLast").value(true))
+                    .andExpect(jsonPath("$.data.hasNext").value(false))
+                    .andExpect(jsonPath("$.data.hasPrevious").value(false))
+                    .andExpect(jsonPath("$.data.exhibitions.length()").value(1))
+                    .andExpect(jsonPath("$.data.exhibitions[0].id").value(savedExhibition.getId()))
+                    .andExpect(jsonPath("$.data.exhibitions[0].writer.id").value(savedUser.getId()))
+                    .andExpect(jsonPath("$.data.exhibitions[0].writer.nickname").value(savedUser.getNickname()))
+                    .andExpect(jsonPath("$.data.exhibitions[0].writer.profileImage").value(savedUser.getProfileImage()))
+                    .andExpect(jsonPath("$.data.exhibitions[0].title").value(savedExhibition.getTitle()))
+                    .andExpect(jsonPath("$.data.exhibitions[0].description").value(savedExhibition.getDescription()))
+                    .andExpect(jsonPath("$.data.exhibitions[0].cardColor").value(savedExhibition.getCardColor()))
+                    .andExpect(jsonPath("$.data.exhibitions[0].likeCount").value(savedExhibition.getLikeCount()))
+                    .andExpect(jsonPath("$.data.exhibitions[0].viewCount").value(savedExhibition.getViewCount()))
+                    .andExpect(jsonPath("$.data.exhibitions[0].isLiked").value(false))
+                    .andExpect(jsonPath("$.data.exhibitions[0].isBookmarked").value(false));
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestSearchMyExhibition(null, null, null, null);
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("좋아요한 전시회이면 isLiked가 true인 목록을 반환하고 200을 반환한다")
+        public void whenAuthenticatedAndExhibitionLiked() throws Exception {
+            // given
+            Exhibition savedExhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            exhibitionLikeCommandPort.save(ExhibitionLike.of(savedUser, savedExhibition));
+
+            // when
+            ResultActions resultActions = requestSearchMyExhibitionAuthenticated(null, null, null, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.exhibitions[0].isLiked").value(true));
+        }
+
+        @Test
+        @DisplayName("북마크한 전시회이면 isBookmarked가 true인 목록을 반환하고 200을 반환한다")
+        public void whenAuthenticatedAndExhibitionBookmarked() throws Exception {
+            // given
+            Exhibition savedExhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            exhibitionBookmarkCommandPort.save(ExhibitionBookmark.of(savedUser, savedExhibition));
+
+            // when
+            ResultActions resultActions = requestSearchMyExhibitionAuthenticated(null, null, null, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.exhibitions[0].isBookmarked").value(true));
+        }
+
+        @Test
+        @DisplayName("키워드가 제목에 포함되면 해당 전시회를 반환하고 200을 반환한다")
+        public void whenKeywordMatchesTitle() throws Exception {
+            // given
+            Exhibition savedExhibition = exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+
+            String keyword = savedExhibition.getTitle();
+
+            // when
+            ResultActions resultActions = requestSearchMyExhibitionAuthenticated(keyword, null, null, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.exhibitions.length()").value(1));
+        }
+
+        @Test
+        @DisplayName("키워드가 제목에 포함되지 않으면 빈 목록을 반환하고 200을 반환한다")
+        public void whenKeywordNotMatchesTitle() throws Exception {
+            // given
+            exhibitionCommandPort.save(
+                    ExhibitionFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+
+            String keyword = "없는키워드";
+
+            // when
+            ResultActions resultActions = requestSearchMyExhibitionAuthenticated(keyword, null, null, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.exhibitions.length()").value(0));
+        }
+
+        @ParameterizedTest
+        @DisplayName("키워드가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.integration.exhibition.ExhibitionQueryIntegrationTest#invalidKeywords")
+        public void whenKeywordInvalid(String invalidKeyword) throws Exception {
+            // when
+            ResultActions resultActions = requestSearchMyExhibitionAuthenticated(invalidKeyword, null, null, null);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("페이지 번호가 음수이면 400을 반환한다")
+        public void whenPageNegative() throws Exception {
+            // given
+            int negativePage = -1;
+
+            // when
+            ResultActions resultActions = requestSearchMyExhibitionAuthenticated(null, negativePage, null, null);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("페이지 사이즈가 유효 범위를 벗어나면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.integration.exhibition.ExhibitionQueryIntegrationTest#invalidSizes")
+        public void whenSizeOutOfRange(String invalidSize) throws Exception {
+            // when
+            ResultActions resultActions = requestSearchMyExhibitionAuthenticated(
+                    null,
+                    null,
+                    Integer.parseInt(invalidSize),
+                    null
+            );
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("정렬 기준이 유효하지 않으면 400을 반환한다")
+        public void whenSortInvalid() throws Exception {
+            // given
+            String invalidSort = "invalid";
+
+            // when
+            ResultActions resultActions = requestSearchMyExhibitionAuthenticated(null, null, null, invalidSort);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+    }
+
     private static Stream<String> invalidKeywords() {
         return Stream.of(
                 "가",               // 최솟값 미만 (1자)
@@ -346,6 +543,51 @@ public class ExhibitionQueryIntegrationTest extends BaseIntegrationTest {
                 get(ApiPath.EXHIBITION_DATA, exhibitionId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         );
+    }
+
+    private ResultActions requestSearchMyExhibition(
+            String keyword,
+            Integer page,
+            Integer size,
+            String sort
+    ) throws Exception {
+        MockHttpServletRequestBuilder builder = get(ApiPath.EXHIBITION_MY_DATA);
+        if (keyword != null) {
+            builder = builder.param("keyword", keyword);
+        }
+        if (page != null) {
+            builder = builder.param("page", String.valueOf(page));
+        }
+        if (size != null) {
+            builder = builder.param("size", String.valueOf(size));
+        }
+        if (sort != null) {
+            builder = builder.param("sort", sort);
+        }
+        return mockMvc.perform(builder);
+    }
+
+    private ResultActions requestSearchMyExhibitionAuthenticated(
+            String keyword,
+            Integer page,
+            Integer size,
+            String sort
+    ) throws Exception {
+        MockHttpServletRequestBuilder builder = get(ApiPath.EXHIBITION_MY_DATA)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        if (keyword != null) {
+            builder = builder.param("keyword", keyword);
+        }
+        if (page != null) {
+            builder = builder.param("page", String.valueOf(page));
+        }
+        if (size != null) {
+            builder = builder.param("size", String.valueOf(size));
+        }
+        if (sort != null) {
+            builder = builder.param("sort", sort);
+        }
+        return mockMvc.perform(builder);
     }
 
     private ResultActions requestSearchExhibition(
