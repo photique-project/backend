@@ -39,6 +39,7 @@ public class ExhibitionSearchResult {
                 .page(exhibitionSearchPage.getNumber())
                 .size(exhibitionSearchPage.getSize())
                 .totalElements(exhibitionSearchPage.getTotalElements())
+                .totalPages(exhibitionSearchPage.getTotalPages())
                 .isFirst(exhibitionSearchPage.isFirst())
                 .isLast(exhibitionSearchPage.isLast())
                 .hasNext(exhibitionSearchPage.hasNext())

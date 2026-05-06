@@ -30,7 +30,7 @@ public class SearchedExhibition {
             boolean isBookmarked
     ) {
         Writer writer = Writer.of(
-                exhibitionSearch.getId(),
+                exhibitionSearch.getWriterId(),
                 exhibitionSearch.getWriterNickname(),
                 exhibitionSearch.getWriterProfileImage()
         );

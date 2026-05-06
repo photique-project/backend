@@ -1,5 +1,6 @@
 package com.benchpress200.photique.exhibition.domain.entity;
 
+import com.benchpress200.photique.user.domain.entity.User;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -74,6 +75,38 @@ public class ExhibitionSearch {
     @Field(type = FieldType.Long)
     private Long lastProcessedEventId;
 
+
+    public static ExhibitionSearch of(
+            Long id,
+            User user,
+            String cardColor,
+            String title,
+            String description,
+            List<String> tags,
+            Long viewCount,
+            Long likeCount,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
+        Writer writer = Writer.builder()
+                .id(user.getId())
+                .nickname(user.getNickname())
+                .profileImage(user.getProfileImage())
+                .build();
+
+        return ExhibitionSearch.builder()
+                .id(id)
+                .writer(writer)
+                .cardColor(cardColor)
+                .title(title)
+                .description(description)
+                .tags(tags)
+                .viewCount(viewCount)
+                .likeCount(likeCount)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
+                .build();
+    }
 
     public Long getWriterId() {
         return writer.getId();
