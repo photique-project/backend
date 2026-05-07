@@ -1,5 +1,6 @@
 package com.benchpress200.photique.integration.singlework;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -7,17 +8,23 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.singlework.api.command.request.SingleWorkCommentCreateRequest;
+import com.benchpress200.photique.singlework.api.command.request.SingleWorkCommentUpdateRequest;
 import com.benchpress200.photique.singlework.api.command.support.fixture.SingleWorkCommentCreateRequestFixture;
+import com.benchpress200.photique.singlework.api.command.support.fixture.SingleWorkCommentUpdateRequestFixture;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
+import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommentCommandPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkTagCommandPort;
 import com.benchpress200.photique.singlework.application.query.port.out.persistence.SingleWorkCommentQueryPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.singlework.domain.entity.SingleWorkComment;
+import com.benchpress200.photique.singlework.domain.support.SingleWorkCommentFixture;
 import com.benchpress200.photique.singlework.domain.support.SingleWorkFixture;
 import com.benchpress200.photique.singlework.infrastructure.persistence.jpa.SingleWorkCommentRepository;
 import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
 import com.benchpress200.photique.user.domain.entity.User;
 import com.benchpress200.photique.user.domain.support.UserFixture;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -47,6 +54,9 @@ public class SingleWorkCommentCommandIntegrationTest extends BaseIntegrationTest
 
     @Autowired
     private SingleWorkTagCommandPort singleWorkTagCommandPort;
+
+    @Autowired
+    private SingleWorkCommentCommandPort singleWorkCommentCommandPort;
 
     @Autowired
     private SingleWorkCommentRepository singleWorkCommentRepository;
@@ -158,6 +168,124 @@ public class SingleWorkCommentCommandIntegrationTest extends BaseIntegrationTest
         }
     }
 
+    @Nested
+    @DisplayName("단일작품 댓글 수정")
+    class UpdateSingleWorkCommentTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 댓글을 수정하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            SingleWorkComment savedComment = singleWorkCommentCommandPort.save(
+                    SingleWorkCommentFixture.builder()
+                            .writer(savedUser)
+                            .singleWork(savedSingleWork)
+                            .build()
+            );
+            SingleWorkCommentUpdateRequest request = SingleWorkCommentUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkCommentAuthenticated(savedComment.getId(), request);
+            Optional<SingleWorkComment> updatedComment = singleWorkCommentQueryPort.findByIdAndDeletedAtIsNull(savedComment.getId());
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(updatedComment)
+                    .isPresent()
+                    .get()
+                    .satisfies(c -> Assertions.assertThat(c.getContent()).isEqualTo(request.getContent()));
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            SingleWorkComment savedComment = singleWorkCommentCommandPort.save(
+                    SingleWorkCommentFixture.builder()
+                            .writer(savedUser)
+                            .singleWork(savedSingleWork)
+                            .build()
+            );
+            SingleWorkCommentUpdateRequest request = SingleWorkCommentUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkComment(savedComment.getId(), request);
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 댓글이면 404를 반환한다")
+        public void whenCommentNotFound() throws Exception {
+            // given
+            Long nonExistentId = 9999L;
+            SingleWorkCommentUpdateRequest request = SingleWorkCommentUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkCommentAuthenticated(nonExistentId, request);
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("본인 소유가 아닌 댓글이면 403을 반환한다")
+        public void whenNotOwned() throws Exception {
+            // given
+            User otherUser = userCommandPort.save(
+                    UserFixture.builder()
+                            .email("other@example.com")
+                            .nickname("다른유저")
+                            .build()
+            );
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(otherUser)
+                            .build()
+            );
+            SingleWorkComment savedComment = singleWorkCommentCommandPort.save(
+                    SingleWorkCommentFixture.builder()
+                            .writer(otherUser)
+                            .singleWork(savedSingleWork)
+                            .build()
+            );
+            SingleWorkCommentUpdateRequest request = SingleWorkCommentUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkCommentAuthenticated(savedComment.getId(), request);
+
+            // then
+            resultActions.andExpect(status().isForbidden());
+        }
+
+        @ParameterizedTest
+        @DisplayName("댓글 내용이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.integration.singlework.SingleWorkCommentCommandIntegrationTest#invalidContents")
+        public void whenContentInvalid(String invalidContent) throws Exception {
+            // given
+            SingleWorkCommentUpdateRequest request = SingleWorkCommentUpdateRequestFixture.builder()
+                    .content(invalidContent)
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateSingleWorkCommentAuthenticated(1L, request);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+    }
+
     private static Stream<String> invalidContents() {
         return Stream.of(
                 null,              // @NotBlank 위반
@@ -183,6 +311,29 @@ public class SingleWorkCommentCommandIntegrationTest extends BaseIntegrationTest
     ) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.SINGLEWORK_COMMENT, singleWorkId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    private ResultActions requestUpdateSingleWorkComment(
+            Long commentId,
+            SingleWorkCommentUpdateRequest request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.SINGLEWORK_COMMENT_DATA, commentId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    private ResultActions requestUpdateSingleWorkCommentAuthenticated(
+            Long commentId,
+            SingleWorkCommentUpdateRequest request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.SINGLEWORK_COMMENT_DATA, commentId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
