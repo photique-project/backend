@@ -1,5 +1,6 @@
 package com.benchpress200.photique.integration.singlework;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -288,6 +289,96 @@ public class SingleWorkCommandIntegrationTest extends BaseIntegrationTest {
             // then
             resultActions.andExpect(status().isBadRequest());
         }
+    }
+
+    @Nested
+    @DisplayName("단일작품 삭제")
+    class DeleteSingleWorkTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 단일작품을 삭제하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteSingleWorkAuthenticated(savedSingleWork.getId());
+            Optional<SingleWork> deletedWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(savedSingleWork.getId());
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(deletedWork).isEmpty();
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteSingleWork(savedSingleWork.getId());
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 단일작품이면 204를 반환한다")
+        public void whenSingleWorkNotFound() throws Exception {
+            // given
+            Long nonExistentId = 9999L;
+
+            // when
+            ResultActions resultActions = requestDeleteSingleWorkAuthenticated(nonExistentId);
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("본인 소유가 아닌 단일작품이면 403을 반환한다")
+        public void whenNotOwned() throws Exception {
+            // given
+            User otherUser = userCommandPort.save(
+                    UserFixture.builder()
+                            .email("other@example.com")
+                            .nickname("다른유저")
+                            .build()
+            );
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(otherUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteSingleWorkAuthenticated(savedSingleWork.getId());
+
+            // then
+            resultActions.andExpect(status().isForbidden());
+        }
+    }
+
+    private ResultActions requestDeleteSingleWork(Long singleWorkId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.SINGLEWORK_DATA, singleWorkId)
+        );
+    }
+
+    private ResultActions requestDeleteSingleWorkAuthenticated(Long singleWorkId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.SINGLEWORK_DATA, singleWorkId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        );
     }
 
     private ResultActions requestUpdateSingleWork(
