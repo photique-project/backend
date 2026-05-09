@@ -1,5 +1,6 @@
 package com.benchpress200.photique.integration.singlework;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -286,6 +287,101 @@ public class SingleWorkCommentCommandIntegrationTest extends BaseIntegrationTest
         }
     }
 
+    @Nested
+    @DisplayName("단일작품 댓글 삭제")
+    class DeleteSingleWorkCommentTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 댓글을 삭제하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            SingleWorkComment savedComment = singleWorkCommentCommandPort.save(
+                    SingleWorkCommentFixture.builder()
+                            .writer(savedUser)
+                            .singleWork(savedSingleWork)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteSingleWorkCommentAuthenticated(savedComment.getId());
+            Optional<SingleWorkComment> deletedComment = singleWorkCommentQueryPort.findByIdAndDeletedAtIsNull(savedComment.getId());
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(deletedComment).isEmpty();
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            SingleWorkComment savedComment = singleWorkCommentCommandPort.save(
+                    SingleWorkCommentFixture.builder()
+                            .writer(savedUser)
+                            .singleWork(savedSingleWork)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteSingleWorkComment(savedComment.getId());
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 댓글이면 204를 반환한다")
+        public void whenCommentNotFound() throws Exception {
+            // given
+            Long nonExistentId = 9999L;
+
+            // when
+            ResultActions resultActions = requestDeleteSingleWorkCommentAuthenticated(nonExistentId);
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+        }
+
+        @Test
+        @DisplayName("본인 소유가 아닌 댓글이면 403을 반환한다")
+        public void whenNotOwned() throws Exception {
+            // given
+            User otherUser = userCommandPort.save(
+                    UserFixture.builder()
+                            .email("other@example.com")
+                            .nickname("다른유저")
+                            .build()
+            );
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(otherUser)
+                            .build()
+            );
+            SingleWorkComment savedComment = singleWorkCommentCommandPort.save(
+                    SingleWorkCommentFixture.builder()
+                            .writer(otherUser)
+                            .singleWork(savedSingleWork)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestDeleteSingleWorkCommentAuthenticated(savedComment.getId());
+
+            // then
+            resultActions.andExpect(status().isForbidden());
+        }
+    }
+
     private static Stream<String> invalidContents() {
         return Stream.of(
                 null,              // @NotBlank 위반
@@ -337,6 +433,19 @@ public class SingleWorkCommentCommandIntegrationTest extends BaseIntegrationTest
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    private ResultActions requestDeleteSingleWorkComment(Long commentId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.SINGLEWORK_COMMENT_DATA, commentId)
+        );
+    }
+
+    private ResultActions requestDeleteSingleWorkCommentAuthenticated(Long commentId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.SINGLEWORK_COMMENT_DATA, commentId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         );
     }
 }
