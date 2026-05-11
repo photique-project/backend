@@ -1,5 +1,6 @@
 package com.benchpress200.photique.integration.singlework;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -157,6 +158,84 @@ public class SingleWorkLikeCommandIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("단일작품 좋아요 취소")
+    class CancelSingleWorkLikeTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 좋아요를 삭제하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            requestAddSingleWorkLikeAuthenticated(savedSingleWork.getId());
+
+            // when
+            ResultActions resultActions = requestCancelSingleWorkLikeAuthenticated(savedSingleWork.getId());
+            boolean likeExists = singleWorkLikeQueryPort.existsByUserIdAndSingleWorkId(
+                    savedUser.getId(),
+                    savedSingleWork.getId()
+            );
+            SingleWork updatedSingleWork = singleWorkQueryPort.findByIdAndDeletedAtIsNull(savedSingleWork.getId())
+                    .orElseThrow();
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(likeExists).isFalse();
+            Assertions.assertThat(updatedSingleWork.getLikeCount()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestCancelSingleWorkLike(savedSingleWork.getId());
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 단일작품이면 404를 반환한다")
+        public void whenSingleWorkNotFound() throws Exception {
+            // given
+            Long nonExistentId = 9999L;
+
+            // when
+            ResultActions resultActions = requestCancelSingleWorkLikeAuthenticated(nonExistentId);
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("좋아요하지 않은 단일작품이면 204를 반환한다")
+        public void whenNotLiked() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+
+            // when
+            ResultActions resultActions = requestCancelSingleWorkLikeAuthenticated(savedSingleWork.getId());
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+        }
+    }
+
     private ResultActions requestAddSingleWorkLike(Long singleWorkId) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.SINGLEWORK_LIKE, singleWorkId)
@@ -166,6 +245,19 @@ public class SingleWorkLikeCommandIntegrationTest extends BaseIntegrationTest {
     private ResultActions requestAddSingleWorkLikeAuthenticated(Long singleWorkId) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.SINGLEWORK_LIKE, singleWorkId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        );
+    }
+
+    private ResultActions requestCancelSingleWorkLike(Long singleWorkId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.SINGLEWORK_LIKE, singleWorkId)
+        );
+    }
+
+    private ResultActions requestCancelSingleWorkLikeAuthenticated(Long singleWorkId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.SINGLEWORK_LIKE, singleWorkId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         );
     }
