@@ -30,6 +30,7 @@ public class SingleWorkSearchResponse {
                 .page(result.getPage())
                 .size(result.getSize())
                 .totalElements(result.getTotalElements())
+                .totalPages(result.getTotalPages())
                 .isFirst(result.isFirst())
                 .isLast(result.isLast())
                 .hasNext(result.isHasNext())

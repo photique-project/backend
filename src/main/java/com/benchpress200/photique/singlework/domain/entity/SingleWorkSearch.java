@@ -1,5 +1,6 @@
 package com.benchpress200.photique.singlework.domain.entity;
 
+import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -76,6 +77,31 @@ public class SingleWorkSearch {
 
     @Field(type = FieldType.Long)
     private Long lastProcessedEventId;
+
+    public static SingleWorkSearch of(
+            SingleWork singleWork,
+            List<String> tags
+    ) {
+        Writer writer = Writer.builder()
+                .id(singleWork.getWriter().getId())
+                .nickname(singleWork.getWriter().getNickname())
+                .profileImage(singleWork.getWriter().getProfileImage())
+                .build();
+
+        return SingleWorkSearch.builder()
+                .id(singleWork.getId())
+                .writer(writer)
+                .image(singleWork.getImage())
+                .title(singleWork.getTitle())
+                .description(singleWork.getDescription())
+                .tags(tags)
+                .category(singleWork.getCategory().getValue())
+                .likeCount(singleWork.getLikeCount())
+                .viewCount(singleWork.getViewCount())
+                .createdAt(singleWork.getCreatedAt())
+                .updatedAt(singleWork.getUpdatedAt())
+                .build();
+    }
 
     public Long getWriterId() {
         return writer.getId();
