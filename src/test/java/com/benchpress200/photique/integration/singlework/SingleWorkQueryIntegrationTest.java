@@ -10,7 +10,10 @@ import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkTagCommandPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
+import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.domain.support.SingleWorkFixture;
+import com.benchpress200.photique.singlework.domain.support.SingleWorkSearchFixture;
+import com.benchpress200.photique.singlework.infrastructure.persistence.elasticsearch.SingleWorkSearchRepository;
 import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -21,8 +24,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 @DisplayName("단일작품 쿼리 API 통합 테스트")
 public class SingleWorkQueryIntegrationTest extends BaseIntegrationTest {
@@ -38,6 +43,12 @@ public class SingleWorkQueryIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private SingleWorkTagCommandPort singleWorkTagCommandPort;
+
+    @Autowired
+    private SingleWorkSearchRepository singleWorkSearchRepository;
+
+    @Autowired
+    private ElasticsearchOperations elasticsearchOperations;
 
     private User savedUser;
     private String accessToken;
@@ -56,6 +67,7 @@ public class SingleWorkQueryIntegrationTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanUp() {
+        singleWorkSearchRepository.deleteAll();
         singleWorkTagCommandPort.deleteAll();
         singleWorkCommandPort.deleteAll();
         userCommandPort.deleteAll();
@@ -112,6 +124,111 @@ public class SingleWorkQueryIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("단일작품 검색")
+    class SearchSingleWorkTest {
+
+        @Test
+        @DisplayName("요청이 유효하면 단일작품 목록을 반환하고 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            SingleWork savedSingleWork = singleWorkCommandPort.save(
+                    SingleWorkFixture.builder()
+                            .writer(savedUser)
+                            .build()
+            );
+            singleWorkSearchRepository.save(
+                    SingleWorkSearchFixture.builder()
+                            .singleWork(savedSingleWork)
+                            .build()
+            );
+            elasticsearchOperations.indexOps(SingleWorkSearch.class).refresh();
+
+            // when
+            ResultActions resultActions = requestSearchSingleWorkAuthenticated("work", "기본", null, null);
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.page").value(0))
+                    .andExpect(jsonPath("$.data.size").value(30))
+                    .andExpect(jsonPath("$.data.totalElements").value(1))
+                    .andExpect(jsonPath("$.data.totalPages").value(1))
+                    .andExpect(jsonPath("$.data.isFirst").value(true))
+                    .andExpect(jsonPath("$.data.isLast").value(true))
+                    .andExpect(jsonPath("$.data.hasNext").value(false))
+                    .andExpect(jsonPath("$.data.hasPrevious").value(false))
+                    .andExpect(jsonPath("$.data.singleWorks.length()").value(1))
+                    .andExpect(jsonPath("$.data.singleWorks[0].id").value(savedSingleWork.getId()))
+                    .andExpect(jsonPath("$.data.singleWorks[0].writer.id").value(savedUser.getId()))
+                    .andExpect(jsonPath("$.data.singleWorks[0].writer.nickname").value(savedUser.getNickname()))
+                    .andExpect(jsonPath("$.data.singleWorks[0].writer.profileImage").value(savedUser.getProfileImage()))
+                    .andExpect(jsonPath("$.data.singleWorks[0].image").value(savedSingleWork.getImage()))
+                    .andExpect(jsonPath("$.data.singleWorks[0].likeCount").value(savedSingleWork.getLikeCount()))
+                    .andExpect(jsonPath("$.data.singleWorks[0].viewCount").value(savedSingleWork.getViewCount()))
+                    .andExpect(jsonPath("$.data.singleWorks[0].isLiked").value(false));
+        }
+
+        @Test
+        @DisplayName("검색 대상이 유효하지 않으면 400을 반환한다")
+        public void whenTargetInvalid() throws Exception {
+            // given
+            String invalidTarget = "invalid";
+            String keyword = "단일";
+
+            // when
+            ResultActions resultActions = requestSearchSingleWorkAuthenticated(invalidTarget, keyword, null, null);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("키워드 길이가 2 미만이면 400을 반환한다")
+        public void whenKeywordTooShort() throws Exception {
+            // given
+            String target = "work";
+            String invalidKeyword = "가";
+
+            // when
+            ResultActions resultActions = requestSearchSingleWorkAuthenticated(target, invalidKeyword, null, null);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("페이지 번호가 음수이면 400을 반환한다")
+        public void whenPageNegative() throws Exception {
+            // given
+            String target = "work";
+            String keyword = "단일";
+            int invalidPage = -1;
+
+            // when
+            ResultActions resultActions = requestSearchSingleWorkAuthenticated(target, keyword, invalidPage,
+                    null);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("페이지 사이즈가 유효 범위를 벗어나면 400을 반환한다")
+        public void whenSizeOutOfRange() throws Exception {
+            // given
+            String target = "work";
+            String keyword = "단일";
+            int size = 0;
+
+            // when
+            ResultActions resultActions = requestSearchSingleWorkAuthenticated(target, keyword, null, size);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+    }
+
     private ResultActions requestGetSingleWorkDetails(Long singleWorkId) throws Exception {
         return mockMvc.perform(
                 get(ApiPath.SINGLEWORK_DATA, singleWorkId)
@@ -123,5 +240,42 @@ public class SingleWorkQueryIntegrationTest extends BaseIntegrationTest {
                 get(ApiPath.SINGLEWORK_DATA, singleWorkId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         );
+    }
+
+    private ResultActions requestSearchSingleWork(
+            String target,
+            String keyword,
+            Integer page,
+            Integer size
+    ) throws Exception {
+        MockHttpServletRequestBuilder builder = get(ApiPath.SINGLEWORK_ROOT)
+                .param("target", target)
+                .param("keyword", keyword);
+        if (page != null) {
+            builder = builder.param("page", String.valueOf(page));
+        }
+        if (size != null) {
+            builder = builder.param("size", String.valueOf(size));
+        }
+        return mockMvc.perform(builder);
+    }
+
+    private ResultActions requestSearchSingleWorkAuthenticated(
+            String target,
+            String keyword,
+            Integer page,
+            Integer size
+    ) throws Exception {
+        MockHttpServletRequestBuilder builder = get(ApiPath.SINGLEWORK_ROOT)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .param("target", target)
+                .param("keyword", keyword);
+        if (page != null) {
+            builder = builder.param("page", String.valueOf(page));
+        }
+        if (size != null) {
+            builder = builder.param("size", String.valueOf(size));
+        }
+        return mockMvc.perform(builder);
     }
 }
