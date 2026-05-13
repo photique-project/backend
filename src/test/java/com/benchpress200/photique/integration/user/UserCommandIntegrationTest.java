@@ -16,6 +16,7 @@ import com.benchpress200.photique.support.fixture.MultipartFileFixture;
 import com.benchpress200.photique.support.fixture.MultipartJsonFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.ResisterRequestFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.UserDetailsUpdateRequestFixture;
+import com.benchpress200.photique.user.api.command.support.fixture.UserPasswordResetRequestFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.UserPasswordUpdateRequestFixture;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
@@ -455,7 +456,8 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
                     .build();
 
             // when
-            ResultActions resultActions = requestUpdateUserDetailsAuthenticated(savedUser.getId(), userPart, invalidProfileImage);
+            ResultActions resultActions = requestUpdateUserDetailsAuthenticated(savedUser.getId(), userPart,
+                    invalidProfileImage);
 
             // then
             resultActions.andExpect(status().isBadRequest());
@@ -575,6 +577,118 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("유저 비밀번호 초기화")
+    class ResetUserPasswordTest {
+        @Test
+        @DisplayName("요청이 유효하면 비밀번호를 초기화하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            User user = userCommandPort.save(UserFixture.builder().build());
+            AuthMailCode authMailCode = AuthMailCodeFixture.builder()
+                    .email(user.getEmail())
+                    .isVerified(true)
+                    .build();
+            authMailCodeCommandPort.save(authMailCode);
+            UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder()
+                    .email(user.getEmail())
+                    .build();
+
+            // when
+            ResultActions resultActions = requestResetUserPassword(request);
+            Optional<User> updatedUser = userQueryPort.findByEmailAndDeletedAtIsNull(user.getEmail());
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(updatedUser)
+                    .isPresent()
+                    .get()
+                    .satisfies(u ->
+                            Assertions.assertThat(u.getPassword()).isNotEqualTo(user.getPassword())
+                    );
+        }
+
+        @ParameterizedTest
+        @DisplayName("이메일이 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.integration.user.UserCommandIntegrationTest#invalidResetEmails")
+        public void whenEmailInvalid(String invalidEmail) throws Exception {
+            // given
+            UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder()
+                    .email(invalidEmail)
+                    .build();
+
+            // when
+            ResultActions resultActions = requestResetUserPassword(request);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("비밀번호가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.integration.user.UserCommandIntegrationTest#invalidResetPasswords")
+        public void whenPasswordInvalid(String invalidPassword) throws Exception {
+            // given
+            UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder()
+                    .password(invalidPassword)
+                    .build();
+
+            // when
+            ResultActions resultActions = requestResetUserPassword(request);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("유저가 존재하지 않으면 404를 반환한다")
+        public void whenUserNotFound() throws Exception {
+            // given
+            UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestResetUserPassword(request);
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("이메일 인증 코드가 존재하지 않거나 만료되었다면 410을 반환한다")
+        public void whenAuthMailCodeExpired() throws Exception {
+            // given
+            User user = userCommandPort.save(UserFixture.builder().build());
+            UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder()
+                    .email(user.getEmail())
+                    .build();
+
+            // when
+            ResultActions resultActions = requestResetUserPassword(request);
+
+            // then
+            resultActions.andExpect(status().isGone());
+        }
+
+        @Test
+        @DisplayName("이메일 인증을 진행하지 않았다면 401을 반환한다")
+        public void whenAuthMailCodeNotVerified() throws Exception {
+            // given
+            User user = userCommandPort.save(UserFixture.builder().build());
+            authMailCodeCommandPort.save(AuthMailCodeFixture.builder()
+                    .email(user.getEmail())
+                    .build());
+            UserPasswordResetRequestFixture request = UserPasswordResetRequestFixture.builder()
+                    .email(user.getEmail())
+                    .build();
+
+            // when
+            ResultActions resultActions = requestResetUserPassword(request);
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+    }
+
     private static Stream<MockMultipartFile> invalidProfileImages() {
         MockMultipartFile emptyImage = MultipartFileFixture.builder()
                 .key(MultipartKey.PROFILE_IMAGE)
@@ -671,6 +785,22 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
         );
     }
 
+    private static Stream<String> invalidResetEmails() {
+        return Stream.of(
+                null,           // @NotNull 위반
+                "invalid-email" // @Email 형식 위반
+        );
+    }
+
+    private static Stream<String> invalidResetPasswords() {
+        return Stream.of(
+                null,           // @NotNull 위반
+                "password!",    // 숫자 없음
+                "pass1!",       // 8자 미만
+                "12345678!"     // 영문자 없음
+        );
+    }
+
     private static Stream<String> invalidEmails() {
         return Stream.of(
                 null,           // @NotNull 위반
@@ -746,6 +876,16 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
         return mockMvc.perform(
                 patch(ApiPath.USER_PASSWORD, userId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    private ResultActions requestResetUserPassword(
+            UserPasswordResetRequestFixture request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.USER_PASSWORD_RESET)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
         );
