@@ -1,5 +1,6 @@
 package com.benchpress200.photique.integration.user;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -689,6 +690,58 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("회원탈퇴")
+    class WithdrawTest {
+        @BeforeEach
+        void setUp() {
+            savedUser = userCommandPort.save(UserFixture.builder().build());
+            AuthenticationTokens tokens = authenticationTokenManagerPort.issueTokens(
+                    savedUser.getId(),
+                    savedUser.getRole().name()
+            );
+            accessToken = tokens.getAccessToken();
+        }
+
+        @Test
+        @DisplayName("요청이 유효하면 회원을 탈퇴시키고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // when
+            ResultActions resultActions = requestWithdrawAuthenticated(savedUser.getId());
+            Optional<User> deletedUser = userQueryPort.findByIdAndDeletedAtIsNull(savedUser.getId());
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(deletedUser).isNotPresent();
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // when
+            ResultActions resultActions = requestWithdraw(savedUser.getId());
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("다른 유저의 userId로 탈퇴를 요청하면 403을 반환한다")
+        public void whenAnotherUserForbidden() throws Exception {
+            // given
+            User otherUser = userCommandPort.save(UserFixture.builder()
+                    .email("other@example.com")
+                    .nickname("다른유저")
+                    .build());
+
+            // when
+            ResultActions resultActions = requestWithdrawAuthenticated(otherUser.getId());
+
+            // then
+            resultActions.andExpect(status().isForbidden());
+        }
+    }
+
     private static Stream<MockMultipartFile> invalidProfileImages() {
         MockMultipartFile emptyImage = MultipartFileFixture.builder()
                 .key(MultipartKey.PROFILE_IMAGE)
@@ -888,6 +941,17 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
                 patch(ApiPath.USER_PASSWORD_RESET)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    private ResultActions requestWithdraw(Long userId) throws Exception {
+        return mockMvc.perform(delete(ApiPath.USER_DATA, userId));
+    }
+
+    private ResultActions requestWithdrawAuthenticated(Long userId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.USER_DATA, userId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         );
     }
 }
