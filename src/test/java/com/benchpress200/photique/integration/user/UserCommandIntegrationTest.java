@@ -1,6 +1,7 @@
 package com.benchpress200.photique.integration.user;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.benchpress200.photique.auth.application.command.port.out.persistence.AuthMailCodeCommandPort;
@@ -15,6 +16,7 @@ import com.benchpress200.photique.support.fixture.MultipartFileFixture;
 import com.benchpress200.photique.support.fixture.MultipartJsonFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.ResisterRequestFixture;
 import com.benchpress200.photique.user.api.command.support.fixture.UserDetailsUpdateRequestFixture;
+import com.benchpress200.photique.user.api.command.support.fixture.UserPasswordUpdateRequestFixture;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
 import com.benchpress200.photique.user.application.query.port.out.persistence.UserQueryPort;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -479,6 +481,100 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("유저 비밀번호 수정")
+    class UpdateUserPasswordTest {
+        @BeforeEach
+        void setUp() {
+            savedUser = userCommandPort.save(UserFixture.builder().build());
+            AuthenticationTokens tokens = authenticationTokenManagerPort.issueTokens(
+                    savedUser.getId(),
+                    savedUser.getRole().name()
+            );
+            accessToken = tokens.getAccessToken();
+        }
+
+        @Test
+        @DisplayName("요청이 유효하면 비밀번호를 수정하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateUserPasswordAuthenticated(savedUser.getId(), request);
+            Optional<User> updatedUser = userQueryPort.findByIdAndDeletedAtIsNull(savedUser.getId());
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(updatedUser)
+                    .isPresent()
+                    .get()
+                    .satisfies(u ->
+                            Assertions.assertThat(u.getPassword()).isNotEqualTo(savedUser.getPassword())
+                    );
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateUserPassword(savedUser.getId(), request);
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("다른 유저의 userId로 수정을 요청하면 403을 반환한다")
+        public void whenAnotherUserForbidden() throws Exception {
+            // given
+            User otherUser = userCommandPort.save(UserFixture.builder()
+                    .email("other@example.com")
+                    .nickname("다른유저")
+                    .build());
+            UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateUserPasswordAuthenticated(otherUser.getId(), request);
+
+            // then
+            resultActions.andExpect(status().isForbidden());
+        }
+
+        @ParameterizedTest
+        @DisplayName("비밀번호가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.integration.user.UserCommandIntegrationTest#invalidUpdatePasswords")
+        public void whenPasswordInvalid(String invalidPassword) throws Exception {
+            // given
+            UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder()
+                    .password(invalidPassword)
+                    .build();
+
+            // when
+            ResultActions resultActions = requestUpdateUserPasswordAuthenticated(savedUser.getId(), request);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("유저가 존재하지 않으면 404를 반환한다")
+        public void whenUserNotFound() throws Exception {
+            // given
+            userCommandPort.deleteAll();
+            UserPasswordUpdateRequestFixture request = UserPasswordUpdateRequestFixture.builder().build();
+
+            // when
+            ResultActions resultActions = requestUpdateUserPasswordAuthenticated(savedUser.getId(), request);
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
+    }
+
     private static Stream<MockMultipartFile> invalidProfileImages() {
         MockMultipartFile emptyImage = MultipartFileFixture.builder()
                 .key(MultipartKey.PROFILE_IMAGE)
@@ -566,6 +662,15 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
         );
     }
 
+    private static Stream<String> invalidUpdatePasswords() {
+        return Stream.of(
+                null,           // @NotNull 위반
+                "password!",    // 숫자 없음
+                "pass1!",       // 8자 미만
+                "12345678!"     // 영문자 없음
+        );
+    }
+
     private static Stream<String> invalidEmails() {
         return Stream.of(
                 null,           // @NotNull 위반
@@ -620,6 +725,29 @@ public class UserCommandIntegrationTest extends BaseIntegrationTest {
                 multipartBuilder
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
+        );
+    }
+
+    private ResultActions requestUpdateUserPassword(
+            Long userId,
+            UserPasswordUpdateRequestFixture request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.USER_PASSWORD, userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        );
+    }
+
+    private ResultActions requestUpdateUserPasswordAuthenticated(
+            Long userId,
+            UserPasswordUpdateRequestFixture request
+    ) throws Exception {
+        return mockMvc.perform(
+                patch(ApiPath.USER_PASSWORD, userId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
         );
     }
 }
