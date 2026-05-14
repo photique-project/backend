@@ -1,5 +1,6 @@
 package com.benchpress200.photique.integration.user;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -175,6 +176,85 @@ public class FollowCommandIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("언팔로우")
+    class UnfollowTest {
+        @Test
+        @DisplayName("요청이 유효하면 팔로우를 삭제하고 204를 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            savedFollower = userCommandPort.save(UserFixture.builder().build());
+            savedFollowee = userCommandPort.save(UserFixture.builder()
+                    .email("followee@example.com")
+                    .nickname("팔로이유저")
+                    .build());
+            accessToken = authenticationTokenManagerPort.issueTokens(
+                    savedFollower.getId(),
+                    savedFollower.getRole().name()
+            ).getAccessToken();
+            followRepository.save(Follow.of(savedFollower, savedFollowee));
+
+            // when
+            ResultActions resultActions = requestUnfollowAuthenticated(savedFollowee.getId());
+            Optional<Follow> follow = followQueryPort.findByFollowerIdAndFolloweeId(
+                    savedFollower.getId(),
+                    savedFollowee.getId()
+            );
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+            Assertions.assertThat(follow).isNotPresent();
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            savedFollowee = userCommandPort.save(UserFixture.builder().build());
+
+            // when
+            ResultActions resultActions = requestUnfollow(savedFollowee.getId());
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("본인을 언팔로우하면 400을 반환한다")
+        public void whenSelfUnfollow() throws Exception {
+            // given
+            savedFollower = userCommandPort.save(UserFixture.builder().build());
+            accessToken = authenticationTokenManagerPort.issueTokens(
+                    savedFollower.getId(),
+                    savedFollower.getRole().name()
+            ).getAccessToken();
+
+            // when
+            ResultActions resultActions = requestUnfollowAuthenticated(savedFollower.getId());
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("팔로우 관계가 없어도 204를 반환한다")
+        public void whenFollowNotFound() throws Exception {
+            // given
+            savedFollower = userCommandPort.save(UserFixture.builder().build());
+            accessToken = authenticationTokenManagerPort.issueTokens(
+                    savedFollower.getId(),
+                    savedFollower.getRole().name()
+            ).getAccessToken();
+            Long nonExistentFolloweeId = savedFollower.getId() + 9999L;
+
+            // when
+            ResultActions resultActions = requestUnfollowAuthenticated(nonExistentFolloweeId);
+
+            // then
+            resultActions.andExpect(status().isNoContent());
+        }
+    }
+
     private ResultActions requestFollow(Long followeeId) throws Exception {
         return mockMvc.perform(post(ApiPath.FOLLOW_ROOT, followeeId));
     }
@@ -182,6 +262,17 @@ public class FollowCommandIntegrationTest extends BaseIntegrationTest {
     private ResultActions requestFollowAuthenticated(Long followeeId) throws Exception {
         return mockMvc.perform(
                 post(ApiPath.FOLLOW_ROOT, followeeId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        );
+    }
+
+    private ResultActions requestUnfollow(Long followeeId) throws Exception {
+        return mockMvc.perform(delete(ApiPath.FOLLOW_ROOT, followeeId));
+    }
+
+    private ResultActions requestUnfollowAuthenticated(Long followeeId) throws Exception {
+        return mockMvc.perform(
+                delete(ApiPath.FOLLOW_ROOT, followeeId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         );
     }
