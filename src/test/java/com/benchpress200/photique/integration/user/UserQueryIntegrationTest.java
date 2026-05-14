@@ -159,6 +159,63 @@ public class UserQueryIntegrationTest extends BaseIntegrationTest {
         );
     }
 
+    @Nested
+    @DisplayName("내 정보 상세 조회")
+    class GetMyDetailsTest {
+        @Test
+        @DisplayName("요청이 유효하면 내 정보를 반환하고 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            savedUser = userCommandPort.save(UserFixture.builder().build());
+            accessToken = authenticationTokenManagerPort.issueTokens(
+                    savedUser.getId(),
+                    savedUser.getRole().name()
+            ).getAccessToken();
+
+            // when
+            ResultActions resultActions = requestGetMyDetailsAuthenticated();
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.userId").value(savedUser.getId()))
+                    .andExpect(jsonPath("$.data.email").value(savedUser.getEmail()))
+                    .andExpect(jsonPath("$.data.nickname").value(savedUser.getNickname()))
+                    .andExpect(jsonPath("$.data.singleWorkCount").value(0))
+                    .andExpect(jsonPath("$.data.exhibitionCount").value(0))
+                    .andExpect(jsonPath("$.data.followerCount").value(0))
+                    .andExpect(jsonPath("$.data.followingCount").value(0));
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // when
+            ResultActions resultActions = requestGetMyDetails();
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("유저가 존재하지 않으면 404를 반환한다")
+        public void whenUserNotFound() throws Exception {
+            // given
+            savedUser = userCommandPort.save(UserFixture.builder().build());
+            accessToken = authenticationTokenManagerPort.issueTokens(
+                    savedUser.getId(),
+                    savedUser.getRole().name()
+            ).getAccessToken();
+            userCommandPort.deleteAll();
+
+            // when
+            ResultActions resultActions = requestGetMyDetailsAuthenticated();
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
+    }
+
     private ResultActions requestGetUserDetails(Long userId) throws Exception {
         return mockMvc.perform(get(ApiPath.USER_DATA, userId));
     }
@@ -176,5 +233,16 @@ public class UserQueryIntegrationTest extends BaseIntegrationTest {
             builder = builder.param("nickname", nickname);
         }
         return mockMvc.perform(builder);
+    }
+
+    private ResultActions requestGetMyDetails() throws Exception {
+        return mockMvc.perform(get(ApiPath.USER_MY_DATA));
+    }
+
+    private ResultActions requestGetMyDetailsAuthenticated() throws Exception {
+        return mockMvc.perform(
+                get(ApiPath.USER_MY_DATA)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+        );
     }
 }
