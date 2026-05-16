@@ -155,8 +155,145 @@ public class FollowQueryIntegrationTest extends BaseIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("팔로워 검색")
+    class SearchFollowerTest {
+        @Test
+        @DisplayName("요청이 유효하면 팔로워 목록을 반환하고 200을 반환한다")
+        public void whenRequestValid() throws Exception {
+            // given
+            savedUser = userCommandPort.save(UserFixture.builder().build());
+            User followerUser = userCommandPort.save(UserFixture.builder()
+                    .email("follower@example.com")
+                    .nickname("팔로워유저")
+                    .build());
+            followRepository.save(Follow.of(followerUser, savedUser));
+            accessToken = authenticationTokenManagerPort.issueTokens(
+                    savedUser.getId(),
+                    savedUser.getRole().name()
+            ).getAccessToken();
+
+            String keyword = "팔로워";
+            int page = 0;
+            int size = 30;
+
+            // when
+            ResultActions resultActions = requestSearchFollower(savedUser.getId(), keyword, page, size);
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.totalElements").value(1))
+                    .andExpect(jsonPath("$.data.users[0].nickname").value(followerUser.getNickname()))
+                    .andExpect(jsonPath("$.data.users[0].isFollowing").value(false));
+        }
+
+        @Test
+        @DisplayName("검색 결과가 없으면 빈 목록을 반환하고 200을 반환한다")
+        public void whenSearchResultEmpty() throws Exception {
+            // given
+            savedUser = userCommandPort.save(UserFixture.builder().build());
+            accessToken = authenticationTokenManagerPort.issueTokens(
+                    savedUser.getId(),
+                    savedUser.getRole().name()
+            ).getAccessToken();
+
+            String keyword = "없는키워드";
+            int page = 0;
+            int size = 30;
+
+            // when
+            ResultActions resultActions = requestSearchFollower(savedUser.getId(), keyword, page, size);
+
+            // then
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.totalElements").value(0));
+        }
+
+        @Test
+        @DisplayName("인증 토큰이 없으면 401을 반환한다")
+        public void whenNotAuthenticated() throws Exception {
+            // given
+            long userId = 1L;
+
+            // when
+            ResultActions resultActions = requestSearchFollowerUnauthenticated(userId);
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("페이지 번호가 음수이면 400을 반환한다")
+        public void whenPageInvalid() throws Exception {
+            // given
+            savedUser = userCommandPort.save(UserFixture.builder().build());
+            accessToken = authenticationTokenManagerPort.issueTokens(
+                    savedUser.getId(),
+                    savedUser.getRole().name()
+            ).getAccessToken();
+
+            int page = -1;
+            int size = 30;
+
+            // when
+            ResultActions resultActions = requestSearchFollower(savedUser.getId(), null, page, size);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+
+        @ParameterizedTest
+        @DisplayName("페이지 크기가 유효하지 않으면 400을 반환한다")
+        @MethodSource("com.benchpress200.photique.integration.user.FollowQueryIntegrationTest#invalidSizes")
+        public void whenSizeInvalid(Integer invalidSize) throws Exception {
+            // given
+            savedUser = userCommandPort.save(UserFixture.builder().build());
+            accessToken = authenticationTokenManagerPort.issueTokens(
+                    savedUser.getId(),
+                    savedUser.getRole().name()
+            ).getAccessToken();
+
+            int page = 0;
+
+            // when
+            ResultActions resultActions = requestSearchFollower(savedUser.getId(), null, page, invalidSize);
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
+    }
+
     private static Stream<Integer> invalidSizes() {
         return Stream.of(0, 51);
+    }
+
+    private ResultActions requestSearchFollower(
+            Long userId,
+            String keyword,
+            Integer page,
+            Integer size
+    ) throws Exception {
+        MockHttpServletRequestBuilder builder = get(ApiPath.FOLLOWER, userId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        if (keyword != null) {
+            builder = builder.param("keyword", keyword);
+        }
+        if (page != null) {
+            builder = builder.param("page", String.valueOf(page));
+        }
+        if (size != null) {
+            builder = builder.param("size", String.valueOf(size));
+        }
+        return mockMvc.perform(builder);
+    }
+
+    private ResultActions requestSearchFollowerUnauthenticated(Long userId) throws Exception {
+        return mockMvc.perform(
+                get(ApiPath.FOLLOWER, userId)
+                        .param("keyword", "테스트")
+        );
     }
 
     private ResultActions requestSearchFollowee(
