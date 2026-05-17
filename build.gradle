@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.0'
     id 'io.spring.dependency-management' version '1.1.6'
+    id 'jacoco'
 }
 
 group = 'com.benchpress200'
@@ -125,4 +126,27 @@ tasks.register('copyTestSecret', Copy) {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+// JaCoCo 설정 추가
+jacoco {
+    toolVersion = "0.8.14"
+}
+
+test {
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+}
+
+jacocoTestReport {
+    reports {
+        html.required = true
+        xml.required = true
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+        xml.outputLocation = layout.buildDirectory.file('jacoco/result.xml')
+    }
 }
