@@ -149,4 +149,14 @@ jacocoTestReport {
         html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
         xml.outputLocation = layout.buildDirectory.file('jacoco/result.xml')
     }
+
+    afterEvaluate {
+        classDirectories.setFrom(
+                files(classDirectories.files.collect {
+                    fileTree(dir: it, exclude: [
+                            '**/Q*'
+                    ])
+                })
+        )
+    }
 }
