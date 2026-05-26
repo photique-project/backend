@@ -7,7 +7,8 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository # 외부 PR 차단
+    runs-on: self-hosted
 
     steps:
       - name: 코드 체크아웃
