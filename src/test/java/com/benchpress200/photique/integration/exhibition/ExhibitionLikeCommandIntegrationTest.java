@@ -66,9 +66,7 @@ public class ExhibitionLikeCommandIntegrationTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanUp() {
-        exhibitionLikeCommandPort.deleteAll();
-        exhibitionCommandPort.deleteAll();
-        userCommandPort.deleteAll();
+        databaseCleaner.clean();
     }
 
     @Nested

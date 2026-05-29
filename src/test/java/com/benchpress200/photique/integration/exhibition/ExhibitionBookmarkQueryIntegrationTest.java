@@ -58,9 +58,7 @@ public class ExhibitionBookmarkQueryIntegrationTest extends BaseIntegrationTest 
 
     @AfterEach
     void cleanUp() {
-        exhibitionBookmarkCommandPort.deleteAll();
-        exhibitionCommandPort.deleteAll();
-        userCommandPort.deleteAll();
+        databaseCleaner.clean();
     }
 
     @Nested

@@ -41,8 +41,7 @@ public class FollowQueryIntegrationTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanUp() {
-        followRepository.deleteAll();
-        userCommandPort.deleteAll();
+        databaseCleaner.clean();
     }
 
     @Nested

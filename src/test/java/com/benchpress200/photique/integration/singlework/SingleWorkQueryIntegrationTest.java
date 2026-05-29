@@ -8,14 +8,11 @@ import com.benchpress200.photique.auth.application.command.port.out.security.Aut
 import com.benchpress200.photique.auth.domain.vo.AuthenticationTokens;
 import com.benchpress200.photique.common.api.constant.ApiPath;
 import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkCommandPort;
-import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkLikeCommandPort;
-import com.benchpress200.photique.singlework.application.command.port.out.persistence.SingleWorkTagCommandPort;
 import com.benchpress200.photique.singlework.domain.entity.SingleWork;
 import com.benchpress200.photique.singlework.domain.entity.SingleWorkSearch;
 import com.benchpress200.photique.singlework.domain.support.SingleWorkFixture;
 import com.benchpress200.photique.singlework.domain.support.SingleWorkSearchFixture;
 import com.benchpress200.photique.singlework.infrastructure.persistence.elasticsearch.SingleWorkSearchRepository;
-import com.benchpress200.photique.singlework.infrastructure.persistence.jpa.SingleWorkLikeRepository;
 import com.benchpress200.photique.support.base.BaseIntegrationTest;
 import com.benchpress200.photique.user.application.command.port.out.persistence.UserCommandPort;
 import com.benchpress200.photique.user.domain.entity.User;
@@ -44,15 +41,6 @@ public class SingleWorkQueryIntegrationTest extends BaseIntegrationTest {
     private SingleWorkCommandPort singleWorkCommandPort;
 
     @Autowired
-    private SingleWorkTagCommandPort singleWorkTagCommandPort;
-
-    @Autowired
-    private SingleWorkLikeCommandPort singleWorkLikeCommandPort;
-
-    @Autowired
-    private SingleWorkLikeRepository singleWorkLikeRepository;
-
-    @Autowired
     private SingleWorkSearchRepository singleWorkSearchRepository;
 
     @Autowired
@@ -75,11 +63,8 @@ public class SingleWorkQueryIntegrationTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanUp() {
+        databaseCleaner.clean();
         singleWorkSearchRepository.deleteAll();
-        singleWorkLikeRepository.deleteAll();
-        singleWorkTagCommandPort.deleteAll();
-        singleWorkCommandPort.deleteAll();
-        userCommandPort.deleteAll();
     }
 
     @Nested

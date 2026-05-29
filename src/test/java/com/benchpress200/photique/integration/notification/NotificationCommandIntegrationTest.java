@@ -60,8 +60,7 @@ public class NotificationCommandIntegrationTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanUp() {
-        notificationCommandPort.deleteAll();
-        userCommandPort.deleteAll();
+        databaseCleaner.clean();
     }
 
     @Nested

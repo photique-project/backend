@@ -74,10 +74,7 @@ public class SingleWorkLikeCommandIntegrationTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanUp() {
-        singleWorkLikeRepository.deleteAll();
-        singleWorkTagCommandPort.deleteAll();
-        singleWorkCommandPort.deleteAll();
-        userCommandPort.deleteAll();
+        databaseCleaner.clean();
     }
 
     @Nested

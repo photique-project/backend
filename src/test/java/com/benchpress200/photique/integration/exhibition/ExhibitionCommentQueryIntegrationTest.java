@@ -59,9 +59,7 @@ public class ExhibitionCommentQueryIntegrationTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanUp() {
-        exhibitionCommentCommandPort.deleteAll();
-        exhibitionCommandPort.deleteAll();
-        userCommandPort.deleteAll();
+        databaseCleaner.clean();
     }
 
     @Nested

@@ -36,7 +36,7 @@ public class UserQueryIntegrationTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanUp() {
-        userCommandPort.deleteAll();
+        databaseCleaner.clean();
     }
 
     @Nested
