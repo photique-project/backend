@@ -26,4 +26,4 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: 테스트 실행
-        run: ./gradlew clean test
+        run: ./gradlew clean test --info

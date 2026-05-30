@@ -126,15 +126,25 @@ tasks.register('copyTestSecret', Copy) {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+// task별 수행 시간 측정
+gradle.taskGraph.whenReady { graph ->
+    graph.allTasks.each { task ->
+        long start
+        task.doFirst {
+            start = System.currentTimeMillis()
+        }
+        task.doLast {
+            println "${task.path}: ${System.currentTimeMillis() - start} ms"
+        }
+    }
 }
 
 // JaCoCo 설정 추가
 jacoco {
     toolVersion = "0.8.14"
-}
-
-test {
-    finalizedBy jacocoTestReport
 }
 
 jacocoTestReport {
