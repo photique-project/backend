@@ -30,7 +30,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: 테스트 실행
-        run: ./gradlew clean test --profile
+        run: ./gradlew clean test --info
 
       - name: gradle 프로파일링 결과 업로드
         if: always()
