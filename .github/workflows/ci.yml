@@ -51,4 +51,4 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v6
-      - run: ./gradlew dependencies  # 의존성만 캐싱
+      - run: ./gradlew build
