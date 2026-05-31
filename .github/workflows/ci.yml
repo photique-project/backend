@@ -23,7 +23,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Gradle 캐시 설정
+      - name: Gradle 캐싱 설정
         uses: gradle/actions/setup-gradle@v6
 
       - name: Gradle 권한 부여
