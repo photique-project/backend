@@ -43,6 +43,7 @@ out/
 !docker/docker-compose.backend.dev.yml
 !docker-compose.backend.prod.yml
 !ci.yml
+!cd.yml
 !deployment-dev.yml
 !deployment-prod.yml
 .claude/
