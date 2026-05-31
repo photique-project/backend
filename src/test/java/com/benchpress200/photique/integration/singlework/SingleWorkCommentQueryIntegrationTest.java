@@ -67,10 +67,7 @@ public class SingleWorkCommentQueryIntegrationTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanUp() {
-        singleWorkCommentRepository.deleteAll();
-        singleWorkTagCommandPort.deleteAll();
-        singleWorkCommandPort.deleteAll();
-        userCommandPort.deleteAll();
+        databaseCleaner.clean();
     }
 
     @Nested

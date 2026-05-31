@@ -72,9 +72,7 @@ public class SingleWorkCommandIntegrationTest extends BaseIntegrationTest {
 
     @AfterEach
     void cleanUp() {
-        singleWorkTagCommandPort.deleteAll();
-        singleWorkCommandPort.deleteAll();
-        userCommandPort.deleteAll();
+        databaseCleaner.clean();
     }
 
     @Nested

@@ -82,10 +82,7 @@ public class SingleWorkCommentCommandIntegrationTest extends BaseIntegrationTest
 
     @AfterEach
     void cleanUp() {
-        singleWorkCommentRepository.deleteAll();
-        singleWorkTagCommandPort.deleteAll();
-        singleWorkCommandPort.deleteAll();
-        userCommandPort.deleteAll();
+        databaseCleaner.clean();
     }
 
     @Nested
@@ -192,7 +189,8 @@ public class SingleWorkCommentCommandIntegrationTest extends BaseIntegrationTest
 
             // when
             ResultActions resultActions = requestUpdateSingleWorkCommentAuthenticated(savedComment.getId(), request);
-            Optional<SingleWorkComment> updatedComment = singleWorkCommentQueryPort.findByIdAndDeletedAtIsNull(savedComment.getId());
+            Optional<SingleWorkComment> updatedComment = singleWorkCommentQueryPort.findByIdAndDeletedAtIsNull(
+                    savedComment.getId());
 
             // then
             resultActions.andExpect(status().isNoContent());
@@ -309,7 +307,8 @@ public class SingleWorkCommentCommandIntegrationTest extends BaseIntegrationTest
 
             // when
             ResultActions resultActions = requestDeleteSingleWorkCommentAuthenticated(savedComment.getId());
-            Optional<SingleWorkComment> deletedComment = singleWorkCommentQueryPort.findByIdAndDeletedAtIsNull(savedComment.getId());
+            Optional<SingleWorkComment> deletedComment = singleWorkCommentQueryPort.findByIdAndDeletedAtIsNull(
+                    savedComment.getId());
 
             // then
             resultActions.andExpect(status().isNoContent());

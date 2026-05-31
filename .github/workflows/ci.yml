@@ -22,8 +22,18 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Gradle 캐싱 설정
+        uses: gradle/actions/setup-gradle@v6
+
       - name: Gradle 권한 부여
         run: chmod +x ./gradlew
 
       - name: 테스트 실행
-        run: ./gradlew clean test
+        run: ./gradlew clean test --profile
+
+      - name: gradle 프로파일링 결과 업로드
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-profile
+          path: build/reports/profile/

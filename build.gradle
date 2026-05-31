@@ -126,15 +126,12 @@ tasks.register('copyTestSecret', Copy) {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
 
 // JaCoCo 설정 추가
 jacoco {
     toolVersion = "0.8.14"
-}
-
-test {
-    finalizedBy jacocoTestReport
 }
 
 jacocoTestReport {
