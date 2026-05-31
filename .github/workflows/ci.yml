@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +24,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Gradle 캐시 설정
+      - name: Gradle 캐싱 설정
         uses: gradle/actions/setup-gradle@v6
 
       - name: Gradle 권한 부여
@@ -38,3 +39,16 @@ jobs:
         with:
           name: gradle-profile
           path: build/reports/profile/
+
+  warm-cache:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v6
+      - run: ./gradlew dependencies  # 의존성만 캐싱
