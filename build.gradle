@@ -124,9 +124,27 @@ tasks.register('copyTestSecret', Copy) {
     into 'src/test/resources'
 }
 
+// 슬라이스, 단위 테스트 실행 테스크
 tasks.named('test') {
-    useJUnitPlatform()
+    useJUnitPlatform { excludeTags 'integration' }
+    maxParallelForks = 2
+
+    def jfrDir = layout.buildDirectory.dir("reports/async-profiler")
+
+    doFirst {
+        jfrDir.get().asFile.mkdirs()
+    }
+
+    jvmArgs "-agentpath:/opt/homebrew/lib/libasyncProfiler.dylib=start,event=itimer,file=${layout.buildDirectory.dir('reports/async-profiler').get().asFile.absolutePath}/profile-%p.jfr"
+
     finalizedBy jacocoTestReport
+}
+
+// 통합 테스트 실행 테스크
+tasks.register('integrationTest', Test) {
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
 }
 
 // JaCoCo 설정 추가
