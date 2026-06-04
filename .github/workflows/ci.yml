@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  test:
+  slice-unit-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,11 +29,28 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: 테스트 실행
-        run: ./gradlew test --profile
+        run: ./gradlew test
 
-      - name: gradle 프로파일 결과 업로드
-        if: always()
-        uses: actions/upload-artifact@v4
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
         with:
-          name: gradle-profile
-          path: build/reports/profile/
+          token: ${{ secrets.ACTION_TOKEN }}
+          submodules: true
+
+      - name: JDK 설정
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Gradle 캐싱 설정
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Gradle 권한 부여
+        run: chmod +x ./gradlew
+
+      - name: 통합 테스트 실행
+        run: ./gradlew integrationTest
