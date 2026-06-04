@@ -124,9 +124,17 @@ tasks.register('copyTestSecret', Copy) {
     into 'src/test/resources'
 }
 
+// 슬라이스, 단위 테스트 실행 테스크
 tasks.named('test') {
-    useJUnitPlatform()
+    useJUnitPlatform { excludeTags 'integration' }
     finalizedBy jacocoTestReport
+}
+
+// 통합 테스트 실행 테스크
+tasks.register('integrationTest', Test) {
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
 }
 
 // JaCoCo 설정 추가
