@@ -29,15 +29,9 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: 테스트 실행
-        run: ./gradlew test --profile
+        run: ./gradlew test
 
-      - name: gradle 프로파일링 결과 업로드
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-profile
-          path: build/reports/profile/
-
+  
   integration-test:
     runs-on: ubuntu-latest
     steps:
@@ -60,11 +54,4 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: 통합 테스트 실행
-        run: ./gradlew integrationTest --profile
-
-      - name: gradle 프로파일링 결과 업로드
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-profile
-          path: build/reports/profile/
+        run: ./gradlew integrationTest
