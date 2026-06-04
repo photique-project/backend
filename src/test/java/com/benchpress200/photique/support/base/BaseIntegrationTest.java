@@ -5,6 +5,8 @@ import com.benchpress200.photique.constant.Profile;
 import com.benchpress200.photique.support.util.DatabaseCleaner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles(Profile.TEST)
 @Import(TestDatabaseCleanerConfig.class)
 @Tag("integration")
+@Execution(ExecutionMode.SAME_THREAD)
 public abstract class BaseIntegrationTest extends BaseTestContainerTest {
     @Autowired
     protected MockMvc mockMvc;

@@ -127,16 +127,6 @@ tasks.register('copyTestSecret', Copy) {
 // 슬라이스, 단위 테스트 실행 테스크
 tasks.named('test') {
     useJUnitPlatform { excludeTags 'integration' }
-    maxParallelForks = 2
-
-    def jfrDir = layout.buildDirectory.dir("reports/async-profiler")
-
-    doFirst {
-        jfrDir.get().asFile.mkdirs()
-    }
-
-    jvmArgs "-agentpath:/opt/homebrew/lib/libasyncProfiler.dylib=start,event=itimer,file=${layout.buildDirectory.dir('reports/async-profiler').get().asFile.absolutePath}/profile-%p.jfr"
-
     finalizedBy jacocoTestReport
 }
 
