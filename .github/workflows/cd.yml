@@ -29,6 +29,6 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: 빌드
-        run: ./gradlew build
+        run: ./gradlew build -x jacocoTestReport
 
       # 배포 생략 ...
