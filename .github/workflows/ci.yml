@@ -29,7 +29,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: 테스트 실행
-        run: ./gradlew test -x jacocoTestReport
+        run: ./gradlew test -PrunIntegrationTest=true -x jacocoTestReport
 
   
   integration-test:
@@ -53,5 +53,5 @@ jobs:
       - name: Gradle 권한 부여
         run: chmod +x ./gradlew
 
-      - name: 통합 테스트 실행
-        run: ./gradlew integrationTest -x jacocoTestReport
+#      - name: 통합 테스트 실행
+#        run: ./gradlew integrationTest -x jacocoTestReport
