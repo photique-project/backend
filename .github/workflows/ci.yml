@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  slice-unit-test:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,29 +29,4 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: 테스트 실행
-        run: ./gradlew test integrationTest -x jacocoTestReport --info
-
-  
-  integration-test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 코드 체크아웃
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.ACTION_TOKEN }}
-          submodules: true
-
-      - name: JDK 설정
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-
-      - name: Gradle 캐싱 설정
-        uses: gradle/actions/setup-gradle@v6
-
-      - name: Gradle 권한 부여
-        run: chmod +x ./gradlew
-
-#      - name: 통합 테스트 실행
-#        run: ./gradlew integrationTest -x jacocoTestReport
+        run: ./gradlew test integrationTest -x jacocoTestReport
