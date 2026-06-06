@@ -137,6 +137,13 @@ tasks.register('integrationTest', Test) {
     }
 }
 
+// 인자 전달로 통합테스트 추가할 수 있도록 설정 추가
+tasks.named("check") {
+    if (project.hasProperty("runIntegrationTest")) {
+        dependsOn(integrationTest)
+    }
+}
+
 // JaCoCo 설정 추가
 jacoco {
     toolVersion = "0.8.14"

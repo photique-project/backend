@@ -29,6 +29,6 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: 빌드
-        run: ./gradlew build -x jacocoTestReport
+        run: ./gradlew build -PrunIntegrationTest=true -x jacocoTestReport
 
       # 배포 생략 ...
