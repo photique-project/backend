@@ -1,4 +1,4 @@
-# 📖 Summary
+# Summary
 
 > photique API 서버입니다.
 
@@ -10,7 +10,7 @@
 
 <br><br>
 
-# 🛠️ Tech Stack
+# Tech Stack
 
 ### Backend
 
@@ -52,7 +52,7 @@
 
 <br><br>
 
-# 📑 API
+# API
 
 > 아래 노션 링크를 통해서 API 상세 스펙을 확인할 수 있습니다.
 
@@ -60,7 +60,18 @@
 
 <br><br>
 
-# 🚀 Architecture
+# Trouble Shooting
+
+| 문제 요인                     | 해결 방법                            | 상세 보기                                           |
+|---------------------------|----------------------------------|-------------------------------------------------|
+| CI 테스트 실행 지연              | Gradle 캐싱 액션 및 Junit 기반 병렬 처리 적용 | [블로그](https://phellinus-linteus.tistory.com/17) |
+| 조회수 처리                    | Redis 집계 및 MySQL 주기적 반영          | [블로그](https://phellinus-linteus.tistory.com/12) |
+| MySQL - Elasticsearch 동기화 | 이벤트 기반 아키텍처 도입                   | [블로그](https://phellinus-linteus.tistory.com/13) |
+| 알림 데이터 생성                 | 이벤트 기반 아키텍처 도입                   | [블로그](https://phellinus-linteus.tistory.com/15) |
+
+<br><br>
+
+# Architecture
 
 <img width="800" alt="Group 260" src="https://github.com/user-attachments/assets/931c687b-26ad-4246-9d1c-7fed0a484066" />
 <img width="800" alt="Group 261" src="https://github.com/user-attachments/assets/047001eb-b503-4656-a80c-6bfa6546be89" />
